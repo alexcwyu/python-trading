@@ -17,8 +17,5 @@ class InstrumentDataManager(MarketDataEventHandler):
     def on_trade(self, trade):
         print "[%s] %s" % (self.__class__.__name__, trade)
 
-    def on_order(self, order):
-        print "[%s] %s" % (self.__class__.__name__, order)
-
 
 inst_data_mgr = InstrumentDataManager()

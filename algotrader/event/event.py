@@ -7,6 +7,9 @@ import datetime
 
 from atom.api import Atom, Unicode, Range, Bool, observe, Enum, Str, Value, Float, Long
 
+from algotrader.tools import *
+
+
 current_time = datetime.datetime.now()
 
 
@@ -26,7 +29,7 @@ class EventHandler(Observer):
         event.on(self)
 
     def on_error(self, e):
-        print("[%s] Error: %s" % (self.__class__.__name__, e))
+        logger.debug("[%s] Error: %s" % (self.__class__.__name__, e))
 
     def on_completed(self):
-        print("[%s] Completed" % self.__class__.__name__)
+        logger.debug("[%s] Completed" % self.__class__.__name__)

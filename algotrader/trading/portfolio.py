@@ -1,25 +1,16 @@
-from algotrader.event.event_bus import EventBus
+import logging
+from algotrader.event.market_data import *
 from algotrader.event.order import *
-from algotrader.provider import *
+from algotrader.trading.order_mgr import *
 from algotrader.tools import *
 
 
-class Broker(Provider, OrderEventHandler):
-    __metaclass__ = abc.ABCMeta
-
-    def start(self):
-        pass
-
-
-@singleton
-class Simulator(Broker, MarketDataEventHandler):
-    ID = "Simulator"
+class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
+    def __init__(self, amount):
+        self.__amount = amount
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)
-
-    def stop(self):
-        pass
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
@@ -33,11 +24,8 @@ class Simulator(Broker, MarketDataEventHandler):
     def on_order(self, order):
         logger.debug("[%s] %s" % (self.__class__.__name__, order))
 
+    def on_ord_upd(self, ord_upd):
+        logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
 
-broker_mapping = {
-    Simulator.ID: Simulator()
-}
-
-
-def get_broker(broker_id):
-    return broker_mapping[broker_id]
+    def on_exec_report(self, exec_report):
+        logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))

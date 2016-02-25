@@ -7,32 +7,50 @@ import logging
 from algotrader.event.market_data import *
 from algotrader.event.order import *
 from algotrader.trading.order_mgr import *
+from algotrader.tools import *
 
 
 class Strategy(OrderEventHandler, MarketDataEventHandler):
-    def __init__(self, feed, broker_id):
-        self.__feed = feed
+    def __init__(self, stg_id, broker_id, feed, portfolio):
+        self.__stg_id = stg_id
         self.__broker_id = broker_id
+        self.__feed = feed
+        self.__portfolio = portfolio
 
-    def run(self):
-        getBroker(broker_id=self.__broker_id).start()
+    def start(self):
+        broker = get_broker(broker_id=self.__broker_id)
+        broker.start()
+        self.__portfolio.start()
         EventBus.data_subject.subscribe(self.on_next)
         self.__feed.start()
 
     def on_bar(self, bar):
-        print "[%s] %s" % (self.__class__.__name__, bar)
+        logger.debug("[%s] %s" % (self.__class__.__name__, bar))
 
     def on_quote(self, quote):
-        print "[%s] %s" % (self.__class__.__name__, quote)
+        logger.debug("[%s] %s" % (self.__class__.__name__, quote))
 
     def on_trade(self, trade):
-        print "[%s] %s" % (self.__class__.__name__, trade)
+        logger.debug("[%s] %s" % (self.__class__.__name__, trade))
 
     def on_order(self, order):
-        print "[%s] %s" % (self.__class__.__name__, order)
+        logger.debug("[%s] %s" % (self.__class__.__name__, order))
 
     def on_ord_upd(self, ord_upd):
-        print "[%s] %s" % (self.__class__.__name__, ord_upd)
+        logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
 
     def on_exec_report(self, exec_report):
-        print "[%s] %s" % (self.__class__.__name__, exec_report)
+        logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
+
+    def new_market_order(self, instrument, qty, tif=TIF.DAY):
+        self.new_order(instrument, OrdType.MARKET, qty, 0.0, tif)
+
+    def new_limit_order(self, instrument, qty, price, tif=TIF.DAY):
+        self.new_order(instrument, OrdType.LIMIT, qty, price, tif)
+
+    def new_order(self, instrument, ord_type, qty, price, tif=TIF.DAY):
+        order = Order(instrument=instrument, timestamp=clock.default_clock.current_date_time(),
+                      ord_id=order_mgr.next_ord_id(), stg_id=self.__stg_id, broker_id=self.__broker_id, type=ord_type,
+                      tif=tif, qty=qty,
+                      limit_price=price)
+        order_mgr.send_order(order)

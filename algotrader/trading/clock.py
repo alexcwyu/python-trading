@@ -1,10 +1,13 @@
-import abc
-from algotrader.event.market_data import *
-from algotrader.tools.singleton import *
-from algotrader.trading.event_bus import *
 import datetime
 
-class Clock(object):
+from algotrader.event import *
+from algotrader.tools import *
+
+
+class Clock:
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
     def current_date_time(self):
         return None
 
@@ -14,20 +17,33 @@ class RealTimeClock(Clock):
     def current_date_time(self):
         return datetime.datetime.now()
 
+
 @singleton
 class SimulationClock(Clock, MarketDataEventHandler):
+    def __init__(self):
+        self.__current_time = None
+
+    def start(self):
+        EventBus.data_subject.subscribe(self.on_next)
+
     def current_date_time(self):
-        return None
+        return self.__current_time
 
     def on_bar(self, bar):
-        print "[%s] %s" % (self.__class__.__name__, bar)
+        logger.debug("[%s] %s" % (self.__class__.__name__, bar))
+        self.__current_time = bar.timestamp
 
     def on_quote(self, quote):
-        print "[%s] %s" % (self.__class__.__name__, quote)
+        logger.debug("[%s] %s" % (self.__class__.__name__, quote))
+        self.__current_time = quote.timestamp
 
     def on_trade(self, trade):
-        print "[%s] %s" % (self.__class__.__name__, trade)
+        logger.debug("[%s] %s" % (self.__class__.__name__, trade))
+        self.__current_time = trade.timestamp
 
 
-clock = RealTimeClock()
-print clock.current_date_time()
+realtime_clock = RealTimeClock()
+
+simluation_clock = SimulationClock()
+
+default_clock = realtime_clock  # default setting

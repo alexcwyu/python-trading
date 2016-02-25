@@ -28,8 +28,8 @@ class PandasCSVDataFeed(CSVDataFeed):
     def start(self):
         for index, row in self.df.iterrows():
             self.subject.on_next(
-                    Bar(row['Symbol'], index, row['Open'], row['High'], row['Low'], row['Close'], row['Volume'],
-                        row['Adj Close'], row['Frequency']))
+                    Bar(instrument=row['Symbol'], timestamp=index, open=row['Open'], high=row['High'], low=row['Low'], close=row['Close'], vol=row['Volume'],
+                        adj_close=row['Adj Close'], freq=row['Frequency']))
 
     def stop(self):
         pass

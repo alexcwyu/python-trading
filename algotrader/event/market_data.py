@@ -108,18 +108,20 @@ class Quote(MarketDataEvent):
     def on(self, handler):
         handler.on_quote(self)
 
+    def mid(self):
+        if self.bid > 0 and self.ask > 0:
+            return (self.bid + self.ask) / 2
+        elif self.bid > 0:
+            return self.bid
+        return self.ask
+
 
 class MarketDataEventHandler(EventHandler):
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractmethod
     def on_bar(self, bar):
         pass
 
-    @abc.abstractmethod
     def on_quote(self, quote):
         pass
 
-    @abc.abstractmethod
     def on_trade(self, trade):
         pass

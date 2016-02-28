@@ -23,7 +23,6 @@ class Event(Atom):
 
 
 class EventHandler(Observer):
-    __metaclass__ = abc.ABCMeta
 
     def on_next(self, event):
         event.on(self)

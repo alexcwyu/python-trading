@@ -8,6 +8,7 @@ from algotrader.event.market_data import *
 from algotrader.event.order import *
 from algotrader.trading.order_mgr import *
 from algotrader.tools import *
+from algotrader.trading.portfolio import *
 
 
 class Strategy(OrderEventHandler, MarketDataEventHandler):
@@ -26,21 +27,27 @@ class Strategy(OrderEventHandler, MarketDataEventHandler):
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
+        self.__portfolio.on_bar(bar)
 
     def on_quote(self, quote):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
+        self.__portfolio.on_quote(quote)
 
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
+        self.__portfolio.on_trade(trade)
 
     def on_order(self, order):
         logger.debug("[%s] %s" % (self.__class__.__name__, order))
+        self.__portfolio.on_order(order)
 
     def on_ord_upd(self, ord_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
+        self.__portfolio.on_ord_upd(ord_upd)
 
     def on_exec_report(self, exec_report):
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
+        self.__portfolio.on_exec_report(exec_report)
 
     def new_market_order(self, instrument, qty, tif=TIF.DAY):
         self.new_order(instrument, OrdType.MARKET, qty, 0.0, tif)

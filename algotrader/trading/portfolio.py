@@ -1,11 +1,11 @@
-import logging
-from algotrader.event.market_data import *
-from algotrader.event.order import *
-from algotrader.trading.order_mgr import *
+import datetime
+
+from atom.api import Atom, Str, Value, Float, Long, Dict
+
+from algotrader.event.event_bus import EventBus
+from algotrader.event.market_data import MarketDataEventHandler
+from algotrader.event.order import Order, OrderEventHandler, ExecutionEventHandler
 from algotrader.tools import *
-from atom.api import Atom, Unicode, Range, Bool, observe, Enum, Str, Value, Float, Long, Dict, List, Instance
-import pandas as pd
-import numpy as np
 
 
 class Position(Atom):
@@ -48,8 +48,9 @@ class Portfolio(Atom, OrderEventHandler, ExecutionEventHandler, MarketDataEventH
     positions = Dict(key=Str, value=Position, default={})
     orders = Dict(key=Long, value=Order, default={})
     equity = Value(FloatSeries())
-    # pnl = Value(FloatSeries)
-    # drawdown = Value(FloatSeries)
+
+    # pnl = Value(FloatSeries())
+    # drawdown = Value(FloatSeries())
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)
@@ -76,8 +77,6 @@ class Portfolio(Atom, OrderEventHandler, ExecutionEventHandler, MarketDataEventH
         position.add_order(order)
         self.orders[order.ord_id] = order
 
-        self.update_filled_order(order)
-
     def on_ord_upd(self, ord_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
         order = self.orders[ord_upd.ord_id]
@@ -87,10 +86,7 @@ class Portfolio(Atom, OrderEventHandler, ExecutionEventHandler, MarketDataEventH
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
         order = self.orders[exec_report.ord_id]
         order.add_exec_report(exec_report)
-        self.update_filled_order(order)
-
-    def update_filled_order(self, order):
-        self.cash -= order.last_price * order.last_qty
+        self.cash -= (exec_report.filled_qty * exec_report.filled_price + exec_report.commission)
 
     def update_price(self, time, instrument, price):
         if instrument in self.positions:
@@ -99,7 +95,7 @@ class Portfolio(Atom, OrderEventHandler, ExecutionEventHandler, MarketDataEventH
         self.update_equity(time)
 
     def update_equity(self, time):
-        value = 0
+        value = self.cash
         for position in self.positions.itervalues():
             value += position.last_price * position.filled_qty()
         self.equity.add(time, value)

@@ -1,15 +1,8 @@
-import pandas as pd
-from rx.concurrency import GEventScheduler
-from rx.observable import Observable, Observer
-from rx.subjects import Subject
-import rx
-from odo import odo
-import blaze
-import abc
-
-from algotrader.strategy.strategy import *
-from algotrader.provider.feed import *
-from algotrader.trading import *
+from algotrader.provider.broker import Simulator
+from algotrader.provider.feed import PandasCSVDataFeed
+from algotrader.strategy.strategy import Strategy
+from algotrader.trading import Portfolio
+from algotrader.trading
 from algotrader.trading import clock
 
 

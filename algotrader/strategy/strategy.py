@@ -1,22 +1,32 @@
-from rx.concurrency import GEventScheduler
-from rx.observable import Observable, Observer
-from rx.subjects import Subject
-import rx
-
-import logging
-from algotrader.event.market_data import *
-from algotrader.event.order import *
-from algotrader.trading.order_mgr import *
-from algotrader.tools import *
-from algotrader.trading.portfolio import *
+from algotrader.trading.portfolio import Portfolio
+from algotrader.trading.order_mgr import order_mgr
+from algotrader.event.order import OrdType, TIF
+from algotrader.trading.clock import *
+from algotrader.provider.broker import get_broker
 
 
-class Strategy(OrderEventHandler, MarketDataEventHandler):
+@singleton
+class StrategyManager:
+    def __init__(self):
+        self.__stg_dict = {}
+
+    def add_strategy(self, strategy):
+        self.__stg_dict[strategy.stg_id] = strategy
+
+    def get_strategy(self, stg_id):
+        return self.__stg_dict[stg_id]
+
+
+stg_mgr = StrategyManager()
+
+
+class Strategy(ExecutionEventHandler, MarketDataEventHandler):
     def __init__(self, stg_id, broker_id, feed, portfolio):
-        self.__stg_id = stg_id
+        self.stg_id = stg_id
         self.__broker_id = broker_id
         self.__feed = feed
         self.__portfolio = portfolio
+        stg_mgr.add_strategy(self)
 
     def start(self):
         broker = get_broker(broker_id=self.__broker_id)
@@ -37,10 +47,6 @@ class Strategy(OrderEventHandler, MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__portfolio.on_trade(trade)
 
-    def on_order(self, order):
-        logger.debug("[%s] %s" % (self.__class__.__name__, order))
-        self.__portfolio.on_order(order)
-
     def on_ord_upd(self, ord_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
         self.__portfolio.on_ord_upd(ord_upd)
@@ -60,4 +66,5 @@ class Strategy(OrderEventHandler, MarketDataEventHandler):
                       ord_id=order_mgr.next_ord_id(), stg_id=self.__stg_id, broker_id=self.__broker_id, type=ord_type,
                       tif=tif, qty=qty,
                       limit_price=price)
-        order_mgr.send_order(order)
+        order = order_mgr.send_order(order)
+        self.__portfolio.on_order(order)

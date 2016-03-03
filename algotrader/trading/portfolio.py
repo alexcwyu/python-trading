@@ -57,7 +57,7 @@ class Portfolio(Atom, OrderEventHandler, ExecutionEventHandler, MarketDataEventH
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
-        self.update_price(bar.timestamp, bar.instrument, bar.close)
+        self.update_price(bar.timestamp, bar.instrument, bar.close_or_adj_close())
 
     def on_quote(self, quote):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))

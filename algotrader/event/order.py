@@ -1,7 +1,3 @@
-from algotrader.event import *
-import abc
-from atom.api import Atom, Unicode, Range, Bool, observe, Enum, Str, Value, Float, Long, Dict, List
-from algotrader.tools import *
 from algotrader.event.execution import *
 
 
@@ -9,10 +5,10 @@ class OrderEvent(Event):
     pass
 
 
-#
-# class OrdAction:
-#     BUY = 1
-#     SELL = 2
+
+class OrdAction:
+    BUY = 1
+    SELL = 2
 
 
 class OrdType:
@@ -29,13 +25,16 @@ class TIF:
 
 
 class OrdStatus:
-    INITIAL = 1
+    NEW = 1
     PENDING_SUBMIT = 2
     SUBMITTED = 3
     PENDING_CANCEL = 4
     CANCELLED = 5
-    PARTIALLY_FILLED = 6
-    FILLED = 7
+    PENDING_REPLACE = 6
+    REPLACED = 7
+    PARTIALLY_FILLED = 8
+    FILLED = 9
+    REJECTED = 10
 
 
 class ExecutionEvent(Event):
@@ -46,8 +45,12 @@ class ExecutionEvent(Event):
 
 
 class OrderStatusUpdate(ExecutionEvent):
-    status = Enum(OrdStatus.INITIAL, OrdStatus.PENDING_SUBMIT, OrdStatus.SUBMITTED, OrdStatus.PENDING_CANCEL,
-                  OrdStatus.CANCELLED, OrdStatus.PARTIALLY_FILLED, OrdStatus.FILLED)
+    status = Enum(OrdStatus.NEW,
+                  OrdStatus.PENDING_SUBMIT, OrdStatus.SUBMITTED,
+                  OrdStatus.PENDING_CANCEL, OrdStatus.CANCELLED,
+                  OrdStatus.PENDING_REPLACE, OrdStatus.REPLACED,
+                  OrdStatus.PARTIALLY_FILLED, OrdStatus.FILLED,
+                  OrdStatus.REJECTED)
 
     def on(self, handler):
         handler.on_ord_upd(self)
@@ -57,7 +60,7 @@ class OrderStatusUpdate(ExecutionEvent):
                % (self.broker_id, self.ord_id, self.instrument, self.timestamp, self.status)
 
 
-class ExecutionReport(ExecutionEvent):
+class ExecutionReport(OrderStatusUpdate):
     er_id = Long()
     filled_qty = Float()
     filled_price = Float()
@@ -80,11 +83,15 @@ class Order(OrderEvent):
     ord_id = Long()
     stg_id = Str()
     broker_id = Str()
-    # action = Enum(OrdAction.BUY, OrdAction.SELL)
+    action = Enum(OrdAction.BUY, OrdAction.SELL)
     type = Enum(OrdType.MARKET, OrdType.LIMIT, OrdType.STOP, OrdType.STOP_LIMIT)
     tif = Enum(TIF.DAY, TIF.GTC, TIF.FOK)
-    status = Enum(OrdStatus.INITIAL, OrdStatus.PENDING_SUBMIT, OrdStatus.SUBMITTED, OrdStatus.PENDING_CANCEL,
-                  OrdStatus.CANCELLED, OrdStatus.PARTIALLY_FILLED, OrdStatus.FILLED)
+    status = Enum(OrdStatus.NEW,
+                  OrdStatus.PENDING_SUBMIT, OrdStatus.SUBMITTED,
+                  OrdStatus.PENDING_CANCEL, OrdStatus.CANCELLED,
+                  OrdStatus.PENDING_REPLACE, OrdStatus.REPLACED,
+                  OrdStatus.PARTIALLY_FILLED, OrdStatus.FILLED,
+                  OrdStatus.REJECTED)
 
     qty = Float()
     limit_price = Float()
@@ -127,6 +134,16 @@ class Order(OrderEvent):
     def update_status(self, ord_upd):
         self.update_events.append(ord_upd)
         self.status = ord_upd.status
+
+    def is_done(self):
+        return self.status == OrdStatus.REJECTED or self.status == OrdStatus.CANCELLED or self.status == OrdStatus.FILLED
+
+    def is_active(self):
+        return self.status == OrdStatus.NEW or self.status == OrdStatus.PENDING_SUBMIT or self.status == OrdStatus.SUBMITTED \
+               or self.status == OrdStatus.PARTIALLY_FILLED or self.status == OrdStatus.REPLACED
+
+    def leave_qty(self):
+        return self.qty - self.filled_qty
 
 
 class ExecutionEventHandler(EventHandler):

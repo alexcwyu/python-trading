@@ -56,6 +56,9 @@ class Bar(MarketDataEvent):
     def on(self, handler):
         handler.on_bar(self)
 
+    def close_or_adj_close(self):
+        return self.adj_close if self.adj_close > 0 else self.close
+
 
 class Trade(MarketDataEvent):
     price = Float()

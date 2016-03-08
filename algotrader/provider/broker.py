@@ -1,4 +1,5 @@
 import abc
+import sys
 
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import Bar, Trade, Quote
@@ -21,11 +22,69 @@ class Broker(Provider, OrderEventHandler):
         pass
 
 
+class MarketDataProcessor:
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def get_price(self, order, market_data, config):
+        pass
+
+    @abc.abstractmethod
+    def get_qty(self, order, market_data, config):
+        pass
+
+
+class BarProcessor(MarketDataProcessor):
+    def get_price(self, order, market_data, config):
+        if market_data and isinstance(market_data, Bar):
+            if config.fill_on_bar_mode == SimConfig.FillMode.LAST or config.fill_on_bar_mode == SimConfig.FillMode.NEXT_CLOSE:
+                return market_data.close_or_adj_close()
+            elif config.fill_on_bar_mode == SimConfig.FillMode.NEXT_OPEN:
+                return market_data.open
+        return 0.0
+
+    def get_qty(self, order, market_data, config):
+        return order.qty
+
+
+class QuoteProcessor(MarketDataProcessor):
+    def get_price(self, order, market_data, config):
+        if market_data and isinstance(market_data, Quote):
+            if order.action == OrdAction.BUY and market_data.ask > 0:
+                return market_data.ask
+            elif order.action == OrdAction.SELL and market_data.bid > 0:
+                return market_data.bid
+        return 0.0
+
+    def get_qty(self, order, market_data, config):
+        if market_data and isinstance(market_data, Quote) and config.partial_fill:
+            if order.action == OrdAction.BUY and market_data.ask_size > 0:
+                return market_data.ask_size
+            elif order.action == OrdAction.SELL and market_data.bid_size > 0:
+                return market_data.bid_size
+        return order.qty
+
+
+class TradeProcessor(MarketDataProcessor):
+    def get_price(self, order, market_data, config):
+        if market_data and isinstance(market_data, Trade):
+            if market_data.price > 0:
+                return market_data.price
+        return 0.0
+
+    def get_qty(self, order, market_data, config):
+        return order.qty
+
+
 class SimOrderHandler:
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, simulator):
-        self.__simulator = simulator
+    def __init__(self, simulator, config):
+        self._simulator = simulator
+        self._config = config
+        self._bar_processor = BarProcessor()
+        self._trade_processor = TradeProcessor()
+        self._quote_processor = QuoteProcessor()
 
     def process(self, event):
         if isinstance(event, Bar):
@@ -53,87 +112,184 @@ class SimOrderHandler:
 
 
 class MarketOrderHandler(SimOrderHandler):
-    def __init__(self, simulator):
-        super(self.__class__, self).__init__(simulator)
+    def __init__(self, simulator, config):
+        super(self.__class__, self).__init__(simulator, config)
 
     def process_w_bar(self, order, bar):
+        if bar:
+            filled_price = self._bar_processor.get_price(order, bar, self._config)
+            filled_qty = self._bar_processor.get_qty(order, bar, self._config)
+            return self._simulator.execute(order, filled_price, filled_qty)
         return False
 
     def process_w_trade(self, order, trade):
+        if trade:
+            filled_price = self._trade_processor.get_price(order, trade, self._config)
+            filled_qty = self._trade_processor.get_qty(order, trade, self._config)
+            return self._simulator.execute(order, filled_price, filled_qty)
         return False
 
     def process_w_quote(self, order, quote):
+        if quote:
+            filled_price = self._quote_processor.get_price(order, quote, self._config)
+            filled_qty = self._quote_processor.get_qty(order, quote, self._config)
+            return self._simulator.execute(order, filled_price, filled_qty)
         return False
 
     def process_w_price_qty(self, order, price, qty):
-        return False
+        return self._simulator.execute(order, price, qty)
 
 
-class LimitOrderHandler(SimOrderHandler):
-    def __init__(self, simulator):
-        super(self.__class__, self).__init__(simulator)
+class AbstractStopLimitOrderHandler(SimOrderHandler):
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, simulator, config):
+        super(self.__class__, self).__init__(simulator, config)
 
     def process_w_bar(self, order, bar):
+        if bar:
+            filled_qty = self._bar_processor.get_qty(order, bar, self._config)
+            return self.stop_limit_w_price_qty(order, bar, filled_qty)
         return False
 
     def process_w_trade(self, order, trade):
+        if trade:
+            filled_price = self._trade_processor.get_price(order, trade, self._config)
+            filled_qty = self._trade_processor.get_qty(order, trade, self._config)
+            return self.stop_limit_w_price_qty(order, filled_price, filled_qty)
         return False
 
     def process_w_quote(self, order, quote):
+        if quote:
+            filled_price = self._quote_processor.get_price(order, quote, self._config)
+            filled_qty = self._quote_processor.get_qty(order, quote, self._config)
+            return self.stop_limit_w_price_qty(order, filled_price, filled_qty)
         return False
 
     def process_w_price_qty(self, order, price, qty):
+        return self.stop_limit_w_price_qty(order, price, qty)
+
+    @abc.abstractmethod
+    def stop_limit_w_bar(self, order, bar, qty):
+        pass
+
+    @abc.abstractmethod
+    def stop_limit_w_price_qty(self, order, price, qty):
+        pass
+
+
+class LimitOrderHandler(AbstractStopLimitOrderHandler):
+    def __init__(self, simulator, config):
+        super(self.__class__, self).__init__(simulator, config)
+
+    def stop_limit_w_bar(self, order, bar, qty):
+        if order.action == OrdAction.BUY and bar.low <= order.limit_price:
+            return self._simulator.execute(order, order.limit_price, qty)
+        elif order.action == OrdAction.SELL and bar.high >= order.limit_price:
+            return self._simulator.execute(order, order.limit_price, qty)
+        return False
+
+    def stop_limit_w_price_qty(self, order, price, qty):
+        if order.action == OrdAction.BUY and price <= order.limit_price:
+            return self._simulator.execute(order, order.limit_price, qty)
+        elif order.action == OrdAction.SELL and price >= order.limit_price:
+            return self._simulator.execute(order, order.limit_price, qty)
         return False
 
 
-class StopLimitOrderHandler(SimOrderHandler):
-    def __init__(self, simulator):
-        super(self.__class__, self).__init__(simulator)
+class StopLimitOrderHandler(AbstractStopLimitOrderHandler):
+    def __init__(self, simulator, config):
+        super(self.__class__, self).__init__(simulator, config)
 
-    def process_w_bar(self, order, bar):
+    def stop_limit_w_bar(self, order, bar, qty):
+        if order.action == OrdAction.BUY:
+            if not order.stop_limit_ready and bar.high >= order.limit_price:
+                order.stop_limit_ready = True
+            elif order.stop_limit_ready and bar.low <= order.limit_price:
+                return self._simulator.execute(order, order.limit_price, qty)
+        elif order.action == OrdAction.SELL:
+            if not order.stop_limit_ready and bar.low <= order.limit_price:
+                order.stop_limit_ready = True
+            elif order.stop_limit_ready and bar.high >= order.limit_price:
+                return self._simulator.execute(order, order.limit_price, qty)
         return False
 
-    def process_w_trade(self, order, trade):
-        return False
-
-    def process_w_quote(self, order, quote):
-        return False
-
-    def process_w_price_qty(self, order, price, qty):
-        return False
-
-
-class StopOrderHandler(SimOrderHandler):
-    def __init__(self, simulator):
-        super(self.__class__, self).__init__(simulator)
-
-    def process_w_bar(self, order, bar):
-        return False
-
-    def process_w_trade(self, order, trade):
-        return False
-
-    def process_w_quote(self, order, quote):
-        return False
-
-    def process_w_price_qty(self, order, price, qty):
+    def stop_limit_w_price_qty(self, order, price, qty):
+        if order.action == OrdAction.BUY:
+            if not order.stop_limit_ready and price >= order.limit_price:
+                order.stop_limit_ready = True
+            elif order.stop_limit_ready and price <= order.limit_price:
+                return self._simulator.execute(order, order.limit_price, qty)
+        elif order.action == OrdAction.SELL:
+            if not order.stop_limit_ready and price <= order.limit_price:
+                order.stop_limit_ready = True
+            elif order.stop_limit_ready and price >= order.limit_price:
+                return self._simulator.execute(order, order.limit_price, qty)
         return False
 
 
-class TrailingStopOrderHandler(SimOrderHandler):
-    def __init__(self, simulator):
-        super(self.__class__, self).__init__(simulator)
+class StopOrderHandler(AbstractStopLimitOrderHandler):
+    def __init__(self, simulator, config):
+        super(self.__class__, self).__init__(simulator, config)
 
-    def process_w_bar(self, order, bar):
+    def stop_limit_w_bar(self, order, bar, qty):
+        if order.action == OrdAction.BUY:
+            if bar.high >= order.stop_price:
+                return self._simulator.execute(order, order.limit_price, qty)
+        elif order.action == OrdAction.SELL:
+            if bar.low <= order.stop_price:
+                return self._simulator.execute(order, order.limit_price, qty)
         return False
 
-    def process_w_trade(self, order, trade):
+    def stop_limit_w_price_qty(self, order, price, qty):
+        if order.action == OrdAction.BUY:
+            if not order.stop_limit_ready and price >= order.limit_price:
+                order.stop_limit_ready = True
+            elif order.stop_limit_ready and price <= order.limit_price:
+                return self._simulator.execute(order, order.limit_price, qty)
+        elif order.action == OrdAction.SELL:
+            if not order.stop_limit_ready and price <= order.limit_price:
+                order.stop_limit_ready = True
+            elif order.stop_limit_ready and price >= order.limit_price:
+                return self._simulator.execute(order, order.limit_price, qty)
         return False
 
-    def process_w_quote(self, order, quote):
+
+class TrailingStopOrderHandler(AbstractStopLimitOrderHandler):
+    def __init__(self, simulator, config):
+        super(self.__class__, self).__init__(simulator, config)
+
+    def _init_order_trailing_stop(self, order):
+        if order.trailing_stop_exec_price == 0:
+            if order.action == OrdAction.BUY:
+                order.trailing_stop_exec_price = sys.float_info.max
+            elif order.action == OrdAction.SELL:
+                order.trailing_stop_exec_price = sys.float_info.min
+
+    def stop_limit_w_bar(self, order, bar, qty):
+        if order.action == OrdAction.BUY:
+            order.trailing_stop_exec_price = min(order.trailing_stop_exec_price, bar.low + order.stop_price)
+
+            if (bar.high >= order.trailing_stop_exec_price):
+                return self._simulator.execute(order, order.trailing_stop_exec_price, qty)
+        elif order.action == OrdAction.SELL:
+            order.trailing_stop_exec_price = max(order.trailing_stop_exec_price, bar.high - order.stop_price)
+
+            if (bar.low <= order.trailing_stop_exec_price):
+                return self._simulator.execute(order, order.trailing_stop_exec_price, qty)
         return False
 
-    def process_w_price_qty(self, order, price, qty):
+    def stop_limit_w_price_qty(self, order, price, qty):
+        if order.action == OrdAction.BUY:
+            order.trailing_stop_exec_price = min(order.trailing_stop_exec_price, price + order.stop_price)
+
+            if (price >= order.trailing_stop_exec_price):
+                return self._simulator.execute(order, order.trailing_stop_exec_price, qty)
+        elif order.action == OrdAction.SELL:
+            order.trailing_stop_exec_price = max(order.trailing_stop_exec_price, price - order.stop_price)
+
+            if (price <= order.trailing_stop_exec_price):
+                return self._simulator.execute(order, order.trailing_stop_exec_price, qty)
         return False
 
 
@@ -143,12 +299,14 @@ class SimConfig:
         NEXT_OPEN = 1
         NEXT_CLOSE = 1
 
-    def __init__(self, fill_on_quote=True,
+    def __init__(self, partial_fill=True,
+                 fill_on_quote=True,
                  fill_on_trade=True,
                  fill_on_bar=True,
                  fill_on_quote_mode=FillMode.LAST,
                  fill_on_trade_mode=FillMode.LAST,
                  fill_on_bar_mode=FillMode.LAST):
+        self.partial_fill = partial_fill
         self.fill_on_quote = fill_on_quote
         self.fill_on_trade = fill_on_trade
         self.fill_on_bar = fill_on_bar
@@ -166,11 +324,11 @@ class Simulator(Broker, MarketDataEventHandler):
         self.__order_map = {}
         self.__quote_map = {}
         self.__sim_config = sim_config if sim_config else SimConfig()
-        self.__market_ord_handler = MarketOrderHandler(self)
-        self.__limit_ord_handler = LimitOrderHandler(self)
-        self.__stop_limit_ord_handler = StopLimitOrderHandler(self)
-        self.__stop_ord_handler = StopOrderHandler(self)
-        self.__trailing_stop_ord_handler = TrailingStopOrderHandler(self)
+        self.__market_ord_handler = MarketOrderHandler(self, self.__sim_config)
+        self.__limit_ord_handler = LimitOrderHandler(self, self.__sim_config)
+        self.__stop_limit_ord_handler = StopLimitOrderHandler(self, self.__sim_config)
+        self.__stop_ord_handler = StopOrderHandler(self, self.__sim_config)
+        self.__trailing_stop_ord_handler = TrailingStopOrderHandler(self, self.__sim_config)
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)

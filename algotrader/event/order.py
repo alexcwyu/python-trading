@@ -5,7 +5,6 @@ class OrderEvent(Event):
     pass
 
 
-
 class OrdAction:
     BUY = 1
     SELL = 2
@@ -103,6 +102,12 @@ class Order(OrderEvent):
     last_qty = Float()
     last_price = Float()
 
+    stop_price = Float()
+
+    stop_limit_ready = Bool(False)
+
+    trailing_stop_exec_price = Float()
+
     exec_reports = List(item=ExecutionReport, default=[])
     update_events = List(item=OrderStatusUpdate, default=[])
 
@@ -110,13 +115,14 @@ class Order(OrderEvent):
         handler.on_order(self)
 
     def __repr__(self):
-        return "Order(instrument = %s, timestamp = %s,ord_id = %s, stg_id = %s, broker_id = %s, type = %s, tif = %s, status = %s" \
-               ", qty = %s, limit_price = %s, stop_price = %s, filled_qty = %s, avg_price = %s, last_qty = %s, last_price = %s" \
-               ", exec_reports = %s , update_events = %s)" \
-               % (self.instrument, self.timestamp, self.ord_id, self.stg_id, self.broker_id, self.type, self.tif,
+        return "Order(instrument = %s, timestamp = %s,ord_id = %s, stg_id = %s, broker_id = %s, action = %s, type = %s, tif = %s, status = %s" \
+               ", qty = %s, limit_price = %s, stop_price = %s, filled_qty = %s, avg_price = %s, last_qty = %s, last_price = %s ,stop_price = %s" \
+               ", stop_limit_ready = %s , trailing_stop_exec_price = %s , exec_reports = %s , update_events = %s)" \
+               % (self.instrument, self.timestamp, self.ord_id, self.stg_id, self.broker_id, self.action, self.type,
+                  self.tif,
                   self.status,
                   self.qty, self.limit_price, self.stop_price, self.filled_qty, self.avg_price, self.last_qty,
-                  self.last_price, self.exec_reports, self.update_events)
+                  self.last_price, self.stop_price. self.stop_limit_ready, self.trailing_stop_exec_price, self.exec_reports, self.update_events)
 
     def add_exec_report(self, exec_report):
         self.exec_reports.append(exec_report)

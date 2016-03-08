@@ -10,6 +10,7 @@ from algotrader.tools import *
 class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
     def __init__(self):
         self.__next_ord_id = 0
+        self.__orders = {}
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)
@@ -35,17 +36,18 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
 
     def on_ord_upd(self, ord_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
-
-        stg = stg_mgr.get_strategy(ord_upd.stg_id)
+        order = self.__orders[ord_upd.ord_id]
+        stg = stg_mgr.get_strategy(order.stg_id)
         stg.on_ord_upd(ord_upd)
 
     def on_exec_report(self, exec_report):
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
-
-        stg = stg_mgr.get_strategy(exec_report.stg_id)
+        order = self.__orders[exec_report.ord_id]
+        stg = stg_mgr.get_strategy(order.stg_id)
         stg.on_exec_report(exec_report)
 
     def send_order(self, order):
+        self.__orders[order.ord_id] = order
         get_broker(order.broker_id).on_order(order)
         return order
 

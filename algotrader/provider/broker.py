@@ -10,6 +10,7 @@ from algotrader.tools import *
 from algotrader.trading.clock import clock
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
+from algotrader.provider.broker_mgr import broker_mgr
 
 
 # from algotrader.tools import *
@@ -329,12 +330,16 @@ class Simulator(Broker, MarketDataEventHandler):
         self.__stop_limit_ord_handler = StopLimitOrderHandler(self, self.__sim_config)
         self.__stop_ord_handler = StopOrderHandler(self, self.__sim_config)
         self.__trailing_stop_ord_handler = TrailingStopOrderHandler(self, self.__sim_config)
+        broker_mgr.reg_broker(self)
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)
 
     def stop(self):
         pass
+
+    def id(self):
+        return Simulator.ID
 
     def next_exec_id(self):
         __next_exec_id = self.__next_exec_id
@@ -465,10 +470,12 @@ class Simulator(Broker, MarketDataEventHandler):
         order_mgr.on_exec_report(exec_report)
 
 
-broker_mapping = {
-    Simulator.ID: Simulator()
-}
+# broker_mapping = {
+#     Simulator.ID: Simulator()
+# }
+#
+#
+# def get_broker(broker_id):
+#     return broker_mapping[broker_id]
 
-
-def get_broker(broker_id):
-    return broker_mapping[broker_id]
+simulator = Simulator();

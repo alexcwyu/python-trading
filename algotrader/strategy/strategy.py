@@ -2,23 +2,9 @@ from algotrader.trading.portfolio import Portfolio
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.event.order import OrdType, TIF
 from algotrader.trading.clock import *
-from algotrader.provider.broker import get_broker
+from algotrader.strategy.strategy_mgr import stg_mgr
 
-
-@singleton
-class StrategyManager:
-    def __init__(self):
-        self.__stg_dict = {}
-
-    def add_strategy(self, strategy):
-        self.__stg_dict[strategy.stg_id] = strategy
-
-    def get_strategy(self, stg_id):
-        return self.__stg_dict[stg_id]
-
-
-stg_mgr = StrategyManager()
-
+from algotrader.provider.broker_mgr import broker_mgr
 
 class Strategy(ExecutionEventHandler, MarketDataEventHandler):
     def __init__(self, stg_id, broker_id, feed, portfolio):
@@ -29,7 +15,7 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
         stg_mgr.add_strategy(self)
 
     def start(self):
-        broker = get_broker(broker_id=self.__broker_id)
+        broker = broker_mgr.get_broker(broker_id=self.__broker_id)
         broker.start()
         self.__portfolio.start()
         EventBus.data_subject.subscribe(self.on_next)

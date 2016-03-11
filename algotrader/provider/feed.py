@@ -33,3 +33,6 @@ class PandasCSVDataFeed(CSVDataFeed):
 
     def stop(self):
         pass
+
+    def id(self):
+        return "PandasCSV"

@@ -1,12 +1,13 @@
 import datetime
 
-from atom.api import Atom, Str, Value, Float, Long, Dict
+from atom.api import Atom, Str, Value, Float, Long, Dict, Int
 
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.order import Order, OrderEventHandler, ExecutionEventHandler
 from algotrader.tools import *
 
+import numpy as np
 
 class Position(Atom):
     instrument = Str()
@@ -30,16 +31,21 @@ class Position(Atom):
 class FloatSeries(Atom):
     time = Value(np.empty([0], dtype='datetime64'))
     value = Value(np.empty([0], dtype='float'))
+    lenght = Int(0)
 
     def add(self, time, value):
         self.time = np.append(self.time, time)
         self.value = np.append(self.value, value)
+        self.lenght += 1
 
     def get_time_value(self):
         return (self.time, self.value)
 
     def get_time_value_as_series(self):
         return pd.Series(data=self.value, index=self.time)
+
+    def size(self):
+        return self.lenght
 
 
 class Portfolio(Atom, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):

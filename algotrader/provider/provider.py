@@ -11,3 +11,7 @@ class Provider:
     @abc.abstractmethod
     def stop(self):
         raise NotImplementedError()
+
+    @abc.abstractmethod
+    def id(self):
+        raise NotImplementedError()

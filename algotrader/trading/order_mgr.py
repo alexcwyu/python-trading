@@ -1,8 +1,8 @@
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.order import OrderEventHandler, ExecutionEventHandler
-from algotrader.provider.broker import get_broker
-from algotrader.strategy.strategy import stg_mgr
+from algotrader.provider.broker_mgr import broker_mgr
+from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.tools import *
 
 
@@ -48,7 +48,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
 
     def send_order(self, order):
         self.__orders[order.ord_id] = order
-        get_broker(order.broker_id).on_order(order)
+        broker_mgr.get_broker(order.broker_id).on_order(order)
         return order
 
 

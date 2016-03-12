@@ -66,6 +66,8 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
     # positions = Dict(key=Str, value=Position, default={})
     # orders = Dict(key=Long, value=Order, default={})
     # equity = Value(FloatSeries())
+    # pnl = Value(FloatSeries())
+    # drawdown = Value(FloatSeries())
 
     def __init__(self, portfolio_id = "test", cash = 100000):
         self.portfolio_id = portfolio_id
@@ -73,8 +75,6 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         self.positions = {}
         self.orders = {}
         self.equity=FloatSeries()
-    # pnl = Value(FloatSeries())
-    # drawdown = Value(FloatSeries())
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)

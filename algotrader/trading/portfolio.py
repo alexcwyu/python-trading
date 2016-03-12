@@ -29,7 +29,7 @@ class Position():
 
     def filled_qty(self):
         qty = 0
-        for key, order in self.orders:
+        for key, order in self.orders.iteritems():
             qty += order.filled_qty if order.action == OrdAction.Buy else -order.filled_qty
         return qty
 

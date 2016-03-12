@@ -14,7 +14,7 @@ class TestPortfolio(TestCase):
         self.assertEqual(0, len(portfolio.positions))
 
         portfolio.on_order(order1)
-        self.check_order(portfolio, [order1])
+        self.check_order(portfolio, [order1], {'HSI':(1000, 0)})
 
         # position = positions['HSI']
         #
@@ -27,7 +27,7 @@ class TestPortfolio(TestCase):
 
 
         portfolio.on_order(order2)
-        self.check_order(portfolio, [order1, order2])
+        self.check_order(portfolio, [order1, order2], {'HSI': (2800, 0)})
 
         # self.assertEqual(1, len(portfolio.positions))
         # self.assertEqual(2, len(portfolio.orders))
@@ -59,9 +59,11 @@ class TestPortfolio(TestCase):
 
             self.assertEqual(len(pos_orders), len(position.orders))
 
-            ord_qty, fill_qty = qtys[inst]
+            (ord_qty, fill_qty) = qtys[inst]
 
             for pos_order in pos_orders:
                 self.assertTrue(pos_order in position.orders.values())
 
+            self.assertEqual(ord_qty, position.size)
+            self.assertEqual(fill_qty, position.filled_qty())
 

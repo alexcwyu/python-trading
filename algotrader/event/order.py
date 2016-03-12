@@ -92,21 +92,21 @@ class Order(OrderEvent):
                   OrdStatus.PARTIALLY_FILLED, OrdStatus.FILLED,
                   OrdStatus.REJECTED)
 
-    qty = Float()
-    limit_price = Float()
-    stop_price = Float()
+    qty = Float(0)
+    limit_price = Float(0)
+    stop_price = Float(0)
 
-    filled_qty = Float()
-    avg_price = Float()
+    filled_qty = Float(0)
+    avg_price = Float(0)
 
-    last_qty = Float()
-    last_price = Float()
+    last_qty = Float(0)
+    last_price = Float(0)
 
-    stop_price = Float()
+    stop_price = Float(0)
 
     stop_limit_ready = Bool(False)
 
-    trailing_stop_exec_price = Float()
+    trailing_stop_exec_price = Float(0)
 
     exec_reports = List(item=ExecutionReport, default=[])
     update_events = List(item=OrderStatusUpdate, default=[])
@@ -122,7 +122,7 @@ class Order(OrderEvent):
                   self.tif,
                   self.status,
                   self.qty, self.limit_price, self.stop_price, self.filled_qty, self.avg_price, self.last_qty,
-                  self.last_price, self.stop_price. self.stop_limit_ready, self.trailing_stop_exec_price, self.exec_reports, self.update_events)
+                  self.last_price, self.stop_price, self.stop_limit_ready, self.trailing_stop_exec_price, self.exec_reports, self.update_events)
 
     def add_exec_report(self, exec_report):
         self.exec_reports.append(exec_report)

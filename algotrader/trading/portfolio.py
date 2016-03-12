@@ -4,28 +4,40 @@ from atom.api import Atom, Str, Value, Float, Long, Dict, Int
 
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
-from algotrader.event.order import Order, OrderEventHandler, ExecutionEventHandler
+from algotrader.event.order import Order, OrdAction, OrderEventHandler, ExecutionEventHandler
 from algotrader.tools import *
-
+from collections import defaultdict
 import numpy as np
 
-class Position(Atom):
-    instrument = Str()
-    orders = Dict(key=Long, value=Order, default={})
-    size = Float()
-    last_price = Float()
+class Position():
+    # instrument = Str()
+    # orders = Dict(key=Long, value=Order, default={})
+    # size = Float()
+    # last_price = Float()
+
+    def __init__(self, instrument):
+        self.instrument = instrument
+        self.orders = {}
+        self.size =0
+        self.last_price = 0
 
     def add_order(self, order):
         if order.ord_id in self.orders:
             raise RuntimeError("order[%s] already exist" % order.ord_id)
         self.orders[order.ord_id] = order
-        self.size += order.qty
+        self.size += order.qty if order.action == OrdAction.BUY else -order.qty
 
     def filled_qty(self):
         qty = 0
         for key, order in self.orders:
-            qty += order.filled_qty
+            qty += order.filled_qty if order.action == OrdAction.Buy else -order.filled_qty
         return qty
+
+    def __repr__(self):
+        return "Position(instrument=%s, orders=%s, size=%s, last_price=%s)"%(
+            self.instrument, self.orders, self.size, self.last_price
+        )
+
 
 
 class FloatSeries(Atom):
@@ -48,13 +60,19 @@ class FloatSeries(Atom):
         return self.lenght
 
 
-class Portfolio(Atom, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
-    portfolio_id = Str()
-    cash = Float(default=100000)
-    positions = Dict(key=Str, value=Position, default={})
-    orders = Dict(key=Long, value=Order, default={})
-    equity = Value(FloatSeries())
+class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
+    # portfolio_id = Str()
+    # cash = Float(default=100000)
+    # positions = Dict(key=Str, value=Position, default={})
+    # orders = Dict(key=Long, value=Order, default={})
+    # equity = Value(FloatSeries())
 
+    def __init__(self, portfolio_id = "test", cash = 100000):
+        self.portfolio_id = portfolio_id
+        self.cash = cash
+        self.positions = {}
+        self.orders = {}
+        self.equity=FloatSeries()
     # pnl = Value(FloatSeries())
     # drawdown = Value(FloatSeries())
 
@@ -79,9 +97,10 @@ class Portfolio(Atom, OrderEventHandler, ExecutionEventHandler, MarketDataEventH
         if order.ord_id in self.orders:
             raise RuntimeError("order[%s] already exist" % order.ord_id)
 
-        position = self.positions.get(order.instrument, Position(instrument=order.instrument))
-        position.add_order(order)
         self.orders[order.ord_id] = order
+        if order.instrument not in self.positions:
+            self.positions[order.instrument] = Position(instrument=order.instrument)
+        self.positions[order.instrument].add_order(order)
 
     def on_ord_upd(self, ord_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
@@ -92,7 +111,8 @@ class Portfolio(Atom, OrderEventHandler, ExecutionEventHandler, MarketDataEventH
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
         order = self.orders[exec_report.ord_id]
         order.add_exec_report(exec_report)
-        self.cash -= (exec_report.filled_qty * exec_report.filled_price + exec_report.commission)
+        direction = 1 if order.action == OrdAction.BUY else -1
+        self.cash -= (direction * exec_report.filled_qty * exec_report.filled_price + exec_report.commission)
 
     def update_price(self, time, instrument, price):
         if instrument in self.positions:

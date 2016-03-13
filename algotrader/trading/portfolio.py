@@ -22,6 +22,9 @@ class Position():
         self.last_price = 0
 
     def add_order(self, order):
+        if order.instrument != self.instrument:
+            raise RuntimeError("order[%s] instrument [%s] is not same as instrument [%s] of position" % (order.ord_id, order.instrument, self.instrument))
+
         if order.ord_id in self.orders:
             raise RuntimeError("order[%s] already exist" % order.ord_id)
         self.orders[order.ord_id] = order
@@ -30,7 +33,7 @@ class Position():
     def filled_qty(self):
         qty = 0
         for key, order in self.orders.iteritems():
-            qty += order.filled_qty if order.action == OrdAction.Buy else -order.filled_qty
+            qty += order.filled_qty if order.action == OrdAction.BUY else -order.filled_qty
         return qty
 
     def __repr__(self):
@@ -59,6 +62,13 @@ class FloatSeries(Atom):
     def size(self):
         return self.lenght
 
+    def current_value(self):
+        return self.value[-1] if self.lenght>0 else 0
+
+    def get_value(self, idx):
+        return self.value[idx]
+
+
 
 class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
     # portfolio_id = Str()
@@ -66,6 +76,7 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
     # positions = Dict(key=Str, value=Position, default={})
     # orders = Dict(key=Long, value=Order, default={})
     # equity = Value(FloatSeries())
+
     # pnl = Value(FloatSeries())
     # drawdown = Value(FloatSeries())
 
@@ -74,22 +85,24 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         self.cash = cash
         self.positions = {}
         self.orders = {}
-        self.equity=FloatSeries()
+        self.stock_mtm_value=FloatSeries()
+        self.total_equity= FloatSeries()
+        self.pnl = FloatSeries()
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
-        self.update_price(bar.timestamp, bar.instrument, bar.close_or_adj_close())
+        self.__update_price(bar.timestamp, bar.instrument, bar.close_or_adj_close())
 
     def on_quote(self, quote):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
-        self.update_price(quote.timestamp, quote.instrument, quote.mid())
+        self.__update_price(quote.timestamp, quote.instrument, quote.mid())
 
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
-        self.update_price(trade.timestamp, trade.instrument, trade.price)
+        self.__update_price(trade.timestamp, trade.instrument, trade.price)
 
     def on_order(self, order):
         logger.debug("[%s] %s" % (self.__class__.__name__, order))
@@ -113,18 +126,20 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         order.add_exec_report(exec_report)
         direction = 1 if order.action == OrdAction.BUY else -1
         self.cash -= (direction * exec_report.filled_qty * exec_report.filled_price + exec_report.commission)
+        self.__update_price(exec_report.timestamp, exec_report.instrument, exec_report.filled_price)
 
-    def update_price(self, time, instrument, price):
+    def __update_price(self, time, instrument, price):
         if instrument in self.positions:
             position = self.positions[instrument]
             position.last_price = price
-        self.update_equity(time)
+        self.__update_equity(time)
 
-    def update_equity(self, time):
-        value = self.cash
+    def __update_equity(self, time):
+        stock_value = 0
         for position in self.positions.itervalues():
-            value += position.last_price * position.filled_qty()
-        self.equity.add(time, value)
+            stock_value += position.last_price * position.filled_qty()
+        self.stock_mtm_value.add(time, stock_value)
+        self.total_equity.add(time, stock_value + self.cash)
 
 
 if __name__ == "__main__":

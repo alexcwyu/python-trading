@@ -125,6 +125,9 @@ class Order(OrderEvent):
                   self.last_price, self.stop_price, self.stop_limit_ready, self.trailing_stop_exec_price, self.exec_reports, self.update_events)
 
     def add_exec_report(self, exec_report):
+        if exec_report.ord_id != self.ord_id:
+            raise Exception("exec_report [%s] order_id [%s] is not same as current order id [%s]" %(exec_report.er_id, exec_report.ord_id, self.ord_id))
+
         self.exec_reports.append(exec_report)
         self.last_price = exec_report.filled_price
         self.last_qty = exec_report.filled_qty
@@ -134,8 +137,10 @@ class Order(OrderEvent):
 
         if self.qty == self.filled_qty:
             self.status = OrdStatus.FILLED
-        else:
+        elif self.qty > self.filled_qty:
             self.status = OrdStatus.PARTIALLY_FILLED
+        else:
+            raise Exception("filled qty %s is greater than ord qty %s" %(self.filled_qty, self.qty))
 
     def update_status(self, ord_upd):
         self.update_events.append(ord_upd)

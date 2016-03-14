@@ -1,5 +1,6 @@
-from algotrader.event.execution import *
-
+from algotrader.event import *
+import abc
+from atom.api import Atom, Unicode, Range, Bool, observe, Enum, Str, Value, Float, Long, List
 
 class OrderEvent(Event):
     pass
@@ -143,6 +144,9 @@ class Order(OrderEvent):
             raise Exception("filled qty %s is greater than ord qty %s" %(self.filled_qty, self.qty))
 
     def update_status(self, ord_upd):
+        if ord_upd.ord_id != self.ord_id:
+            raise Exception("ord_upd  order_id [%s] is not same as current order id [%s]" %(ord_upd.ord_id, self.ord_id))
+
         self.update_events.append(ord_upd)
         self.status = ord_upd.status
 

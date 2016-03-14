@@ -77,8 +77,7 @@ class TradeProcessor(MarketDataProcessor):
         return order.qty
 
 
-class SimOrderHandler:
-    __metaclass__ = abc.ABCMeta
+class SimOrderHandler(object):
 
     def __init__(self, simulator, config):
         self._simulator = simulator
@@ -142,10 +141,9 @@ class MarketOrderHandler(SimOrderHandler):
 
 
 class AbstractStopLimitOrderHandler(SimOrderHandler):
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, simulator, config):
-        super(self.__class__, self).__init__(simulator, config)
+        super(AbstractStopLimitOrderHandler, self).__init__(simulator, config)
 
     def process_w_bar(self, order, bar):
         if bar:
@@ -298,7 +296,7 @@ class SimConfig:
     class FillMode:
         LAST = 0
         NEXT_OPEN = 1
-        NEXT_CLOSE = 1
+        NEXT_CLOSE = 2
 
     def __init__(self, partial_fill=True,
                  fill_on_quote=True,

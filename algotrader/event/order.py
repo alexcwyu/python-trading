@@ -16,6 +16,7 @@ class OrdType:
     LIMIT = 2
     STOP = 3
     STOP_LIMIT = 4
+    TRAILING_STOP = 5
 
 
 class TIF:
@@ -84,7 +85,7 @@ class Order(OrderEvent):
     stg_id = Str()
     broker_id = Str()
     action = Enum(OrdAction.BUY, OrdAction.SELL)
-    type = Enum(OrdType.MARKET, OrdType.LIMIT, OrdType.STOP, OrdType.STOP_LIMIT)
+    type = Enum(OrdType.MARKET, OrdType.LIMIT, OrdType.STOP, OrdType.STOP_LIMIT, OrdType.TRAILING_STOP)
     tif = Enum(TIF.DAY, TIF.GTC, TIF.FOK)
     status = Enum(OrdStatus.NEW,
                   OrdStatus.PENDING_SUBMIT, OrdStatus.SUBMITTED,

@@ -1,6 +1,7 @@
 from algotrader.provider.broker import Simulator
 from algotrader.provider.feed import PandasCSVDataFeed
 from algotrader.strategy.strategy import Strategy
+from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
 from algotrader.trading.portfolio import Portfolio
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
@@ -21,13 +22,14 @@ class BacktestRunner:
 
 
 def main():
-    feed = PandasCSVDataFeed(names=['goog', 'msft'])
+    feed = PandasCSVDataFeed(names=['spy'])
     portfolio = Portfolio(100000)
-    strategy = Strategy("Demo", Simulator.ID, feed, portfolio)
+    strategy = Down2PctStrategy("down2%", Simulator.ID, feed, portfolio, 1000)
 
     runner = BacktestRunner(strategy)
     runner.start()
-
+    print portfolio.cash
+    print portfolio.pnl.current_value()
 
 if __name__ == "__main__":
     main()

@@ -133,8 +133,9 @@ class Order(OrderEvent):
         self.exec_reports.append(exec_report)
         self.last_price = exec_report.filled_price
         self.last_qty = exec_report.filled_qty
-        self.avg_price = ((self.avg_price * self.filled_qty) + (exec_report.filled_price * exec_report.filled_qty)) / (
-            self.filled_qty + exec_report.filled_qty)
+        if self.filled_qty + exec_report.filled_qty != 0:
+            self.avg_price = ((self.avg_price * self.filled_qty) + (exec_report.filled_price * exec_report.filled_qty)) / (
+                self.filled_qty + exec_report.filled_qty)
         self.filled_qty += exec_report.filled_qty
 
         if self.qty == self.filled_qty:

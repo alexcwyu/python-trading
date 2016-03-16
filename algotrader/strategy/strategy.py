@@ -45,15 +45,16 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
         self.__portfolio.on_exec_report(exec_report)
 
     def new_market_order(self, instrument, action, qty, tif=TIF.DAY):
-        self.new_order(instrument, OrdType.MARKET, action, qty, 0.0, tif)
+        return self.new_order(instrument, OrdType.MARKET, action, qty, 0.0, tif)
 
     def new_limit_order(self, instrument, action, qty, price, tif=TIF.DAY):
-        self.new_order(instrument, OrdType.LIMIT, action, qty, price, tif)
+        return self.new_order(instrument, OrdType.LIMIT, action, qty, price, tif)
 
     def new_order(self, instrument, ord_type, action, qty, price, tif=TIF.DAY):
         order = Order(instrument=instrument, timestamp=clock.default_clock.current_date_time(),
-                      ord_id=order_mgr.next_ord_id(), stg_id=self.__stg_id, broker_id=self.__broker_id, action=action, type=ord_type,
+                      ord_id=order_mgr.next_ord_id(), stg_id=self.stg_id, broker_id=self.__broker_id, action=action, type=ord_type,
                       tif=tif, qty=qty,
                       limit_price=price)
-        order = order_mgr.send_order(order)
         self.__portfolio.on_order(order)
+        order = order_mgr.send_order(order)
+        return order

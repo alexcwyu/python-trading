@@ -472,12 +472,12 @@ class Simulator(Broker, MarketDataEventHandler):
 
     def __send_status(self, order, ord_status):
         ord_update = OrderStatusUpdate(broker_id=Simulator.ID, ord_id=order.ord_id, instrument=order.instrument,
-                                   timestamp=clock.current_date_time(), status = ord_status)
+                                   timestamp=default_clock.current_date_time(), status = ord_status)
         self.__exec__handler.on_ord_upd(ord_update)
 
     def __send_exec_report(self, order, filled_price, filled_qty, ord_status):
         exec_report = ExecutionReport(broker_id=Simulator.ID, ord_id=order.ord_id, instrument=order.instrument,
-                                      timestamp=clock.current_date_time(), er_id=self.next_exec_id(),
+                                      timestamp=default_clock.current_date_time(), er_id=self.next_exec_id(),
                                       filled_qty=filled_qty,
                                       filled_price=filled_price, status=ord_status)
 

@@ -3,7 +3,7 @@ from algotrader.event.market_data import *
 from algotrader.tools import *
 
 
-@singleton
+#@singleton
 class InstrumentDataManager(MarketDataEventHandler):
     def __init__(self):
         self.__bar_dict = {}
@@ -26,13 +26,19 @@ class InstrumentDataManager(MarketDataEventHandler):
         self.__trade_dict[trade.instrument] = trade
 
     def get_bar(self, instrument):
-        return self.__bar_dict[instrument]
+        if instrument in self.__bar_dict:
+            return self.__bar_dict[instrument]
+        return None
 
     def get_quote(self, instrument):
-        return self.__quote_dict[instrument]
+        if instrument in self.__quote_dict:
+            return self.__quote_dict[instrument]
+        return None
 
     def get_trade(self, instrument):
-        return self.__trade_dict[instrument]
+        if instrument in self.__trade_dict:
+            return self.__trade_dict[instrument]
+        return None
 
     def get_latest_price(self, instrument):
         if instrument in self.__trade_dict:
@@ -42,6 +48,11 @@ class InstrumentDataManager(MarketDataEventHandler):
         elif instrument in self.__bar_dict:
             return self.__bar_dict[instrument].close_or_adj_close()
         return None
+
+    def clear(self):
+        self.__bar_dict = {}
+        self.__quote_dict = {}
+        self.__trade_dict = {}
 
 
 inst_data_mgr = InstrumentDataManager()

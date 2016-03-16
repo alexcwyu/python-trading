@@ -4,14 +4,14 @@ import sys
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import Bar, Trade, Quote
 from algotrader.event.order import MarketDataEventHandler, OrderEventHandler, OrdType, OrdStatus, ExecutionReport, \
-    OrdAction
+    OrdAction, OrderStatusUpdate
 from algotrader.provider import Provider
 from algotrader.tools import *
 from algotrader.trading.clock import clock
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.provider.broker_mgr import broker_mgr
-
+from collections import defaultdict
 
 # from algotrader.tools import *
 
@@ -78,6 +78,7 @@ class TradeProcessor(MarketDataProcessor):
 
 
 class SimOrderHandler(object):
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, execute_func, config):
         self.execute_func = execute_func
@@ -86,13 +87,13 @@ class SimOrderHandler(object):
         self._trade_processor = TradeProcessor()
         self._quote_processor = QuoteProcessor()
 
-    def process(self, event):
+    def process(self, order, event):
         if isinstance(event, Bar):
-            return self.process_w_bar(event)
+            return self.process_w_bar(order, event)
         elif isinstance(event, Quote):
-            return self.process_w_quote(event)
+            return self.process_w_quote(order, event)
         elif isinstance(event, Trade):
-            return self.process_w_trade(event)
+            return self.process_w_trade(order, event)
 
     @abc.abstractmethod
     def process_w_quote(self, order, quote):
@@ -141,6 +142,7 @@ class MarketOrderHandler(SimOrderHandler):
 
 
 class AbstractStopLimitOrderHandler(SimOrderHandler):
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, execute_func, config):
         super(AbstractStopLimitOrderHandler, self).__init__(execute_func, config)
@@ -168,9 +170,11 @@ class AbstractStopLimitOrderHandler(SimOrderHandler):
     def process_w_price_qty(self, order, price, qty):
         return self.stop_limit_w_price_qty(order, price, qty)
 
+    @abc.abstractmethod
     def stop_limit_w_bar(self, order, bar, qty):
         pass
 
+    @abc.abstractmethod
     def stop_limit_w_price_qty(self, order, price, qty):
         pass
 
@@ -314,15 +318,16 @@ class SimConfig:
         self.fill_on_bar_mode = fill_on_bar_mode
 
 
-@singleton
+#@singleton
 class Simulator(Broker, MarketDataEventHandler):
     ID = "Simulator"
 
-    def __init__(self, sim_config=None):
+    def __init__(self, sim_config=None, exec_handler=order_mgr):
         self.__next_exec_id = 0
-        self.__order_map = {}
+        self.__order_map = defaultdict(dict)
         self.__quote_map = {}
         self.__sim_config = sim_config if sim_config else SimConfig()
+        self.__exec__handler = exec_handler
         self.__market_ord_handler = MarketOrderHandler(self.execute, self.__sim_config)
         self.__limit_ord_handler = LimitOrderHandler(self.execute, self.__sim_config)
         self.__stop_limit_ord_handler = StopLimitOrderHandler(self.execute, self.__sim_config)
@@ -347,7 +352,7 @@ class Simulator(Broker, MarketDataEventHandler):
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
         if self.__sim_config.fill_on_bar and bar.instrument in self.__order_map:
-            for order in self.__order_map[bar.instrument].itervalues():
+            for order in self.__order_map[bar.instrument].values():
                 executed = False
                 if self.__sim_config.fill_on_bar_mode == SimConfig.FillMode.NEXT_OPEN:
                     executed = self.__process_w_price_qty(order, bar.open, order.qty)
@@ -390,7 +395,7 @@ class Simulator(Broker, MarketDataEventHandler):
             self.__remove_order(order)
 
     def __add_order(self, order):
-        orders = self.__order_map.get(order.instrument, {})
+        orders = self.__order_map[order.instrument]
         orders[order.ord_id] = order
 
     def __remove_order(self, order):
@@ -408,18 +413,20 @@ class Simulator(Broker, MarketDataEventHandler):
         bar = inst_data_mgr.get_bar(order.instrument)
 
         if order.type == OrdType.MARKET:
+            # TODO fix it, we should handle the fill sequentially, from quote, then trade, then bar
             if not executed and config.fill_on_quote and config.fill_on_bar_mode == SimConfig.FillMode.LAST and quote:
                 executed = self.__market_ord_handler.process_w_quote(order, quote)
-            if not executed and config.fill_on_trade and config.fill_on_trade_mode == SimConfig.FillMode.LAST and trade:
+            elif not executed and config.fill_on_trade and config.fill_on_trade_mode == SimConfig.FillMode.LAST and trade:
                 executed = self.__market_ord_handler.process_w_trade(order, trade)
-            if not executed and config.fill_on_bar and config.fill_on_bar_mode == SimConfig.FillMode.LAST and bar:
+            elif not executed and config.fill_on_bar and config.fill_on_bar_mode == SimConfig.FillMode.LAST and bar:
                 executed = self.__market_ord_handler.process_w_bar(order, bar)
         else:
+            # TODO fix it, we should handle the fill sequentially, from quote, then trade, then bar
             if not executed and config.fill_on_quote and quote:
                 executed = self.__process(order, quote)
-            if not executed and config.fill_on_trade and trade:
+            elif not executed and config.fill_on_trade and trade:
                 executed = self.__process(order, trade)
-            if not executed and config.fill_on_bar and bar:
+            elif not executed and config.fill_on_bar and bar:
                 executed = self.__process(order, bar)
 
         return executed
@@ -463,13 +470,21 @@ class Simulator(Broker, MarketDataEventHandler):
             self.__remove_order(order)
             return True
 
+    def __send_status(self, order, ord_status):
+        ord_update = OrderStatusUpdate(broker_id=Simulator.ID, ord_id=order.ord_id, instrument=order.instrument,
+                                   timestamp=clock.current_date_time(), status = ord_status)
+        self.__exec__handler.on_ord_upd(ord_update)
+
     def __send_exec_report(self, order, filled_price, filled_qty, ord_status):
         exec_report = ExecutionReport(broker_id=Simulator.ID, ord_id=order.ord_id, instrument=order.instrument,
                                       timestamp=clock.current_date_time(), er_id=self.next_exec_id(),
                                       filled_qty=filled_qty,
-                                      filled_price=filled_price, ord_status=ord_status)
+                                      filled_price=filled_price, status=ord_status)
 
-        order_mgr.on_exec_report(exec_report)
+        self.__exec__handler.on_exec_report(exec_report)
+
+    def _get_orders(self):
+        return self.__order_map
 
 
 # broker_mapping = {

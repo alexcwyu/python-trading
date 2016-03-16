@@ -1,7 +1,10 @@
 from algotrader.trading.portfolio import Portfolio
 from algotrader.trading.order_mgr import order_mgr
-from algotrader.event.order import OrdType, TIF
-from algotrader.trading.clock import *
+from algotrader.event.order import OrdType, TIF, ExecutionEventHandler, Order
+from algotrader.event.market_data import MarketDataEventHandler
+from algotrader.event.event_bus import EventBus
+from algotrader.trading import clock
+from algotrader.tools import logger
 from algotrader.strategy.strategy_mgr import stg_mgr
 
 from algotrader.provider.broker_mgr import broker_mgr

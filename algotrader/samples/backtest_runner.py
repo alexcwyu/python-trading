@@ -1,8 +1,9 @@
 from algotrader.provider.broker import Simulator
 from algotrader.provider.feed import PandasCSVDataFeed
 from algotrader.strategy.strategy import Strategy
-from algotrader.trading import Portfolio
-from algotrader.trading
+from algotrader.trading.portfolio import Portfolio
+from algotrader.trading.instrument_data import inst_data_mgr
+from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading import clock
 
 

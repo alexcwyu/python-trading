@@ -46,4 +46,4 @@ realtime_clock = RealTimeClock()
 
 simluation_clock = SimulationClock()
 
-clock = realtime_clock  # default setting
+default_clock = realtime_clock  # default setting

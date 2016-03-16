@@ -7,7 +7,7 @@ from algotrader.event.order import MarketDataEventHandler, OrderEventHandler, Or
     OrdAction, OrderStatusUpdate
 from algotrader.provider import Provider
 from algotrader.tools import *
-from algotrader.trading.clock import clock
+from algotrader.trading.clock import default_clock
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.provider.broker_mgr import broker_mgr

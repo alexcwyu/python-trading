@@ -57,7 +57,8 @@ class Bar(MarketDataEvent):
         handler.on_bar(self)
 
     def close_or_adj_close(self):
-        return self.adj_close if self.adj_close > 0 else self.close
+        #return self.adj_close if self.adj_close > 0 else self.close
+        return self.close
 
 
 class Trade(MarketDataEvent):

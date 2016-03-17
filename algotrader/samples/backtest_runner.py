@@ -23,13 +23,18 @@ class BacktestRunner:
 
 def main():
     feed = PandasCSVDataFeed(names=['spy'])
-    portfolio = Portfolio(100000)
+    portfolio = Portfolio(1000000)
     strategy = Down2PctStrategy("down2%", Simulator.ID, feed, portfolio, 1000)
 
     runner = BacktestRunner(strategy)
     runner.start()
     print portfolio.cash
-    print portfolio.pnl.current_value()
+
+    import matplotlib.pyplot as plt
+    portfolio.total_equity.get_time_value_as_series().plot()
+
+    plt.show()
+
 
 if __name__ == "__main__":
     main()

@@ -308,7 +308,7 @@ class SimConfig:
                  fill_on_bar=True,
                  fill_on_quote_mode=FillMode.LAST,
                  fill_on_trade_mode=FillMode.LAST,
-                 fill_on_bar_mode=FillMode.LAST):
+                 fill_on_bar_mode=FillMode.NEXT_OPEN):
         self.partial_fill = partial_fill
         self.fill_on_quote = fill_on_quote
         self.fill_on_trade = fill_on_trade
@@ -446,15 +446,15 @@ class Simulator(Broker, MarketDataEventHandler):
 
     def __process_w_price_qty(self, order, price, qty):
         if order.type == OrdType.MARKET:
-            return self.__market_ord_handler.process(order, price, qty)
+            return self.__market_ord_handler.process_w_price_qty(order, price, qty)
         elif order.type == OrdType.LIMIT:
-            return self.__limit_ord_handler.process(order, price, qty)
+            return self.__limit_ord_handler.process_w_price_qty(order, price, qty)
         elif order.type == OrdType.STOP_LIMIT:
-            return self.__stop_limit_ord_handler.process(order, price, qty)
+            return self.__stop_limit_ord_handler.process_w_price_qty(order, price, qty)
         elif order.type == OrdType.STOP:
-            return self.__stop_ord_handler.process(order, price, qty)
+            return self.__stop_ord_handler.process_w_price_qty(order, price, qty)
         elif order.type == OrdType.TRAILING_STOP:
-            return self.__trailing_stop_ord_handler.process(order, price, qty)
+            return self.__trailing_stop_ord_handler.process_w_price_qty(order, price, qty)
         return False
 
     def execute(self, order, filled_price, filled_qty):

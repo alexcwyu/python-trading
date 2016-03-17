@@ -8,6 +8,7 @@ from algotrader.event.order import Order, OrdAction, OrderEventHandler, Executio
 from algotrader.tools import *
 from collections import defaultdict
 import numpy as np
+import pandas as pd
 
 class Position():
     # instrument = Str()
@@ -43,30 +44,50 @@ class Position():
 
 
 
-class FloatSeries(Atom):
-    time = Value(np.empty([0], dtype='datetime64'))
-    value = Value(np.empty([0], dtype='float'))
-    lenght = Int(0)
+class FloatSeries():
+
+    # time = Value(np.empty([0], dtype='datetime64'))
+    # value = Value(np.empty([0], dtype='float'))
+    # lenght = Int(0)
+
+    def __init__(self):
+        self.__time = []
+        self.__value = []
+        self.__data = {}
 
     def add(self, time, value):
-        self.time = np.append(self.time, time)
-        self.value = np.append(self.value, value)
-        self.lenght += 1
+        # self.time = np.append(self.time, time)
+        # self.value = np.append(self.value, value)
+        # self.lenght += 1
+        self.__time.append(time)
+        self.__value.append(value)
+        self.__data[time] = value
+
 
     def get_time_value(self):
-        return (self.time, self.value)
+        # return (self.time, self.value)
+        return self.__data
 
     def get_time_value_as_series(self):
-        return pd.Series(data=self.value, index=self.time)
+        #return pd.Series(data=self.value, index=self.time)
+        s =  pd.Series(self.__data, name = 'Value')
+        s.index.name = 'Time'
+        return s
+
 
     def size(self):
-        return self.lenght
+        #return self.lenght
+        return len(self.__data)
 
     def current_value(self):
-        return self.value[-1] if self.lenght>0 else 0
+        #return self.value[-1] if self.lenght>0 else 0
+        return self.__data[-1] if len(self.__value) > 0 else 0
 
-    def get_value(self, idx):
-        return self.value[idx]
+    def get_value_by_idx(self, idx):
+        return self.__value[idx]
+
+    def get_value_by_time(self, time):
+        return self.__data[time]
 
 
 
@@ -163,17 +184,21 @@ if __name__ == "__main__":
     import pandas as pd
     import numpy as np
 
-    x = pd.Series(dtype=float, )
+    #x = pd.Series(dtype=float, )
 
-    time = np.empty([0], dtype='datetime64')
-    time = np.append(time, datetime.datetime.now())
-    time = np.append(time, datetime.datetime.now())
+    #time = np.empty([0], dtype='datetime64')
+    #time = np.append(time, datetime.datetime.now())
+    #time = np.append(time, datetime.datetime.now())
 
     series = FloatSeries()
-    series2 = FloatSeries()
-    series.add(datetime.datetime.now(), 61)
-    series.add(datetime.datetime.now(), 62)
+    #series2 = FloatSeries()
+
+    t1 = datetime.datetime.now()
+
+    t2 = datetime.datetime.now() + datetime.timedelta(0,3)
+    series.add(t1, 61)
+    series.add(t2, 62)
     print series.get_time_value_as_series()
 
-    p = Portfolio()
-    print p.cash
+    #p = Portfolio()
+    #print p.cash

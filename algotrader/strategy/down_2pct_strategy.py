@@ -10,7 +10,7 @@ class Down2PctStrategy(Strategy):
         self.__curr_bar = None
         self.day_count = 0
         self.order = None
-        self.qty = 1000
+        self.qty = qty
 
     def on_bar(self, bar):
         self.__prev_bar = self.__curr_bar
@@ -19,13 +19,13 @@ class Down2PctStrategy(Strategy):
         if self.order is None:
             roc = self.roc()
             if roc < -0.02:
-                logger.info("[%s] buying....date = %s, roc = %s" % (self.__class__.__name__, bar.timestamp, roc))
+                logger.info("%s,B,%s" % (bar.timestamp, bar.close_or_adj_close()))
                 self.order = self.new_market_order(instrument=bar.instrument, action=OrdAction.BUY, qty=self.qty)
                 self.day_count = 0
         else:
             self.day_count += 1
             if self.day_count >= 5:
-                logger.info("[%s] selling....date = %s, day_count = %s" % (self.__class__.__name__,bar.timestamp, self.day_count))
+                logger.info("%s,S,%s" % (bar.timestamp, bar.close_or_adj_close()))
                 self.new_market_order(instrument=bar.instrument, action=OrdAction.SELL, qty=self.qty)
                 self.order = None
 

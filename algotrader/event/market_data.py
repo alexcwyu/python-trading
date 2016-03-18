@@ -1,7 +1,4 @@
 from algotrader.event import *
-import abc
-
-from atom.api import Atom, Unicode, Range, Bool, observe, Enum, Str, Value, Float, Long, Int
 
 
 class Frequency(object):
@@ -15,38 +12,36 @@ class Frequency(object):
 
 
 class MarketDataEvent(Event):
-    instrument = Str()
-    timestamp = Value(current_time)
+    _slots__ = (
+        'instrument',
+        'timestamp',
+    )
+
+    def __init__(self, instrument, timestamp):
+        self.instrument = instrument
+        self.timestamp = timestamp
 
 
 class Bar(MarketDataEvent):
-    freq = Long()
-    open = Float()
-    high = Float()
-    low = Float()
-    close = Float()
-    vol = Float()
-    adj_close = Float()
+    __slots__ = (
+        'freq',
+        'open',
+        'high',
+        'low',
+        'close',
+        'vol',
+        'adj_close'
+    )
 
-    # __slots__ = (
-    #     'freq',
-    #     'open',
-    #     'high',
-    #     'low',
-    #     'close',
-    #     'vol',
-    #     'adj_close'
-    # )
-    #
-    # def __init__(self, instrument, timestamp, open, high, low, close, vol, adj_close, freq=Frequency.D1):
-    #     super(self.__class__, self).__init__(instrument, timestamp)
-    #     self.freq = freq
-    #     self.open = open
-    #     self.high = high
-    #     self.low = low
-    #     self.close = close
-    #     self.vol = vol
-    #     self.adj_close = adj_close
+    def __init__(self, instrument, timestamp, open=0, high=0, low=0, close=0, vol=0, adj_close=0, freq=Frequency.D1):
+        super(Bar, self).__init__(instrument, timestamp)
+        self.freq = freq
+        self.open = open
+        self.high = high
+        self.low = low
+        self.close = close
+        self.vol = vol
+        self.adj_close = adj_close
 
     def __str__(self):
         return "Bar(instrument = %s, timestamp = %s,freq = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
@@ -57,24 +52,20 @@ class Bar(MarketDataEvent):
         handler.on_bar(self)
 
     def close_or_adj_close(self):
-        #return self.adj_close if self.adj_close > 0 else self.close
+        # return self.adj_close if self.adj_close > 0 else self.close
         return self.close
 
 
 class Trade(MarketDataEvent):
-    price = Float()
-    size = Long()
+    __slots__ = (
+        'price',
+        'size'
+    )
 
-    #
-    # __slots__ = (
-    #     'price',
-    #     'size'
-    # )
-    #
-    # def __init__(self, instrument, timestamp, price, size):
-    #     super(self.__class__, self).__init__(instrument, timestamp)
-    #     self.price = price
-    #     self.size = size
+    def __init__(self, instrument, timestamp, price=0, size=0):
+        super(Trade, self).__init__(instrument, timestamp)
+        self.price = price
+        self.size = size
 
     def __str__(self):
         return "Trade(instrument = %s, timestamp = %s,price = %s, size = %s)" \
@@ -85,25 +76,19 @@ class Trade(MarketDataEvent):
 
 
 class Quote(MarketDataEvent):
-    bid = Float()
-    bid_size = Long()
-    ask = Float()
-    ask_size = Long()
+    __slots__ = (
+        'bid',
+        'bid_size',
+        'ask',
+        'ask_size',
+    )
 
-    #
-    # __slots__ = (
-    #     'bid',
-    #     'bid_size',
-    #     'ask',
-    #     'ask_size',
-    # )
-    #
-    # def __init__(self, instrument, timestamp, bid, bid_size, ask, ask_size):
-    #     super(self.__class__, self).__init__(instrument, timestamp)
-    #     self.bid = bid
-    #     self.bid_size = bid_size
-    #     self.ask = ask
-    #     self.ask_size = ask_size
+    def __init__(self, instrument, timestamp, bid=0, bid_size=0, ask=0, ask_size=0):
+        super(Quote, self).__init__(instrument, timestamp)
+        self.bid = bid
+        self.bid_size = bid_size
+        self.ask = ask
+        self.ask_size = ask_size
 
     def __str__(self):
         return "Quote(instrument = %s, timestamp = %s,bid = %s, bid_size = %s, ask = %s, ask_size = %s)" \

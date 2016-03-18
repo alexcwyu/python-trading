@@ -1,6 +1,5 @@
 from algotrader.event import *
 import abc
-from atom.api import Atom, Unicode, Range, Bool, observe, Enum, Str, Value, Float, Long, List
 
 class OrderEvent(Event):
     pass
@@ -39,19 +38,35 @@ class OrdStatus:
 
 
 class ExecutionEvent(Event):
-    broker_id = Str()
-    ord_id = Long()
-    instrument = Str()
-    timestamp = Value(current_time)
+
+    __slots__ = (
+        'broker_id',
+        'ord_id',
+        'instrument',
+        'timestamp'
+    )
+
+    def __init__(self, broker_id, ord_id, instrument, timestamp):
+        #super(ExecutionEvent, self).__init__(instrument, timestamp)
+        self.broker_id = broker_id
+        self.ord_id = ord_id
+        self.instrument = instrument
+        self.timestamp = timestamp
 
 
 class OrderStatusUpdate(ExecutionEvent):
-    status = Enum(OrdStatus.NEW,
-                  OrdStatus.PENDING_SUBMIT, OrdStatus.SUBMITTED,
-                  OrdStatus.PENDING_CANCEL, OrdStatus.CANCELLED,
-                  OrdStatus.PENDING_REPLACE, OrdStatus.REPLACED,
-                  OrdStatus.PARTIALLY_FILLED, OrdStatus.FILLED,
-                  OrdStatus.REJECTED)
+
+    __slots__ = (
+        'status'
+    )
+
+    def __init__(self, broker_id, ord_id, instrument, timestamp, status=OrdStatus.NEW):
+        super(OrderStatusUpdate, self).__init__(broker_id, ord_id, instrument, timestamp)
+        self.status = status
+        self.ord_id = ord_id
+        self.instrument = instrument
+        self.timestamp = timestamp
+
 
     def on(self, handler):
         handler.on_ord_upd(self)
@@ -62,10 +77,22 @@ class OrderStatusUpdate(ExecutionEvent):
 
 
 class ExecutionReport(OrderStatusUpdate):
-    er_id = Long()
-    filled_qty = Float()
-    filled_price = Float()
-    commission = Float()
+
+    __slots__ = (
+        'er_id',
+        'filled_qty',
+        'filled_price',
+        'commission'
+    )
+
+    def __init__(self, broker_id, ord_id, instrument, timestamp, er_id, filled_qty, filled_price, commission = 0, status=OrdStatus.NEW):
+        super(ExecutionReport, self).__init__(broker_id, ord_id, instrument, timestamp, status)
+        self.er_id = er_id
+        self.filled_qty = filled_qty
+        self.filled_price = filled_price
+        self.commission = commission
+
+
 
     def on(self, handler):
         handler.on_exec_report(self)
@@ -78,40 +105,54 @@ class ExecutionReport(OrderStatusUpdate):
 
 
 class Order(OrderEvent):
-    instrument = Str()
-    timestamp = Value(current_time)
 
-    ord_id = Long()
-    stg_id = Str()
-    broker_id = Str()
-    action = Enum(OrdAction.BUY, OrdAction.SELL)
-    type = Enum(OrdType.MARKET, OrdType.LIMIT, OrdType.STOP, OrdType.STOP_LIMIT, OrdType.TRAILING_STOP)
-    tif = Enum(TIF.DAY, TIF.GTC, TIF.FOK)
-    status = Enum(OrdStatus.NEW,
-                  OrdStatus.PENDING_SUBMIT, OrdStatus.SUBMITTED,
-                  OrdStatus.PENDING_CANCEL, OrdStatus.CANCELLED,
-                  OrdStatus.PENDING_REPLACE, OrdStatus.REPLACED,
-                  OrdStatus.PARTIALLY_FILLED, OrdStatus.FILLED,
-                  OrdStatus.REJECTED)
+    __slots__ = (
+        'instrument',
+        'timestamp',
+        'ord_id',
+        'stg_id',
+        'broker_id',
+        'action',
+        'type',
+        'qty',
+        'limit_price'
+        'tif',
+        'status',
+        'filled_qty',
+        'avg_price',
+        'last_qty',
+        'last_price',
+        'stop_price',
+        'stop_limit_ready',
+        'trailing_stop_exec_price',
+        'exec_reports',
+        'update_events'
+    )
 
-    qty = Float(0)
-    limit_price = Float(0)
-    stop_price = Float(0)
+    def __init__(self, instrument, ord_id, stg_id, broker_id, action, type, timestamp = None, qty = 0, limit_price =0, stop_price = 0, status = OrdStatus.NEW, tif = TIF.DAY):
+        self.instrument = instrument
+        self.timestamp = timestamp
+        self.ord_id = ord_id
+        self.stg_id = stg_id
+        self.broker_id = broker_id
+        self.action = action
+        self.type = type
+        self.qty = qty
+        self.limit_price = limit_price
+        self.tif = tif
+        self.status = status
+        self.filled_qty = 0
+        self.avg_price =0
+        self.last_qty =0
+        self.last_price = 0
+        self.stop_price =stop_price
+        self.stop_limit_ready = False
+        self.trailing_stop_exec_price =0
+        self.exec_reports = []
+        self.update_events = []
 
-    filled_qty = Float(0)
-    avg_price = Float(0)
 
-    last_qty = Float(0)
-    last_price = Float(0)
 
-    stop_price = Float(0)
-
-    stop_limit_ready = Bool(False)
-
-    trailing_stop_exec_price = Float(0)
-
-    exec_reports = List(item=ExecutionReport, default=[])
-    update_events = List(item=OrderStatusUpdate, default=[])
 
     def on(self, handler):
         handler.on_order(self)

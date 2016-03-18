@@ -115,7 +115,7 @@ class SimOrderHandler(object):
 
 class MarketOrderHandler(SimOrderHandler):
     def __init__(self, execute_func, config):
-        super(self.__class__, self).__init__(execute_func, config)
+        super(MarketOrderHandler, self).__init__(execute_func, config)
 
     def process_w_bar(self, order, bar):
         if bar:
@@ -182,7 +182,7 @@ class AbstractStopLimitOrderHandler(SimOrderHandler):
 
 class LimitOrderHandler(AbstractStopLimitOrderHandler):
     def __init__(self, execute_func, config):
-        super(self.__class__, self).__init__(execute_func, config)
+        super(LimitOrderHandler, self).__init__(execute_func, config)
 
     def stop_limit_w_bar(self, order, bar, qty):
         if order.action == OrdAction.BUY and bar.low <= order.limit_price:
@@ -201,7 +201,7 @@ class LimitOrderHandler(AbstractStopLimitOrderHandler):
 
 class StopLimitOrderHandler(AbstractStopLimitOrderHandler):
     def __init__(self, execute_func, config):
-        super(self.__class__, self).__init__(execute_func, config)
+        super(StopLimitOrderHandler, self).__init__(execute_func, config)
 
     def stop_limit_w_bar(self, order, bar, qty):
         if order.action == OrdAction.BUY:
@@ -232,7 +232,7 @@ class StopLimitOrderHandler(AbstractStopLimitOrderHandler):
 
 class StopOrderHandler(AbstractStopLimitOrderHandler):
     def __init__(self, execute_func, config):
-        super(self.__class__, self).__init__(execute_func, config)
+        super(StopOrderHandler, self).__init__(execute_func, config)
 
     def stop_limit_w_bar(self, order, bar, qty):
         if order.action == OrdAction.BUY:
@@ -259,7 +259,7 @@ class StopOrderHandler(AbstractStopLimitOrderHandler):
 
 class TrailingStopOrderHandler(AbstractStopLimitOrderHandler):
     def __init__(self, execute_func, config):
-        super(self.__class__, self).__init__(execute_func, config)
+        super(TrailingStopOrderHandler, self).__init__(execute_func, config)
 
     def _init_order_trailing_stop(self, order):
         if order.trailing_stop_exec_price == 0:

@@ -5,7 +5,6 @@ from rx.subjects import Subject
 import rx
 import datetime
 
-from atom.api import Atom, Unicode, Range, Bool, observe, Enum, Str, Value, Float, Long
 
 from algotrader.utils import *
 
@@ -13,7 +12,7 @@ from algotrader.utils import *
 current_time = datetime.datetime.now()
 
 
-class Event(Atom):
+class Event(object):
     def on(self, handler):
         pass
 

@@ -1,7 +1,8 @@
 import datetime
 
 from algotrader.event import *
-from algotrader.tools import *
+from algotrader.utils import *
+from algotrader.utils.singleton import singleton
 
 
 class Clock:

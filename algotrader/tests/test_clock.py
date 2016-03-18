@@ -2,7 +2,7 @@ from datetime import datetime
 from unittest import TestCase
 
 from algotrader.event.market_data import Bar, Quote, Trade
-from algotrader.trading.clock import simluation_clock
+from algotrader.utils.clock import simluation_clock
 
 
 class ClockTest(TestCase):

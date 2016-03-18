@@ -1,17 +1,18 @@
 import abc
 import sys
+from collections import defaultdict
 
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import Bar, Trade, Quote
 from algotrader.event.order import MarketDataEventHandler, OrderEventHandler, OrdType, OrdStatus, ExecutionReport, \
     OrdAction, OrderStatusUpdate
 from algotrader.provider import Provider
-from algotrader.tools import *
-from algotrader.trading.clock import default_clock
+from algotrader.provider.broker_mgr import broker_mgr
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
-from algotrader.provider.broker_mgr import broker_mgr
-from collections import defaultdict
+from algotrader.utils import *
+from algotrader.utils.clock import default_clock
+
 
 # from algotrader.tools import *
 

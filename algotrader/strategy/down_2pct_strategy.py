@@ -1,6 +1,6 @@
 from algotrader.event.order import OrdAction
 from algotrader.strategy.strategy import Strategy
-from algotrader.tools import logger
+from algotrader.utils import logger
 
 
 class Down2PctStrategy(Strategy):

@@ -1,14 +1,11 @@
 import datetime
 
-from atom.api import Atom, Str, Value, Float, Long, Dict, Int
-
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
-from algotrader.event.order import Order, OrdAction, OrderEventHandler, ExecutionEventHandler
-from algotrader.tools import *
-from collections import defaultdict
-import numpy as np
-import pandas as pd
+from algotrader.event.order import OrdAction, OrderEventHandler, ExecutionEventHandler
+from algotrader.utils import *
+from algotrader.utils.time_series import TimeSeries
+
 
 class Position():
     # instrument = Str()
@@ -43,54 +40,6 @@ class Position():
         )
 
 
-
-class FloatSeries():
-
-    # time = Value(np.empty([0], dtype='datetime64'))
-    # value = Value(np.empty([0], dtype='float'))
-    # lenght = Int(0)
-
-    def __init__(self):
-        self.__time = []
-        self.__value = []
-        self.__data = {}
-
-    def add(self, time, value):
-        # self.time = np.append(self.time, time)
-        # self.value = np.append(self.value, value)
-        # self.lenght += 1
-        self.__time.append(time)
-        self.__value.append(value)
-        self.__data[time] = value
-
-
-    def get_time_value(self):
-        # return (self.time, self.value)
-        return self.__data
-
-    def get_time_value_as_series(self):
-        #return pd.Series(data=self.value, index=self.time)
-        s =  pd.Series(self.__data, name = 'Value')
-        s.index.name = 'Time'
-        return s
-
-
-    def size(self):
-        #return self.lenght
-        return len(self.__data)
-
-    def current_value(self):
-        #return self.value[-1] if self.lenght>0 else 0
-        return self.__data[-1] if len(self.__value) > 0 else 0
-
-    def get_value_by_idx(self, idx):
-        return self.__value[idx]
-
-    def get_value_by_time(self, time):
-        return self.__data[time]
-
-
-
 class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
     # portfolio_id = Str()
     # cash = Float(default=100000)
@@ -106,9 +55,10 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         self.cash = cash
         self.positions = {}
         self.orders = {}
-        self.stock_mtm_value=FloatSeries()
-        self.total_equity= FloatSeries()
-        self.pnl = FloatSeries()
+        self.stock_mtm_value= TimeSeries()
+        self.total_equity= TimeSeries()
+        self.pnl = TimeSeries()
+        self.drawdown = TimeSeries()
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)
@@ -181,16 +131,13 @@ if __name__ == "__main__":
     #
     # print order
 
-    import pandas as pd
-    import numpy as np
-
     #x = pd.Series(dtype=float, )
 
     #time = np.empty([0], dtype='datetime64')
     #time = np.append(time, datetime.datetime.now())
     #time = np.append(time, datetime.datetime.now())
 
-    series = FloatSeries()
+    series = TimeSeries()
     #series2 = FloatSeries()
 
     t1 = datetime.datetime.now()
@@ -198,7 +145,7 @@ if __name__ == "__main__":
     t2 = datetime.datetime.now() + datetime.timedelta(0,3)
     series.add(t1, 61)
     series.add(t2, 62)
-    print series.get_time_value_as_series()
+    print series.get_series()
 
     #p = Portfolio()
     #print p.cash

@@ -20,7 +20,7 @@ class MarketDataEvent(Event):
 
 
 class Bar(MarketDataEvent):
-    freq = Int()
+    freq = Long()
     open = Float()
     high = Float()
     low = Float()

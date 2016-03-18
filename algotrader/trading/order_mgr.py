@@ -3,7 +3,8 @@ from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.order import OrderEventHandler, ExecutionEventHandler
 from algotrader.provider.broker_mgr import broker_mgr
 from algotrader.strategy.strategy_mgr import stg_mgr
-from algotrader.tools import *
+from algotrader.utils import *
+from algotrader.utils.singleton import singleton
 
 
 @singleton

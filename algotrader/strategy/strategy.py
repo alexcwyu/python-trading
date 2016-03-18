@@ -1,13 +1,11 @@
-from algotrader.trading.portfolio import Portfolio
-from algotrader.trading.order_mgr import order_mgr
-from algotrader.event.order import OrdType, TIF, ExecutionEventHandler, Order
-from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.event_bus import EventBus
-from algotrader.trading import clock
-from algotrader.tools import logger
-from algotrader.strategy.strategy_mgr import stg_mgr
-
+from algotrader.event.market_data import MarketDataEventHandler
+from algotrader.event.order import OrdType, TIF, ExecutionEventHandler, Order
 from algotrader.provider.broker_mgr import broker_mgr
+from algotrader.strategy.strategy_mgr import stg_mgr
+from algotrader.trading.order_mgr import order_mgr
+from algotrader.utils import logger, clock
+
 
 class Strategy(ExecutionEventHandler, MarketDataEventHandler):
     def __init__(self, stg_id, broker_id, feed, portfolio):
@@ -58,3 +56,6 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
         self.__portfolio.on_order(order)
         order = order_mgr.send_order(order)
         return order
+
+    def get_portfolio(self):
+        return self.__portfolio

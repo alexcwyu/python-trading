@@ -1,7 +1,8 @@
-from algotrader.provider import *
-from algotrader.event.market_data import *
-from algotrader.trading.order_mgr import *
 import pandas as pd
+
+from algotrader.event.market_data import *
+from algotrader.provider import *
+from algotrader.trading.order_mgr import *
 
 
 class CSVDataFeed(Provider):
@@ -18,9 +19,11 @@ class PandasCSVDataFeed(CSVDataFeed):
         self.subject = subject
         self.dfs = []
         for name in names:
-            df = pd.read_csv('../../data/%s.csv' % name, index_col='Date', parse_dates=['Date'], date_parser=dateparse)
-            df['Symbol'] = name
-            df['Frequency'] = 24 * 60 * 60
+            # df = pd.read_csv('../../data/%s.csv' % name, index_col='Date', parse_dates=['Date'], date_parser=dateparse)
+            # df['Symbol'] = name
+            # df['Frequency'] = int(24 * 60 * 60)
+            df = self.read_csv(name, '../../data/%s.csv' % name)
+            # df['Frequency'].astype(np.int32)
             self.dfs.append(df)
 
         self.df = pd.concat(self.dfs).sort_index(0, ascending=True)
@@ -28,7 +31,8 @@ class PandasCSVDataFeed(CSVDataFeed):
     def start(self):
         for index, row in self.df.iterrows():
             self.subject.on_next(
-                    Bar(instrument=row['Symbol'], timestamp=index, open=row['Open'], high=row['High'], low=row['Low'], close=row['Close'], vol=row['Volume'],
+                    Bar(instrument=row['Symbol'], timestamp=index, open=row['Open'], high=row['High'], low=row['Low'],
+                        close=row['Close'], vol=row['Volume'],
                         adj_close=row['Adj Close'], freq=row['Frequency']))
 
     def stop(self):
@@ -36,3 +40,10 @@ class PandasCSVDataFeed(CSVDataFeed):
 
     def id(self):
         return "PandasCSV"
+
+    @staticmethod
+    def read_csv(symobl, file):
+        df = pd.read_csv(file, index_col='Date', parse_dates=['Date'], date_parser=dateparse)
+        df['Symbol'] = symobl
+        df['Frequency'] = int(24 * 60 * 60)
+        return df

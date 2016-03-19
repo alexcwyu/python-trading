@@ -35,12 +35,11 @@ class FloatSeriesTest(TestCase):
 
         self.assertEqual(2.4, series.get_value_by_idx(1))
 
-
     def test_get_value_by_time(self):
         series = TimeSeries()
 
         t1 = datetime.datetime.now()
-        t2 = t1  + datetime.timedelta(0,3)
+        t2 = t1 + datetime.timedelta(0, 3)
 
         series.add(t1, 2)
         series.add(t2, 2.4)

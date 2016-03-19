@@ -3,18 +3,15 @@ import sys
 from collections import defaultdict
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.market_data import Bar, Trade, Quote
-from algotrader.event.order import MarketDataEventHandler, OrderEventHandler, OrdType, OrdStatus, ExecutionReport, \
+from algotrader.event.market_data import Bar, Trade, Quote, MarketDataEventHandler
+from algotrader.event.order import OrderEventHandler, OrdType, OrdStatus, ExecutionReport, \
     OrdAction, OrderStatusUpdate
 from algotrader.provider import Provider
 from algotrader.provider.broker_mgr import broker_mgr
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
-from algotrader.utils import *
+from algotrader.utils import logger
 from algotrader.utils.clock import default_clock
-
-
-# from algotrader.tools import *
 
 
 class Broker(Provider, OrderEventHandler):
@@ -24,7 +21,7 @@ class Broker(Provider, OrderEventHandler):
         pass
 
 
-class MarketDataProcessor:
+class MarketDataProcessor(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -309,7 +306,7 @@ class SimConfig:
                  fill_on_bar=True,
                  fill_on_quote_mode=FillMode.LAST,
                  fill_on_trade_mode=FillMode.LAST,
-                 fill_on_bar_mode=FillMode.NEXT_OPEN):
+                 fill_on_bar_mode=FillMode.LAST):
         self.partial_fill = partial_fill
         self.fill_on_quote = fill_on_quote
         self.fill_on_trade = fill_on_trade
@@ -319,7 +316,6 @@ class SimConfig:
         self.fill_on_bar_mode = fill_on_bar_mode
 
 
-#@singleton
 class Simulator(Broker, MarketDataEventHandler):
     ID = "Simulator"
 
@@ -473,7 +469,7 @@ class Simulator(Broker, MarketDataEventHandler):
 
     def __send_status(self, order, ord_status):
         ord_update = OrderStatusUpdate(broker_id=Simulator.ID, ord_id=order.ord_id, instrument=order.instrument,
-                                   timestamp=default_clock.current_date_time(), status = ord_status)
+                                       timestamp=default_clock.current_date_time(), status=ord_status)
         self.__exec__handler.on_ord_upd(ord_update)
 
     def __send_exec_report(self, order, filled_price, filled_qty, ord_status):
@@ -487,13 +483,5 @@ class Simulator(Broker, MarketDataEventHandler):
     def _get_orders(self):
         return self.__order_map
 
-
-# broker_mapping = {
-#     Simulator.ID: Simulator()
-# }
-#
-#
-# def get_broker(broker_id):
-#     return broker_mapping[broker_id]
 
 simulator = Simulator();

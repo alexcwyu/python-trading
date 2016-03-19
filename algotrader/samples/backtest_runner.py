@@ -1,3 +1,4 @@
+from algotrader.chart.plotter import StrategyPlotter
 from algotrader.provider.broker import Simulator
 from algotrader.provider.feed import PandasCSVDataFeed
 from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
@@ -5,7 +6,7 @@ from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio import Portfolio
 from algotrader.utils import clock
-from algotrader.chart.plotter import StrategyPlotter
+
 
 class BacktestRunner:
     def __init__(self, stg):
@@ -29,13 +30,8 @@ def main():
     runner.start()
     print portfolio.cash
 
-    #import matplotlib.pyplot as plt
-    #portfolio.total_equity.get_series().plot()
-
     plotter = StrategyPlotter(strategy)
     plotter.plot()
-
-    #plt.show()
 
 
 if __name__ == "__main__":

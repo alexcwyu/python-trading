@@ -50,7 +50,8 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
 
     def new_order(self, instrument, ord_type, action, qty, price, tif=TIF.DAY):
         order = Order(instrument=instrument, timestamp=clock.default_clock.current_date_time(),
-                      ord_id=order_mgr.next_ord_id(), stg_id=self.stg_id, broker_id=self.__broker_id, action=action, type=ord_type,
+                      ord_id=order_mgr.next_ord_id(), stg_id=self.stg_id, broker_id=self.__broker_id, action=action,
+                      type=ord_type,
                       tif=tif, qty=qty,
                       limit_price=price)
         self.__portfolio.on_order(order)

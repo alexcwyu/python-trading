@@ -39,7 +39,6 @@ class PositionTest(TestCase):
         with self.assertRaises(RuntimeError) as ex:
             position.add_order(order2)
 
-
     def test_add_order_with_diff_inst(self):
         position = Position('HSI')
         order1 = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
@@ -50,7 +49,6 @@ class PositionTest(TestCase):
 
         with self.assertRaises(RuntimeError) as ex:
             position.add_order(order2)
-
 
     def test_fill_qty(self):
         position = Position('HSI')
@@ -65,14 +63,13 @@ class PositionTest(TestCase):
         order1.add_exec_report(er1)
         self.assertEquals(500, position.filled_qty())
 
-
         er2 = ExecutionReport(ord_id=1, er_id=2, instrument="HSI", filled_qty=500, filled_price=18.4,
                               status=OrdStatus.FILLED)
         order1.add_exec_report(er2)
         self.assertEquals(1000, position.filled_qty())
 
-
-        order2 = Order(ord_id=2, instrument="HSI", action=OrdAction.SELL, type=OrdType.LIMIT, qty=1200, limit_price=18.5)
+        order2 = Order(ord_id=2, instrument="HSI", action=OrdAction.SELL, type=OrdType.LIMIT, qty=1200,
+                       limit_price=18.5)
         position.add_order(order2)
         self.assertEquals(1000, position.filled_qty())
 
@@ -80,7 +77,6 @@ class PositionTest(TestCase):
                               status=OrdStatus.PARTIALLY_FILLED)
         order2.add_exec_report(er3)
         self.assertEquals(200, position.filled_qty())
-
 
         er4 = ExecutionReport(ord_id=2, er_id=4, instrument="HSI", filled_qty=400, filled_price=18.4,
                               status=OrdStatus.FILLED)

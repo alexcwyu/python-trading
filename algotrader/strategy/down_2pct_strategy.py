@@ -31,5 +31,6 @@ class Down2PctStrategy(Strategy):
 
     def roc(self):
         if self.__curr_bar and self.__prev_bar:
-            return (self.__curr_bar.close_or_adj_close() - self.__prev_bar.close_or_adj_close()) / self.__prev_bar.close_or_adj_close()
+            return (
+                   self.__curr_bar.close_or_adj_close() - self.__prev_bar.close_or_adj_close()) / self.__prev_bar.close_or_adj_close()
         return 0

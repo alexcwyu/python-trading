@@ -1,9 +1,7 @@
-import datetime
-
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.order import OrdAction, OrderEventHandler, ExecutionEventHandler
-from algotrader.utils import *
+from algotrader.utils import logger
 from algotrader.utils.time_series import TimeSeries
 
 
@@ -16,12 +14,13 @@ class Position():
     def __init__(self, instrument):
         self.instrument = instrument
         self.orders = {}
-        self.size =0
+        self.size = 0
         self.last_price = 0
 
     def add_order(self, order):
         if order.instrument != self.instrument:
-            raise RuntimeError("order[%s] instrument [%s] is not same as instrument [%s] of position" % (order.ord_id, order.instrument, self.instrument))
+            raise RuntimeError("order[%s] instrument [%s] is not same as instrument [%s] of position" % (
+                order.ord_id, order.instrument, self.instrument))
 
         if order.ord_id in self.orders:
             raise RuntimeError("order[%s] already exist" % order.ord_id)
@@ -35,7 +34,7 @@ class Position():
         return qty
 
     def __repr__(self):
-        return "Position(instrument=%s, orders=%s, size=%s, last_price=%s)"%(
+        return "Position(instrument=%s, orders=%s, size=%s, last_price=%s)" % (
             self.instrument, self.orders, self.size, self.last_price
         )
 
@@ -50,13 +49,13 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
     # pnl = Value(FloatSeries())
     # drawdown = Value(FloatSeries())
 
-    def __init__(self, portfolio_id = "test", cash = 100000):
+    def __init__(self, portfolio_id="test", cash=100000):
         self.portfolio_id = portfolio_id
         self.cash = cash
         self.positions = {}
         self.orders = {}
-        self.stock_mtm_value= TimeSeries()
-        self.total_equity= TimeSeries()
+        self.stock_mtm_value = TimeSeries()
+        self.total_equity = TimeSeries()
         self.pnl = TimeSeries()
         self.drawdown = TimeSeries()
 
@@ -111,41 +110,3 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
             stock_value += position.last_price * position.filled_qty()
         self.stock_mtm_value.add(time, stock_value)
         self.total_equity.add(time, stock_value + self.cash)
-
-
-if __name__ == "__main__":
-    # order = Order(instrument="HSI", timestamp=datetime.datetime.now(), ord_id=1,
-    #               stg_id="SMA", broker_id="SIMULATOR", type=OrdType.LIMIT, tif=TIF.DAY, qty=10000,
-    #               limit_price=18888)
-    #
-    # exec_report1 = ExecutionReport(instrument="HSI",
-    #                                timestamp=datetime.datetime.now(), ord_id=1,
-    #                                broker_id="SIMULATOR", er_id=20, filled_qty=2000, filled_price=18887)
-    #
-    # exec_report2 = ExecutionReport(instrument="HSI",
-    #                                timestamp=datetime.datetime.now(), ord_id=1,
-    #                                broker_id="SIMULATOR", er_id=21, filled_qty=4000, filled_price=18880)
-    #
-    # order.add_exec_report(exec_report1)
-    # order.add_exec_report(exec_report2)
-    #
-    # print order
-
-    #x = pd.Series(dtype=float, )
-
-    #time = np.empty([0], dtype='datetime64')
-    #time = np.append(time, datetime.datetime.now())
-    #time = np.append(time, datetime.datetime.now())
-
-    series = TimeSeries()
-    #series2 = FloatSeries()
-
-    t1 = datetime.datetime.now()
-
-    t2 = datetime.datetime.now() + datetime.timedelta(0,3)
-    series.add(t1, 61)
-    series.add(t2, 62)
-    print series.get_series()
-
-    #p = Portfolio()
-    #print p.cash

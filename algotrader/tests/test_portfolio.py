@@ -98,32 +98,32 @@ class TestPortfolio(TestCase):
         expected_total_equity = expected_cash + expected_stock_value
 
         self.assertEqual(expected_cash, self.portfolio.cash)
-        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value(0))
-        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value(0))
+        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value_by_idx(0))
+        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value_by_idx(0))
 
         self.portfolio.on_trade(Trade(instrument='HSI', price=20, size=1000))
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 20
         expected_total_equity = expected_cash + expected_stock_value
         self.assertEqual(expected_cash, self.portfolio.cash)
-        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value(1))
-        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value(1))
+        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value_by_idx(1))
+        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value_by_idx(1))
 
-        self.portfolio.on_bar(Bar(instrument='HSI', adj_close=16, vol=1000))
+        self.portfolio.on_bar(Bar(instrument='HSI', close=16, adj_close=16, vol=1000))
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 16
         expected_total_equity = expected_cash + expected_stock_value
         self.assertEqual(expected_cash, self.portfolio.cash)
-        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value(2))
-        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value(2))
+        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value_by_idx(2))
+        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value_by_idx(2))
 
         self.portfolio.on_quote(Quote(instrument='HSI', bid=16, ask=18))
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 17
         expected_total_equity = expected_cash + expected_stock_value
         self.assertEqual(expected_cash, self.portfolio.cash)
-        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value(3))
-        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value(3))
+        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value_by_idx(3))
+        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value_by_idx(3))
 
     def check_order(self, portfolio, orders, qtys):
         expected_positon = defaultdict(list)

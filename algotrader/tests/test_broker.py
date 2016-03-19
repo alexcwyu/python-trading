@@ -1,10 +1,10 @@
-from datetime import datetime
 from unittest import TestCase
 
-from algotrader.event.market_data import Bar, Quote, Trade
-from algotrader.provider.broker import SimConfig, Simulator
-from algotrader.event.order import ExecutionEventHandler, Order, ExecutionEvent, OrdStatus, OrderStatusUpdate, OrdAction,  OrdType
+from algotrader.event.market_data import Bar
+from algotrader.event.order import ExecutionEventHandler, Order, OrdStatus, OrdAction, OrdType
+from algotrader.provider.broker import Simulator
 from algotrader.trading.instrument_data import inst_data_mgr
+
 
 class SimulatorTest(TestCase):
     class ExecHandler(ExecutionEventHandler):
@@ -45,14 +45,12 @@ class SimulatorTest(TestCase):
         exec_report = self.exec_handler.exec_reports[0]
         self.assert_exec_report(exec_report, order1.ord_id, 0, 0, OrdStatus.SUBMITTED)
 
-
         bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5)
         bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17)
 
         self.exec_handler.reset()
         self.simulator.on_bar(bar1)
         self.assertEqual(0, len(self.exec_handler.exec_reports))
-
 
         self.exec_handler.reset()
         self.simulator.on_bar(bar2)
@@ -84,7 +82,6 @@ class SimulatorTest(TestCase):
 
         exec_report = self.exec_handler.exec_reports[1]
         self.assert_exec_report(exec_report, order1.ord_id, 1000, 18.5, OrdStatus.FILLED)
-
 
     def assert_exec_report(self, exec_report, ord_id, filled_qty, filled_price, status):
         self.assertEqual(ord_id, exec_report.ord_id)

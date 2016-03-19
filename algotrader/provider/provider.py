@@ -1,7 +1,7 @@
 import abc
 
 
-class Provider:
+class Provider(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod

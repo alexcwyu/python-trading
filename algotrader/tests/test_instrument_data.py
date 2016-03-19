@@ -31,13 +31,11 @@ class InstrumentDataTest(TestCase):
         self.assertIsNone(trade)
 
         trade1 = Trade(instrument="HSI", price=20, size=200)
-        self.inst_data_mgr.on_bar(trade1)
-        trade = self.inst_data_mgr.get_bar("HSI")
+        self.inst_data_mgr.on_trade(trade1)
+        trade = self.inst_data_mgr.get_trade("HSI")
         self.assertEqual(trade1, trade)
 
-
     def get_latest_price(self):
-
         price = self.inst_data_mgr.get_latest_price("HSI")
         self.assertIsNone(price)
 

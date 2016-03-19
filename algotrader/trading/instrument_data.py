@@ -1,12 +1,11 @@
 from collections import defaultdict
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.market_data import *
-from algotrader.utils import *
+from algotrader.event.market_data import MarketDataEventHandler
+from algotrader.utils import logger
 from algotrader.utils.time_series import TimeSeries
 
 
-# @singleton
 class InstrumentDataManager(MarketDataEventHandler):
     def __init__(self):
         self.__bar_dict = {}
@@ -73,9 +72,9 @@ class InstrumentDataManager(MarketDataEventHandler):
         self.__bar_dict = {}
         self.__quote_dict = {}
         self.__trade_dict = {}
-        self.__bar_series = defaultdict(TimeSeries())
-        self.__quote_series = defaultdict(TimeSeries())
-        self.__trade_series = defaultdict(TimeSeries())
+        self.__bar_series = defaultdict(TimeSeries)
+        self.__quote_series = defaultdict(TimeSeries)
+        self.__trade_series = defaultdict(TimeSeries)
 
 
 inst_data_mgr = InstrumentDataManager()

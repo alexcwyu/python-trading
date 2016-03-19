@@ -1,5 +1,5 @@
 from algotrader.event import *
-import abc
+
 
 class OrderEvent(Event):
     pass
@@ -38,7 +38,6 @@ class OrdStatus:
 
 
 class ExecutionEvent(Event):
-
     __slots__ = (
         'broker_id',
         'ord_id',
@@ -46,8 +45,8 @@ class ExecutionEvent(Event):
         'timestamp'
     )
 
-    def __init__(self, broker_id, ord_id, instrument, timestamp):
-        #super(ExecutionEvent, self).__init__(instrument, timestamp)
+    def __init__(self, broker_id=None, ord_id=None, instrument=None, timestamp=None):
+        # super(ExecutionEvent, self).__init__(instrument, timestamp)
         self.broker_id = broker_id
         self.ord_id = ord_id
         self.instrument = instrument
@@ -55,18 +54,16 @@ class ExecutionEvent(Event):
 
 
 class OrderStatusUpdate(ExecutionEvent):
-
     __slots__ = (
         'status'
     )
 
-    def __init__(self, broker_id, ord_id, instrument, timestamp, status=OrdStatus.NEW):
+    def __init__(self, broker_id=None, ord_id=None, instrument=None, timestamp=None, status=OrdStatus.NEW):
         super(OrderStatusUpdate, self).__init__(broker_id, ord_id, instrument, timestamp)
         self.status = status
         self.ord_id = ord_id
         self.instrument = instrument
         self.timestamp = timestamp
-
 
     def on(self, handler):
         handler.on_ord_upd(self)
@@ -77,7 +74,6 @@ class OrderStatusUpdate(ExecutionEvent):
 
 
 class ExecutionReport(OrderStatusUpdate):
-
     __slots__ = (
         'er_id',
         'filled_qty',
@@ -85,14 +81,13 @@ class ExecutionReport(OrderStatusUpdate):
         'commission'
     )
 
-    def __init__(self, broker_id, ord_id, instrument, timestamp, er_id, filled_qty, filled_price, commission = 0, status=OrdStatus.NEW):
+    def __init__(self, broker_id=None, ord_id=None, instrument=None, timestamp=None, er_id=None, filled_qty=0, filled_price=0, commission=0,
+                 status=OrdStatus.NEW):
         super(ExecutionReport, self).__init__(broker_id, ord_id, instrument, timestamp, status)
         self.er_id = er_id
         self.filled_qty = filled_qty
         self.filled_price = filled_price
         self.commission = commission
-
-
 
     def on(self, handler):
         handler.on_exec_report(self)
@@ -105,7 +100,6 @@ class ExecutionReport(OrderStatusUpdate):
 
 
 class Order(OrderEvent):
-
     __slots__ = (
         'instrument',
         'timestamp',
@@ -129,7 +123,8 @@ class Order(OrderEvent):
         'update_events'
     )
 
-    def __init__(self, instrument, ord_id, stg_id, broker_id, action, type, timestamp = None, qty = 0, limit_price =0, stop_price = 0, status = OrdStatus.NEW, tif = TIF.DAY):
+    def __init__(self, instrument=None, ord_id=None, stg_id=None, broker_id=None, action=None, type=None, timestamp=None, qty=0, limit_price=0,
+                 stop_price=0, status=OrdStatus.NEW, tif=TIF.DAY):
         self.instrument = instrument
         self.timestamp = timestamp
         self.ord_id = ord_id
@@ -142,17 +137,14 @@ class Order(OrderEvent):
         self.tif = tif
         self.status = status
         self.filled_qty = 0
-        self.avg_price =0
-        self.last_qty =0
+        self.avg_price = 0
+        self.last_qty = 0
         self.last_price = 0
-        self.stop_price =stop_price
+        self.stop_price = stop_price
         self.stop_limit_ready = False
-        self.trailing_stop_exec_price =0
+        self.trailing_stop_exec_price = 0
         self.exec_reports = []
         self.update_events = []
-
-
-
 
     def on(self, handler):
         handler.on_order(self)
@@ -165,18 +157,21 @@ class Order(OrderEvent):
                   self.tif,
                   self.status,
                   self.qty, self.limit_price, self.stop_price, self.filled_qty, self.avg_price, self.last_qty,
-                  self.last_price, self.stop_price, self.stop_limit_ready, self.trailing_stop_exec_price, self.exec_reports, self.update_events)
+                  self.last_price, self.stop_price, self.stop_limit_ready, self.trailing_stop_exec_price,
+                  self.exec_reports, self.update_events)
 
     def add_exec_report(self, exec_report):
         if exec_report.ord_id != self.ord_id:
-            raise Exception("exec_report [%s] order_id [%s] is not same as current order id [%s]" %(exec_report.er_id, exec_report.ord_id, self.ord_id))
+            raise Exception("exec_report [%s] order_id [%s] is not same as current order id [%s]" % (
+                exec_report.er_id, exec_report.ord_id, self.ord_id))
 
         self.exec_reports.append(exec_report)
         self.last_price = exec_report.filled_price
         self.last_qty = exec_report.filled_qty
         if self.filled_qty + exec_report.filled_qty != 0:
-            self.avg_price = ((self.avg_price * self.filled_qty) + (exec_report.filled_price * exec_report.filled_qty)) / (
-                self.filled_qty + exec_report.filled_qty)
+            self.avg_price = ((self.avg_price * self.filled_qty) + (
+                exec_report.filled_price * exec_report.filled_qty)) / (
+                                 self.filled_qty + exec_report.filled_qty)
         self.filled_qty += exec_report.filled_qty
 
         if self.qty == self.filled_qty:
@@ -184,11 +179,12 @@ class Order(OrderEvent):
         elif self.qty > self.filled_qty:
             self.status = OrdStatus.PARTIALLY_FILLED
         else:
-            raise Exception("filled qty %s is greater than ord qty %s" %(self.filled_qty, self.qty))
+            raise Exception("filled qty %s is greater than ord qty %s" % (self.filled_qty, self.qty))
 
     def update_status(self, ord_upd):
         if ord_upd.ord_id != self.ord_id:
-            raise Exception("ord_upd  order_id [%s] is not same as current order id [%s]" %(ord_upd.ord_id, self.ord_id))
+            raise Exception(
+                "ord_upd  order_id [%s] is not same as current order id [%s]" % (ord_upd.ord_id, self.ord_id))
 
         self.update_events.append(ord_upd)
         self.status = ord_upd.status
@@ -215,9 +211,3 @@ class ExecutionEventHandler(EventHandler):
 class OrderEventHandler(EventHandler):
     def on_order(self, order):
         pass
-
-
-if __name__ == "__main__":
-    order = Order()
-    print order.avg_price
-    print order.status

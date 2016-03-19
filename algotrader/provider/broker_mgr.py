@@ -1,5 +1,3 @@
-from algotrader.utils import *
-
 class BrokerManager():
     def __init__(self):
         self.__broker_mapping = {}

@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
+
 from algotrader.trading.instrument_data import inst_data_mgr
+
 
 class TimeSeriesPlot:
     def __init__(self, time_series, marker=" ", color=None):
@@ -51,13 +53,12 @@ class StrategyPlotter:
         bar_dict = inst_data_mgr.get_bar_series()
         inst = bar_dict.keys()[0]
 
-
         ax_stock = fig.add_axes(rect_stock, axisbg=axescolor)  # left, bottom, width, height
 
-        #pmax = series.max()
+        # pmax = series.max()
         ax_stock.text(0.025, 0.95, 'Chart', va='top', transform=ax_stock.transAxes, fontsize=textsize)
         ax_stock.set_title('%s Daily' % inst)
-        #ax_stock.set_ylim(0, 1.1 * pmax)
+        # ax_stock.set_ylim(0, 1.1 * pmax)
 
         bar_series = bar_dict[inst]
         if bar_series.size() > 0:

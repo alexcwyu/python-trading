@@ -1,15 +1,14 @@
 import pandas as pd
 
-from algotrader.event.market_data import *
-from algotrader.provider import *
-from algotrader.trading.order_mgr import *
+from algotrader.event.event_bus import EventBus
+from algotrader.event.market_data import Bar
+from algotrader.provider import Provider
+
+dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 
 class CSVDataFeed(Provider):
     pass
-
-
-dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 
 class PandasCSVDataFeed(CSVDataFeed):
@@ -31,9 +30,9 @@ class PandasCSVDataFeed(CSVDataFeed):
     def start(self):
         for index, row in self.df.iterrows():
             self.subject.on_next(
-                    Bar(instrument=row['Symbol'], timestamp=index, open=row['Open'], high=row['High'], low=row['Low'],
-                        close=row['Close'], vol=row['Volume'],
-                        adj_close=row['Adj Close'], freq=row['Frequency']))
+                Bar(instrument=row['Symbol'], timestamp=index, open=row['Open'], high=row['High'], low=row['Low'],
+                    close=row['Close'], vol=row['Volume'],
+                    adj_close=row['Adj Close'], freq=row['Frequency']))
 
     def stop(self):
         pass

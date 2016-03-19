@@ -183,7 +183,8 @@ class OrderHandlerTest(TestCase):
         bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17)
 
         # BUY
-        order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.STOP_LIMIT, qty=1000, limit_price=18,
+        order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.STOP_LIMIT, qty=1000,
+                      limit_price=18,
                       stop_price=18.5)
         processed = handler.process_w_price_qty(order, 18, 1000)
         self.assertFalse(order.stop_limit_ready)
@@ -205,7 +206,8 @@ class OrderHandlerTest(TestCase):
         self.mock.reset()
 
         # BUY with bar
-        order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.STOP_LIMIT, qty=1000, limit_price=18,
+        order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.STOP_LIMIT, qty=1000,
+                      limit_price=18,
                       stop_price=18.5)
         processed = handler.process_w_bar(order, bar2)
         self.assertFalse(processed)
@@ -226,7 +228,8 @@ class OrderHandlerTest(TestCase):
 
         self.mock.reset()
         # SELL
-        order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.STOP_LIMIT, qty=1000, limit_price=20,
+        order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.STOP_LIMIT, qty=1000,
+                      limit_price=20,
                       stop_price=18.5)
         processed = handler.process_w_price_qty(order, 19, 1000)
         self.assertFalse(order.stop_limit_ready)
@@ -248,7 +251,8 @@ class OrderHandlerTest(TestCase):
         self.mock.reset()
 
         # SELL with bar
-        order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.STOP_LIMIT, qty=1000, limit_price=20,
+        order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.STOP_LIMIT, qty=1000,
+                      limit_price=20,
                       stop_price=18.5)
         processed = handler.process_w_bar(order, bar1)
         self.assertFalse(processed)
@@ -279,7 +283,8 @@ class OrderHandlerTest(TestCase):
         bar5 = Bar(instrument="HSI", open=20, high=22, low=19, close=21)
 
         # BUY with bar
-        order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.TRAILING_STOP, qty=1000, stop_price=5)
+        order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.TRAILING_STOP, qty=1000,
+                      stop_price=5)
 
         self.assertEquals(0, order.trailing_stop_exec_price)
 
@@ -307,9 +312,9 @@ class OrderHandlerTest(TestCase):
 
         self.mock.reset()
 
-
         # BUY
-        order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.TRAILING_STOP, qty=1000, stop_price=5)
+        order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.TRAILING_STOP, qty=1000,
+                      stop_price=5)
 
         self.assertEquals(0, order.trailing_stop_exec_price)
 
@@ -342,9 +347,9 @@ class OrderHandlerTest(TestCase):
 
         self.mock.reset()
 
-
         # SELL with bar
-        order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.TRAILING_STOP, qty=1000, stop_price=5)
+        order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.TRAILING_STOP, qty=1000,
+                      stop_price=5)
 
         self.assertEquals(0, order.trailing_stop_exec_price)
 
@@ -372,9 +377,9 @@ class OrderHandlerTest(TestCase):
 
         self.mock.reset()
 
-
         # SELL
-        order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.TRAILING_STOP, qty=1000, stop_price=5)
+        order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.TRAILING_STOP, qty=1000,
+                      stop_price=5)
 
         self.assertEquals(0, order.trailing_stop_exec_price)
 

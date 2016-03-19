@@ -3,11 +3,9 @@ from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.order import OrderEventHandler, ExecutionEventHandler
 from algotrader.provider.broker_mgr import broker_mgr
 from algotrader.strategy.strategy_mgr import stg_mgr
-from algotrader.utils import *
-from algotrader.utils.singleton import singleton
+from algotrader.utils import logger
 
 
-@singleton
 class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
     def __init__(self):
         self.__next_ord_id = 0

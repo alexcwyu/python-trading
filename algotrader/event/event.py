@@ -1,13 +1,8 @@
-import abc
-from rx.concurrency import GEventScheduler
-from rx.observable import Observable, Observer
-from rx.subjects import Subject
-import rx
 import datetime
 
+from rx.observable import Observer
 
-from algotrader.utils import *
-
+from algotrader.utils import logger
 
 current_time = datetime.datetime.now()
 
@@ -22,7 +17,6 @@ class Event(object):
 
 
 class EventHandler(Observer):
-
     def on_next(self, event):
         event.on(self)
 

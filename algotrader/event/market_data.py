@@ -1,4 +1,4 @@
-from algotrader.event import *
+from algotrader.event import Event, EventHandler
 
 
 class Frequency(object):
@@ -33,7 +33,7 @@ class Bar(MarketDataEvent):
         'adj_close'
     )
 
-    def __init__(self, instrument, timestamp, open=0, high=0, low=0, close=0, vol=0, adj_close=0, freq=Frequency.D1):
+    def __init__(self, instrument=None, timestamp=None, open=0, high=0, low=0, close=0, vol=0, adj_close=0, freq=Frequency.D1):
         super(Bar, self).__init__(instrument, timestamp)
         self.freq = freq
         self.open = open
@@ -62,7 +62,7 @@ class Trade(MarketDataEvent):
         'size'
     )
 
-    def __init__(self, instrument, timestamp, price=0, size=0):
+    def __init__(self, instrument=None, timestamp=None, price=0, size=0):
         super(Trade, self).__init__(instrument, timestamp)
         self.price = price
         self.size = size
@@ -83,7 +83,7 @@ class Quote(MarketDataEvent):
         'ask_size',
     )
 
-    def __init__(self, instrument, timestamp, bid=0, bid_size=0, ask=0, ask_size=0):
+    def __init__(self, instrument=None, timestamp=None, bid=0, bid_size=0, ask=0, ask_size=0):
         super(Quote, self).__init__(instrument, timestamp)
         self.bid = bid
         self.bid_size = bid_size

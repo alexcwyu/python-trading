@@ -199,6 +199,11 @@ class Order(OrderEvent):
     def leave_qty(self):
         return self.qty - self.filled_qty
 
+    def is_buy(self):
+        return self.action == OrdAction.BUY
+
+    def is_sell(self):
+        return self.action == OrdAction.SELL
 
 class ExecutionEventHandler(EventHandler):
     def on_ord_upd(self, ord_upd):

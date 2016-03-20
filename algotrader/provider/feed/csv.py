@@ -1,14 +1,15 @@
+import abc
+
 import pandas as pd
 
-from algotrader.event.event_bus import EventBus
-from algotrader.event.market_data import Bar
-from algotrader.provider import Provider
+from algotrader.event import EventBus, Bar
+from algotrader.provider import Feed
 
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 
-class CSVDataFeed(Provider):
-    pass
+class CSVDataFeed(Feed):
+    __metaclass__ = abc.ABCMeta
 
 
 class PandasCSVDataFeed(CSVDataFeed):

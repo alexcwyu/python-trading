@@ -2,7 +2,8 @@ from unittest import TestCase
 
 from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.event.order import Order, OrdAction, OrdType
-from algotrader.provider.broker import SimConfig, BarProcessor, TradeProcessor, QuoteProcessor
+from algotrader.provider.broker.data_processor import BarProcessor, TradeProcessor, QuoteProcessor
+from algotrader.provider.broker.sim_config import SimConfig
 
 
 class MarketDataProcessorTest(TestCase):

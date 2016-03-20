@@ -2,7 +2,9 @@ from unittest import TestCase
 
 from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.event.order import Order, OrdAction, OrdType
-from algotrader.provider.broker import SimConfig, LimitOrderHandler, MarketOrderHandler, StopLimitOrderHandler, StopOrderHandler, TrailingStopOrderHandler
+from algotrader.provider.broker.order_handler import LimitOrderHandler, MarketOrderHandler, StopLimitOrderHandler, StopOrderHandler, TrailingStopOrderHandler
+from algotrader.provider.broker.sim_config import SimConfig
+
 
 
 class OrderHandlerTest(TestCase):

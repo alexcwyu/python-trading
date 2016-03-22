@@ -30,24 +30,18 @@ def main():
     runner.start()
     print portfolio.cash
 
-
-    equity = strategy.get_portfolio().total_equity.get_series()
-    equity.name = 'equity'
-    rets =  equity.pct_change().dropna()
-    rets.index = rets.index.tz_localize("UTC")
-
-    print rets
-    print type(rets)
-
+    # pyfolio
+    rets = strategy.get_portfolio().get_return()
     import pyfolio as pf
     #pf.create_returns_tear_sheet(rets)
     pf.create_full_tear_sheet(rets)
 
+    # build in plot
+    plotter = StrategyPlotter(strategy)
+    plotter.plot()
+
     import matplotlib.pyplot as plt
     plt.show()
-
-    #plotter = StrategyPlotter(strategy)
-    #plotter.plot()
 
 
 if __name__ == "__main__":

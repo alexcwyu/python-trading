@@ -110,3 +110,10 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
             stock_value += position.last_price * position.filled_qty()
         self.stock_mtm_value.add(time, stock_value)
         self.total_equity.add(time, stock_value + self.cash)
+
+    def get_return(self):
+        equity = self.total_equity.get_series()
+        equity.name = 'equity'
+        rets =  equity.pct_change().dropna()
+        rets.index = rets.index.tz_localize("UTC")
+        return rets

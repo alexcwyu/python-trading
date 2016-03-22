@@ -4,7 +4,7 @@ from unittest import TestCase
 from algotrader.utils.time_series import TimeSeries
 
 
-class FloatSeriesTest(TestCase):
+class TimeSeriesTest(TestCase):
     def test_size(self):
         series = TimeSeries()
         self.assertEqual(0, series.size())

@@ -23,7 +23,7 @@ class Feed(Provider):
     __metaclass__ = abc.ABCMeta
 
 
-class FeedManager():
+class FeedManager(object):
     def __init__(self):
         self.__feed_mapping = {}
 
@@ -43,7 +43,7 @@ class Broker(Provider, OrderEventHandler):
     __metaclass__ = abc.ABCMeta
 
 
-class BrokerManager():
+class BrokerManager(object):
     def __init__(self):
         self.__broker_mapping = {}
 

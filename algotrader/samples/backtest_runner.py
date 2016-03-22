@@ -8,7 +8,7 @@ from algotrader.trading.portfolio import Portfolio
 from algotrader.utils import clock
 
 
-class BacktestRunner:
+class BacktestRunner(object):
     def __init__(self, stg):
         self.__stg = stg
 
@@ -32,16 +32,16 @@ def main():
 
     # pyfolio
     rets = strategy.get_portfolio().get_return()
-    import pyfolio as pf
+    #import pyfolio as pf
     #pf.create_returns_tear_sheet(rets)
-    pf.create_full_tear_sheet(rets)
+    #pf.create_full_tear_sheet(rets)
 
     # build in plot
     plotter = StrategyPlotter(strategy)
     plotter.plot()
 
-    import matplotlib.pyplot as plt
-    plt.show()
+    #import matplotlib.pyplot as plt
+    #plt.show()
 
 
 if __name__ == "__main__":

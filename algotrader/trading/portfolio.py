@@ -5,12 +5,7 @@ from algotrader.utils import logger
 from algotrader.utils.time_series import TimeSeries
 
 
-class Position():
-    # instrument = Str()
-    # orders = Dict(key=Long, value=Order, default={})
-    # size = Float()
-    # last_price = Float()
-
+class Position(object):
     def __init__(self, instrument):
         self.instrument = instrument
         self.orders = {}
@@ -40,24 +35,27 @@ class Position():
 
 
 class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
-    # portfolio_id = Str()
-    # cash = Float(default=100000)
-    # positions = Dict(key=Str, value=Position, default={})
-    # orders = Dict(key=Long, value=Order, default={})
-    # equity = Value(FloatSeries())
-
-    # pnl = Value(FloatSeries())
-    # drawdown = Value(FloatSeries())
-
     def __init__(self, portfolio_id="test", cash=1000000):
         self.portfolio_id = portfolio_id
-        self.cash = cash
         self.positions = {}
         self.orders = {}
-        self.stock_mtm_value = TimeSeries()
-        self.total_equity = TimeSeries()
-        self.pnl = TimeSeries()
-        self.drawdown = TimeSeries()
+
+        self.total_equity_series = TimeSeries()
+        self.cash_series = TimeSeries()
+        self.stock_value_series = TimeSeries()
+        self.pnl_series = TimeSeries()
+        self.drawdown_series = TimeSeries()
+        self.drawdown_pct_series = TimeSeries()
+
+        self.total_equity = 0
+        self.cash = cash
+        self.high_equity = 0
+        self.low_equity = 0
+        self.pnl = 0
+        self.drawdown = 0
+        self.drawdown_pct = 0
+        self.current_run_up = 0
+        self.current_drawdown = 0
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)
@@ -103,17 +101,51 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
             position = self.positions[instrument]
             position.last_price = price
         self.__update_equity(time)
+        self.__update_pnl(time)
+        self.__update_draw_down(time)
 
     def __update_equity(self, time):
         stock_value = 0
         for position in self.positions.itervalues():
             stock_value += position.last_price * position.filled_qty()
-        self.stock_mtm_value.add(time, stock_value)
-        self.total_equity.add(time, stock_value + self.cash)
+        self.total_equity = stock_value + self.cash
+
+        self.stock_value_series.add(time, stock_value)
+        self.cash_series.add(time, self.cash)
+        self.total_equity_series.add(time, self.total_equity)
+
+        if self.total_equity_series.size() == 1:
+            self.low_equity = self.total_equity
+            self.high_equity = self.total_equity
+        else:
+            if self.total_equity > self.high_equity:
+                self.high_equity = self.total_equity
+                self.low_equity = self.total_equity
+                self.current_drawdown = 0
+            elif self.total_equity < self.low_equity:
+                self.low_equity = self.total_equity
+                self.current_run_up = 0
+            elif self.total_equity > self.low_equity and self.total_equity < self.high_equity:
+                self.current_drawdown = 1 - self.total_equity / self.high_equity
+                self.current_run_up = self.total_equity / self.low_equity - 1
+
+    def __update_pnl(self, time):
+        if self.total_equity_series.size() >= 2:
+            self.pnl = self.total_equity_series.get_value_by_idx(-1) - self.total_equity_series.get_value_by_idx(-2)
+            self.pnl_series.add(time, self.pnl)
+
+    def __update_draw_down(self, time):
+        if self.total_equity_series.size() >= 2:
+            self.drawdown = self.total_equity - self.high_equity
+            self.drawdown_series.add(time, self.drawdown)
+
+            if self.high_equity != 0:
+                self.drawdown_pct = abs(self.drawdown / self.high_equity)
+                self.drawdown_pct_series.add(time, self.drawdown_pct)
 
     def get_return(self):
-        equity = self.total_equity.get_series()
+        equity = self.total_equity_series.get_series()
         equity.name = 'equity'
-        rets =  equity.pct_change().dropna()
+        rets = equity.pct_change().dropna()
         rets.index = rets.index.tz_localize("UTC")
         return rets

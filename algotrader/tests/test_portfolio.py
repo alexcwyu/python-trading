@@ -20,17 +20,17 @@ class TestPortfolio(TestCase):
 
         self.assertEqual(0, len(self.portfolio.positions))
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertEqual(0, self.portfolio.total_equity.current_value())
+        self.assertEqual(0, self.portfolio.total_equity_series.current_value())
 
         self.portfolio.on_order(order1)
         self.check_order(self.portfolio, [order1], {'HSI': (1000, 0)})
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertEqual(0, self.portfolio.total_equity.current_value())
+        self.assertEqual(0, self.portfolio.total_equity_series.current_value())
 
         self.portfolio.on_order(order2)
         self.check_order(self.portfolio, [order1, order2], {'HSI': (2800, 0)})
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertEqual(0, self.portfolio.total_equity.current_value())
+        self.assertEqual(0, self.portfolio.total_equity_series.current_value())
 
     def test_on_ord_update(self):
 
@@ -62,8 +62,8 @@ class TestPortfolio(TestCase):
         expected_total_equity = expected_cash + expected_stock_value
 
         self.assertEqual(expected_cash, self.portfolio.cash)
-        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.current_value())
-        self.assertEqual(expected_total_equity, self.portfolio.total_equity.current_value())
+        self.assertEqual(expected_stock_value, self.portfolio.stock_value_series.current_value())
+        self.assertEqual(expected_total_equity, self.portfolio.total_equity_series.current_value())
 
         er2 = ExecutionReport(ord_id=1, er_id=2, instrument="HSI", filled_qty=500, filled_price=18.2,
                               status=OrdStatus.FILLED)
@@ -81,8 +81,8 @@ class TestPortfolio(TestCase):
         expected_total_equity = expected_cash + expected_stock_value
 
         self.assertEqual(expected_cash, self.portfolio.cash)
-        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.current_value())
-        self.assertEqual(expected_total_equity, self.portfolio.total_equity.current_value())
+        self.assertEqual(expected_stock_value, self.portfolio.stock_value_series.current_value())
+        self.assertEqual(expected_total_equity, self.portfolio.total_equity_series.current_value())
 
     def test_on_market_date_update(self):
 
@@ -98,32 +98,32 @@ class TestPortfolio(TestCase):
         expected_total_equity = expected_cash + expected_stock_value
 
         self.assertEqual(expected_cash, self.portfolio.cash)
-        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value_by_idx(0))
-        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value_by_idx(0))
+        self.assertEqual(expected_stock_value, self.portfolio.stock_value_series.get_value_by_idx(0))
+        self.assertEqual(expected_total_equity, self.portfolio.total_equity_series.get_value_by_idx(0))
 
         self.portfolio.on_trade(Trade(instrument='HSI', price=20, size=1000))
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 20
         expected_total_equity = expected_cash + expected_stock_value
         self.assertEqual(expected_cash, self.portfolio.cash)
-        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value_by_idx(1))
-        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value_by_idx(1))
+        self.assertEqual(expected_stock_value, self.portfolio.stock_value_series.get_value_by_idx(1))
+        self.assertEqual(expected_total_equity, self.portfolio.total_equity_series.get_value_by_idx(1))
 
         self.portfolio.on_bar(Bar(instrument='HSI', close=16, adj_close=16, vol=1000))
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 16
         expected_total_equity = expected_cash + expected_stock_value
         self.assertEqual(expected_cash, self.portfolio.cash)
-        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value_by_idx(2))
-        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value_by_idx(2))
+        self.assertEqual(expected_stock_value, self.portfolio.stock_value_series.get_value_by_idx(2))
+        self.assertEqual(expected_total_equity, self.portfolio.total_equity_series.get_value_by_idx(2))
 
         self.portfolio.on_quote(Quote(instrument='HSI', bid=16, ask=18))
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 17
         expected_total_equity = expected_cash + expected_stock_value
         self.assertEqual(expected_cash, self.portfolio.cash)
-        self.assertEqual(expected_stock_value, self.portfolio.stock_mtm_value.get_value_by_idx(3))
-        self.assertEqual(expected_total_equity, self.portfolio.total_equity.get_value_by_idx(3))
+        self.assertEqual(expected_stock_value, self.portfolio.stock_value_series.get_value_by_idx(3))
+        self.assertEqual(expected_total_equity, self.portfolio.total_equity_series.get_value_by_idx(3))
 
     def check_order(self, portfolio, orders, qtys):
         expected_positon = defaultdict(list)

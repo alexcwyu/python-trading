@@ -1,5 +1,5 @@
 import pandas as pd
-
+from collections import OrderedDict
 
 class TimeSeries():
     # time = Value(np.empty([0], dtype='datetime64'))
@@ -7,20 +7,12 @@ class TimeSeries():
     # lenght = Int(0)
 
     def __init__(self):
-        self.__time = []
-        self.__value = []
-        self.__data = {}
+        self.__data = OrderedDict()
 
     def add(self, time, value):
-        # self.time = np.append(self.time, time)
-        # self.value = np.append(self.value, value)
-        # self.lenght += 1
-        self.__time.append(time)
-        self.__value.append(value)
         self.__data[time] = value
 
     def get_data(self):
-        # return (self.time, self.value)
         return self.__data
 
     def get_series(self):
@@ -30,15 +22,14 @@ class TimeSeries():
         return s
 
     def size(self):
-        # return self.lenght
         return len(self.__data)
 
     def current_value(self):
         # return self.value[-1] if self.lenght>0 else 0
-        return self.__value[-1] if len(self.__value) > 0 else 0
+        return self.__data.items()[-1][1] if len(self.__data) > 0 else 0
 
     def get_value_by_idx(self, idx):
-        return self.__value[idx]
+        return self.__data.items()[idx][1]
 
     def get_value_by_time(self, time):
         return self.__data[time]

@@ -49,7 +49,7 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
     # pnl = Value(FloatSeries())
     # drawdown = Value(FloatSeries())
 
-    def __init__(self, portfolio_id="test", cash=100000):
+    def __init__(self, portfolio_id="test", cash=1000000):
         self.portfolio_id = portfolio_id
         self.cash = cash
         self.positions = {}

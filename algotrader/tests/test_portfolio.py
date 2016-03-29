@@ -3,15 +3,14 @@ from unittest import TestCase
 
 from algotrader.event.order import *
 from algotrader.trading.portfolio import Portfolio
-
+import math
 
 class TestPortfolio(TestCase):
     def setUp(self):
-        self.portfolio = Portfolio()
+        self.portfolio = Portfolio(cash=100000)
 
     def test_portfolio(self):
-        portfolio = Portfolio()
-        self.assertEqual(portfolio.cash, 100000)
+        self.assertEqual(self.portfolio.cash, 100000)
 
     def test_position(self):
 
@@ -20,17 +19,17 @@ class TestPortfolio(TestCase):
 
         self.assertEqual(0, len(self.portfolio.positions))
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertEqual(0, self.portfolio.total_equity_series.now())
+        self.assertTrue(math.isnan(self.portfolio.total_equity_series.now()))
 
         self.portfolio.on_order(order1)
         self.check_order(self.portfolio, [order1], {'HSI': (1000, 0)})
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertEqual(0, self.portfolio.total_equity_series.now())
+        self.assertTrue(math.isnan(self.portfolio.total_equity_series.now()))
 
         self.portfolio.on_order(order2)
         self.check_order(self.portfolio, [order1, order2], {'HSI': (2800, 0)})
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertEqual(0, self.portfolio.total_equity_series.now())
+        self.assertTrue(math.isnan(self.portfolio.total_equity_series.now()))
 
     def test_on_ord_update(self):
 

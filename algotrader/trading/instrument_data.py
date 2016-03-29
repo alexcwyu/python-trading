@@ -35,7 +35,7 @@ class InstrumentDataManager(MarketDataEventHandler):
 
         self.get_series("%s.%s" % (quote.id(), "Bid")).add(quote.timestamp, quote.bid)
         self.get_series("%s.%s" % (quote.id(), "BidSize")).add(quote.timestamp, quote.bid_size)
-        self.get_series("%s.%s" % (quote.id(), "Ask")).add(quote.timestamp, quote.ask())
+        self.get_series("%s.%s" % (quote.id(), "Ask")).add(quote.timestamp, quote.ask)
         self.get_series("%s.%s" % (quote.id(), "AskSize")).add(quote.timestamp, quote.ask_size)
         self.get_series("%s.%s" % (quote.id(), "Mid")).add(quote.timestamp, quote.mid())
 

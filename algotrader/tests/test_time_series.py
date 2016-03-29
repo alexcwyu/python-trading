@@ -1,6 +1,8 @@
 import datetime
 from unittest import TestCase
 
+import numpy as np
+import math
 from algotrader.utils.time_series import TimeSeries
 
 
@@ -17,7 +19,7 @@ class TimeSeriesTest(TestCase):
 
     def test_get_current_value(self):
         series = TimeSeries()
-        self.assertEqual(0, series.now())
+        self.assertTrue(math.isnan(series.now()))
 
         series.add(datetime.datetime.now(), 2)
         self.assertEqual(2, series.now())

@@ -2,7 +2,7 @@ import abc
 
 import pandas as pd
 
-from algotrader.event import EventBus, Bar
+from algotrader.event import EventBus, Bar, Frequency
 from algotrader.provider import Feed
 
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
@@ -45,5 +45,5 @@ class PandasCSVDataFeed(CSVDataFeed):
     def read_csv(symobl, file):
         df = pd.read_csv(file, index_col='Date', parse_dates=['Date'], date_parser=dateparse)
         df['Symbol'] = symobl
-        df['Frequency'] = int(24 * 60 * 60)
+        df['Frequency'] = int(Frequency.D1)
         return df

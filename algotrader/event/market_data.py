@@ -21,6 +21,8 @@ class MarketDataEvent(Event):
         self.instrument = instrument
         self.timestamp = timestamp
 
+    def id(self):
+        raise NotImplementedError()
 
 class Bar(MarketDataEvent):
     __slots__ = (
@@ -33,7 +35,8 @@ class Bar(MarketDataEvent):
         'adj_close'
     )
 
-    def __init__(self, instrument=None, timestamp=None, open=0, high=0, low=0, close=0, vol=0, adj_close=0, freq=Frequency.D1):
+    def __init__(self, instrument=None, timestamp=None, open=0, high=0, low=0, close=0, vol=0, adj_close=0,
+                 freq=Frequency.D1):
         super(Bar, self).__init__(instrument, timestamp)
         self.freq = freq
         self.open = open
@@ -42,6 +45,9 @@ class Bar(MarketDataEvent):
         self.close = close
         self.vol = vol
         self.adj_close = adj_close
+
+    def id(self):
+        return "Bar.%s.%s" % (self.instrument, self.freq)
 
     def __str__(self):
         return "Bar(instrument = %s, timestamp = %s,freq = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
@@ -67,6 +73,9 @@ class Trade(MarketDataEvent):
         self.price = price
         self.size = size
 
+    def id(self):
+        return "Trade.%s" % (self.instrument)
+
     def __str__(self):
         return "Trade(instrument = %s, timestamp = %s,price = %s, size = %s)" \
                % (self.instrument, self.timestamp, self.price, self.size)
@@ -89,6 +98,9 @@ class Quote(MarketDataEvent):
         self.bid_size = bid_size
         self.ask = ask
         self.ask_size = ask_size
+
+    def id(self):
+        return "Quote.%s" % (self.instrument)
 
     def __str__(self):
         return "Quote(instrument = %s, timestamp = %s,bid = %s, bid_size = %s, ask = %s, ask_size = %s)" \

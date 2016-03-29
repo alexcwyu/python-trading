@@ -5,6 +5,7 @@ from algotrader.provider import broker_mgr
 from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.utils import logger, clock
+from algotrader.trading.instrument_data import inst_data_mgr
 
 
 class Strategy(ExecutionEventHandler, MarketDataEventHandler):

@@ -1,11 +1,8 @@
-import abc
-
+from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.utils.time_series import TimeSeries
 
 
 class Indicator(TimeSeries):
-    __metaclass__ = abc.ABCMeta
-
     _slots__ = (
         'input',
         'calculate',
@@ -13,14 +10,19 @@ class Indicator(TimeSeries):
 
     def __init__(self, input, id, description):
         super(Indicator, self).__init__(id, description)
-        self.input = input
+
+        if isinstance(input, TimeSeries):
+            self.input = input
+        else:
+            self.input = inst_data_mgr.get_series(input)
+        self.input.subject.subscribe(self.on_update)
+        inst_data_mgr.add_series(self)
         self.calculate = True
-        self.input.subject.subscribe(self.on_time_value)
         self.update_all()
 
     def update_all(self):
         for time, value in self.input.get_data().items():
-            self.on_time_value(time, value)
+            self.on_update(time, value)
 
-    def on_time_value(self, time_value):
+    def on_update(self, time_value):
         raise NotImplementedError()

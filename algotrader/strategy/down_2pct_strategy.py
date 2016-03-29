@@ -1,10 +1,12 @@
 from algotrader.event.order import OrdAction
 from algotrader.strategy.strategy import Strategy
+from algotrader.trading.instrument_data import inst_data_mgr
+from algotrader.technical.ma import SMA
 from algotrader.utils import logger
 
 
 class Down2PctStrategy(Strategy):
-    def __init__(self, stg_id, broker_id, feed, portfolio, qty=1000):
+    def __init__(self, stg_id, broker_id, feed, portfolio, instrument, qty=1000):
         super(Down2PctStrategy, self).__init__(stg_id, broker_id, feed, portfolio)
         self.__prev_bar = None
         self.__curr_bar = None
@@ -19,13 +21,13 @@ class Down2PctStrategy(Strategy):
         if self.order is None:
             roc = self.roc()
             if roc < -0.02:
-                logger.info("%s,B,%s" % (bar.timestamp, bar.close_or_adj_close()))
+                logger.info("%s,B,%.2f" % (bar.timestamp, bar.close_or_adj_close()))
                 self.order = self.new_market_order(instrument=bar.instrument, action=OrdAction.BUY, qty=self.qty)
                 self.day_count = 0
         else:
             self.day_count += 1
             if self.day_count >= 5:
-                logger.info("%s,S,%s" % (bar.timestamp, bar.close_or_adj_close()))
+                logger.info("%s,S,%.2f" % (bar.timestamp, bar.close_or_adj_close()))
                 self.new_market_order(instrument=bar.instrument, action=OrdAction.SELL, qty=self.qty)
                 self.order = None
 

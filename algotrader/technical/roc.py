@@ -6,27 +6,26 @@ from algotrader.technical import Indicator
 from algotrader.utils.time_series import TimeSeries
 
 
+def roc(prev_value, curr_value):
+    if prev_value != 0.0:
+        return (curr_value - prev_value) / prev_value
+    return np.nan
+
+
 class ROC(Indicator):
     _slots__ = (
-        'ago'
+        'length'
     )
 
-    def __init__(self, input, ago=1, description="Rate Of Change"):
-        super(ROC, self).__init__(input, "ROC(%s, %s)" % (input.id, ago), description)
-        self.ago = ago
+    def __init__(self, input, length=1, description="Rate Of Change"):
+        super(ROC, self).__init__(input, "ROC(%s, %s)" % (input.id, length), description)
+        self.length = length
 
     def on_update(self, time_value):
         time, value = time_value
-        if self.input.size() > self.ago:
-            prev_value = self.input.ago(self.ago)
+        if self.input.size() > self.length:
+            prev_value = self.input.ago(self.length)
             curr_value = self.input.now()
-            if prev_value != 0.0:
-                value = (curr_value - prev_value) / prev_value
-                self.add(time, value)
-            else:
-                self.add(time, np.nan)
+            self.add(time, roc(prev_value, curr_value))
         else:
             self.add(time, np.nan)
-
-
-

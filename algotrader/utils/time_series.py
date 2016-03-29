@@ -11,10 +11,11 @@ class TimeSeries(object):
         'subject',
         '__key',
         '__prev_time',
-        '__size'
+        '__size',
+        '__missing_value'
     )
 
-    def __init__(self, id=None, description=None):
+    def __init__(self, id=None, description=None, missing_value=np.nan):
         self.id = id
         self.description = description if description else id
         self.data = dict()
@@ -22,6 +23,7 @@ class TimeSeries(object):
         self.__value = list()
         self.__prev_time = None
         self.__size = 0
+        self.__missing_value = missing_value
 
     def add(self, time, value):
 
@@ -35,7 +37,8 @@ class TimeSeries(object):
             self.__value.pop()
             self.__value.append(value)
         else:
-            raise AssertionError("Time for new Item %s cannot be earlier then previous item %s" % (time, self.__prev_time))
+            raise AssertionError(
+                "Time for new Item %s cannot be earlier then previous item %s" % (time, self.__prev_time))
         self.subject.on_next((time, value))
 
     def get_data(self):
@@ -56,7 +59,7 @@ class TimeSeries(object):
         if idx == None:
             return self.__value
         elif isinstance(idx, int) and (idx >= self.__size or idx < -self.__size):
-            return np.nan
+            return self.__missing_value
         return self.__value[idx]
 
     def get_by_time(self, time):
@@ -112,6 +115,32 @@ class TimeSeries(object):
         raise NotImplementedError("Unsupported index type %s, %s" % (index, type(index)))
 
 
+class DataSeries(TimeSeries):
+    def __init__(self, id=None, description=None):
+        super(DataSeries, self).__init__(id, description, None)
+
+    def get_series(self):
+        raise RuntimeError("Unsupported")
+
+    def std(self, start=None, end=None):
+        raise RuntimeError("Unsupported")
+
+    def var(self, start=None, end=None):
+        raise RuntimeError("Unsupported")
+
+    def mean(self, start=None, end=None):
+        raise RuntimeError("Unsupported")
+
+    def max(self, start=None, end=None):
+        raise RuntimeError("Unsupported")
+
+    def min(self, start=None, end=None):
+        raise RuntimeError("Unsupported")
+
+    def median(self, start=None, end=None):
+        raise RuntimeError("Unsupported")
+
+
 def cross_above(value1, value2, look_up_period=1):
     pass
 
@@ -143,7 +172,10 @@ if __name__ == "__main__":
     print close[0:4]
     print close[0:8]
 
+    print close[-8:]
+
     print "mean"
+    print close.mean(-80)
     print close.mean()
     print close.mean(0, 4)
     print close.mean(0, 6)

@@ -4,19 +4,43 @@ import numpy as np
 
 from algotrader.technical import Indicator
 from algotrader.utils.time_series import TimeSeries
-
+from algotrader.technical.ma import SMA
+from algotrader.technical.stats import STD
+import math
 
 class BB(Indicator):
     _slots__ = (
-        'length'
+        'length',
+        'num_std'
+        '__sma',
+        'upper',
+        'lower',
+        '__std_dev',
     )
 
-    def __init__(self, input, length=14, description="Bollinger Band"):
-        super(BB, self).__init__(input, "BB(%s, %s)" % (input.id, length), description)
+    def __init__(self, input, length=14, num_std = 3, description="Bollinger Bands"):
+        super(BB, self).__init__(input, "BB(%s, %s, %s)" % (input.id, length, num_std), description)
         self.length = length
+        self.num_std = num_std
+        self.__sma = SMA(input, length)
+        self.__std_dev = STD(input, length)
+        self.upper = TimeSeries("BBU(%s, %s)" % (input.id, length))
+        self.lower = TimeSeries("BBL(%s, %s)" % (input.id, length))
 
     def on_update(self, time_value):
-        pass
+        time, value = time_value
+        sma = self.__sma.now()
+        std = self.__std_dev.now()
+        if not np.isnan(sma):
+            upper = sma + std * self.num_std
+            lower = sma - std * self.num_std
+            self.upper.add(time, upper)
+            self.lower.add(time, lower)
+            self.add(time, sma)
+        else:
+            self.upper.add(time, np.nan)
+            self.lower.add(time, np.nan)
+            self.add(time, np.nan)
 
 
 

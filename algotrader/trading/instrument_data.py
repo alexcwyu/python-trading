@@ -3,7 +3,7 @@ from collections import defaultdict
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.utils import logger
-from algotrader.utils.time_series import TimeSeries
+from algotrader.utils.time_series import TimeSeries, DataSeries
 
 
 class InstrumentDataManager(MarketDataEventHandler):
@@ -21,6 +21,8 @@ class InstrumentDataManager(MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
         self.__bar_dict[bar.instrument] = bar
 
+        self.get_series(bar.id(), DataSeries).add(bar.timestamp, bar)
+
         self.get_series("%s.%s" % (bar.id(), "Open")).add(bar.timestamp, bar.open)
         self.get_series("%s.%s" % (bar.id(), "High")).add(bar.timestamp, bar.high)
         self.get_series("%s.%s" % (bar.id(), "Low")).add(bar.timestamp, bar.low)
@@ -33,6 +35,8 @@ class InstrumentDataManager(MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
         self.__quote_dict[quote.instrument] = quote
 
+        self.get_series(quote.id(), DataSeries).add(quote.timestamp, quote)
+
         self.get_series("%s.%s" % (quote.id(), "Bid")).add(quote.timestamp, quote.bid)
         self.get_series("%s.%s" % (quote.id(), "BidSize")).add(quote.timestamp, quote.bid_size)
         self.get_series("%s.%s" % (quote.id(), "Ask")).add(quote.timestamp, quote.ask)
@@ -42,6 +46,8 @@ class InstrumentDataManager(MarketDataEventHandler):
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__trade_dict[trade.instrument] = trade
+
+        self.get_series(trade.id(), DataSeries).add(trade.timestamp, trade)
 
         self.get_series("%s.%s" % (trade.id(), "Price")).add(trade.timestamp, trade.price)
         self.get_series("%s.%s" % (trade.id(), "Size")).add(trade.timestamp, trade.size)
@@ -70,9 +76,9 @@ class InstrumentDataManager(MarketDataEventHandler):
             return self.__bar_dict[instrument].close_or_adj_close()
         return None
 
-    def get_series(self, key):
+    def get_series(self, key, cls = TimeSeries):
         if key not in self.__series_dict:
-            self.__series_dict[key] = TimeSeries(id=key)
+            self.__series_dict[key] = cls(id=key)
         return self.__series_dict[key]
 
     def add_series(self, series):

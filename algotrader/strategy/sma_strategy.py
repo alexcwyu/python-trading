@@ -15,12 +15,12 @@ class SMAStrategy(Strategy):
         self.sma_slow = SMA(close, 25)
 
     def on_bar(self, bar):
-        if self.order is None and self.sma_fast.current_value() > self.sma_slow.current_value():
+        if self.order is None and self.sma_fast.now() > self.sma_slow.now():
             logger.info("%s,B,%.2f,%.2f,%.2f" % (
-            bar.timestamp, bar.close_or_adj_close(), self.sma_fast.current_value(), self.sma_slow.current_value()))
+                bar.timestamp, bar.close_or_adj_close(), self.sma_fast.now(), self.sma_slow.now()))
             self.order = self.new_market_order(instrument=bar.instrument, action=OrdAction.BUY, qty=self.qty)
-        elif self.order is not None and self.sma_fast.current_value() < self.sma_slow.current_value():
+        elif self.order is not None and self.sma_fast.now() < self.sma_slow.now():
             logger.info("%s,S,%.2f,%.2f,%.2f" % (
-            bar.timestamp, bar.close_or_adj_close(), self.sma_fast.current_value(), self.sma_slow.current_value()))
+                bar.timestamp, bar.close_or_adj_close(), self.sma_fast.now(), self.sma_slow.now()))
             self.new_market_order(instrument=bar.instrument, action=OrdAction.SELL, qty=self.qty)
             self.order = None

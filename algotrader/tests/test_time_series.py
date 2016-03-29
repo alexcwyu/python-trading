@@ -17,13 +17,13 @@ class TimeSeriesTest(TestCase):
 
     def test_get_current_value(self):
         series = TimeSeries()
-        self.assertEqual(0, series.current_value())
+        self.assertEqual(0, series.now())
 
         series.add(datetime.datetime.now(), 2)
-        self.assertEqual(2, series.current_value())
+        self.assertEqual(2, series.now())
 
         series.add(datetime.datetime.now(), 2.4)
-        self.assertEqual(2.4, series.current_value())
+        self.assertEqual(2.4, series.now())
 
     def test_get_value_by_index(self):
         series = TimeSeries()
@@ -31,9 +31,9 @@ class TimeSeriesTest(TestCase):
         series.add(datetime.datetime.now(), 2)
         series.add(datetime.datetime.now(), 2.4)
 
-        self.assertEqual(2, series.get_value_by_idx(0))
+        self.assertEqual(2, series.get_by_idx(0))
 
-        self.assertEqual(2.4, series.get_value_by_idx(1))
+        self.assertEqual(2.4, series.get_by_idx(1))
 
     def test_get_value_by_time(self):
         series = TimeSeries()
@@ -44,6 +44,6 @@ class TimeSeriesTest(TestCase):
         series.add(t1, 2)
         series.add(t2, 2.4)
 
-        self.assertEqual(2, series.get_value_by_time(t1))
+        self.assertEqual(2, series.get_by_time(t1))
 
-        self.assertEqual(2.4, series.get_value_by_time(t2))
+        self.assertEqual(2.4, series.get_by_time(t2))

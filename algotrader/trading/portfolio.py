@@ -131,7 +131,7 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
 
     def __update_pnl(self, time):
         if self.total_equity_series.size() >= 2:
-            self.pnl = self.total_equity_series.get_value_by_idx(-1) - self.total_equity_series.get_value_by_idx(-2)
+            self.pnl = self.total_equity_series.get_by_idx(-1) - self.total_equity_series.get_by_idx(-2)
             self.pnl_series.add(time, self.pnl)
 
     def __update_draw_down(self, time):

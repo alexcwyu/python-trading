@@ -21,8 +21,11 @@ class Indicator(TimeSeries):
         self.update_all()
 
     def update_all(self):
-        for time, value in self.input.get_data().items():
-            self.on_update(time, value)
+        data = self.input.get_data()
+        keylist = data.keys()
+        keylist.sort()
+        for time in keylist:
+            self.on_update(time, data[time])
 
     def on_update(self, time_value):
         raise NotImplementedError()

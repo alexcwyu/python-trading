@@ -20,7 +20,7 @@ class SMA(Indicator):
         if self.input.size() >= self.length:
             value = 0.0
             for idx in range(self.input.size() - self.length, self.input.size()):
-                value += self.input.get_value_by_idx(idx)
+                value += self.input.get_by_idx(idx)
             value = round(value / float(self.length), 8)
             self.add(time, value)
         else:

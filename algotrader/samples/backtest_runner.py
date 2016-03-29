@@ -25,11 +25,12 @@ class BacktestRunner(object):
 def main():
     feed = PandasCSVDataFeed(names=['spy'])
     portfolio = Portfolio(cash=100000)
-    strategy = SMAStrategy("down2%", Simulator.ID, feed, portfolio, instrument='spy', qty=1000)
+    #strategy = SMAStrategy("sma", Simulator.ID, feed, portfolio, instrument='spy', qty=1000)
+    strategy = Down2PctStrategy("down2%", Simulator.ID, feed, portfolio, instrument='spy', qty=1000)
 
     runner = BacktestRunner(strategy)
     runner.start()
-    print portfolio.cash
+    print portfolio.total_equity
 
     # pyfolio
     rets = strategy.get_portfolio().get_return()

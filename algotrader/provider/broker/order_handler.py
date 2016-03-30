@@ -15,14 +15,11 @@ class FillInfo(object):
 class SimOrderHandler(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, config=None):
+    def __init__(self, config):
         self._config = config
         self._bar_processor = BarProcessor()
         self._trade_processor = TradeProcessor()
         self._quote_processor = QuoteProcessor()
-
-    def set_config(self, config):
-        self._config = config
 
     def process(self, order, event, new_order = False):
         if event:
@@ -53,13 +50,16 @@ class SimOrderHandler(object):
 
 
 class MarketOrderHandler(SimOrderHandler):
-    def __init__(self, config=None):
+    def __init__(self, config, slippage = None):
         super(MarketOrderHandler, self).__init__(config)
+        self.__slippage = slippage
 
     def process_w_bar(self, order, bar, qty, new_order=False):
         fill_price = self._bar_processor.get_price(order, bar, self._config, new_order)
         if fill_price == 0.0:
             return None
+        if self.__slippage:
+            fill_price = self.__slippage.calc_price_w_bar(order, fill_price, qty, bar)
         return FillInfo(qty, fill_price)
 
     def process_w_price_qty(self, order, price, qty):
@@ -67,7 +67,7 @@ class MarketOrderHandler(SimOrderHandler):
 
 
 class LimitOrderHandler(SimOrderHandler):
-    def __init__(self, config=None):
+    def __init__(self, config):
         super(LimitOrderHandler, self).__init__(config)
 
     def process_w_bar(self, order, bar, qty, new_order=False):
@@ -86,7 +86,7 @@ class LimitOrderHandler(SimOrderHandler):
 
 
 class StopLimitOrderHandler(SimOrderHandler):
-    def __init__(self, config=None):
+    def __init__(self, config):
         super(StopLimitOrderHandler, self).__init__(config)
 
     def process_w_bar(self, order, bar, qty, new_order=False):
@@ -117,18 +117,25 @@ class StopLimitOrderHandler(SimOrderHandler):
 
 
 class StopOrderHandler(SimOrderHandler):
-    def __init__(self, config=None):
+    def __init__(self, config, slippage = None):
         super(StopOrderHandler, self).__init__(config)
+        self.__slippage = slippage
 
     def process_w_bar(self, order, bar, qty, new_order=False):
         if order.is_buy():
             if bar.high >= order.stop_price:
                 order.stop_limit_ready = True
-                return FillInfo(qty, order.stop_price)
+                fill_price = order.stop_price
+                if self.__slippage:
+                    fill_price = self.__slippage.calc_price_w_bar(order, fill_price, qty, bar)
+                return FillInfo(qty, fill_price)
         elif order.is_sell():
             if bar.low <= order.stop_price:
                 order.stop_limit_ready = True
-                return FillInfo(qty, order.stop_price)
+                fill_price = order.stop_price
+                if self.__slippage:
+                    fill_price = self.__slippage.calc_price_w_bar(order, fill_price, qty, bar)
+                return FillInfo(qty, fill_price)
         return None
 
     def process_w_price_qty(self, order, price, qty):
@@ -144,8 +151,9 @@ class StopOrderHandler(SimOrderHandler):
 
 
 class TrailingStopOrderHandler(SimOrderHandler):
-    def __init__(self, config=None):
+    def __init__(self, config, slippage = None):
         super(TrailingStopOrderHandler, self).__init__(config)
+        self.__slippage = slippage
 
     def _init_order_trailing_stop(self, order):
         if order.trailing_stop_exec_price == 0:
@@ -160,12 +168,18 @@ class TrailingStopOrderHandler(SimOrderHandler):
             order.trailing_stop_exec_price = min(order.trailing_stop_exec_price, bar.low + order.stop_price)
 
             if bar.high >= order.trailing_stop_exec_price:
-                return FillInfo(qty, order.trailing_stop_exec_price)
+                fill_price = order.trailing_stop_exec_price
+                if self.__slippage:
+                    fill_price = self.__slippage.calc_price_w_bar(order, fill_price, qty, bar)
+                return FillInfo(qty, fill_price)
         elif order.is_sell():
             order.trailing_stop_exec_price = max(order.trailing_stop_exec_price, bar.high - order.stop_price)
 
             if bar.low <= order.trailing_stop_exec_price:
-                return FillInfo(qty, order.trailing_stop_exec_price)
+                fill_price = order.trailing_stop_exec_price
+                if self.__slippage:
+                    fill_price = self.__slippage.calc_price_w_bar(order, fill_price, qty, bar)
+                return FillInfo(qty, fill_price)
         return None
 
     def process_w_price_qty(self, order, price, qty):

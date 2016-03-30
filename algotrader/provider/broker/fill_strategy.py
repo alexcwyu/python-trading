@@ -5,6 +5,7 @@ from algotrader.event.order import OrdType
 from algotrader.provider.broker.order_handler import MarketOrderHandler, LimitOrderHandler, StopLimitOrderHandler, \
     StopOrderHandler, TrailingStopOrderHandler
 from algotrader.provider.broker.sim_config import SimConfig
+from algotrader.provider.broker.slippage import NoSlippage
 from algotrader.trading import inst_data_mgr
 
 
@@ -25,8 +26,9 @@ class FillStrategy(object):
 
 
 class DefaultFillStrategy(FillStrategy):
-    def __init__(self, sim_config=None):
+    def __init__(self, sim_config=None, slippage = None):
         self.__sim_config = sim_config if sim_config else SimConfig()
+        self.__slippage = slippage if slippage else NoSlippage()
         self.__market_ord_handler = MarketOrderHandler(self.__sim_config)
         self.__limit_ord_handler = LimitOrderHandler(self.__sim_config)
         self.__stop_limit_ord_handler = StopLimitOrderHandler(self.__sim_config)

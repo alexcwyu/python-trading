@@ -29,11 +29,11 @@ class DefaultFillStrategy(FillStrategy):
     def __init__(self, sim_config=None, slippage = None):
         self.__sim_config = sim_config if sim_config else SimConfig()
         self.__slippage = slippage if slippage else NoSlippage()
-        self.__market_ord_handler = MarketOrderHandler(self.__sim_config)
+        self.__market_ord_handler = MarketOrderHandler(self.__sim_config, self.__slippage)
         self.__limit_ord_handler = LimitOrderHandler(self.__sim_config)
         self.__stop_limit_ord_handler = StopLimitOrderHandler(self.__sim_config)
-        self.__stop_ord_handler = StopOrderHandler(self.__sim_config)
-        self.__trailing_stop_ord_handler = TrailingStopOrderHandler(self.__sim_config)
+        self.__stop_ord_handler = StopOrderHandler(self.__sim_config, self.__slippage)
+        self.__trailing_stop_ord_handler = TrailingStopOrderHandler(self.__sim_config, self.__slippage)
 
     def process_new_order(self, order):
         fill_info = None

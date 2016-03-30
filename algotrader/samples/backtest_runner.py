@@ -30,7 +30,7 @@ def main():
 
     runner = BacktestRunner(strategy)
     runner.start()
-    print portfolio.total_equity
+    print portfolio.get_result()
 
     # pyfolio
     rets = strategy.get_portfolio().get_return()

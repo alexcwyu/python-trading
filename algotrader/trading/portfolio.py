@@ -1,6 +1,8 @@
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.order import OrdAction, OrderEventHandler, ExecutionEventHandler
+from algotrader.performance.drawdown import DrawDown
+from algotrader.performance.returns import Pnl
 from algotrader.utils import logger
 from algotrader.utils.time_series import TimeSeries
 
@@ -35,7 +37,7 @@ class Position(object):
 
 
 class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
-    def __init__(self, portfolio_id="test", cash=1000000):
+    def __init__(self, portfolio_id="test", cash=1000000, analyzers=[Pnl, DrawDown]):
         self.portfolio_id = portfolio_id
         self.positions = {}
         self.orders = {}
@@ -43,19 +45,11 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         self.total_equity_series = TimeSeries()
         self.cash_series = TimeSeries()
         self.stock_value_series = TimeSeries()
-        self.pnl_series = TimeSeries()
-        self.drawdown_series = TimeSeries()
-        self.drawdown_pct_series = TimeSeries()
 
         self.total_equity = 0
         self.cash = cash
-        self.high_equity = 0
-        self.low_equity = 0
-        self.pnl = 0
-        self.drawdown = 0
-        self.drawdown_pct = 0
-        self.current_run_up = 0
-        self.current_drawdown = 0
+        self.stock_value = 0
+        self.analyzers = [cls(self) for cls in analyzers]
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)
@@ -101,47 +95,18 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
             position = self.positions[instrument]
             position.last_price = price
         self.__update_equity(time)
-        self.__update_pnl(time)
-        self.__update_draw_down(time)
+        for analyzer in self.analyzers:
+            analyzer.update(time)
 
     def __update_equity(self, time):
-        stock_value = 0
+        self.stock_value = 0
         for position in self.positions.itervalues():
-            stock_value += position.last_price * position.filled_qty()
-        self.total_equity = stock_value + self.cash
+            self.stock_value += position.last_price * position.filled_qty()
+        self.total_equity = self.stock_value + self.cash
 
-        self.stock_value_series.add(time, stock_value)
+        self.stock_value_series.add(time, self.stock_value)
         self.cash_series.add(time, self.cash)
         self.total_equity_series.add(time, self.total_equity)
-
-        if self.total_equity_series.size() == 1:
-            self.low_equity = self.total_equity
-            self.high_equity = self.total_equity
-        else:
-            if self.total_equity > self.high_equity:
-                self.high_equity = self.total_equity
-                self.low_equity = self.total_equity
-                self.current_drawdown = 0
-            elif self.total_equity < self.low_equity:
-                self.low_equity = self.total_equity
-                self.current_run_up = 0
-            elif self.total_equity > self.low_equity and self.total_equity < self.high_equity:
-                self.current_drawdown = 1 - self.total_equity / self.high_equity
-                self.current_run_up = self.total_equity / self.low_equity - 1
-
-    def __update_pnl(self, time):
-        if self.total_equity_series.size() >= 2:
-            self.pnl = self.total_equity_series.get_by_idx(-1) - self.total_equity_series.get_by_idx(-2)
-            self.pnl_series.add(time, self.pnl)
-
-    def __update_draw_down(self, time):
-        if self.total_equity_series.size() >= 2:
-            self.drawdown = self.total_equity - self.high_equity
-            self.drawdown_series.add(time, self.drawdown)
-
-            if self.high_equity != 0:
-                self.drawdown_pct = abs(self.drawdown / self.high_equity)
-                self.drawdown_pct_series.add(time, self.drawdown_pct)
 
     def get_return(self):
         equity = self.total_equity_series.get_series()
@@ -149,3 +114,25 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         rets = equity.pct_change().dropna()
         rets.index = rets.index.tz_localize("UTC")
         return rets
+
+    def get_series(self):
+        result = {
+            "TotalEquity": self.total_equity_series,
+            "Cash": self.cash_series,
+            "StockValue": self.stock_value_series
+        }
+
+        for analyzer in self.analyzers:
+            result.update(analyzer.get_series())
+        return result
+
+    def get_result(self):
+        result = {
+            "TotalEquity": self.total_equity,
+            "Cash": self.cash,
+            "StockValue": self.stock_value
+        }
+
+        for analyzer in self.analyzers:
+            result.update(analyzer.get_result())
+        return result

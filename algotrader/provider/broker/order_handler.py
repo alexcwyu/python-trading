@@ -42,8 +42,8 @@ class SimOrderHandler(object):
 
 
 class MarketOrderHandler(SimOrderHandler):
-    def __init__(self, execute_func, config):
-        super(MarketOrderHandler, self).__init__(execute_func, config)
+    def __init__(self, execute_func = None, config = None):
+        super(MarketOrderHandler, self).__init__(execute_func = None, config = None)
 
     def process_w_bar(self, order, bar):
         if bar:

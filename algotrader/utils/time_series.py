@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import numpy as np
 import pandas as pd
 from rx.subjects import Subject
@@ -26,7 +28,6 @@ class TimeSeries(object):
         self.__missing_value = missing_value
 
     def add(self, time, value):
-
         if self.__prev_time == None or time > self.__prev_time:
             self.data[time] = value
             self.__value.append(value)
@@ -115,30 +116,125 @@ class TimeSeries(object):
         raise NotImplementedError("Unsupported index type %s, %s" % (index, type(index)))
 
 
-class DataSeries(TimeSeries):
-    def __init__(self, id=None, description=None):
-        super(DataSeries, self).__init__(id, description, None)
+class DataSeries(object):
+    _slots__ = (
+        'name',
+        'description',
+        'data',
+        'subject',
+        '__key',
+        '__prev_time',
+        '__size',
+        '__missing_value'
+    )
 
-    def get_series(self):
-        raise RuntimeError("Unsupported")
+    def __init__(self, name=None, description=None, missing_value=np.nan):
+        self.name = name
+        self.description = description if description else id
+        self.data = defaultdict(dict)
+        self.subject = Subject()
+        self.__value = defaultdict(list)
+        self.__prev_time = defaultdict(lambda: None)
+        self.__size = defaultdict(lambda: 0)
+        self.__missing_value = missing_value
 
-    def std(self, start=None, end=None):
-        raise RuntimeError("Unsupported")
+    def add(self, time, values):
+        for key, value in values.items():
+            if self.__prev_time[key] == None or time > self.__prev_time[key]:
+                self.data[key][time] = value
+                self.__value[key].append(value)
+                self.__size[key] += 1
+                self.__prev_time[key] = time
+            elif time == self.__prev_time[key]:
+                self.data[key][time] = value
+                self.__value[key].pop()
+                self.__value[key].append(value)
+            else:
+                raise AssertionError(
+                    "Time for new Item %s cannot be earlier then previous item %s" % (time, self.__prev_time))
+        self.subject.on_next((time, values))
 
-    def var(self, start=None, end=None):
-        raise RuntimeError("Unsupported")
+    def get_data(self, keys=None):
+        return self.__get_result_for_keys(keys, lambda key: self.data[key])
 
-    def mean(self, start=None, end=None):
-        raise RuntimeError("Unsupported")
+    def get_series(self, keys=None):
+        def f(key):
+            s = pd.Series(self.data[key], name="%s.%s" % (self.name, key))
+            s.index.name = 'Time'
+            return s
 
-    def max(self, start=None, end=None):
-        raise RuntimeError("Unsupported")
+        return self.__get_result_for_keys(keys, f)
 
-    def min(self, start=None, end=None):
-        raise RuntimeError("Unsupported")
+    def size(self, keys=None):
+        return self.__get_result_for_keys(keys, lambda key: self.__size[key])
 
-    def median(self, start=None, end=None):
-        raise RuntimeError("Unsupported")
+    def now(self, keys=None):
+        return self.__get_result_for_keys(keys, lambda key: self.get_by_idx(key, -1))
+
+    def get_by_idx(self, key, idx=None):
+        if idx == None:
+            return self.__value[key]
+        elif isinstance(idx, int) and (idx >= self.__size[key] or idx < -self.__size[key]):
+            return self.__missing_value
+        return self.__value[key][idx]
+
+    def get_by_time(self, key, time):
+        return self.data[key][time]
+
+    def ago(self, keys=None, idx=1):
+        assert idx >= 0
+        return self.__get_result_for_keys(keys, lambda key: self.get_by_idx(key, -1 - idx))
+
+    def std(self, keys=None, start=None, end=None):
+        return self.__call_np(keys, start, end, np.nanstd)
+
+    def var(self, keys=None, start=None, end=None):
+        return self.__call_np(keys, start, end, np.nanvar)
+
+    def mean(self, keys=None, start=None, end=None):
+        return self.__call_np(keys, start, end, np.nanmean)
+
+    def max(self, keys=None, start=None, end=None):
+        return self.__call_np(keys, start, end, np.nanmax)
+
+    def min(self, keys=None, start=None, end=None):
+        return self.__call_np(keys, start, end, np.nanmin)
+
+    def median(self, keys=None, start=None, end=None):
+        return self.__call_np(keys, start, end, np.nanmedian)
+
+    def __get_result_for_keys(self, keys, function):
+        result = {}
+        if not keys:
+            keys = self.data.keys()
+        for key in keys:
+            result[key] = function(key)
+        return result
+
+    def __call_np(self, keys, start, end, np_func):
+        idx = self.__create_slice(start, end)
+
+        def f(key):
+            data = self.get_by_idx(key, idx)
+            return np_func(data)
+
+        return self.__get_result_for_keys(keys, f)
+
+    def __create_slice(self, start=None, end=None):
+        if not end:
+            end = self.size()
+        if start:
+            return slice(start, end)
+        else:
+            return slice(end)
+
+    def __getitem__(self, idx):
+        key, index = idx
+        if isinstance(index, slice) or isinstance(index, int):
+            return self.get_by_idx(key, index)
+        elif isinstance(index, datetime.datetime):
+            return self.get_by_time(key, index)
+        raise NotImplementedError("Unsupported index type %s, %s" % (index, type(index)))
 
 
 def cross_above(value1, value2, look_up_period=1):
@@ -166,7 +262,6 @@ if __name__ == "__main__":
     for idx, value in enumerate(values):
         close.add(t, value)
         t = t + datetime.timedelta(0, 3)
-        print close.now(), close.ago(0), close.ago(1), close.ago(2)
 
     print close[0:2]
     print close[0:4]
@@ -204,3 +299,5 @@ if __name__ == "__main__":
     print close.var()
     print close.var(0, 4)
     print close.var(0, 6)
+
+

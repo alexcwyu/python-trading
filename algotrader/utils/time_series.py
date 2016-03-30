@@ -3,22 +3,22 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 from rx.subjects import Subject
-
+import datetime
 
 class TimeSeries(object):
     _slots__ = (
-        'id',
+        'name',
         'description',
         'data',
         'subject',
-        '__key',
+        '__value',
         '__prev_time',
         '__size',
         '__missing_value'
     )
 
-    def __init__(self, id=None, description=None, missing_value=np.nan):
-        self.id = id
+    def __init__(self, name=None, description=None, missing_value=np.nan):
+        self.name = name
         self.description = description if description else id
         self.data = dict()
         self.subject = Subject()
@@ -46,7 +46,7 @@ class TimeSeries(object):
         return self.data
 
     def get_series(self):
-        s = pd.Series(self.data, name=self.id)
+        s = pd.Series(self.data, name=self.name)
         s.index.name = 'Time'
         return s
 
@@ -122,10 +122,10 @@ class DataSeries(object):
         'description',
         'data',
         'subject',
-        '__key',
-        '__prev_time',
-        '__size',
-        '__missing_value'
+        '_value',
+        '_prev_time',
+        '_size',
+        '_missing_value'
     )
 
     def __init__(self, name=None, description=None, missing_value=np.nan):
@@ -133,25 +133,26 @@ class DataSeries(object):
         self.description = description if description else id
         self.data = defaultdict(dict)
         self.subject = Subject()
-        self.__value = defaultdict(list)
-        self.__prev_time = defaultdict(lambda: None)
-        self.__size = defaultdict(lambda: 0)
-        self.__missing_value = missing_value
+        self._value = defaultdict(list)
+        self._prev_time = defaultdict(lambda: None)
+        self._size = defaultdict(lambda: 0)
+        self._missing_value = missing_value
 
     def add(self, time, values):
+        assert type(values) == dict
         for key, value in values.items():
-            if self.__prev_time[key] == None or time > self.__prev_time[key]:
+            if self._prev_time[key] == None or time > self._prev_time[key]:
                 self.data[key][time] = value
-                self.__value[key].append(value)
-                self.__size[key] += 1
-                self.__prev_time[key] = time
-            elif time == self.__prev_time[key]:
+                self._value[key].append(value)
+                self._size[key] += 1
+                self._prev_time[key] = time
+            elif time == self._prev_time[key]:
                 self.data[key][time] = value
-                self.__value[key].pop()
-                self.__value[key].append(value)
+                self._value[key].pop()
+                self._value[key].append(value)
             else:
                 raise AssertionError(
-                    "Time for new Item %s cannot be earlier then previous item %s" % (time, self.__prev_time))
+                    "Time for new Item %s cannot be earlier then previous item %s" % (time, self._prev_time))
         self.subject.on_next((time, values))
 
     def get_data(self, keys=None):
@@ -166,17 +167,17 @@ class DataSeries(object):
         return self.__get_result_for_keys(keys, f)
 
     def size(self, keys=None):
-        return self.__get_result_for_keys(keys, lambda key: self.__size[key])
+        return self.__get_result_for_keys(keys, lambda key: self._size[key])
 
     def now(self, keys=None):
         return self.__get_result_for_keys(keys, lambda key: self.get_by_idx(key, -1))
 
     def get_by_idx(self, key, idx=None):
         if idx == None:
-            return self.__value[key]
-        elif isinstance(idx, int) and (idx >= self.__size[key] or idx < -self.__size[key]):
-            return self.__missing_value
-        return self.__value[key][idx]
+            return self._value[key]
+        elif isinstance(idx, int) and (idx >= self._size[key] or idx < -self._size[key]):
+            return self._missing_value
+        return self._value[key][idx]
 
     def get_by_time(self, key, time):
         return self.data[key][time]
@@ -207,22 +208,24 @@ class DataSeries(object):
         result = {}
         if not keys:
             keys = self.data.keys()
+        if type(keys) != set and type(keys) != list:
+            keys = [keys]
         for key in keys:
             result[key] = function(key)
         return result
 
     def __call_np(self, keys, start, end, np_func):
-        idx = self.__create_slice(start, end)
 
         def f(key):
+            idx = self.__create_slice(key, start, end)
             data = self.get_by_idx(key, idx)
             return np_func(data)
 
         return self.__get_result_for_keys(keys, f)
 
-    def __create_slice(self, start=None, end=None):
+    def __create_slice(self, key, start=None, end=None):
         if not end:
-            end = self.size()
+            end = self.size([key])[key]
         if start:
             return slice(start, end)
         else:
@@ -247,57 +250,4 @@ def cross_below(value1, value2, look_up_period=1):
 
 def __cross_impl(value1, value2, func, start=-2, end=-1):
     pass
-
-
-if __name__ == "__main__":
-    import datetime
-
-    close = TimeSeries("close")
-
-    t = datetime.datetime.now()
-
-    values = [np.nan, np.nan, 44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
-              45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
-
-    for idx, value in enumerate(values):
-        close.add(t, value)
-        t = t + datetime.timedelta(0, 3)
-
-    print close[0:2]
-    print close[0:4]
-    print close[0:8]
-
-    print close[-8:]
-
-    print "mean"
-    print close.mean(-80)
-    print close.mean()
-    print close.mean(0, 4)
-    print close.mean(0, 6)
-
-    print "median"
-    print close.median()
-    print close.median(0, 4)
-    print close.median(0, 6)
-
-    print "max"
-    print close.max()
-    print close.max(0, 4)
-    print close.max(0, 6)
-
-    print "min"
-    print close.min()
-    print close.min(0, 4)
-    print close.min(0, 6)
-
-    print "std"
-    print close.std()
-    print close.std(0, 4)
-    print close.std(0, 6)
-
-    print "var"
-    print close.var()
-    print close.var(0, 4)
-    print close.var(0, 6)
-
 

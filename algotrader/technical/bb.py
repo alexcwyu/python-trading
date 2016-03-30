@@ -19,13 +19,13 @@ class BB(Indicator):
     )
 
     def __init__(self, input, length=14, num_std = 3, description="Bollinger Bands"):
-        super(BB, self).__init__(input, "BB(%s, %s, %s)" % (input.id, length, num_std), description)
+        super(BB, self).__init__(input, "BB(%s, %s, %s)" % (input.name, length, num_std), description)
         self.length = length
         self.num_std = num_std
         self.__sma = SMA(input, length)
         self.__std_dev = STD(input, length)
-        self.upper = TimeSeries("BBU(%s, %s)" % (input.id, length))
-        self.lower = TimeSeries("BBL(%s, %s)" % (input.id, length))
+        self.upper = TimeSeries("BBU(%s, %s)" % (input.name, length))
+        self.lower = TimeSeries("BBL(%s, %s)" % (input.name, length))
 
     def on_update(self, time_value):
         time, value = time_value

@@ -10,7 +10,7 @@ class MAX(Indicator):
     )
 
     def __init__(self, input, length, description="Maximum"):
-        super(MAX, self).__init__(input, "MAX(%s,%s)" % (input.id, length), description)
+        super(MAX, self).__init__(input, "MAX(%s,%s)" % (input.name, length), description)
         self.length = length
 
     def on_update(self, time_value):

@@ -25,10 +25,13 @@ class TimeSeriesTest(TestCase):
         series = TimeSeries()
         self.assertTrue(math.isnan(series.now()))
 
-        series.add(datetime.datetime.now(), 2)
+        t1 = datetime.datetime.now()
+        t2 = t1 + datetime.timedelta(0, 3)
+
+        series.add(t1, 2)
         self.assertEqual(2, series.now())
 
-        series.add(datetime.datetime.now(), 2.4)
+        series.add(t2, 2.4)
         self.assertEqual(2.4, series.now())
 
     def test_get_value_by_index(self):

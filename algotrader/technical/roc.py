@@ -18,7 +18,7 @@ class ROC(Indicator):
     )
 
     def __init__(self, input, length=1, description="Rate Of Change"):
-        super(ROC, self).__init__(input, "ROC(%s, %s)" % (input.id, length), description)
+        super(ROC, self).__init__(input, "ROC(%s, %s)" % (input.name, length), description)
         self.length = length
 
     def on_update(self, time_value):

@@ -12,7 +12,7 @@ class ATR(Indicator):
     )
 
     def __init__(self, input, length=14, description="Average True Range"):
-        super(ATR, self).__init__(input, "ATR(%s, %s)" % (input.id, length), description)
+        super(ATR, self).__init__(input, "ATR(%s, %s)" % (input.name, length), description)
         self.length = length
         self.__prev_close = None
         self.__value = None

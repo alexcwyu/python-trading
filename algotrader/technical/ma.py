@@ -12,7 +12,7 @@ class SMA(Indicator):
     )
 
     def __init__(self, input, length, description="Simple Moving Average"):
-        super(SMA, self).__init__(input, "SMA(%s,%s)" % (input.id, length), description)
+        super(SMA, self).__init__(input, "SMA(%s,%s)" % (input.name, length), description)
         self.length = length
 
     def on_update(self, time_value):

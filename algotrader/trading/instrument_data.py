@@ -21,7 +21,7 @@ class InstrumentDataManager(MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
         self.__bar_dict[bar.instrument] = bar
 
-        self.get_series(bar.id(), DataSeries).add(bar.timestamp, bar)
+        self.get_series(bar.id(), DataSeries).add(bar.timestamp,{"open":bar.open, "high":bar.high, "low":bar.low, "close":bar.close})
 
         self.get_series("%s.%s" % (bar.id(), "Open")).add(bar.timestamp, bar.open)
         self.get_series("%s.%s" % (bar.id(), "High")).add(bar.timestamp, bar.high)
@@ -35,7 +35,7 @@ class InstrumentDataManager(MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
         self.__quote_dict[quote.instrument] = quote
 
-        self.get_series(quote.id(), DataSeries).add(quote.timestamp, quote)
+        self.get_series(quote.id(), DataSeries).add(quote.timestamp, {"bid":quote.bid, "ask":quote.ask})
 
         self.get_series("%s.%s" % (quote.id(), "Bid")).add(quote.timestamp, quote.bid)
         self.get_series("%s.%s" % (quote.id(), "BidSize")).add(quote.timestamp, quote.bid_size)
@@ -47,7 +47,7 @@ class InstrumentDataManager(MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__trade_dict[trade.instrument] = trade
 
-        self.get_series(trade.id(), DataSeries).add(trade.timestamp, trade)
+        self.get_series(trade.id(), DataSeries).add(trade.timestamp, {"price":trade.price})
 
         self.get_series("%s.%s" % (trade.id(), "Price")).add(trade.timestamp, trade.price)
         self.get_series("%s.%s" % (trade.id(), "Size")).add(trade.timestamp, trade.size)
@@ -78,12 +78,12 @@ class InstrumentDataManager(MarketDataEventHandler):
 
     def get_series(self, key, cls = TimeSeries):
         if key not in self.__series_dict:
-            self.__series_dict[key] = cls(id=key)
+            self.__series_dict[key] = cls(name=key)
         return self.__series_dict[key]
 
     def add_series(self, series):
-        if series.id not in self.__series_dict:
-            self.__series_dict[series.id] = series
+        if series.name not in self.__series_dict:
+            self.__series_dict[series.name] = series
             return True
         return False
 

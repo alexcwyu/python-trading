@@ -10,7 +10,7 @@ class MovingAverageTest(TestCase):
     def test_name(self):
         close = TimeSeries("close")
         sma = SMA(close, 3)
-        self.assertEquals("SMA(close,3)", sma.id)
+        self.assertEquals("SMA(close,3)", sma.name)
 
     def test_empty_at_initialize(self):
         close = TimeSeries("close")

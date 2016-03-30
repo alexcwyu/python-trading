@@ -56,7 +56,7 @@ class RSI(Indicator):
     )
 
     def __init__(self, input, length=14, description="Relative Strength Indicator"):
-        super(RSI, self).__init__(input, "RSI(%s, %s)" % (input.id, length), description)
+        super(RSI, self).__init__(input, "RSI(%s, %s)" % (input.name, length), description)
         self.length = length
         self.__prev_gain = None
         self.__prev_loss = None

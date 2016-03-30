@@ -6,34 +6,45 @@ from algotrader.event.order import OrdAction
 from algotrader.provider.broker.data_processor import BarProcessor, TradeProcessor, QuoteProcessor
 
 
+class FillInfo(object):
+    def __init__(self, fill_qty, fill_price):
+        self.fill_qty = fill_qty
+        self.fill_price = fill_price
+
+
 class SimOrderHandler(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, execute_func, config):
-        self.execute_func = execute_func
+    def __init__(self, config=None):
         self._config = config
         self._bar_processor = BarProcessor()
         self._trade_processor = TradeProcessor()
         self._quote_processor = QuoteProcessor()
 
-    def process(self, order, event):
-        if isinstance(event, Bar):
-            return self.process_w_bar(order, event)
-        elif isinstance(event, Quote):
-            return self.process_w_quote(order, event)
-        elif isinstance(event, Trade):
-            return self.process_w_trade(order, event)
+    def set_config(self, config):
+        self._config = config
+
+    def process(self, order, event, new_order = False):
+        if event:
+            if isinstance(event, Bar):
+                fill_qty = self._bar_processor.get_qty(order, event, self._config)
+                return self.process_w_bar(order, event, fill_qty, new_order)
+            elif isinstance(event, Quote):
+                fill_price = self._quote_processor.get_price(order, event, self._config, new_order)
+                fill_qty = self._quote_processor.get_qty(order, event, self._config)
+                if fill_price == 0.0:
+                    return None
+                return self.process_w_price_qty(order, fill_price, fill_qty)
+            elif isinstance(event, Trade):
+                fill_price = self._trade_processor.get_price(order, event, self._config, new_order)
+                fill_qty = self._trade_processor.get_qty(order, event, self._config)
+                if fill_price == 0.0:
+                    return None
+                return self.process_w_price_qty(order, fill_price, fill_qty)
+        return None
 
     @abc.abstractmethod
-    def process_w_quote(self, order, quote):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def process_w_trade(self, order, trade):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def process_w_bar(self, order, bar):
+    def process_w_bar(self, order, bar, new_order=False):
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -42,184 +53,129 @@ class SimOrderHandler(object):
 
 
 class MarketOrderHandler(SimOrderHandler):
-    def __init__(self, execute_func = None, config = None):
-        super(MarketOrderHandler, self).__init__(execute_func = None, config = None)
+    def __init__(self, config=None):
+        super(MarketOrderHandler, self).__init__(config)
 
-    def process_w_bar(self, order, bar):
-        if bar:
-            filled_price = self._bar_processor.get_price(order, bar, self._config)
-            filled_qty = self._bar_processor.get_qty(order, bar, self._config)
-            return self.process_w_price_qty(order, filled_price, filled_qty)
-        return False
-
-    def process_w_trade(self, order, trade):
-        if trade:
-            filled_price = self._trade_processor.get_price(order, trade, self._config)
-            filled_qty = self._trade_processor.get_qty(order, trade, self._config)
-            return self.process_w_price_qty(order, filled_price, filled_qty)
-        return False
-
-    def process_w_quote(self, order, quote):
-        if quote:
-            filled_price = self._quote_processor.get_price(order, quote, self._config)
-            filled_qty = self._quote_processor.get_qty(order, quote, self._config)
-            return self.process_w_price_qty(order, filled_price, filled_qty)
-        return False
+    def process_w_bar(self, order, bar, qty, new_order=False):
+        fill_price = self._bar_processor.get_price(order, bar, self._config, new_order)
+        if fill_price == 0.0:
+            return None
+        return FillInfo(qty, fill_price)
 
     def process_w_price_qty(self, order, price, qty):
-        return self.execute_func(order, price, qty)
+        return FillInfo(qty, price)
 
 
-class AbstractStopLimitOrderHandler(SimOrderHandler):
-    __metaclass__ = abc.ABCMeta
+class LimitOrderHandler(SimOrderHandler):
+    def __init__(self, config=None):
+        super(LimitOrderHandler, self).__init__(config)
 
-    def __init__(self, execute_func, config):
-        super(AbstractStopLimitOrderHandler, self).__init__(execute_func, config)
-
-    def process_w_bar(self, order, bar):
-        if bar:
-            filled_qty = self._bar_processor.get_qty(order, bar, self._config)
-            return self.stop_limit_w_bar(order, bar, filled_qty)
-        return False
-
-    def process_w_trade(self, order, trade):
-        if trade:
-            filled_price = self._trade_processor.get_price(order, trade, self._config)
-            filled_qty = self._trade_processor.get_qty(order, trade, self._config)
-            return self.process_w_price_qty(order, filled_price, filled_qty)
-        return False
-
-    def process_w_quote(self, order, quote):
-        if quote:
-            filled_price = self._quote_processor.get_price(order, quote, self._config)
-            filled_qty = self._quote_processor.get_qty(order, quote, self._config)
-            return self.process_w_price_qty(order, filled_price, filled_qty)
-        return False
+    def process_w_bar(self, order, bar, qty, new_order=False):
+        if order.is_buy() and bar.low <= order.limit_price:
+            return FillInfo(qty, order.limit_price)
+        elif order.is_sell() and bar.high >= order.limit_price:
+            return FillInfo(qty, order.limit_price)
+        return None
 
     def process_w_price_qty(self, order, price, qty):
-        return self.stop_limit_w_price_qty(order, price, qty)
-
-    @abc.abstractmethod
-    def stop_limit_w_bar(self, order, bar, qty):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def stop_limit_w_price_qty(self, order, price, qty):
-        raise NotImplementedError()
+        if order.is_buy() and price <= order.limit_price:
+            return FillInfo(qty, order.limit_price)
+        elif order.is_sell() and price >= order.limit_price:
+            return FillInfo(qty, order.limit_price)
+        return None
 
 
-class LimitOrderHandler(AbstractStopLimitOrderHandler):
-    def __init__(self, execute_func, config):
-        super(LimitOrderHandler, self).__init__(execute_func, config)
+class StopLimitOrderHandler(SimOrderHandler):
+    def __init__(self, config=None):
+        super(StopLimitOrderHandler, self).__init__(config)
 
-    def stop_limit_w_bar(self, order, bar, qty):
-        if order.action == OrdAction.BUY and bar.low <= order.limit_price:
-            return self.execute_func(order, order.limit_price, qty)
-        elif order.action == OrdAction.SELL and bar.high >= order.limit_price:
-            return self.execute_func(order, order.limit_price, qty)
-        return False
-
-    def stop_limit_w_price_qty(self, order, price, qty):
-        if order.action == OrdAction.BUY and price <= order.limit_price:
-            return self.execute_func(order, order.limit_price, qty)
-        elif order.action == OrdAction.SELL and price >= order.limit_price:
-            return self.execute_func(order, order.limit_price, qty)
-        return False
-
-
-class StopLimitOrderHandler(AbstractStopLimitOrderHandler):
-    def __init__(self, execute_func, config):
-        super(StopLimitOrderHandler, self).__init__(execute_func, config)
-
-    def stop_limit_w_bar(self, order, bar, qty):
-        if order.action == OrdAction.BUY:
+    def process_w_bar(self, order, bar, qty, new_order=False):
+        if order.is_buy():
             if not order.stop_limit_ready and bar.high >= order.stop_price:
                 order.stop_limit_ready = True
             elif order.stop_limit_ready and bar.low <= order.limit_price:
-                return self.execute_func(order, order.limit_price, qty)
-        elif order.action == OrdAction.SELL:
+                return FillInfo(qty, order.limit_price)
+        elif order.is_sell():
             if not order.stop_limit_ready and bar.low <= order.stop_price:
                 order.stop_limit_ready = True
             elif order.stop_limit_ready and bar.high >= order.limit_price:
-                return self.execute_func(order, order.limit_price, qty)
-        return False
+                return FillInfo(qty, order.limit_price)
+        return None
 
-    def stop_limit_w_price_qty(self, order, price, qty):
-        if order.action == OrdAction.BUY:
+    def process_w_price_qty(self, order, price, qty):
+        if order.is_buy():
             if not order.stop_limit_ready and price >= order.stop_price:
                 order.stop_limit_ready = True
             elif order.stop_limit_ready and price <= order.limit_price:
-                return self.execute_func(order, price, qty)
-        elif order.action == OrdAction.SELL:
+                return FillInfo(qty, price)
+        elif order.is_sell():
             if not order.stop_limit_ready and price <= order.stop_price:
                 order.stop_limit_ready = True
             elif order.stop_limit_ready and price >= order.limit_price:
-                return self.execute_func(order, price, qty)
-        return False
+                return FillInfo(qty, price)
+        return None
 
 
-class StopOrderHandler(AbstractStopLimitOrderHandler):
-    def __init__(self, execute_func, config):
-        super(StopOrderHandler, self).__init__(execute_func, config)
+class StopOrderHandler(SimOrderHandler):
+    def __init__(self, config=None):
+        super(StopOrderHandler, self).__init__(config)
 
-    def stop_limit_w_bar(self, order, bar, qty):
-        if order.action == OrdAction.BUY:
+    def process_w_bar(self, order, bar, qty, new_order=False):
+        if order.is_buy():
             if bar.high >= order.stop_price:
                 order.stop_limit_ready = True
-                return self.execute_func(order, order.stop_price, qty)
-        elif order.action == OrdAction.SELL:
+                return FillInfo(qty, order.stop_price)
+        elif order.is_sell():
             if bar.low <= order.stop_price:
                 order.stop_limit_ready = True
-                return self.execute_func(order, order.stop_price, qty)
-        return False
+                return FillInfo(qty, order.stop_price)
+        return None
 
-    def stop_limit_w_price_qty(self, order, price, qty):
-        if order.action == OrdAction.BUY:
+    def process_w_price_qty(self, order, price, qty):
+        if order.is_buy():
             if price >= order.stop_price:
                 order.stop_limit_ready = True
-                return self.execute_func(order, price, qty)
-        elif order.action == OrdAction.SELL:
+                return FillInfo(qty, price)
+        elif order.is_sell():
             if price <= order.stop_price:
                 order.stop_limit_ready = True
-                return self.execute_func(order, price, qty)
-        return False
+                return FillInfo(qty, price)
+        return None
 
 
-class TrailingStopOrderHandler(AbstractStopLimitOrderHandler):
-    def __init__(self, execute_func, config):
-        super(TrailingStopOrderHandler, self).__init__(execute_func, config)
+class TrailingStopOrderHandler(SimOrderHandler):
+    def __init__(self, config=None):
+        super(TrailingStopOrderHandler, self).__init__(config)
 
     def _init_order_trailing_stop(self, order):
         if order.trailing_stop_exec_price == 0:
-            if order.action == OrdAction.BUY:
+            if order.is_buy():
                 order.trailing_stop_exec_price = sys.float_info.max
-            elif order.action == OrdAction.SELL:
+            elif order.is_sell():
                 order.trailing_stop_exec_price = sys.float_info.min
 
-    def stop_limit_w_bar(self, order, bar, qty):
+    def process_w_bar(self, order, bar, qty, new_order=False):
         self._init_order_trailing_stop(order)
-        if order.action == OrdAction.BUY:
+        if order.is_buy():
             order.trailing_stop_exec_price = min(order.trailing_stop_exec_price, bar.low + order.stop_price)
 
-            if (bar.high >= order.trailing_stop_exec_price):
-                return self.execute_func(order, order.trailing_stop_exec_price, qty)
-        elif order.action == OrdAction.SELL:
+            if bar.high >= order.trailing_stop_exec_price:
+                return FillInfo(qty, order.trailing_stop_exec_price)
+        elif order.is_sell():
             order.trailing_stop_exec_price = max(order.trailing_stop_exec_price, bar.high - order.stop_price)
 
-            if (bar.low <= order.trailing_stop_exec_price):
-                return self.execute_func(order, order.trailing_stop_exec_price, qty)
-        return False
+            if bar.low <= order.trailing_stop_exec_price:
+                return FillInfo(qty, order.trailing_stop_exec_price)
+        return None
 
-    def stop_limit_w_price_qty(self, order, price, qty):
+    def process_w_price_qty(self, order, price, qty):
         self._init_order_trailing_stop(order)
-        if order.action == OrdAction.BUY:
+        if order.is_buy():
             order.trailing_stop_exec_price = min(order.trailing_stop_exec_price, price + order.stop_price)
-
-            if (price >= order.trailing_stop_exec_price):
-                return self.execute_func(order, order.trailing_stop_exec_price, qty)
-        elif order.action == OrdAction.SELL:
+            if price >= order.trailing_stop_exec_price:
+                return FillInfo(qty, order.trailing_stop_exec_price)
+        elif order.is_sell():
             order.trailing_stop_exec_price = max(order.trailing_stop_exec_price, price - order.stop_price)
-
-            if (price <= order.trailing_stop_exec_price):
-                return self.execute_func(order, order.trailing_stop_exec_price, qty)
-        return False
+            if price <= order.trailing_stop_exec_price:
+                return FillInfo(qty, order.trailing_stop_exec_price)
+        return None

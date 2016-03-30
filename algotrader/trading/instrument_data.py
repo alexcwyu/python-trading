@@ -29,7 +29,6 @@ class InstrumentDataManager(MarketDataEventHandler):
         self.get_series("%s.%s" % (bar.id(), "Close")).add(bar.timestamp, bar.close)
         self.get_series("%s.%s" % (bar.id(), "AdjClose")).add(bar.timestamp, bar.adj_close)
         self.get_series("%s.%s" % (bar.id(), "Vol")).add(bar.timestamp, bar.vol)
-        self.get_series("%s.%s" % (bar.id(), "CloseOrAdjClose")).add(bar.timestamp, bar.close_or_adj_close())
 
     def on_quote(self, quote):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
@@ -73,7 +72,7 @@ class InstrumentDataManager(MarketDataEventHandler):
         elif instrument in self.__quote_dict:
             return self.__quote_dict[instrument].mid()
         elif instrument in self.__bar_dict:
-            return self.__bar_dict[instrument].close_or_adj_close()
+            return self.__bar_dict[instrument].close
         return None
 
     def get_series(self, key, cls = TimeSeries):

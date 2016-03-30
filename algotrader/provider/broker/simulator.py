@@ -1,33 +1,25 @@
 from collections import defaultdict
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.order import MarketDataEventHandler, OrdAction, OrdStatus, OrdType, OrderStatusUpdate, \
+from algotrader.event.order import MarketDataEventHandler, OrdStatus, OrderStatusUpdate, \
     ExecutionReport
-from algotrader.provider.provider import broker_mgr, Broker
-from algotrader.provider.broker.order_handler import MarketOrderHandler, LimitOrderHandler, StopLimitOrderHandler, \
-    StopOrderHandler, TrailingStopOrderHandler
-from algotrader.provider.broker.sim_config import SimConfig
-from algotrader.trading import order_mgr, inst_data_mgr
-from algotrader.utils import logger
-from algotrader.utils import clock
 from algotrader.provider.broker.commission import NoCommission
+from algotrader.provider.broker.fill_strategy import DefaultFillStrategy
+from algotrader.provider.provider import broker_mgr, Broker
+from algotrader.trading import order_mgr
+from algotrader.utils import clock
+from algotrader.utils import logger
 
 
 class Simulator(Broker, MarketDataEventHandler):
     ID = "Simulator"
 
-    def __init__(self, sim_config=None, exec_handler=order_mgr, commission= None):
+    def __init__(self, sim_config=None, exec_handler=order_mgr, commission=None, fill_strategy=None):
         self.__next_exec_id = 0
         self.__order_map = defaultdict(dict)
         self.__quote_map = {}
-        self.__sim_config = sim_config if sim_config else SimConfig()
         self.__exec__handler = exec_handler
-        self.__market_ord_handler = MarketOrderHandler(self.execute, self.__sim_config)
-        self.__limit_ord_handler = LimitOrderHandler(self.execute, self.__sim_config)
-        self.__stop_limit_ord_handler = StopLimitOrderHandler(self.execute, self.__sim_config)
-        self.__stop_ord_handler = StopOrderHandler(self.execute, self.__sim_config)
-        self.__trailing_stop_ord_handler = TrailingStopOrderHandler(self.execute, self.__sim_config)
-
+        self.__fill_strategy = fill_strategy if fill_strategy is not None else DefaultFillStrategy()
         self.__commission = commission if commission is not None else NoCommission()
         broker_mgr.reg_broker(self)
 
@@ -46,49 +38,29 @@ class Simulator(Broker, MarketDataEventHandler):
         return __next_exec_id
 
     def on_bar(self, bar):
-        logger.debug("[%s] %s" % (self.__class__.__name__, bar))
-        if self.__sim_config.fill_on_bar and bar.instrument in self.__order_map:
-            for order in self.__order_map[bar.instrument].values():
-                executed = False
-                if self.__sim_config.fill_on_bar_mode == SimConfig.FillMode.NEXT_OPEN:
-                    executed = self.__process_w_price_qty(order, bar.open, order.qty)
-
-                if not executed:
-                    executed = self.__process(order, bar)
+        self.__process_event(bar)
 
     def on_quote(self, quote):
-        logger.debug("[%s] %s" % (self.__class__.__name__, quote))
-
-        diff_ask = True
-        diff_bid = True
-
-        if quote.instrument in self.__quote_map:
-            prev_quote = self.__quote_map[quote.instrument]
-            diff_ask = prev_quote.ask != quote.ask or prev_quote.ask_size != quote.ask_size
-            diff_bid = prev_quote.bid != quote.bid or prev_quote.bid_size != quote.bid_size
-
-        self.__quote_map[quote.instrument] = quote
-
-        if self.__sim_config.fill_on_quote and quote.instrument in self.__order_map:
-            for order in self.__order_map[quote.instrument].itervalues():
-                if order.action == OrdAction.BUY and diff_ask:
-                    self.__process(order, quote)
-                elif order.action == OrdAction.SELL and diff_bid:
-                    self.__process(order, quote)
+        self.__process_event(quote)
 
     def on_trade(self, trade):
-        logger.debug("[%s] %s" % (self.__class__.__name__, trade))
-        if self.__sim_config.fill_on_trade and trade.instrument in self.__order_map:
-            for order in self.__order_map[trade.instrument].itervalues():
-                self.__process(order, trade)
+        self.__process_event(trade)
+
+    def __process_event(self, event):
+        logger.debug("[%s] %s" % (self.__class__.__name__, event))
+        if event.instrument in self.__order_map:
+            for order in self.__order_map[event.instrument].itervalues():
+                fill_info = self.__fill_strategy.process_w_market_data(order, event, False)
+                executed = self.execute(order, fill_info)
 
     def on_order(self, order):
         logger.debug("[%s] %s" % (self.__class__.__name__, order))
 
         self.__add_order(order)
         self.__send_exec_report(order, 0, 0, OrdStatus.SUBMITTED)
-        if self.__process_new_order(order):
-            self.__remove_order(order)
+
+        fill_info = self.__fill_strategy.process_new_order(order)
+        executed = self.execute(order, fill_info)
 
     def __add_order(self, order):
         orders = self.__order_map[order.instrument]
@@ -100,61 +72,18 @@ class Simulator(Broker, MarketDataEventHandler):
             if order.ord_id in orders:
                 del orders[order.ord_id]
 
-    def __process_new_order(self, order):
-        executed = False
-        config = self.__sim_config
+    def execute(self, order, fill_info):
+        if not fill_info:
+            return False
 
-        quote = inst_data_mgr.get_quote(order.instrument)
-        trade = inst_data_mgr.get_trade(order.instrument)
-        bar = inst_data_mgr.get_bar(order.instrument)
+        filled_price = fill_info.fill_price
+        filled_qty = fill_info.fill_qty
 
-        if order.type == OrdType.MARKET:
-            # TODO fix it, we should handle the fill sequentially, from quote, then trade, then bar
-            if not executed and config.fill_on_quote and config.fill_on_bar_mode == SimConfig.FillMode.LAST and quote:
-                executed = self.__market_ord_handler.process_w_quote(order, quote)
-            elif not executed and config.fill_on_trade and config.fill_on_trade_mode == SimConfig.FillMode.LAST and trade:
-                executed = self.__market_ord_handler.process_w_trade(order, trade)
-            elif not executed and config.fill_on_bar and config.fill_on_bar_mode == SimConfig.FillMode.LAST and bar:
-                executed = self.__market_ord_handler.process_w_bar(order, bar)
-        else:
-            # TODO fix it, we should handle the fill sequentially, from quote, then trade, then bar
-            if not executed and config.fill_on_quote and quote:
-                executed = self.__process(order, quote)
-            elif not executed and config.fill_on_trade and trade:
-                executed = self.__process(order, trade)
-            elif not executed and config.fill_on_bar and bar:
-                executed = self.__process(order, bar)
+        assert filled_price > 0
+        assert filled_qty > 0
 
-        return executed
-
-    def __process(self, order, event):
-        if order.type == OrdType.MARKET:
-            return self.__market_ord_handler.process(order, event)
-        elif order.type == OrdType.LIMIT:
-            return self.__limit_ord_handler.process(order, event)
-        elif order.type == OrdType.STOP_LIMIT:
-            return self.__stop_limit_ord_handler.process(order, event)
-        elif order.type == OrdType.STOP:
-            return self.__stop_ord_handler.process(order, event)
-        elif order.type == OrdType.TRAILING_STOP:
-            return self.__trailing_stop_ord_handler.process(order, event)
-        return False
-
-    def __process_w_price_qty(self, order, price, qty):
-        if order.type == OrdType.MARKET:
-            return self.__market_ord_handler.process_w_price_qty(order, price, qty)
-        elif order.type == OrdType.LIMIT:
-            return self.__limit_ord_handler.process_w_price_qty(order, price, qty)
-        elif order.type == OrdType.STOP_LIMIT:
-            return self.__stop_limit_ord_handler.process_w_price_qty(order, price, qty)
-        elif order.type == OrdType.STOP:
-            return self.__stop_ord_handler.process_w_price_qty(order, price, qty)
-        elif order.type == OrdType.TRAILING_STOP:
-            return self.__trailing_stop_ord_handler.process_w_price_qty(order, price, qty)
-        return False
-
-    def execute(self, order, filled_price, filled_qty):
         if order.is_done():
+            self.__remove_order(order)
             return False
 
         if filled_qty < order.leave_qty():
@@ -177,7 +106,7 @@ class Simulator(Broker, MarketDataEventHandler):
                                       timestamp=clock.default_clock.current_date_time(), er_id=self.next_exec_id(),
                                       filled_qty=filled_qty,
                                       filled_price=filled_price, status=ord_status,
-                                      commission = commission)
+                                      commission=commission)
 
         self.__exec__handler.on_exec_report(exec_report)
 

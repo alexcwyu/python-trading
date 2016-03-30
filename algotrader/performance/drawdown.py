@@ -10,8 +10,7 @@ class DrawDown(PortfolioAnalyzer):
     CurrentRunUp = "CurrentRunUp"
     CurrentDrawDown = "CurrentDrawDown"
 
-    def __init__(self, portfolio):
-        super(DrawDown, self).__init__(portfolio)
+    def __init__(self):
         self.drawdown_series = TimeSeries(name=DrawDown.DrawDown)
         self.drawdown_pct_series = TimeSeries(name=DrawDown.DrawDownPct)
         self.drawdown = 0

@@ -10,12 +10,13 @@ from algotrader.provider.broker.sim_config import SimConfig
 from algotrader.trading import order_mgr, inst_data_mgr
 from algotrader.utils import logger
 from algotrader.utils import clock
+from algotrader.provider.broker.commission import NoCommission
 
 
 class Simulator(Broker, MarketDataEventHandler):
     ID = "Simulator"
 
-    def __init__(self, sim_config=None, exec_handler=order_mgr):
+    def __init__(self, sim_config=None, exec_handler=order_mgr, commission= None):
         self.__next_exec_id = 0
         self.__order_map = defaultdict(dict)
         self.__quote_map = {}
@@ -26,6 +27,8 @@ class Simulator(Broker, MarketDataEventHandler):
         self.__stop_limit_ord_handler = StopLimitOrderHandler(self.execute, self.__sim_config)
         self.__stop_ord_handler = StopOrderHandler(self.execute, self.__sim_config)
         self.__trailing_stop_ord_handler = TrailingStopOrderHandler(self.execute, self.__sim_config)
+
+        self.__commission = commission if commission is not None else NoCommission()
         broker_mgr.reg_broker(self)
 
     def start(self):
@@ -169,10 +172,12 @@ class Simulator(Broker, MarketDataEventHandler):
         self.__exec__handler.on_ord_upd(ord_update)
 
     def __send_exec_report(self, order, filled_price, filled_qty, ord_status):
+        commission = self.__commission.calc(order, filled_price, filled_qty)
         exec_report = ExecutionReport(broker_id=Simulator.ID, ord_id=order.ord_id, instrument=order.instrument,
                                       timestamp=clock.default_clock.current_date_time(), er_id=self.next_exec_id(),
                                       filled_qty=filled_qty,
-                                      filled_price=filled_price, status=ord_status)
+                                      filled_price=filled_price, status=ord_status,
+                                      commission = commission)
 
         self.__exec__handler.on_exec_report(exec_report)
 

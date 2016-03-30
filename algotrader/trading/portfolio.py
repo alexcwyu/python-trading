@@ -37,7 +37,7 @@ class Position(object):
 
 
 class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
-    def __init__(self, portfolio_id="test", cash=1000000, analyzers=[Pnl, DrawDown]):
+    def __init__(self, portfolio_id="test", cash=1000000, analyzers=None):
         self.portfolio_id = portfolio_id
         self.positions = {}
         self.orders = {}
@@ -49,7 +49,10 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         self.total_equity = 0
         self.cash = cash
         self.stock_value = 0
-        self.analyzers = [cls(self) for cls in analyzers]
+
+        self.analyzers = analyzers if analyzers is not None else [Pnl(), DrawDown()]
+        for analyzer in self.analyzers:
+            analyzer.set_portfolio(self)
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)

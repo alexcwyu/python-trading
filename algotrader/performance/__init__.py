@@ -1,7 +1,5 @@
 
 class PortfolioAnalyzer(object):
-    def __init__(self, portfolio):
-        self.portfolio = portfolio
 
     def update(self, time):
         pass
@@ -11,3 +9,6 @@ class PortfolioAnalyzer(object):
 
     def get_series(self):
         return None
+
+    def set_portfolio(self, portfolio):
+        self.portfolio = portfolio

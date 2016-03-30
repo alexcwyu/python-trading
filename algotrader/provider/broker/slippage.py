@@ -3,7 +3,7 @@ import abc
 from algotrader.event.order import OrdAction
 
 
-class SlippageModel(object):
+class Slippage(object):
     __metaclass__ = abc.ABCMeta
 
     def calc_price_w_bar(self, order, price, qty, used_qty, bar):
@@ -23,12 +23,12 @@ class SlippageModel(object):
         raise NotImplementedError()
 
 
-class NoSlippage(SlippageModel):
+class NoSlippage(Slippage):
     def calc_price(self, order, price, qty, used_qty, total_avail_qty):
         return price
 
 
-class VolumeShareSlippage(SlippageModel):
+class VolumeShareSlippage(Slippage):
 
     def __init__(self, price_impact = 0.1):
         self.price_impact = price_impact

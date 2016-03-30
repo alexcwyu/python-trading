@@ -5,8 +5,7 @@ from algotrader.utils.time_series import TimeSeries
 class Pnl(PortfolioAnalyzer):
     Pnl = "Pnl"
 
-    def __init__(self, portfolio):
-        super(Pnl, self).__init__(portfolio)
+    def __init__(self):
         self.pnl_series = TimeSeries(name=Pnl.Pnl)
         self.pnl = 0
 

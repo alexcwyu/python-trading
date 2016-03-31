@@ -3,7 +3,7 @@ import abc
 from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.event.order import OrdAction
 from algotrader.provider.broker.sim_config import SimConfig
-
+import math
 
 class MarketDataProcessor(object):
     __metaclass__ = abc.ABCMeta
@@ -27,7 +27,7 @@ class BarProcessor(MarketDataProcessor):
 
     def get_qty(self, order, market_data, config):
         if config.partial_fill:
-            bar_vol = market_data.vol if not config.bar_vol_ratio else market_data.vol * config.bar_vol_ratio
+            bar_vol = math.trunc(market_data.vol if not config.bar_vol_ratio else market_data.vol * config.bar_vol_ratio)
             return min(order.qty, bar_vol)
         return order.qty
 

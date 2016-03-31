@@ -2,287 +2,208 @@ from unittest import TestCase
 
 from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.event.order import Order, OrdAction, OrdType
-from algotrader.provider.broker.order_handler import LimitOrderHandler, MarketOrderHandler, StopLimitOrderHandler, StopOrderHandler, TrailingStopOrderHandler
+from algotrader.provider.broker.order_handler import FillInfo, LimitOrderHandler, MarketOrderHandler, StopLimitOrderHandler, StopOrderHandler, TrailingStopOrderHandler
 from algotrader.provider.broker.sim_config import SimConfig
 
 
 
 class OrderHandlerTest(TestCase):
-    class MockExec():
-        def __init__(self):
-            self.order = None;
-            self.price = 0;
-            self.qty = 0;
-
-        def execute(self, order, price, qty):
-            self.order = order
-            self.price = price
-            self.qty = qty
-            return True
-
-        def reset(self):
-            self.order = None;
-            self.price = 0;
-            self.qty = 0;
-
     def setUp(self):
-        self.mock = OrderHandlerTest.MockExec()
-        self.config = SimConfig()
+        self.config = SimConfig(bar_vol_ratio =1)
 
     def test_limit_order_handler(self):
-        handler = LimitOrderHandler(self.mock.execute, self.config)
-        self.assertEquals(None, self.mock.order)
+        handler = LimitOrderHandler(self.config)
 
-        bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5)
-        bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17)
+        bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5, vol=1000)
+        bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17, vol=1000)
 
         # BUY
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
-        processed = handler.process_w_price_qty(order, 20, 1000)
-        self.assertFalse(processed)
-        self.assertEquals(None, self.mock.order)
+        fill_info = handler.process_w_price_qty(order, 20, 1000)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 18, 1000)
-        self.assertTrue(processed)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(18.5, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        fill_info = handler.process_w_price_qty(order, 18, 1000)
+        self.assertEquals(18.5, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
 
         # BUY with bar
-        processed = handler.process_w_bar(order, bar1)
-        self.assertFalse(processed)
-        self.assertEquals(None, self.mock.order)
+        fill_info = handler.process(order, bar1)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar2)
-        self.assertTrue(processed)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(18.5, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        fill_info = handler.process(order, bar2)
+        self.assertEquals(18.5, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
 
         # SELL
         order2 = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.LIMIT, qty=1000,
                        limit_price=18.5)
-        processed = handler.process_w_price_qty(order2, 18, 1000)
-        self.assertFalse(processed)
-        self.assertEquals(None, self.mock.order)
+        fill_info = handler.process_w_price_qty(order2, 18, 1000)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order2, 20, 1000)
-        self.assertTrue(processed)
-        self.assertEquals(order2, self.mock.order)
-        self.assertEquals(18.5, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        fill_info = handler.process_w_price_qty(order2, 20, 1000)
+        self.assertEquals(18.5, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
 
         # SELL with bar
-        processed = handler.process_w_bar(order2, bar2)
-        self.assertFalse(processed)
-        self.assertEquals(None, self.mock.order)
+        fill_info = handler.process(order2, bar2)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order2, bar1)
-        self.assertTrue(processed)
-        self.assertEquals(order2, self.mock.order)
-        self.assertEquals(18.5, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        fill_info = handler.process(order2, bar1)
+        self.assertEquals(18.5, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
     def test_market_order_handler(self):
-        handler = MarketOrderHandler(self.mock.execute, self.config)
-        self.assertEquals(None, self.mock.order)
+        handler = MarketOrderHandler(self.config)
 
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
 
         quote = Quote(instrument="HSI", bid=18, ask=19, bid_size=200, ask_size=500)
         trade = Trade(instrument="HSI", price=20, size=200)
 
-        processed = handler.process_w_price_qty(order, 18, 500)
-        self.assertTrue(processed)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(18, self.mock.price)
-        self.assertEquals(500, self.mock.qty)
+        fill_info = handler.process_w_price_qty(order, 18, 500)
+        self.assertEquals(18, fill_info.fill_price)
+        self.assertEquals(500, fill_info.fill_qty)
 
     def test_stop_order_handler(self):
-        handler = StopOrderHandler(self.mock.execute, self.config)
+        handler = StopOrderHandler(self.config)
 
-        self.assertEquals(None, self.mock.order)
-
-        bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5)
-        bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17)
+        bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5, vol=1000)
+        bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17, vol=1000)
 
         # BUY
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.STOP, qty=1000, stop_price=18.5)
-        processed = handler.process_w_price_qty(order, 18, 1000)
-        self.assertFalse(processed)
+        fill_info = handler.process_w_price_qty(order, 18, 1000)
         self.assertFalse(order.stop_limit_ready)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 19, 1000)
-        self.assertTrue(processed)
+        fill_info = handler.process_w_price_qty(order, 19, 1000)
         self.assertTrue(order.stop_limit_ready)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(19, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
-
-        self.mock.reset()
+        self.assertEquals(19, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
         # BUY with bar
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.STOP, qty=1000, stop_price=18.5)
-        processed = handler.process_w_bar(order, bar2)
-        self.assertFalse(processed)
+        fill_info = handler.process(order, bar2)
         self.assertFalse(order.stop_limit_ready)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar1)
-        self.assertTrue(processed)
+        fill_info = handler.process(order, bar1)
         self.assertTrue(order.stop_limit_ready)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(18.5, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        self.assertEquals(18.5, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
 
         # SELL
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.STOP, qty=1000, stop_price=18.5)
-        processed = handler.process_w_price_qty(order, 19, 1000)
-        self.assertFalse(processed)
+        fill_info = handler.process_w_price_qty(order, 19, 1000)
         self.assertFalse(order.stop_limit_ready)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 18, 1000)
-        self.assertTrue(processed)
+        fill_info = handler.process_w_price_qty(order, 18, 1000)
         self.assertTrue(order.stop_limit_ready)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(18, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        self.assertEquals(18, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
 
         # SELL with bar
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.STOP, qty=1000, stop_price=18.5)
-        processed = handler.process_w_bar(order, bar1)
-        self.assertFalse(processed)
+        fill_info = handler.process(order, bar1)
         self.assertFalse(order.stop_limit_ready)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar2)
-        self.assertTrue(processed)
+        fill_info = handler.process(order, bar2)
         self.assertTrue(order.stop_limit_ready)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(18.5, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        self.assertEquals(18.5, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
 
     def test_stop_limit_order_handler(self):
-        handler = StopLimitOrderHandler(self.mock.execute, self.config)
+        handler = StopLimitOrderHandler(self.config)
 
-        self.assertEquals(None, self.mock.order)
-
-        bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5)
-        bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17)
+        bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5, vol=1000)
+        bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17,  vol=1000)
 
         # BUY
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.STOP_LIMIT, qty=1000,
                       limit_price=18,
                       stop_price=18.5)
-        processed = handler.process_w_price_qty(order, 18, 1000)
+        fill_info = handler.process_w_price_qty(order, 18, 1000)
         self.assertFalse(order.stop_limit_ready)
-        self.assertFalse(processed)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 19, 1000)
+        fill_info = handler.process_w_price_qty(order, 19, 1000)
         self.assertTrue(order.stop_limit_ready)
-        self.assertFalse(processed)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 18, 1000)
+        fill_info = handler.process_w_price_qty(order, 18, 1000)
         self.assertTrue(order.stop_limit_ready)
-        self.assertTrue(processed)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(18, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        self.assertEquals(18, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
 
         # BUY with bar
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.STOP_LIMIT, qty=1000,
                       limit_price=18,
                       stop_price=18.5)
-        processed = handler.process_w_bar(order, bar2)
-        self.assertFalse(processed)
+        fill_info = handler.process(order, bar2)
         self.assertFalse(order.stop_limit_ready)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar1)
+        fill_info = handler.process(order, bar1)
         self.assertTrue(order.stop_limit_ready)
-        self.assertFalse(processed)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar2)
+        fill_info = handler.process(order, bar2)
         self.assertTrue(order.stop_limit_ready)
-        self.assertTrue(processed)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(18, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        self.assertEquals(18, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
         # SELL
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.STOP_LIMIT, qty=1000,
                       limit_price=20,
                       stop_price=18.5)
-        processed = handler.process_w_price_qty(order, 19, 1000)
+        fill_info = handler.process_w_price_qty(order, 19, 1000)
         self.assertFalse(order.stop_limit_ready)
-        self.assertFalse(processed)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 18, 1000)
+        fill_info = handler.process_w_price_qty(order, 18, 1000)
         self.assertTrue(order.stop_limit_ready)
-        self.assertFalse(processed)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 20, 1000)
+        fill_info = handler.process_w_price_qty(order, 20, 1000)
         self.assertTrue(order.stop_limit_ready)
-        self.assertTrue(processed)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(20, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        self.assertEquals(20, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
 
         # SELL with bar
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.STOP_LIMIT, qty=1000,
                       limit_price=20,
                       stop_price=18.5)
-        processed = handler.process_w_bar(order, bar1)
-        self.assertFalse(processed)
+        fill_info = handler.process(order, bar1)
         self.assertFalse(order.stop_limit_ready)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar2)
+        fill_info = handler.process(order, bar2)
         self.assertTrue(order.stop_limit_ready)
-        self.assertFalse(processed)
-        self.assertEquals(None, self.mock.order)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar1)
+        fill_info = handler.process(order, bar1)
         self.assertTrue(order.stop_limit_ready)
-        self.assertTrue(processed)
-        self.assertEquals(order, self.mock.order)
-        self.assertEquals(20, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        self.assertEquals(20, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
     def test_trailing_stop_order_handler(self):
-        handler = TrailingStopOrderHandler(self.mock.execute, self.config)
+        handler = TrailingStopOrderHandler(self.config)
 
-        self.assertEquals(None, self.mock.order)
-
-        bar1 = Bar(instrument="HSI", open=16, high=18, low=15, close=17)
-        bar2 = Bar(instrument="HSI", open=17, high=19, low=16, close=18)
-        bar3 = Bar(instrument="HSI", open=18, high=20, low=17, close=19)
-        bar4 = Bar(instrument="HSI", open=19, high=21, low=18, close=20)
-        bar5 = Bar(instrument="HSI", open=20, high=22, low=19, close=21)
+        bar1 = Bar(instrument="HSI", open=16, high=18, low=15, close=17, vol=1000)
+        bar2 = Bar(instrument="HSI", open=17, high=19, low=16, close=18, vol=1000)
+        bar3 = Bar(instrument="HSI", open=18, high=20, low=17, close=19, vol=1000)
+        bar4 = Bar(instrument="HSI", open=19, high=21, low=18, close=20, vol=1000)
+        bar5 = Bar(instrument="HSI", open=20, high=22, low=19, close=21, vol=1000)
 
         # BUY with bar
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.TRAILING_STOP, qty=1000,
@@ -290,29 +211,22 @@ class OrderHandlerTest(TestCase):
 
         self.assertEquals(0, order.trailing_stop_exec_price)
 
-        processed = handler.process_w_bar(order, bar2)
+        fill_info = handler.process(order, bar2)
         self.assertEquals(21, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar3)
+        fill_info = handler.process(order, bar3)
         self.assertEquals(21, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar1)
+        fill_info = handler.process(order, bar1)
         self.assertEquals(20, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar3)
+        fill_info = handler.process(order, bar3)
         self.assertEquals(20, order.trailing_stop_exec_price)
-        self.assertEquals(order, self.mock.order)
-        self.assertTrue(processed)
-        self.assertEquals(20, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
-
-        self.mock.reset()
+        self.assertEquals(20, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
         # BUY
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.TRAILING_STOP, qty=1000,
@@ -320,34 +234,27 @@ class OrderHandlerTest(TestCase):
 
         self.assertEquals(0, order.trailing_stop_exec_price)
 
-        processed = handler.process_w_price_qty(order, 16, 1000)
+        fill_info = handler.process_w_price_qty(order, 16, 1000)
         self.assertEquals(21, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 17, 1000)
+        fill_info = handler.process_w_price_qty(order, 17, 1000)
         self.assertEquals(21, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 15, 1000)
+        fill_info = handler.process_w_price_qty(order, 15, 1000)
         self.assertEquals(20, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 19, 1000)
+        fill_info = handler.process_w_price_qty(order, 19, 1000)
         self.assertEquals(20, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 20, 1000)
+        fill_info = handler.process_w_price_qty(order, 20, 1000)
         self.assertEquals(20, order.trailing_stop_exec_price)
-        self.assertEquals(order, self.mock.order)
-        self.assertTrue(processed)
-        self.assertEquals(20, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        self.assertEquals(20, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
 
         # SELL with bar
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.TRAILING_STOP, qty=1000,
@@ -355,29 +262,23 @@ class OrderHandlerTest(TestCase):
 
         self.assertEquals(0, order.trailing_stop_exec_price)
 
-        processed = handler.process_w_bar(order, bar4)
+        fill_info = handler.process(order, bar4)
         self.assertEquals(16, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar3)
+        fill_info = handler.process(order, bar3)
         self.assertEquals(16, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar5)
+        fill_info = handler.process(order, bar5)
         self.assertEquals(17, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_bar(order, bar3)
+        fill_info = handler.process(order, bar3)
         self.assertEquals(17, order.trailing_stop_exec_price)
-        self.assertEquals(order, self.mock.order)
-        self.assertTrue(processed)
-        self.assertEquals(17, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        self.assertEquals(17, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()
 
         # SELL
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.SELL, type=OrdType.TRAILING_STOP, qty=1000,
@@ -385,31 +286,24 @@ class OrderHandlerTest(TestCase):
 
         self.assertEquals(0, order.trailing_stop_exec_price)
 
-        processed = handler.process_w_price_qty(order, 21, 1000)
+        fill_info = handler.process_w_price_qty(order, 21, 1000)
         self.assertEquals(16, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 20, 1000)
+        fill_info = handler.process_w_price_qty(order, 20, 1000)
         self.assertEquals(16, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 22, 1000)
+        fill_info = handler.process_w_price_qty(order, 22, 1000)
         self.assertEquals(17, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 18, 1000)
+        fill_info = handler.process_w_price_qty(order, 18, 1000)
         self.assertEquals(17, order.trailing_stop_exec_price)
-        self.assertEquals(None, self.mock.order)
-        self.assertFalse(processed)
+        self.assertEquals(None, fill_info)
 
-        processed = handler.process_w_price_qty(order, 17, 1000)
+        fill_info = handler.process_w_price_qty(order, 17, 1000)
         self.assertEquals(17, order.trailing_stop_exec_price)
-        self.assertEquals(order, self.mock.order)
-        self.assertTrue(processed)
-        self.assertEquals(17, self.mock.price)
-        self.assertEquals(1000, self.mock.qty)
+        self.assertEquals(17, fill_info.fill_price)
+        self.assertEquals(1000, fill_info.fill_qty)
 
-        self.mock.reset()

@@ -14,7 +14,7 @@ from algotrader.utils import logger
 class Simulator(Broker, MarketDataEventHandler):
     ID = "Simulator"
 
-    def __init__(self, sim_config=None, exec_handler=order_mgr, commission=None, fill_strategy=None):
+    def __init__(self, exec_handler=order_mgr, commission=None, fill_strategy=None):
         self.__next_exec_id = 0
         self.__order_map = defaultdict(dict)
         self.__quote_map = {}
@@ -49,7 +49,7 @@ class Simulator(Broker, MarketDataEventHandler):
     def __process_event(self, event):
         logger.debug("[%s] %s" % (self.__class__.__name__, event))
         if event.instrument in self.__order_map:
-            for order in self.__order_map[event.instrument].itervalues():
+            for order in self.__order_map[event.instrument].values():
                 fill_info = self.__fill_strategy.process_w_market_data(order, event, False)
                 executed = self.execute(order, fill_info)
 
@@ -73,14 +73,11 @@ class Simulator(Broker, MarketDataEventHandler):
                 del orders[order.ord_id]
 
     def execute(self, order, fill_info):
-        if not fill_info:
+        if not fill_info or fill_info.fill_price <=0 or fill_info.fill_price<=0:
             return False
 
         filled_price = fill_info.fill_price
         filled_qty = fill_info.fill_qty
-
-        assert filled_price > 0
-        assert filled_qty > 0
 
         if order.is_done():
             self.__remove_order(order)

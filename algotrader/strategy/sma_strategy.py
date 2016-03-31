@@ -10,9 +10,9 @@ class SMAStrategy(Strategy):
         super(SMAStrategy, self).__init__(stg_id, broker_id, feed, portfolio)
         self.order = None
         self.qty = qty
-        close = inst_data_mgr.get_series("Bar.%s.86400.Close" % instrument)
-        self.sma_fast = SMA(close, 10)
-        self.sma_slow = SMA(close, 25)
+        self.close = inst_data_mgr.get_series("Bar.%s.86400.Close" % instrument)
+        self.sma_fast = SMA(self.close, 10)
+        self.sma_slow = SMA(self.close, 25)
 
     def on_bar(self, bar):
         if self.order is None and self.sma_fast.now() > self.sma_slow.now():

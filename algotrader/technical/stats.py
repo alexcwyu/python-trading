@@ -1,7 +1,7 @@
 import numpy as np
 
 from algotrader.technical import Indicator
-
+from algotrader.utils.time_series import TimeSeries
 
 
 class MAX(Indicator):
@@ -9,8 +9,13 @@ class MAX(Indicator):
         'length'
     )
 
+    @classmethod
+    def get_name(cls, input, length):
+        name = input.name if isinstance(input, TimeSeries) else input
+        return "MAX(%s,%s)" % (name, length)
+
     def __init__(self, input, length, description="Maximum"):
-        super(MAX, self).__init__(input, "MAX(%s,%s)" % (input.name, length), description)
+        super(MAX, self).__init__(MAX.get_name(input, length), input, description)
         self.length = length
 
     def on_update(self, time_value):
@@ -26,8 +31,13 @@ class MIN(Indicator):
         'length'
     )
 
+    @classmethod
+    def get_name(cls, input, length):
+        name = input.name if isinstance(input, TimeSeries) else input
+        return "MIN(%s,%s)" % (name, length)
+
     def __init__(self, input, length, description="Minimum"):
-        super(MIN, self).__init__(input, "MIN(%s,%s)" % (input.id, length), description)
+        super(MIN, self).__init__(MIN.get_name(input, length), input, description)
         self.length = length
 
     def on_update(self, time_value):
@@ -43,8 +53,13 @@ class STD(Indicator):
         'length'
     )
 
+    @classmethod
+    def get_name(cls, input, length):
+        name = input.name if isinstance(input, TimeSeries) else input
+        return "STD(%s,%s)" % (name, length)
+
     def __init__(self, input, length, description="Standard Deviation"):
-        super(STD, self).__init__(input, "STD(%s,%s)" % (input.id, length), description)
+        super(STD, self).__init__(STD.get_name(input, length), input, description)
         self.length = length
 
     def on_update(self, time_value):
@@ -60,8 +75,13 @@ class VAR(Indicator):
         'length'
     )
 
+    @classmethod
+    def get_name(cls, input, length):
+        name = input.name if isinstance(input, TimeSeries) else input
+        return "VAR(%s,%s)" % (name, length)
+
     def __init__(self, input, length, description="Variance"):
-        super(VAR, self).__init__(input, "VAR(%s,%s)" % (input.id, length), description)
+        super(VAR, self).__init__(VAR.get_name(input, length), input, description)
         self.length = length
 
     def on_update(self, time_value):

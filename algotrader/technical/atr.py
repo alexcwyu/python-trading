@@ -1,6 +1,7 @@
 from algotrader.event.market_data import Bar
 from algotrader.technical import Indicator
 from algotrader.technical.ma import SMA
+from algotrader.utils.time_series import TimeSeries
 
 
 class ATR(Indicator):
@@ -11,8 +12,13 @@ class ATR(Indicator):
         '__average',
     )
 
+    @classmethod
+    def get_name(cls, input, length):
+        name = input.name if isinstance(input, TimeSeries) else input
+        return "ATR(%s,%s)" % (name, length)
+
     def __init__(self, input, length=14, description="Average True Range"):
-        super(ATR, self).__init__(input, "ATR(%s, %s)" % (input.name, length), description)
+        super(ATR, self).__init__(ATR.get_name(input, length), input, description)
         self.length = length
         self.__prev_close = None
         self.__value = None

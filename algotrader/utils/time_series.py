@@ -19,7 +19,7 @@ class TimeSeries(object):
 
     def __init__(self, name=None, description=None, missing_value=np.nan):
         self.name = name
-        self.description = description if description else id
+        self.description = description if description else name
         self.data = dict()
         self.subject = Subject()
         self.__value = list()
@@ -130,7 +130,7 @@ class DataSeries(object):
 
     def __init__(self, name=None, description=None, missing_value=np.nan):
         self.name = name
-        self.description = description if description else id
+        self.description = description if description else name
         self.data = defaultdict(dict)
         self.subject = Subject()
         self._value = defaultdict(list)

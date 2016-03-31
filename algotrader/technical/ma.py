@@ -11,8 +11,13 @@ class SMA(Indicator):
         'length'
     )
 
+    @classmethod
+    def get_name(cls, input, length):
+        name = input.name if isinstance(input, TimeSeries) else input
+        return "SMA(%s,%s)" % (name, length)
+
     def __init__(self, input, length, description="Simple Moving Average"):
-        super(SMA, self).__init__(input, "SMA(%s,%s)" % (input.name, length), description)
+        super(SMA, self).__init__(SMA.get_name(input, length), input, description)
         self.length = length
 
     def on_update(self, time_value):

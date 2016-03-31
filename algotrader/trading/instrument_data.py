@@ -4,7 +4,7 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.utils import logger
 from algotrader.utils.time_series import TimeSeries, DataSeries
-
+import numpy as np
 
 class InstrumentDataManager(MarketDataEventHandler):
     def __init__(self):
@@ -75,16 +75,21 @@ class InstrumentDataManager(MarketDataEventHandler):
             return self.__bar_dict[instrument].close
         return None
 
-    def get_series(self, key, cls = TimeSeries):
-        if key not in self.__series_dict:
-            self.__series_dict[key] = cls(name=key)
-        return self.__series_dict[key]
+    def get_series(self, key, create_if_missing = True, cls = TimeSeries, description=None, missing_value=np.nan):
+        if type(key) == str:
+            if key not in self.__series_dict:
+                self.__series_dict[key] = cls(name=key, description=description, missing_value=missing_value)
+            return self.__series_dict[key]
+        raise AssertionError()
 
     def add_series(self, series):
         if series.name not in self.__series_dict:
             self.__series_dict[series.name] = series
             return True
         return False
+
+    def has_series(self, name):
+        return name in self.__series_dict
 
     def clear(self):
         self.__bar_dict = {}

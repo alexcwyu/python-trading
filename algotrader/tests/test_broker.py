@@ -45,8 +45,8 @@ class SimulatorTest(TestCase):
         exec_report = self.exec_handler.exec_reports[0]
         self.assert_exec_report(exec_report, order1.ord_id, 0, 0, OrdStatus.SUBMITTED)
 
-        bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5)
-        bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17)
+        bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5, vol=1000)
+        bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17, vol=1000)
 
         self.exec_handler.reset()
         self.simulator.on_bar(bar1)
@@ -59,8 +59,8 @@ class SimulatorTest(TestCase):
         self.assert_exec_report(exec_report, order1.ord_id, 1000, 18.5, OrdStatus.FILLED)
 
     def test_on_limit_order_immediate_fill(self):
-        bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5)
-        bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17)
+        bar1 = Bar(instrument="HSI", open=20, high=21, low=19, close=20.5, vol=1000)
+        bar2 = Bar(instrument="HSI", open=16, high=18, low=15, close=17, vol=1000)
 
         inst_data_mgr.on_bar(bar2)
 

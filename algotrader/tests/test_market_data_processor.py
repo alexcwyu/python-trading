@@ -12,7 +12,7 @@ class MarketDataProcessorTest(TestCase):
         processor = BarProcessor()
 
         order = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
-        bar = Bar(open=18, high=19, low=17, close=17.5)
+        bar = Bar(open=18, high=19, low=17, close=17.5, vol=1000)
 
         self.assertEqual(17.5, processor.get_price(order, bar, config))
         self.assertEqual(1000, processor.get_qty(order, bar, config))
@@ -29,7 +29,7 @@ class MarketDataProcessorTest(TestCase):
         trade = Trade(price=20, size=200)
 
         self.assertEqual(20, processor.get_price(order, trade, config))
-        self.assertEqual(1000, processor.get_qty(order, trade, config))
+        self.assertEqual(200, processor.get_qty(order, trade, config))
 
     def test_quote_processor(self):
         config = SimConfig()

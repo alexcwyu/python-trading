@@ -1,12 +1,13 @@
 #### DONE
 - fill strategy & slippage & bar vol ratio & commission
 - serialization
+    json
+    msgpack
+- indicator / timeseries, reuse...
 
-
-#### TODO
+#### PIPELINE
 - bar adj price
 - strategy has it orderID  (clOrderID vs orderID)
-- indicator / timeseries, reuse...
 - unify timeseries & dataseries, test performance
 - support merge / append on dataSeries
 - better API

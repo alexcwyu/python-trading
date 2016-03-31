@@ -3,18 +3,18 @@ import datetime
 from rx.observable import Observer
 
 from algotrader.utils import logger
-
+from algotrader.utils.ser_deser import Serializable
 current_time = datetime.datetime.now()
 
 
-class Event(object):
+
+class Event(Serializable):
     def on(self, handler):
         pass
 
     def __repr__(self):
         items = ("%s = %r" % (k, v) for k, v in self.__dict__.items())
         return "%s(%s)" % (self.__class__.__name__, ', '.join(items))
-
 
 
 class EventHandler(Observer):

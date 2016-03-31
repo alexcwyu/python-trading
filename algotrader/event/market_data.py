@@ -12,7 +12,7 @@ class Frequency(object):
 
 
 class MarketDataEvent(Event):
-    _slots__ = (
+    __slots__ = (
         'instrument',
         'timestamp',
     )

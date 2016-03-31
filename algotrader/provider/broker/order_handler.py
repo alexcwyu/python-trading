@@ -29,13 +29,13 @@ class SimOrderHandler(object):
             elif isinstance(event, Quote):
                 fill_price = self._quote_processor.get_price(order, event, self._config, new_order)
                 fill_qty = self._quote_processor.get_qty(order, event, self._config)
-                if fill_price == 0.0:
+                if fill_price <= 0.0 or fill_qty <=0:
                     return None
                 return self.process_w_price_qty(order, fill_price, fill_qty)
             elif isinstance(event, Trade):
                 fill_price = self._trade_processor.get_price(order, event, self._config, new_order)
                 fill_qty = self._trade_processor.get_qty(order, event, self._config)
-                if fill_price == 0.0:
+                if fill_price <= 0.0 or fill_qty <=0:
                     return None
                 return self.process_w_price_qty(order, fill_price, fill_qty)
         return None
@@ -56,7 +56,7 @@ class MarketOrderHandler(SimOrderHandler):
 
     def process_w_bar(self, order, bar, qty, new_order=False):
         fill_price = self._bar_processor.get_price(order, bar, self._config, new_order)
-        if fill_price == 0.0:
+        if fill_price <= 0.0 or qty <=0:
             return None
         if self.__slippage:
             fill_price = self.__slippage.calc_price_w_bar(order, fill_price, qty, bar)

@@ -10,7 +10,8 @@ class SimConfig:
                  fill_on_bar=True,
                  fill_on_quote_mode=FillMode.LAST,
                  fill_on_trade_mode=FillMode.LAST,
-                 fill_on_bar_mode=FillMode.LAST):
+                 fill_on_bar_mode=FillMode.LAST,
+                 bar_vol_ratio = 0.25):
         self.partial_fill = partial_fill
         self.fill_on_quote = fill_on_quote
         self.fill_on_trade = fill_on_trade
@@ -18,3 +19,4 @@ class SimConfig:
         self.fill_on_quote_mode = fill_on_quote_mode
         self.fill_on_trade_mode = fill_on_trade_mode
         self.fill_on_bar_mode = fill_on_bar_mode
+        self.bar_vol_ratio = bar_vol_ratio if bar_vol_ratio >0 and bar_vol_ratio <=1 else 1

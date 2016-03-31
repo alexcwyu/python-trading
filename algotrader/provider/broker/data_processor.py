@@ -19,32 +19,33 @@ class MarketDataProcessor(object):
 
 class BarProcessor(MarketDataProcessor):
     def get_price(self, order, market_data, config, new_order = False):
-        if market_data and isinstance(market_data, Bar):
-            if config.fill_on_bar_mode == SimConfig.FillMode.LAST or config.fill_on_bar_mode == SimConfig.FillMode.NEXT_CLOSE:
-                return market_data.close
-            elif not new_order and config.fill_on_bar_mode == SimConfig.FillMode.NEXT_OPEN:
-                return market_data.open
+        if config.fill_on_bar_mode == SimConfig.FillMode.LAST or config.fill_on_bar_mode == SimConfig.FillMode.NEXT_CLOSE:
+            return market_data.close
+        elif not new_order and config.fill_on_bar_mode == SimConfig.FillMode.NEXT_OPEN:
+            return market_data.open
         return 0.0
 
     def get_qty(self, order, market_data, config):
+        if config.partial_fill:
+            bar_vol = market_data.vol if not config.bar_vol_ratio else market_data.vol * config.bar_vol_ratio
+            return min(order.qty, bar_vol)
         return order.qty
 
 
 class QuoteProcessor(MarketDataProcessor):
     def get_price(self, order, market_data, config, new_order = False):
-        if market_data and isinstance(market_data, Quote):
-            if order.is_buy() and market_data.ask > 0:
-                return market_data.ask
-            elif order.is_sell() and market_data.bid > 0:
-                return market_data.bid
+        if order.is_buy() and market_data.ask > 0:
+            return market_data.ask
+        elif order.is_sell() and market_data.bid > 0:
+            return market_data.bid
         return 0.0
 
     def get_qty(self, order, market_data, config):
-        if market_data and isinstance(market_data, Quote) and config.partial_fill:
-            if order.is_buy() and market_data.ask_size > 0:
-                return market_data.ask_size
-            elif order.is_sell() and market_data.bid_size > 0:
-                return market_data.bid_size
+        if config.partial_fill:
+            if order.is_buy():
+                return min(market_data.ask_size, order.qty)
+            elif order.is_sell():
+                return min(market_data.bid_size, order.qty)
         return order.qty
 
 
@@ -56,4 +57,6 @@ class TradeProcessor(MarketDataProcessor):
         return 0.0
 
     def get_qty(self, order, market_data, config):
+        if config.partial_fill:
+            return min(order.qty, market_data.size)
         return order.qty

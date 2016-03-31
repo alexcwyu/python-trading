@@ -12,17 +12,16 @@ class ATR(Indicator):
         '__average',
     )
 
-    @classmethod
+    @staticmethod
     def get_name(cls, input, length):
-        name = input.name if isinstance(input, TimeSeries) else input
-        return "ATR(%s,%s)" % (name, length)
+        return "ATR(%s,%s)" % (Indicator.get_input_name(input), length)
 
     def __init__(self, input, length=14, description="Average True Range"):
         super(ATR, self).__init__(ATR.get_name(input, length), input, description)
-        self.length = length
+        self.length = int(length)
         self.__prev_close = None
         self.__value = None
-        self.__average = SMA(input, length)
+        self.__average = SMA(input, self.length)
 
     def on_update(self, time_value):
         time, bar = time_value

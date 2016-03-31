@@ -82,11 +82,11 @@ class InstrumentDataManager(MarketDataEventHandler):
             return self.__series_dict[key]
         raise AssertionError()
 
-    def add_series(self, series):
+    def add_series(self, series, raise_if_duplicate = True):
         if series.name not in self.__series_dict:
             self.__series_dict[series.name] = series
-            return True
-        return False
+        elif raise_if_duplicate and self.__series_dict[series.name] != series:
+            raise AssertionError("Series [%s] already exist" % series.name)
 
     def has_series(self, name):
         return name in self.__series_dict

@@ -16,14 +16,13 @@ class ROC(Indicator):
     _slots__ = (
         'length'
     )
-    @classmethod
-    def get_name(cls, input, length):
-        name = input.name if isinstance(input, TimeSeries) else input
-        return "ROC(%s,%s)" % (name, length)
+    @staticmethod
+    def get_name(input, length):
+        return "ROC(%s,%s)" % (Indicator.get_input_name(input), length)
 
     def __init__(self, input, length=1, description="Rate Of Change"):
         super(ROC, self).__init__(ROC.get_name(input, length), input, description)
-        self.length = length
+        self.length = int(length)
 
     def on_update(self, time_value):
         time, value = time_value

@@ -55,14 +55,13 @@ class RSI(Indicator):
         '__prev_loss'
     )
 
-    @classmethod
-    def get_name(cls, input, length):
-        name = input.name if isinstance(input, TimeSeries) else input
-        return "RSI(%s,%s)" % (name, length)
+    @staticmethod
+    def get_name(input, length):
+        return "RSI(%s,%s)" % (Indicator.get_input_name(input), length)
 
     def __init__(self, input, length=14, description="Relative Strength Indicator"):
-        super(RSI, self).__init__(RSI.get_name(input.name, length), input, description)
-        self.length = length
+        super(RSI, self).__init__(RSI.get_name(input, length), input, description)
+        self.length = int(length)
         self.__prev_gain = None
         self.__prev_loss = None
 

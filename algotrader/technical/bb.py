@@ -18,19 +18,18 @@ class BB(Indicator):
         '__std_dev',
     )
 
-    @classmethod
+    @staticmethod
     def get_name(cls, input, length, num_std):
-        name = input.name if isinstance(input, TimeSeries) else input
-        return "BB(%s,%s,%s)" % (name, length, num_std)
+        return "BB(%s,%s,%s)" % (Indicator.get_input_name(input), length, num_std)
 
     def __init__(self, input, length=14, num_std = 3, description="Bollinger Bands"):
         super(BB, self).__init__(BB.get_name(input, length, num_std), input, description)
-        self.length = length
-        self.num_std = num_std
-        self.__sma = SMA(input, length)
-        self.__std_dev = STD(input, length)
-        self.upper = TimeSeries("BBU(%s, %s)" % (input.name, length))
-        self.lower = TimeSeries("BBL(%s, %s)" % (input.name, length))
+        self.length = int(length)
+        self.num_std = int(num_std)
+        self.__sma = SMA(input, self.length)
+        self.__std_dev = STD(input, self.length)
+        self.upper = TimeSeries("BBU(%s,%s)" % (input.name, self.length))
+        self.lower = TimeSeries("BBL(%s,%s)" % (input.name, self.length))
 
     def on_update(self, time_value):
         time, value = time_value

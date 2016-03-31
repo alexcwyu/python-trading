@@ -9,14 +9,13 @@ class MAX(Indicator):
         'length'
     )
 
-    @classmethod
+    @staticmethod
     def get_name(cls, input, length):
-        name = input.name if isinstance(input, TimeSeries) else input
-        return "MAX(%s,%s)" % (name, length)
+        return "MAX(%s,%s)" % (Indicator.get_input_name(input), length)
 
     def __init__(self, input, length, description="Maximum"):
         super(MAX, self).__init__(MAX.get_name(input, length), input, description)
-        self.length = length
+        self.length = int(length)
 
     def on_update(self, time_value):
         time, value = time_value
@@ -31,14 +30,13 @@ class MIN(Indicator):
         'length'
     )
 
-    @classmethod
+    @staticmethod
     def get_name(cls, input, length):
-        name = input.name if isinstance(input, TimeSeries) else input
-        return "MIN(%s,%s)" % (name, length)
+        return "MIN(%s,%s)" % (Indicator.get_input_name(input), length)
 
     def __init__(self, input, length, description="Minimum"):
         super(MIN, self).__init__(MIN.get_name(input, length), input, description)
-        self.length = length
+        self.length = int(length)
 
     def on_update(self, time_value):
         time, value = time_value
@@ -53,14 +51,13 @@ class STD(Indicator):
         'length'
     )
 
-    @classmethod
+    @staticmethod
     def get_name(cls, input, length):
-        name = input.name if isinstance(input, TimeSeries) else input
-        return "STD(%s,%s)" % (name, length)
+        return "STD(%s,%s)" % (Indicator.get_input_name(input), length)
 
     def __init__(self, input, length, description="Standard Deviation"):
         super(STD, self).__init__(STD.get_name(input, length), input, description)
-        self.length = length
+        self.length = int(length)
 
     def on_update(self, time_value):
         time, value = time_value
@@ -75,14 +72,13 @@ class VAR(Indicator):
         'length'
     )
 
-    @classmethod
+    @staticmethod
     def get_name(cls, input, length):
-        name = input.name if isinstance(input, TimeSeries) else input
-        return "VAR(%s,%s)" % (name, length)
+        return "VAR(%s,%s)" % (Indicator.get_input_name(input), length)
 
     def __init__(self, input, length, description="Variance"):
         super(VAR, self).__init__(VAR.get_name(input, length), input, description)
-        self.length = length
+        self.length = int(length)
 
     def on_update(self, time_value):
         time, value = time_value

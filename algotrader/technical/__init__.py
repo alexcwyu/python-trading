@@ -9,6 +9,14 @@ class Indicator(TimeSeries):
         'calculate',
     )
 
+    @staticmethod
+    def get_input_name(input):
+        if isinstance(input, Indicator):
+            return input.name
+        if isinstance(input, TimeSeries):
+            return "'%s'"%input.name
+        return "'%s'"%input
+
     def __init__(self, name, input, description):
         super(Indicator, self).__init__(name, description)
         if isinstance(input, TimeSeries):
@@ -40,8 +48,50 @@ from algotrader.technical.stats import MIN
 from algotrader.technical.stats import STD
 from algotrader.technical.stats import VAR
 
-def get_or_create_indicator(cls_name, *args, **kwargs):
-    name = globals()[cls_name].get_name(*args, **kwargs)
+def parse(name):
     if not inst_data_mgr.has_series(name):
-        return globals()[cls_name](*args, **kwargs)
+        count = name.count("(")
+        if count >1 :
+            lidx = name.find("(")
+            ridx = name.rfind(")", 0, -1)
+            assert name.endswith(")") , "invalid syntax, cannot parse %s" % name
+            assert lidx > -1 , "invalid syntax, cannot parse %s" % name
+            assert ridx > lidx , "invalid syntax, cannot parse %s" % name
+
+            cls_str =  name[0:lidx]
+            inner_str = name[lidx+1 : ridx+1]
+            arg_str = name[ridx + 2:-1]
+            inner = parse(inner_str)
+            arg = [inner]
+            arg += arg_str.split(',')
+            return globals()[cls_str](*arg)
+        elif count == 1 :
+            lidx = name.find("(")
+            ridx = name.find(",")
+            assert name.endswith(")") , "invalid syntax, cannot parse %s" % name
+            assert lidx > -1 , "invalid syntax, cannot parse %s" % name
+            assert ridx > lidx , "invalid syntax, cannot parse %s" % name
+
+            cls_str = name[0:lidx]
+            inner_str = name[lidx+1: ridx].strip(' \'\"')
+            arg_str = name[ridx + 1:-1]
+            inner = parse(inner_str)
+            arg = [inner]
+            arg += arg_str.split(',')
+            return globals()[cls_str](*arg)
+    return inst_data_mgr.get_series(name)
+
+
+
+def get_or_create_indicator(cls, *args, **kwargs):
+    name = globals()[cls].get_name(*args, **kwargs)
+    if not inst_data_mgr.has_series(name):
+        return globals()[cls](*args, **kwargs)
     return inst_data_mgr.get_series(name, create_if_missing=False)
+
+#
+#
+# def get_or_create_indicator_by_str(name):
+#     if not inst_data_mgr.has_series(name):
+#         return globals()[cls](*args, **kwargs)
+#     return inst_data_mgr.get_series(name, create_if_missing=False)

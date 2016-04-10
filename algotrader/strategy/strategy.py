@@ -14,7 +14,14 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
         self.__broker_id = broker_id
         self.__feed = feed
         self.__portfolio = portfolio
+        self.__next_ord_id = 0
         stg_mgr.add_strategy(self)
+
+    def __get_next_ord_id(self):
+        next_ord_id = self.__next_ord_id
+        self.__next_ord_id += 1
+        return next_ord_id
+
 
     def start(self):
         broker = broker_mgr.get_broker(broker_id=self.__broker_id)
@@ -43,18 +50,30 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
         self.__portfolio.on_exec_report(exec_report)
 
-    def new_market_order(self, instrument, action, qty, tif=TIF.DAY):
+    def market_order(self, instrument, action, qty, tif=TIF.DAY):
         return self.new_order(instrument, OrdType.MARKET, action, qty, 0.0, tif)
 
-    def new_limit_order(self, instrument, action, qty, price, tif=TIF.DAY):
+    def limit_order(self, instrument, action, qty, price, tif=TIF.DAY):
         return self.new_order(instrument, OrdType.LIMIT, action, qty, price, tif)
+
+    def stop_order(self):
+        pass
+
+    def stop_limit_order(self):
+        pass
+
+    def close_position(self):
+        pass
+           
+
 
     def new_order(self, instrument, ord_type, action, qty, price, tif=TIF.DAY):
         order = Order(instrument=instrument, timestamp=clock.default_clock.current_date_time(),
                       ord_id=order_mgr.next_ord_id(), stg_id=self.stg_id, broker_id=self.__broker_id, action=action,
                       type=ord_type,
                       tif=tif, qty=qty,
-                      limit_price=price)
+                      limit_price=price,
+                      cl_ord_id=self.__get_next_ord_id())
         self.__portfolio.on_order(order)
         order = order_mgr.send_order(order)
         return order

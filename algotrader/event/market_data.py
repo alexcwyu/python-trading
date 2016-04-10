@@ -1,7 +1,7 @@
 from algotrader.event import Event, EventHandler
 
 
-class Frequency(object):
+class BarSize(object):
     S = 1
     M1 = 60
     M5 = 5 * 60
@@ -9,6 +9,23 @@ class Frequency(object):
     H1 = 60 * 60
     H4 = 4 * 60 * 60
     D1 = 24 * 60 * 60
+
+class BarType:
+    Time = 1
+    Tick = 2
+    Volume = 3
+    Dynamic = 4
+
+    map = {
+        1 : "Time",
+        2 : "Tick",
+        3 : "Volume",
+        4 : "Dynamic"
+    }
+
+    @staticmethod
+    def name(type):
+        return BarType.map[type]
 
 
 class MarketDataEvent(Event):
@@ -26,7 +43,9 @@ class MarketDataEvent(Event):
 
 class Bar(MarketDataEvent):
     __slots__ = (
-        'freq',
+        'type',
+        'size',
+        'begin_time',
         'open',
         'high',
         'low',
@@ -35,10 +54,12 @@ class Bar(MarketDataEvent):
         'adj_close'
     )
 
-    def __init__(self, instrument=None, timestamp=None, open=0, high=0, low=0, close=0, vol=0, adj_close=0,
-                 freq=Frequency.D1):
+    def __init__(self, instrument=None, begin_time=None, timestamp=None, open=0, high=0, low=0, close=0, vol=0, adj_close=0,
+                 size=BarSize.D1, type=BarType.Time):
         super(Bar, self).__init__(instrument, timestamp)
-        self.freq = freq
+        self.type = type
+        self.size = size
+        self.begin_time=begin_time
         self.open = open
         self.high = high
         self.low = low
@@ -47,11 +68,11 @@ class Bar(MarketDataEvent):
         self.adj_close = adj_close
 
     def id(self):
-        return "Bar.%s.%s" % (self.instrument, self.freq)
+        return "Bar.%s.%s.%s" % (self.instrument, BarType.name(self.type), self.size)
 
     def __str__(self):
-        return "Bar(instrument = %s, timestamp = %s,freq = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
-               % (self.instrument, self.timestamp, self.freq, self.open, self.high, self.low, self.close, self.vol,
+        return "Bar(instrument = %s, begin_time = %s, timestamp = %s,type = %s, size = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
+               % (self.instrument, self.begin_time, self.timestamp, self.type, self.size, self.open, self.high, self.low, self.close, self.vol,
                   self.adj_close)
 
     def on(self, handler):

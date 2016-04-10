@@ -46,6 +46,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
         stg.on_exec_report(exec_report)
 
     def send_order(self, order):
+        #order.ord_id = self.next_ord_id()
         self.__orders[order.ord_id] = order
         broker_mgr.get_broker(order.broker_id).on_order(order)
         return order

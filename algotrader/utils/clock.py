@@ -10,13 +10,20 @@ class Clock:
 
     @abc.abstractmethod
     def current_date_time(self):
-        return None
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def add_reminder(self, on_reminder, datetime, data = None):
+        raise NotImplementedError()
 
 
 @singleton
 class RealTimeClock(Clock):
     def current_date_time(self):
         return datetime.datetime.now()
+
+    def add_reminder(self, on_reminder, datetime, data = None):
+        return None
 
 
 @singleton
@@ -29,6 +36,9 @@ class SimulationClock(Clock, MarketDataEventHandler):
 
     def current_date_time(self):
         return self.__current_time
+
+    def add_reminder(self, on_reminder, datetime, data = None):
+        return None
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))

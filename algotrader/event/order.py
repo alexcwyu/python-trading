@@ -104,6 +104,7 @@ class Order(OrderEvent):
         'instrument',
         'timestamp',
         'ord_id',
+        'cl_ord_id',
         'stg_id',
         'broker_id',
         'action',
@@ -124,11 +125,12 @@ class Order(OrderEvent):
     )
 
     def __init__(self, instrument=None, ord_id=None, stg_id=None, broker_id=None, action=None, type=None, timestamp=None, qty=0, limit_price=0,
-                 stop_price=0, status=OrdStatus.NEW, tif=TIF.DAY):
+                 stop_price=0, status=OrdStatus.NEW, tif=TIF.DAY, cl_ord_id=None):
         self.instrument = instrument
         self.timestamp = timestamp
         self.ord_id = ord_id
         self.stg_id = stg_id
+        self.cl_ord_id = cl_ord_id
         self.broker_id = broker_id
         self.action = action
         self.type = type
@@ -150,10 +152,10 @@ class Order(OrderEvent):
         handler.on_order(self)
 
     def __repr__(self):
-        return "Order(instrument = %s, timestamp = %s,ord_id = %s, stg_id = %s, broker_id = %s, action = %s, type = %s, tif = %s, status = %s" \
+        return "Order(instrument = %s, timestamp = %s,ord_id = %s, stg_id = %s, cl_ord_id = %s, broker_id = %s, action = %s, type = %s, tif = %s, status = %s" \
                ", qty = %s, limit_price = %s, stop_price = %s, filled_qty = %s, avg_price = %s, last_qty = %s, last_price = %s ,stop_price = %s" \
                ", stop_limit_ready = %s , trailing_stop_exec_price = %s , exec_reports = %s , update_events = %s)" \
-               % (self.instrument, self.timestamp, self.ord_id, self.stg_id, self.broker_id, self.action, self.type,
+               % (self.instrument, self.timestamp, self.ord_id, self.stg_id, self.cl_ord_id, self.broker_id, self.action, self.type,
                   self.tif,
                   self.status,
                   self.qty, self.limit_price, self.stop_price, self.filled_qty, self.avg_price, self.last_qty,

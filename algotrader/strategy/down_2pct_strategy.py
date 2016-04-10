@@ -18,12 +18,12 @@ class Down2PctStrategy(Strategy):
         if self.order is None:
             if self.roc.now() < -0.02:
                 logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
-                self.order = self.new_market_order(instrument=bar.instrument, action=OrdAction.BUY, qty=self.qty)
+                self.order = self.market_order(instrument=bar.instrument, action=OrdAction.BUY, qty=self.qty)
                 self.day_count = 0
         else:
             self.day_count += 1
             if self.day_count >= 5:
                 logger.info("%s,S,%.2f" % (bar.timestamp, bar.close))
-                self.new_market_order(instrument=bar.instrument, action=OrdAction.SELL, qty=self.qty)
+                self.market_order(instrument=bar.instrument, action=OrdAction.SELL, qty=self.qty)
                 self.order = None
 

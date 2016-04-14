@@ -11,7 +11,7 @@ class Down2PctStrategy(Strategy):
         self.day_count = 0
         self.order = None
         self.qty = qty
-        self.close = inst_data_mgr.get_series("Bar.%s.86400.Close" % instrument)
+        self.close = inst_data_mgr.get_series("Bar.%s.Time.86400.Close" % instrument)
         self.roc = ROC(self.close, 1)
 
     def on_bar(self, bar):

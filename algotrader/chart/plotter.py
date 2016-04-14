@@ -50,7 +50,7 @@ class StrategyPlotter:
         plt.show()
 
     def _plot_bar_chart(self, fig, instrument = None):
-        key = "Bar.%s.86400.Close" % instrument
+        key = "Bar.%s.Time.86400.Close" % instrument
         series = inst_data_mgr.get_series(key)
         #key = series_dict.keys()[0]
 

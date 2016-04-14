@@ -9,6 +9,7 @@ class BarSize(object):
     H1 = 60 * 60
     H4 = 4 * 60 * 60
     D1 = 24 * 60 * 60
+    D5 = D1 * 5
 
 class BarType:
     Time = 1

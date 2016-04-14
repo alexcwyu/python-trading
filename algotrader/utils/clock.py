@@ -4,6 +4,8 @@ from algotrader.event import *
 from algotrader.utils import *
 from algotrader.utils.singleton import singleton
 
+import time
+from threading import Timer
 
 class Clock:
     __metaclass__ = abc.ABCMeta
@@ -51,6 +53,11 @@ class SimulationClock(Clock, MarketDataEventHandler):
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__current_time = trade.timestamp
+
+
+    def add_reminder(self, on_reminder, datetime, data = None):
+        return None
+
 
 
 realtime_clock = RealTimeClock()

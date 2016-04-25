@@ -86,10 +86,7 @@ class IbGateway(Broker):
 
     def req_mkt_depth(self, market_orderbook_numdepth=5):
         for id, row in self.__instru_mgr.instrument_repo.iterrows():
-            self.__tws.reqMktDepth(id, self.__contractFactory.buildStockOrCashContract(row['symbol'],
-                                                                                  row['secType'],
-                                                                                 row['exchange'],
-                                                                                 row['currency']),
+            self.__tws.reqMktDepth(id, self.__contractFactory.buildStockOrCashContract(row['symbol']),
                                    market_orderbook_numdepth)
 
     def cancel_mkt_depth(self, *args, **kwargs):

@@ -23,8 +23,11 @@ def makeIbOrder(order):
         iborder.orderType = 'LMT'
 
     iborder.totalQuantity = order.qty
+
     iborder.tif = 'DAT'
-    iborder.ocaGroup = order.oca_tag
+
+    if not order.oca_tag :
+        iborder.ocaGroup = order.oca_tag
     return iborder
 
 

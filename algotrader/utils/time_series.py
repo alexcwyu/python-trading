@@ -116,6 +116,91 @@ class TimeSeries(object):
         raise NotImplementedError("Unsupported index type %s, %s" % (index, type(index)))
 
 
+class MultiTimeSeries(object):
+    _slots__ = (
+        'name',
+        'keys',
+        'default_key',
+        'description',
+        'series_dict',
+        'subject',
+        '__value',
+        '__prev_time',
+        '__size',
+        '__missing_value'
+    )
+
+    def __init__(self, name, keys, default_key, description=None, missing_value=np.nan):
+        self.name = name
+        self.keys= keys
+        self.default_key = default_key
+        self.description = description if description else name
+        self.series_dict = dict()
+        self.subject = Subject()
+        if keys is not None:
+            for key in keys:
+                self.series_dict[key] = TimeSeries(name="%s.%s" % (name, key), missing_value=missing_value)
+        self.__value = list()
+        self.__prev_time = None
+        self.__size = 0
+        self.__missing_value = missing_value
+
+    def get_key(self, key=None):
+        if not key:
+            return self.default_key
+
+    def add(self, time, data):
+        for key, value in data:
+            self.series_dict[key].add(time, value)
+        self.subject.on_next((time, data))
+
+    def get_data(self, key=None):
+        return self.series_dict[self.get_key(key)].get_data()
+
+    def get_series(self, key=None):
+        s = pd.Series(self.get_data(key), name=self.name)
+        s.index.name = 'Time'
+        return s
+
+
+    def size(self, key=None):
+        return self.series_dict[self.get_key(key)].size()
+
+    def now(self, key=None):
+        return self.get_by_idx(-1)
+
+    def get_by_idx(self, key=None, idx=None):
+        return self.series_dict[self.get_key(key)].get_by_idx(idx)
+
+    def get_by_time(self, key=None, time=None):
+        return self.series_dict[self.get_key(key)].get_by_time(time)
+
+
+    def ago(self, key=None, idx=1):
+        return self.series_dict[self.get_key(key)].ago(idx)
+
+    def std(self, key=None, start=None, end=None):
+        return self.series_dict[self.get_key(key)].std(start, end)
+
+    def var(self, key=None, start=None, end=None):
+        return self.series_dict[self.get_key(key)].var(start, end)
+
+    def mean(self, key=None, start=None, end=None):
+        return self.series_dict[self.get_key(key)].mean(start, end)
+
+    def max(self, key=None, start=None, end=None):
+        return self.series_dict[self.get_key(key)].max(start, end)
+
+    def min(self, key=None, start=None, end=None):
+        return self.series_dict[self.get_key(key)].min(start, end)
+
+    def median(self, key=None, start=None, end=None):
+        return self.series_dict[self.get_key(key)].median(start, end)
+
+    def __getitem__(self, key):
+        return self.series_dict[self.get_key(key)]
+
+
 class DataSeries(object):
     _slots__ = (
         'name',

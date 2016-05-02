@@ -9,6 +9,7 @@ from algotrader.trading.portfolio import Portfolio
 from algotrader.utils import clock
 
 
+
 class BacktestRunner(object):
     def __init__(self, stg):
         self.__stg = stg

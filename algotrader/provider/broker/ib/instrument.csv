@@ -1,0 +1,4 @@
+id,symbol,secType,exchange,currency,altSymbol,
+0,EURUSD,CASH,IDEALPRO,USD,EUR,
+1,USDJPY,CASH,IDEALPRO,JPY,USD,
+2,VXX,STK,SMART,USD,VXX,

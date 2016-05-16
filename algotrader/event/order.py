@@ -107,6 +107,7 @@ class Order(OrderEvent):
         'cl_ord_id',
         'stg_id',
         'broker_id',
+        'oca_tag'
         'action',
         'type',
         'qty',
@@ -125,13 +126,14 @@ class Order(OrderEvent):
     )
 
     def __init__(self, instrument=None, ord_id=None, stg_id=None, broker_id=None, action=None, type=None, timestamp=None, qty=0, limit_price=0,
-                 stop_price=0, status=OrdStatus.NEW, tif=TIF.DAY, cl_ord_id=None):
+                 stop_price=0, status=OrdStatus.NEW, tif=TIF.DAY, cl_ord_id=None, oca_tag=None):
         self.instrument = instrument
         self.timestamp = timestamp
         self.ord_id = ord_id
         self.stg_id = stg_id
         self.cl_ord_id = cl_ord_id
         self.broker_id = broker_id
+        self.oca_tag = oca_tag
         self.action = action
         self.type = type
         self.qty = qty

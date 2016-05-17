@@ -72,6 +72,16 @@ class Instrument:
     def id(self):
         return self.symbol + "@" + self.exch_id
 
+    def get_symbol(self, provider_id):
+        if self.alt_symbol and provider_id in self.alt_symbol:
+            return self.alt_symbol[provider_id]
+        return self.symbol
+
+
+    def get_exch_id(self, provider_id):
+        if self.alt_exch_id and provider_id in self.alt_exch_id:
+            return self.alt_exch_id[provider_id]
+        return self.exch_id
 
 class Exchange:
     __slots__ = (
@@ -127,12 +137,9 @@ class RefDataManager(object):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def get_inst(self, inst_id):
+    def get_inst(self, inst_id=None, symbol=None, exch_id=None):
         raise NotImplementedError()
 
-    @abc.abstractmethod
-    def get_inst_by_symbol(self, symbol, exch_id):
-        raise NotImplementedError()
 
     @abc.abstractmethod
     def get_ccy(self, ccy_id):
@@ -219,11 +226,17 @@ class InMemoryRefDataManager(RefDataManager):
 
         self.__exch_dict[exch.exch_id] = exch
 
-    def get_inst(self, inst_id):
-        return self.__inst_dict.get(inst_id, None)
-
-    def get_inst_by_symbol(self, symbol, exch_id):
-        return self.__inst_symbol_dict.get('%s@%s' % (symbol, exch_id), None)
+    def get_inst(self, inst_id=None, symbol=None, exch_id=None):
+        if inst_id:
+            return self.__inst_dict.get(inst_id, None)
+        elif symbol and exch_id:
+            return self.__inst_symbol_dict.get('%s@%s' % (symbol, exch_id), None)
+        elif symbol:
+            for key in self.__inst_dict:
+                inst = self.__inst_dict[key]
+                if inst.symbol == symbol:
+                    return inst
+        return None
 
     def get_ccy(self, ccy_id):
         return self.__ccy_dict.get(ccy_id, None)
@@ -234,8 +247,8 @@ class InMemoryRefDataManager(RefDataManager):
 
 if __name__ == "__main__":
     mgr = InMemoryRefDataManager();
-    print mgr.get_inst_by_symbol('EURUSD', 'IDEALPRO')
-    print mgr.get_inst(2)
+    print mgr.get_inst(symbol='EURUSD', exch_id='IDEALPRO')
+    print mgr.get_inst(inst_id=2)
 
 
 

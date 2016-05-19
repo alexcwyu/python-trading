@@ -1,6 +1,8 @@
 from algotrader.event import Event, EventHandler
 
 
+
+
 class BarSize(object):
     S = 1
     M1 = 60

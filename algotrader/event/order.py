@@ -220,3 +220,10 @@ class ExecutionEventHandler(EventHandler):
 class OrderEventHandler(EventHandler):
     def on_order(self, order):
         pass
+
+    def on_ord_update_req(self, order):
+        pass
+
+    def on_ord_cancel_req(self, order):
+        pass
+

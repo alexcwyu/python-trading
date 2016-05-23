@@ -8,6 +8,7 @@ class OrderEvent(Event):
 class OrdAction:
     BUY = 1
     SELL = 2
+    SSHORT = 3
 
 
 class OrdType:
@@ -16,12 +17,18 @@ class OrdType:
     STOP = 3
     STOP_LIMIT = 4
     TRAILING_STOP = 5
+    MARKET_ON_CLOSE = 6
+    LIMIT_ON_CLOSE = 7
+    MARKET_TO_LIMIT = 8
+    MARKET_IF_PRICE_TOUCHED = 9
+    MARKET_ON_OPEN = 10
 
 
 class TIF:
     DAY = 1
     GTC = 2
     FOK = 3
+    GTD = 4
 
 
 class OrdStatus:
@@ -122,11 +129,12 @@ class Order(OrderEvent):
         'stop_limit_ready',
         'trailing_stop_exec_price',
         'exec_reports',
-        'update_events'
+        'update_events',
+        'params'
     )
 
     def __init__(self, instrument=None, ord_id=None, stg_id=None, broker_id=None, action=None, type=None, timestamp=None, qty=0, limit_price=0,
-                 stop_price=0, status=OrdStatus.NEW, tif=TIF.DAY, cl_ord_id=None, oca_tag=None):
+                 stop_price=0, status=OrdStatus.NEW, tif=TIF.DAY, cl_ord_id=None, oca_tag=None, params=None):
         self.instrument = instrument
         self.timestamp = timestamp
         self.ord_id = ord_id
@@ -149,6 +157,8 @@ class Order(OrderEvent):
         self.trailing_stop_exec_price = 0
         self.exec_reports = []
         self.update_events = []
+        self.params = params if params else {}
+
 
     def on(self, handler):
         handler.on_order(self)
@@ -156,13 +166,13 @@ class Order(OrderEvent):
     def __repr__(self):
         return "Order(instrument = %s, timestamp = %s,ord_id = %s, stg_id = %s, cl_ord_id = %s, broker_id = %s, action = %s, type = %s, tif = %s, status = %s" \
                ", qty = %s, limit_price = %s, stop_price = %s, filled_qty = %s, avg_price = %s, last_qty = %s, last_price = %s ,stop_price = %s" \
-               ", stop_limit_ready = %s , trailing_stop_exec_price = %s , exec_reports = %s , update_events = %s)" \
+               ", stop_limit_ready = %s , trailing_stop_exec_price = %s , exec_reports = %s , update_events = %s, params = %s)" \
                % (self.instrument, self.timestamp, self.ord_id, self.stg_id, self.cl_ord_id, self.broker_id, self.action, self.type,
                   self.tif,
                   self.status,
                   self.qty, self.limit_price, self.stop_price, self.filled_qty, self.avg_price, self.last_qty,
                   self.last_price, self.stop_price, self.stop_limit_ready, self.trailing_stop_exec_price,
-                  self.exec_reports, self.update_events)
+                  self.exec_reports, self.update_events, self.params)
 
     def add_exec_report(self, exec_report):
         if exec_report.ord_id != self.ord_id:

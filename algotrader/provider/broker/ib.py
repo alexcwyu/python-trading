@@ -241,6 +241,7 @@ class SwigIBClient(EWrapper):
 
         print("\n====================================================================")
         print(" History requested, waiting %ds for TWS responses" % WAIT_TIME)
+        print(" History requested, waiting %ds for TWS responses" % WAIT_TIME)
         print("====================================================================\n")
 
 

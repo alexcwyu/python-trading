@@ -14,13 +14,14 @@ from datetime import datetime
 from swigibpy import (EWrapper, EPosixClientSocket)
 
 from algotrader.event.market_data import MarketDataEventHandler
-from algotrader.provider import Feed
+from algotrader.provider import Feed, SubscriptionKey, HistDataSubscriptionKey, MarketDepthSubscriptionKey
 from algotrader.provider.broker.ib.iborder_factory import makeIbOrder
 from algotrader.provider.broker.ib.instrument_mgr import IBContractFactory
 from algotrader.provider.provider import Broker
 from algotrader.trading.ref_data import InMemoryRefDataManager
 from algotrader.utils import logger
 
+from swigibpy import  *
 
 class DataRecord:
     __slots__ = (
@@ -64,10 +65,29 @@ class DataRecord:
 class SubscriptionRegistry:
     def __init__(self):
         self.subscriptions = {}
+
         self.data_records = {}
+        # self.market_depth_records = {} # Market Depth
+        # self.realtime_data_records = {} # realtime data
+        # self.historical_data_records = {} # historical data
 
     def add_subscription(self, req_id, sub_key):
+        if req_id in self.subscriptions:
+            raise "Duplicated req_id %s" % req_id
+
         self.subscriptions[req_id] = sub_key
+
+        self.data_records[req_id] =DataRecord(sub_key.inst_id)
+
+        # record = DataRecord(sub_key.inst_id)
+        # if isinstance(sub_key, HistDataSubscriptionKey):
+        #     self.historical_data_records[req_id] = record
+        # elif isinstance(sub_key, MarketDepthSubscriptionKey):
+        #     self.market_depth_records[req_id] = record
+        # else:
+        #     self.realtime_data_records[req_id] = record
+
+
 
     def get_subscription_key(self, req_id):
         return self.subscriptions.get(req_id, None)
@@ -80,7 +100,19 @@ class SubscriptionRegistry:
 
     def remove_subscription(self, req_id=None, sub_key=None):
         if req_id and req_id in self.subscriptions:
+            # sub_key = self.subscriptions[req_id]
             del self.subscriptions[req_id]
+
+            del self.data_records[req_id]
+
+            # if isinstance(sub_key, HistDataSubscriptionKey):
+            #     del self.historical_data_records[req_id]
+            # elif isinstance(sub_key, MarketDepthSubscriptionKey):
+            #     del self.market_depth_records[req_id]
+            # else:
+            #     del self.realtime_data_records[req_id]
+
+
             return True
         elif sub_key:
             sub_id = self.get_subsciption_id(sub_key)
@@ -95,9 +127,24 @@ class SubscriptionRegistry:
             return True
         return False
 
+    def get_data_record(self, req_id):
+        # sub_key = self.subscriptions[req_id]
+        # if isinstance(sub_key, HistDataSubscriptionKey):
+        #     return self.historical_data_records[req_id]
+        # elif isinstance(sub_key, MarketDepthSubscriptionKey):
+        #     return self.market_depth_records[req_id]
+        # else:
+        #     return self.realtime_data_records[req_id]
+
+        return self.data_records[req_id]
+
+
     def clear(self):
         self.subscriptions.clear()
         self.data_records.clear()
+        # self.historical_data_records.clear()
+        # self.market_depth_records.clear()
+        # self.realtime_data_records.clear()
 
 
 class OrderRegistry:
@@ -225,7 +272,7 @@ class IBBroker(Broker, EWrapper, MarketDataEventHandler, Feed):
         ib_order = self.__model_factory.create_ib_order(order)
         contract = self.__model_factory.create_ib_contract(order.instrument)
 
-        # TODO what is this??
+        # TODO WTF is this??
         # self.__callback.on_order(
         #     order)  # let the callback class has a reference to the order so that once the IB return the exeuction report we can undate the order accordingly
 
@@ -299,13 +346,66 @@ class IBBroker(Broker, EWrapper, MarketDataEventHandler, Feed):
         """
         TickerId tickerId, TickType field, double price, int canAutoExecute
         """
-        pass
+        record = self.__data_sub_reg.get_data_record(tickerId)
+        if record:
+            prev = price
+            if field == BID:
+                prev = record.bid
+                record.bid = price
+            elif field == ASK:
+                prev = record.ask
+                record.ask = price
+            elif field == LAST:
+                prev = record.last
+                record.last = price
+            elif field == HIGH:
+                prev = record.high
+                record.high = price
+            elif field == LOW:
+                prev = record.low
+                record.low = price
+            elif field == CLOSE:
+                prev = record.close
+                record.close = price
+
+            if prev != price:
+                self.__emit_market_data(field, record)
+
+
+
+    def __emit_market_data(self, field, record):
+        if record.quote_req and (field == BID or field == BID_SIZE or field == ASK or field == ASK_SIZE):
+            # TODO construct quote and send to event bus
+            pass
+
+        if record.trade_req and (field == LAST or field == LAST_SIZE):
+            # TODO construct trade and send to event bus
+            pass
+
 
     def tickSize(self, tickerId, field, size):
-        """
-        TickerId tickerId, TickType field, int size
-        """
-        pass
+        record = self.__data_sub_reg.get_data_record(tickerId)
+
+        if record:
+            prev = size
+
+            if field == BID_SIZE:
+                prev = record.bid_size
+                record.bid_size = size
+            elif field == ASK_SIZE:
+                prev = record.ask_size
+                record.ask_size = size
+            elif field == LAST_SIZE:
+                prev = record.last_size
+                record.last_size = size
+            elif field == VOLUME:
+                prev = record.vol
+                record.vol = size
+
+            if prev != size:
+                self.__emit_market_data(field, record)
+
+
 
     def tickOptionComputation(self, tickerId, tickType, impliedVol, delta, optPrice, gamma, vega, theta, undPrice):
         """
@@ -381,14 +481,37 @@ class IBBroker(Broker, EWrapper, MarketDataEventHandler, Feed):
         TickerId reqId, IBString const & date, double open, double high, double low, double close,
         int volume, int barCount, double WAP, int hasGaps)
         """
-        pass
+
+        record = self.__data_sub_reg.get_data_record(reqId)
+
+        if record:
+            record.open = open
+            record.high = high
+            record.low = low
+            record.close = close
+            record.vol = volume
+
+            #TODO publish bar to bus
+
 
     def realtimeBar(self, reqId, time, open, high, low, close, volume, wap, count):
         """
         TickerId reqId, long time, double open, double high, double low, double close, long volume,
         double wap, int count
         """
-        pass
+
+        record = self.__data_sub_reg.get_data_record(reqId)
+
+        if record:
+            record.open = open
+            record.high = high
+            record.low = low
+            record.close = close
+            record.vol = volume
+
+            #TODO publish bar to bus
+
+
 
     def currentTime(self, time):
         """

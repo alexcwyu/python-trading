@@ -13,7 +13,6 @@ from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio import Portfolio
 from algotrader.utils import clock
-from algotrader.provider.broker.ib.instrument_mgr import InstrumentManager, IBContractFactory
 from algotrader.provider.broker.ib.ib_broker import IbGateway
 from algotrader.utils.betterthread import Thread as bThread
 from algotrader.utils.clock import default_clock

@@ -107,16 +107,11 @@ class MarketDepthSubscriptionKey(SubscriptionKey):
 class Feed(Provider):
     __metaclass__ = abc.ABCMeta
 
+
     def subscribe_mktdata(self, sub_key):
         pass
 
     def unsubscribe_mktdata(self, sub_key):
-        pass
-
-    def subscribe_hist_data(self, sub_key):
-        pass
-
-    def unsubscribe_hist_data(self, sub_key):
         pass
 
 

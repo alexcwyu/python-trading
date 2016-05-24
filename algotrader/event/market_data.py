@@ -1,17 +1,19 @@
 from algotrader.event import Event, EventHandler
 
 
-
-
 class BarSize(object):
-    S = 1
+    S1 = 1
+    S5 = 5
+    S15 = 15
+    S30 = 30
     M1 = 60
+    M2 = 120
     M5 = 5 * 60
+    M15 = 15 * 60
     M30 = 30 * 60
     H1 = 60 * 60
-    H4 = 4 * 60 * 60
     D1 = 24 * 60 * 60
-    D5 = D1 * 5
+
 
 class BarType:
     Time = 1
@@ -20,15 +22,26 @@ class BarType:
     Dynamic = 4
 
     map = {
-        1 : "Time",
-        2 : "Tick",
-        3 : "Volume",
-        4 : "Dynamic"
+        1: "Time",
+        2: "Tick",
+        3: "Volume",
+        4: "Dynamic"
     }
 
     @staticmethod
     def name(type):
         return BarType.map[type]
+
+
+class MDSide:
+    Ask = 0
+    Bid = 1
+
+
+class MDOperation:
+    Insert = 0
+    Update = 1
+    Delete = 2
 
 
 class MarketDataEvent(Event):
@@ -44,6 +57,7 @@ class MarketDataEvent(Event):
     def id(self):
         raise NotImplementedError()
 
+
 class Bar(MarketDataEvent):
     __slots__ = (
         'type',
@@ -57,12 +71,13 @@ class Bar(MarketDataEvent):
         'adj_close'
     )
 
-    def __init__(self, instrument=None, begin_time=None, timestamp=None, open=0, high=0, low=0, close=0, vol=0, adj_close=0,
+    def __init__(self, instrument=None, begin_time=None, timestamp=None, open=0, high=0, low=0, close=0, vol=0,
+                 adj_close=0,
                  size=BarSize.D1, type=BarType.Time):
         super(Bar, self).__init__(instrument, timestamp)
         self.type = type
         self.size = size
-        self.begin_time=begin_time
+        self.begin_time = begin_time
         self.open = open
         self.high = high
         self.low = low
@@ -75,8 +90,10 @@ class Bar(MarketDataEvent):
 
     def __str__(self):
         return "Bar(instrument = %s, begin_time = %s, timestamp = %s,type = %s, size = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
-               % (self.instrument, self.begin_time, self.timestamp, self.type, self.size, self.open, self.high, self.low, self.close, self.vol,
-                  self.adj_close)
+               % (
+               self.instrument, self.begin_time, self.timestamp, self.type, self.size, self.open, self.high, self.low,
+               self.close, self.vol,
+               self.adj_close)
 
     def on(self, handler):
         handler.on_bar(self)
@@ -141,6 +158,39 @@ class Quote(MarketDataEvent):
         return self.ask
 
 
+class MarketDepth(MarketDataEvent):
+    __slots__ = (
+        'provider_id',
+        'position',
+        'operation',
+        'side',
+        'price',
+        'size',
+    )
+
+    def __init__(self, instrument=None, timestamp=None, provider_id=None, position=0, operation=None, side=None,
+                 price=0.0, size=0):
+        super(MarketDepth, self).__init__(instrument, timestamp)
+        self.provider_id = provider_id
+        self.position = position
+        self.operation = operation
+        self.side = side
+        self.price = price
+        self.size = size
+
+    def id(self):
+        return "MarketDepth.%s" % (self.instrument)
+
+    def __str__(self):
+        return "MarketDepth(instrument = %s, timestamp = %s, provider_id = %s, position = %s, operation = %s, side = %s, price = %s, size = %s)" \
+               % (
+               self.instrument, self.timestamp, self.provider_id, self.position, self.operation, self.side, self.price,
+               self.size)
+
+    def on(self, handler):
+        handler.on_market_depth(self)
+
+
 class MarketDataEventHandler(EventHandler):
     def on_bar(self, bar):
         pass
@@ -149,4 +199,7 @@ class MarketDataEventHandler(EventHandler):
         pass
 
     def on_trade(self, trade):
+        pass
+
+    def on_market_depth(self, market_depth):
         pass

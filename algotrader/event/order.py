@@ -42,20 +42,23 @@ class OrdStatus:
     PARTIALLY_FILLED = 8
     FILLED = 9
     REJECTED = 10
+    UNKNOWN = -1
 
 
 class ExecutionEvent(Event):
     __slots__ = (
         'broker_id',
         'ord_id',
+        'cl_ord_id',
         'instrument',
         'timestamp'
     )
 
-    def __init__(self, broker_id=None, ord_id=None, instrument=None, timestamp=None):
+    def __init__(self, broker_id=None, ord_id=None, cl_ord_id = None, instrument=None, timestamp=None):
         # super(ExecutionEvent, self).__init__(instrument, timestamp)
         self.broker_id = broker_id
         self.ord_id = ord_id
+        self.cl_ord_id = cl_ord_id
         self.instrument = instrument
         self.timestamp = timestamp
 
@@ -65,19 +68,17 @@ class OrderStatusUpdate(ExecutionEvent):
         'status'
     )
 
-    def __init__(self, broker_id=None, ord_id=None, instrument=None, timestamp=None, status=OrdStatus.NEW):
+    def __init__(self, broker_id=None, ord_id=None, cl_ord_id=None, instrument=None, timestamp=None, status=OrdStatus.NEW):
         super(OrderStatusUpdate, self).__init__(broker_id, ord_id, instrument, timestamp)
         self.status = status
-        self.ord_id = ord_id
-        self.instrument = instrument
-        self.timestamp = timestamp
+
 
     def on(self, handler):
         handler.on_ord_upd(self)
 
     def __repr__(self):
-        return "OrderStatusUpdate(broker_id = %s, ord_id = %s,instrument = %s, timestamp = %s, status = %s)" \
-               % (self.broker_id, self.ord_id, self.instrument, self.timestamp, self.status)
+        return "OrderStatusUpdate(broker_id = %s, ord_id = %s, cl_ord_id=%s, instrument = %s, timestamp = %s, status = %s)" \
+               % (self.broker_id, self.ord_id, self.cl_ord_id, self.instrument, self.timestamp, self.status)
 
 
 class ExecutionReport(OrderStatusUpdate):
@@ -88,9 +89,9 @@ class ExecutionReport(OrderStatusUpdate):
         'commission'
     )
 
-    def __init__(self, broker_id=None, ord_id=None, instrument=None, timestamp=None, er_id=None, filled_qty=0, filled_price=0, commission=0,
+    def __init__(self, broker_id=None, ord_id=None, cl_ord_id = None, instrument=None, timestamp=None, er_id=None, filled_qty=0, filled_price=0, commission=0,
                  status=OrdStatus.NEW):
-        super(ExecutionReport, self).__init__(broker_id, ord_id, instrument, timestamp, status)
+        super(ExecutionReport, self).__init__(broker_id, ord_id, cl_ord_id, instrument, timestamp, status)
         self.er_id = er_id
         self.filled_qty = filled_qty
         self.filled_price = filled_price
@@ -100,9 +101,9 @@ class ExecutionReport(OrderStatusUpdate):
         handler.on_exec_report(self)
 
     def __repr__(self):
-        return "ExecutionReport(broker_id = %s, ord_id = %s,instrument = %s, timestamp = %s" \
+        return "ExecutionReport(broker_id = %s, ord_id = %s, cl_ord_id = %s, instrument = %s, timestamp = %s" \
                ", er_id = %s, filled_qty = %s, filled_price = %s, commission = %s)" \
-               % (self.broker_id, self.ord_id, self.instrument, self.timestamp,
+               % (self.broker_id, self.ord_id, self.cl_ord_id, self.instrument, self.timestamp,
                   self.er_id, self.filled_qty, self.filled_price, self.commission)
 
 

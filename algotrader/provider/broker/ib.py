@@ -213,11 +213,11 @@ class SwigIBClient(EWrapper):
 
 
         try:
-            self.callback.got_contract.wait(timeout=WAIT_TIME)
+            self.got_contract.wait(timeout=WAIT_TIME)
         except KeyboardInterrupt:
             pass
         finally:
-            if not self.callback.got_contract.is_set():
+            if not self.got_contract.is_set():
                 print('Failed to get contract within %d seconds' % WAIT_TIME)
 
 
@@ -246,11 +246,11 @@ class SwigIBClient(EWrapper):
 
 
         try:
-            self.callback.got_history.wait(timeout=WAIT_TIME)
+            self.got_history.wait(timeout=WAIT_TIME)
         except KeyboardInterrupt:
             pass
         finally:
-            if not self.callback.got_history.is_set():
+            if not self.got_history.is_set():
                 print('Failed to get history within %d seconds' % WAIT_TIME)
 
 
@@ -266,7 +266,7 @@ class SwigIBClient(EWrapper):
 
     def place_order(self, contract):
         print('Waiting for valid order id')
-        order_id = self.callback.order_ids.get(timeout=WAIT_TIME)
+        order_id = self.order_ids.get(timeout=WAIT_TIME)
         if not order_id:
             raise RuntimeError('Failed to receive order id after %ds' % WAIT_TIME)
 
@@ -311,13 +311,17 @@ class SwigIBClient(EWrapper):
         print("Waiting for order to be filled..")
 
         try:
-            self.callback.order_filled.wait(WAIT_TIME)
+            self.order_filled.wait(WAIT_TIME)
         except KeyboardInterrupt:
             pass
         finally:
-            if not self.callback.order_filled.is_set():
+            if not self.order_filled.is_set():
                 print('Failed to fill order')
 
 
 if __name__ =="__main__":
-    pass
+        ib = SwigIBClient()
+        ib.connect()
+        contract = ib.create_contract()
+
+        ib.request_hist_data(contract)

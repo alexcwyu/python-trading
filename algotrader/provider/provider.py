@@ -43,7 +43,7 @@ class SubscriptionKey:
     def __eq__(self, other):
         if not other:
             return False
-        if isinstance(other, SubscriptionKey):
+        if not isinstance(other, SubscriptionKey):
             return False
 
         return ((self.provider_id, self.data_type, self.inst_id, self.bar_type, self.bar_size) ==
@@ -69,7 +69,7 @@ class HistDataSubscriptionKey(SubscriptionKey):
     def __eq__(self, other):
         if not other:
             return False
-        if isinstance(other, HistDataSubscriptionKey):
+        if not isinstance(other, HistDataSubscriptionKey):
             return False
 
         return ((self.provider_id, self.data_type, self.inst_id, self.bar_type, self.bar_size,
@@ -95,7 +95,7 @@ class MarketDepthSubscriptionKey(SubscriptionKey):
     def __eq__(self, other):
         if not other:
             return False
-        if isinstance(other, MarketDepthSubscriptionKey):
+        if not isinstance(other, MarketDepthSubscriptionKey):
             return False
 
         return ((self.provider_id, self.data_type, self.inst_id, self.bar_type, self.bar_size,

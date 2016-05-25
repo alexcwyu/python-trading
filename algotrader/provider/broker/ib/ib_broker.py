@@ -10,11 +10,11 @@ import swigibpy
 from algotrader.event import EventBus
 from algotrader.event.order import *
 from algotrader.provider import Feed
+from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
+from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.provider import Broker, HistDataSubscriptionKey, MarketDepthSubscriptionKey
 from algotrader.trading.ref_data import InMemoryRefDataManager
 from algotrader.utils import logger
-from .ib_model_factory import IBModelFactory
-from .ib_socket import IBSocket
 
 
 class DataRecord:
@@ -35,7 +35,7 @@ class DataRecord:
         'quote_req'
     )
 
-    def __init__(self, inst_id):
+    def __init__(self, inst_id, trade_req=False, quote_req=False):
         self.inst_id = inst_id
         self.bid = 0.0
         self.ask = 0.0
@@ -52,8 +52,8 @@ class DataRecord:
 
         self.vol = 0
 
-        self.trade_req = False
-        self.quote_req = False
+        self.trade_req = trade_req
+        self.quote_req = quote_req
 
 
 class SubscriptionRegistry:
@@ -66,7 +66,8 @@ class SubscriptionRegistry:
             raise "Duplicated req_id %s" % req_id
 
         self.subscriptions[req_id] = sub_key
-        self.data_records[req_id] = DataRecord(sub_key.inst_id)
+        self.data_records[req_id] = DataRecord(sub_key.inst_id, quote_req=sub_key.data_type == Quote,
+                                               trade_req=sub_key.data_type == Trade)
 
     def get_subscription_key(self, req_id):
         return self.subscriptions.get(req_id, None)
@@ -96,7 +97,7 @@ class SubscriptionRegistry:
         return False
 
     def get_data_record(self, req_id):
-        return self.data_records[req_id]
+        return self.data_records.get(req_id, None)
 
     def clear(self):
         self.subscriptions.clear()
@@ -133,6 +134,8 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
     ID = "IB"
 
     def __init__(self, port=4001, client_id=1, ref_data_mgr=None, data_event_bus=None, execution_event_bus=None):
+        super(IBBroker, self).__init__()
+
         self.__tws = swigibpy.EPosixClientSocket(self)
         self.__port = port
         self.__client_id = client_id
@@ -149,11 +152,10 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         if not self.__tws.eConnect("", self.__port, self.__client_id):
             raise RuntimeError('Failed to connect TWS')
 
-
         logger.info("Server version, %s", self.__tws.serverVersion())
 
         self.__tws.reqManagedAccts()
-        self.__tws.reqAccountUpdates()
+        # self.__tws.reqAccountUpdates()
 
         self.__tws.reqAllOpenOrders()
         self.__tws.reqOpenOrders()
@@ -173,12 +175,12 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
     def id(self):
         return IBBroker.ID
 
-    def __next_request_id(self):
+    def next_request_id(self):
         req_id = self.__next_request_id
         self.__next_request_id += 1
         return req_id
 
-    def __next_order_id(self):
+    def next_order_id(self):
         """get from next_order_id, increment and set the value back to next_order_id, """
         order_id = self.__next_order_id
         self.__next_order_id += 1
@@ -189,13 +191,13 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
             req_func = self.__req_market_depth
         elif isinstance(sub_key, HistDataSubscriptionKey):
             req_func = self.__req_hist_data
-        elif sub_key.type == Bar:
+        elif sub_key.data_type == Bar:
             req_func = self.__req_real_time_bar
-        elif sub_key.type == Quote or sub_key.type == Trade:
+        elif sub_key.data_type == Quote or sub_key.data_type == Trade:
             req_func = self.__req_mktdata
 
         if req_func and not self.__data_sub_reg.has_subscription(sub_key=sub_key):
-            req_id = self.__next_request_id()
+            req_id = self.next_request_id()
             self.__data_sub_reg.add_subscription(req_id, sub_key)
             contract = self.__model_factory.create_ib_contract(sub_key.inst_id)
 
@@ -207,9 +209,9 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
             cancel_func = self.__cancel_market_depth
         elif isinstance(sub_key, HistDataSubscriptionKey):
             cancel_func = self.__cancel_hist_data
-        elif sub_key.type == Bar:
+        elif sub_key.data_type == Bar:
             cancel_func = self.__cancel_real_time_bar
-        elif sub_key.type == Quote or sub_key.type == Trade:
+        elif sub_key.data_type == Quote or sub_key.data_type == Trade:
             cancel_func = self.__cancel_mktdata
 
         if cancel_func:
@@ -228,8 +230,8 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
 
     def __req_real_time_bar(self, req_id, sub_key, contract):
         self.__tws.reqRealTimeBars(req_id, contract,
-                                   self.__model_factory.convert_bar_size(sub_key.bar_size),  # barSizeSetting,
-                                   self.__model_factory.convert_hist_data_type(sub_key.type),
+                                   sub_key.bar_size,  # barSizeSetting,
+                                   self.__model_factory.convert_hist_data_type(sub_key.data_type),
                                    0  # RTH Regular trading hour
                                    )
 
@@ -244,11 +246,11 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
 
     def __req_hist_data(self, req_id, sub_key, contract):
         self.__tws.reqHistoricalData(req_id, contract,
-                                     sub_key.to_date.strftime("%Y%m%d %H:%M:%S %Z"),  # endDateTime,
+                                     self.__model_factory.convert_datetime(sub_key.to_date),  # endDateTime,
                                      self.__model_factory.convert_time_period(sub_key.from_date, sub_key.to_date),
                                      # durationStr,
                                      self.__model_factory.convert_bar_size(sub_key.bar_size),  # barSizeSetting,
-                                     self.__model_factory.convert_hist_data_type(sub_key.type),  # whatToShow,
+                                     self.__model_factory.convert_hist_data_type(sub_key.data_type),  # whatToShow,
                                      0,  # useRTH,
                                      1  # formatDate
                                      )
@@ -264,7 +266,7 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
     def on_order(self, order):
         logger.debug("[%s] %s" % (self.__class__.__name__, order))
 
-        order.ord_id = self.__next_order_id()
+        order.ord_id = self.next_order_id()
         self.__ord_reg.add_order(order)
 
         ib_order = self.__model_factory.create_ib_order(order)
@@ -360,14 +362,14 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
 
     def __emit_market_data(self, field, record):
         if record.quote_req and (
-                                field == swigibpy.BID or field == swigibpy.BID_SIZE or field == swigibpy.ASK or field == swigibpy.ASK_SIZE):
-            self.subject.on_next(Quote(instrument=record.inst_id, timestamp=datetime.datetime.now(),
-                                       bid=record.bid,
-                                       bid_size=record.bid_size,
-                                       ask=record.ask,
-                                       ask_size=record.ask_size))
+                                field == swigibpy.BID or field == swigibpy.BID_SIZE or field == swigibpy.ASK or field == swigibpy.ASK_SIZE) and record.bid > 0 and record.ask > 0:
+            self.__data_event_bus.on_next(Quote(instrument=record.inst_id, timestamp=datetime.datetime.now(),
+                                                bid=record.bid,
+                                                bid_size=record.bid_size,
+                                                ask=record.ask,
+                                                ask_size=record.ask_size))
 
-        if record.trade_req and (field == swigibpy.LAST or field == swigibpy.LAST_SIZE):
+        if record.trade_req and (field == swigibpy.LAST or field == swigibpy.LAST_SIZE) and record.last > 0:
             self.__data_event_bus.on_next(
                 Trade(instrument=record.inst_id, timestamp=datetime.datetime.now(), price=record.last,
                       size=record.last_size))
@@ -406,6 +408,9 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         TickerId reqId, IBString const & date, double open, double high, double low, double close,
         int volume, int barCount, double WAP, int hasGaps)
         """
+        if barCount < 0:
+            return
+
         sub_key = self.__data_sub_reg.get_subscription_key(reqId)
         record = self.__data_sub_reg.get_data_record(reqId)
 
@@ -415,9 +420,9 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
             record.low = low
             record.close = close
             record.vol = volume
-
+            timestamp = self.__model_factory.convert_ib_date(date)
             self.__data_event_bus.on_next(
-                Bar(instrument=record.inst_id, timestamp=datetime.datetime.now(), open=open, high=high, low=low,
+                Bar(instrument=record.inst_id, timestamp=timestamp, open=open, high=high, low=low,
                     close=close, vol=volume, size=sub_key.bar_size))
 
     def realtimeBar(self, reqId, time, open, high, low, close, volume, wap, count):
@@ -436,7 +441,7 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
             record.close = close
             record.vol = volume
 
-            timestamp = self.__model_factory.convert_ib_datetime(time)
+            timestamp = datetime.datetime.fromtimestamp(time)
             self.__data_event_bus.on_next(
                 Bar(instrument=record.inst_id, timestamp=timestamp, open=open, high=high, low=low, close=close,
                     vol=volume, size=sub_key.bar_size))

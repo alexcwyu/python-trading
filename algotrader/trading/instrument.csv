@@ -2,3 +2,4 @@ inst_id,name,type,symbol,exch_id,ccy_id,alt_symbol,alt_exch_id,sector,group,put_
 0,EURUSD,CASH,EURUSD,IDEALPRO,USD,IB=EUR,,,,,,,,,
 1,USDJPY,CASH,USDJPY,IDEALPRO,JPY,IB=USD,,,,,,,,,
 2,VXX,STK,VXX,SMART,USD,IB=VXX
+3,Google,STK,GOOG,SMART,USD,IB=GOOG

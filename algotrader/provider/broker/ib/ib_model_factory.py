@@ -1,17 +1,16 @@
+from datetime import datetime
+
+from dateutil.relativedelta import relativedelta
 from swigibpy import Contract, Order, TagValue, TagValueList
 
-from algotrader.event.order import *
-from algotrader.provider.broker.ib.ib_broker import IBBroker
-
 from algotrader.event.market_data import *
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+from algotrader.event.order import *
 
-import swigibpy
 
 class IBModelFactory:
 
     IB_DATETIME_FORMAT = "%Y%m%d %H:%M:%S %Z"
+    IB_DATE_FORMAT = "%Y%m%d"
 
     sec_type_mapping = {
     }
@@ -135,6 +134,7 @@ class IBModelFactory:
         return self.ord_action_mapping[ord_action]
 
     def create_ib_contract(self, inst_id):
+        from .ib_broker import IBBroker
         inst = self.__ref_data_mgr.get_inst(inst_id=inst_id)
 
         contract = Contract()
@@ -142,7 +142,7 @@ class IBModelFactory:
         contract.symbol = inst.get_symbol(IBBroker.ID)
         contract.secType = self.convert_sec_type(inst.type)
         contract.currency = self.convert_sec_type(inst.ccy_id)
-        pass
+        return contract
 
 
     def convert_hist_data_type(self, type):
@@ -153,12 +153,17 @@ class IBModelFactory:
         return datetime.strftime(self.IB_DATETIME_FORMAT)
 
 
+    def convert_ib_date(self, ib_date_str):
+       return datetime.strptime(ib_date_str, self.IB_DATE_FORMAT)
+
+
+
     def convert_ib_datetime(self, ib_datetime_str):
-        return datetime.strptime(self.IB_DATETIME_FORMAT, ib_datetime_str)
+        return datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT)
 
 
     def convert_time_period(self, start_time, end_time):
-        diff = relativedelta(start_time, end_time)
+        diff = relativedelta(end_time, start_time)
         if diff.years:
             if diff.months and diff.months >=11:
                 return "%s Y" % (diff.years + 1)

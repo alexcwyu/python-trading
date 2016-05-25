@@ -65,11 +65,16 @@ class ExecutionEvent(Event):
 
 class OrderStatusUpdate(ExecutionEvent):
     __slots__ = (
-        'status'
+        'filled_qty',
+        'avg_price',
+        'status',
+
     )
 
-    def __init__(self, broker_id=None, ord_id=None, cl_ord_id=None, instrument=None, timestamp=None, status=OrdStatus.NEW):
+    def __init__(self, broker_id=None, ord_id=None, cl_ord_id=None, instrument=None, timestamp=None, filled_qty=0, avg_price=0, status=OrdStatus.NEW):
         super(OrderStatusUpdate, self).__init__(broker_id, ord_id, instrument, timestamp)
+        self.filled_qty = filled_qty
+        self.avg_price = avg_price
         self.status = status
 
 
@@ -84,17 +89,18 @@ class OrderStatusUpdate(ExecutionEvent):
 class ExecutionReport(OrderStatusUpdate):
     __slots__ = (
         'er_id',
-        'filled_qty',
-        'filled_price',
+        'last_qty',
+        'last_price'
         'commission'
     )
 
-    def __init__(self, broker_id=None, ord_id=None, cl_ord_id = None, instrument=None, timestamp=None, er_id=None, filled_qty=0, filled_price=0, commission=0,
+    def __init__(self, broker_id=None, ord_id=None, cl_ord_id = None, instrument=None, timestamp=None, er_id=None, last_qty=0, last_price=0,
+                 filled_qty=0, avg_price=0, commission=0,
                  status=OrdStatus.NEW):
-        super(ExecutionReport, self).__init__(broker_id, ord_id, cl_ord_id, instrument, timestamp, status)
+        super(ExecutionReport, self).__init__(broker_id, ord_id, cl_ord_id, instrument, timestamp, filled_qty, avg_price, status)
         self.er_id = er_id
-        self.filled_qty = filled_qty
-        self.filled_price = filled_price
+        self.last_qty = last_qty
+        self.last_price = last_price
         self.commission = commission
 
     def on(self, handler):
@@ -102,9 +108,9 @@ class ExecutionReport(OrderStatusUpdate):
 
     def __repr__(self):
         return "ExecutionReport(broker_id = %s, ord_id = %s, cl_ord_id = %s, instrument = %s, timestamp = %s" \
-               ", er_id = %s, filled_qty = %s, filled_price = %s, commission = %s)" \
+               ", er_id = %s, last_qty = %s, last_price = %s, filled_qty = %s, avg_price = %s, commission = %s)" \
                % (self.broker_id, self.ord_id, self.cl_ord_id, self.instrument, self.timestamp,
-                  self.er_id, self.filled_qty, self.filled_price, self.commission)
+                  self.er_id, self.last_qty, self.last_price, self.filled_qty, self.avg_price, self.commission)
 
 
 class Order(OrderEvent):
@@ -181,13 +187,23 @@ class Order(OrderEvent):
                 exec_report.er_id, exec_report.ord_id, self.ord_id))
 
         self.exec_reports.append(exec_report)
-        self.last_price = exec_report.filled_price
-        self.last_qty = exec_report.filled_qty
-        if self.filled_qty + exec_report.filled_qty != 0:
-            self.avg_price = ((self.avg_price * self.filled_qty) + (
-                exec_report.filled_price * exec_report.filled_qty)) / (
-                                 self.filled_qty + exec_report.filled_qty)
-        self.filled_qty += exec_report.filled_qty
+        self.last_price = exec_report.last_price
+        self.last_qty = exec_report.last_qty
+
+        avg_price = exec_report.avg_price
+
+        if avg_price:
+            self.avg_price = avg_price
+        elif self.filled_qty + exec_report.last_qty != 0:
+                self.avg_price = ((self.avg_price * self.filled_qty) + (
+                    self.last_price * self.last_qty)) / (
+                                     self.filled_qty + exec_report.last_qty)
+
+        filled_qty = exec_report.filled_qty
+        if filled_qty:
+            self.filled_qty = filled_qty
+        else:
+            self.filled_qty += exec_report.last_qty
 
         if self.qty == self.filled_qty:
             self.status = OrdStatus.FILLED

@@ -83,8 +83,8 @@ class SimulatorTest(TestCase):
         exec_report = self.exec_handler.exec_reports[1]
         self.assert_exec_report(exec_report, order1.ord_id, 1000, 18.5, OrdStatus.FILLED)
 
-    def assert_exec_report(self, exec_report, ord_id, filled_qty, filled_price, status):
+    def assert_exec_report(self, exec_report, ord_id, last_qty, last_price, status):
         self.assertEqual(ord_id, exec_report.ord_id)
-        self.assertEqual(filled_qty, exec_report.filled_qty)
-        self.assertEqual(filled_price, exec_report.filled_price)
+        self.assertEqual(last_qty, exec_report.last_qty)
+        self.assertEqual(last_price, exec_report.last_price)
         self.assertEqual(status, exec_report.status)

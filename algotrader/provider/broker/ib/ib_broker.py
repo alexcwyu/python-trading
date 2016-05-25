@@ -3,15 +3,12 @@ Created on 4/5/16
 @author = 'jason'
 '''
 
-import datetime
 import time
 
 import swigibpy
 
 from algotrader.event import EventBus
 from algotrader.event.order import *
-from algotrader.event.market_data import MarketDataEventHandler
-from algotrader.event.market_data import Quote, Trade, Bar, MarketDepth
 from algotrader.provider import Feed
 from algotrader.provider.provider import Broker, HistDataSubscriptionKey, MarketDepthSubscriptionKey
 from algotrader.trading.ref_data import InMemoryRefDataManager
@@ -151,6 +148,15 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
     def start(self):
         if not self.__tws.eConnect("", self.__port, self.__client_id):
             raise RuntimeError('Failed to connect TWS')
+
+
+        logger.info("Server version, %s", self.__tws.serverVersion())
+
+        self.__tws.reqManagedAccts()
+        self.__tws.reqAccountUpdates()
+
+        self.__tws.reqAllOpenOrders()
+        self.__tws.reqOpenOrders()
 
         # wait until we get the next_order_id
         while (not self.__next_order_id):
@@ -366,32 +372,6 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
                 Trade(instrument=record.inst_id, timestamp=datetime.datetime.now(), price=record.last,
                       size=record.last_size))
 
-    def updateAccountValue(self, key, val, currency, accountName):
-        """
-        IBString const & key, IBString const & val, IBString const & currency, IBString const & accountName
-        """
-        pass
-
-    def updatePortfolio(self, contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL,
-                        accountName):
-        """
-        Contract contract, int position, double marketPrice, double marketValue, double averageCost,
-        double unrealizedPNL, double realizedPNL, IBString const & accountName
-        """
-        pass
-
-    def updateAccountTime(self, timeStamp):
-        """
-        IBString const & timeStamp
-        """
-        pass
-
-    def accountDownloadEnd(self, accountName):
-        """
-        IBString const & accountName
-        """
-        pass
-
     def updateMktDepth(self, id, position, operation, side, price, size):
         """
         TickerId id, int position, int operation, int side, double price, int size
@@ -399,7 +379,8 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         # TODO fix provider_id
         sub_key = self.__data_sub_reg.get_subscription_key(id)
         self.__data_event_bus.on_next(
-            MarketDepth(instrument=sub_key.inst_id, timestamp=datetime.datetime.now(), provider_id=0, position=position,
+            MarketDepth(instrument=sub_key.inst_id, timestamp=datetime.datetime.now(), provider_id=self.ID,
+                        position=position,
                         operation=self.__model_factory.convert_ib_md_operation(operation),
                         side=self.__model_factory.convert_ib_md_side(side),
                         price=price, size=size))
@@ -412,7 +393,8 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         # TODO fix provider_id
         sub_key = self.__data_sub_reg.get_subscription_key(id)
         self.__data_event_bus.on_next(
-            MarketDepth(instrument=sub_key.inst_id, timestamp=datetime.datetime.now(), provider_id=0, position=position,
+            MarketDepth(instrument=sub_key.inst_id, timestamp=datetime.datetime.now(), provider_id=self.ID,
+                        position=position,
                         operation=self.__model_factory.convert_ib_md_operation(operation),
                         side=self.__model_factory.convert_ib_md_side(side),
                         price=price, size=size))
@@ -459,12 +441,6 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
                 Bar(instrument=record.inst_id, timestamp=timestamp, open=open, high=high, low=low, close=close,
                     vol=volume, size=sub_key.bar_size))
 
-    def currentTime(self, time):
-        """
-        long time
-        """
-        pass
-
     def orderStatus(self, id, status, filled, remaining, avgFillPrice, permId,
                     parentId, lastFilledPrice, clientId, whyHeld):
         """
@@ -477,23 +453,20 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
             create_er = False
 
             if ord_status == OrdStatus.NEW or ord_status == OrdStatus.PENDING_CANCEL or ord_status == OrdStatus.CANCELLED or (
-                    ord_status == OrdStatus.REJECTED and order.status != OrdStatus.REJECTED):
+                            ord_status == OrdStatus.REJECTED and order.status != OrdStatus.REJECTED):
                 create_er = True
 
             if create_er:
-                self.__execution_event_bus.on_next(ExecutionReport(
+                self.__execution_event_bus.on_next(OrderStatusUpdate(
                     broker_id=self.ID,
-                    ord_id = order.ord_id,
-                    cl_ord_id = order.cl_ord_id,
-                    er_id= order.ord_id, ## TODO fix it need to get it from provider, which is im memory or from database
+                    ord_id=order.ord_id,
+                    cl_ord_id=order.cl_ord_id,
                     timestamp=datetime.datetime.now(),
-                    instrument= order.instrument,
-                    filled_qty= filled,
-                    filled_price= lastFilledPrice,
-                    status = ord_status
+                    instrument=order.instrument,
+                    filled_qty=filled,
+                    filled_price=avgFillPrice,
+                    status=ord_status
                 ))
-
-
 
     def execDetails(self, reqId, contract, execution):
         """
@@ -501,25 +474,79 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         """
         order = self.__ord_reg.get_order(id)
         if order:
-            #TODO
+            self.__execution_event_bus.on_next(ExecutionReport(
+                broker_id=self.ID,
+                ord_id=order.ord_id,
+                cl_ord_id=order.cl_ord_id,
+                er_id=execution.execId,
+                timestamp=datetime.datetime.now(),
+                instrument=order.instrument,
+                last_qty=execution.shares,
+                last_price=execution.price,
+                filled_qty=execution.cumQty,
+                filled_price=execution.avgPrice
+            ))
+
+    def updateAccountValue(self, key, val, currency, accountName):
+        """
+        IBString const & key, IBString const & val, IBString const & currency, IBString const & accountName
+        """
+        # TODO
+        super(IBBroker, self).updateAccountValue(key, val, currency, accountName)
+
+    def updatePortfolio(self, contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL,
+                        accountName):
+        """
+        Contract contract, int position, double marketPrice, double marketValue, double averageCost,
+        double unrealizedPNL, double realizedPNL, IBString const & accountName
+        """
+        # TODO
+        super(IBBroker, self).updatePortfolio(contract, position, marketPrice, marketValue, averageCost, unrealizedPNL,
+                                              realizedPNL,
+                                              accountName)
+
+    def updateAccountTime(self, timeStamp):
+        """
+        IBString const & timeStamp
+        """
+        # TODO
+        super(IBBroker, self).updateAccountTime(timeStamp)
+
+    def accountDownloadEnd(self, accountName):
+        """
+        IBString const & accountName
+        """
+        # TODO
+        super(IBBroker, self).accountDownloadEnd(accountName)
+
+    def currentTime(self, time):
+        """
+        long time
+        """
+        # TODO
+        super(IBBroker, self).currentTime(time)
 
     def managedAccounts(self, accountsList):
         """
         IBString const & accountsList
         """
-        pass
+        # TODO
+        super(IBBroker, self).managedAccounts(accountsList)
 
     def connectionClosed(self):
-        pass
+        # TODO
+        super(IBBroker, self).connectionClosed()
 
     def openOrder(self, orderID, contract, order, orderState):
         """
         OrderId orderId, Contract arg0, Order arg1, OrderState arg2
         """
-        pass
+        # TODO
+        super(IBBroker, self).openOrder(orderID, contract, order, orderState)
 
     def commissionReport(self, commissionReport):
         """
         CommissionReport commissionReport
         """
-        pass
+        # TODO
+        super(IBBroker, self).commissionReport(commissionReport)

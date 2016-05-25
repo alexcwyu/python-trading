@@ -1,6 +1,6 @@
-from algotrader.utils import logger
-
 import swigibpy
+
+from algotrader.utils import logger
 
 
 class IBSocket(swigibpy.EWrapper):
@@ -63,8 +63,8 @@ class IBSocket(swigibpy.EWrapper):
                 dividendImpact, dividendsToExpiry):
         """
         EWrapper self, TickerId tickerId, TickType tickType, double basisPoints, IBString const & formattedBasisPoints,
-                                                                                                      double totalDividends, int holdDays, IBString const & futureExpiry,
-                                                                                                                                                    double dividendImpact, double dividendsToExpiry
+        double totalDividends, int holdDays, IBString const & futureExpiry,
+        double dividendImpact, double dividendsToExpiry
         """
         logger.debug(
             "tickEFP, tickerId=%s tickType=%s basisPoints=%s formattedBasisPoints=%s totalDividends=%s, holdDays=%s, futureExpiry=%s, dividendImpact=%s, dividendsToExpiry=%s",

@@ -58,12 +58,12 @@ class PositionTest(TestCase):
         position.add_order(order1)
         self.assertEquals(0, position.filled_qty())
 
-        er1 = ExecutionReport(ord_id=1, er_id=1, instrument="HSI", filled_qty=500, filled_price=18.4,
+        er1 = ExecutionReport(ord_id=1, er_id=1, instrument="HSI", last_qty=500, last_price=18.4,
                               status=OrdStatus.PARTIALLY_FILLED)
         order1.add_exec_report(er1)
         self.assertEquals(500, position.filled_qty())
 
-        er2 = ExecutionReport(ord_id=1, er_id=2, instrument="HSI", filled_qty=500, filled_price=18.4,
+        er2 = ExecutionReport(ord_id=1, er_id=2, instrument="HSI", last_qty=500, last_price=18.4,
                               status=OrdStatus.FILLED)
         order1.add_exec_report(er2)
         self.assertEquals(1000, position.filled_qty())
@@ -73,12 +73,12 @@ class PositionTest(TestCase):
         position.add_order(order2)
         self.assertEquals(1000, position.filled_qty())
 
-        er3 = ExecutionReport(ord_id=2, er_id=3, instrument="HSI", filled_qty=800, filled_price=18.4,
+        er3 = ExecutionReport(ord_id=2, er_id=3, instrument="HSI", last_qty=800, last_price=18.4,
                               status=OrdStatus.PARTIALLY_FILLED)
         order2.add_exec_report(er3)
         self.assertEquals(200, position.filled_qty())
 
-        er4 = ExecutionReport(ord_id=2, er_id=4, instrument="HSI", filled_qty=400, filled_price=18.4,
+        er4 = ExecutionReport(ord_id=2, er_id=4, instrument="HSI", last_qty=400, last_price=18.4,
                               status=OrdStatus.FILLED)
         order2.add_exec_report(er4)
         self.assertEquals(-200, position.filled_qty())

@@ -90,7 +90,7 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         order = self.orders[exec_report.ord_id]
         order.add_exec_report(exec_report)
         direction = 1 if order.action == OrdAction.BUY else -1
-        self.cash -= (direction * exec_report.filled_qty * exec_report.filled_price + exec_report.commission)
+        self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
         self.__update_price(exec_report.timestamp, exec_report.instrument, exec_report.filled_price)
 
     def __update_price(self, time, instrument, price):

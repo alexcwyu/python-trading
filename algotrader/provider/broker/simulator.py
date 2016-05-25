@@ -76,19 +76,19 @@ class Simulator(Broker, MarketDataEventHandler):
         if not fill_info or fill_info.fill_price <=0 or fill_info.fill_price<=0:
             return False
 
-        filled_price = fill_info.fill_price
-        filled_qty = fill_info.fill_qty
+        price = fill_info.fill_price
+        qty = fill_info.fill_qty
 
         if order.is_done():
             self.__remove_order(order)
             return False
 
-        if filled_qty < order.leave_qty():
-            self.__send_exec_report(order, filled_price, filled_qty, OrdStatus.PARTIALLY_FILLED)
+        if qty < order.leave_qty():
+            self.__send_exec_report(order, price, qty, OrdStatus.PARTIALLY_FILLED)
             return False
         else:
-            filled_qty = order.leave_qty()
-            self.__send_exec_report(order, filled_price, filled_qty, OrdStatus.FILLED)
+            qty = order.leave_qty()
+            self.__send_exec_report(order, price, qty, OrdStatus.FILLED)
             self.__remove_order(order)
             return True
 
@@ -97,12 +97,12 @@ class Simulator(Broker, MarketDataEventHandler):
                                        timestamp=clock.default_clock.current_date_time(), status=ord_status)
         self.__exec__handler.on_ord_upd(ord_update)
 
-    def __send_exec_report(self, order, filled_price, filled_qty, ord_status):
-        commission = self.__commission.calc(order, filled_price, filled_qty)
+    def __send_exec_report(self, order, last_price, last_qty, ord_status):
+        commission = self.__commission.calc(order, last_price, last_qty)
         exec_report = ExecutionReport(broker_id=Simulator.ID, ord_id=order.ord_id, instrument=order.instrument,
                                       timestamp=clock.default_clock.current_date_time(), er_id=self.next_exec_id(),
-                                      filled_qty=filled_qty,
-                                      filled_price=filled_price, status=ord_status,
+                                      last_qty=last_qty,
+                                      last_price=last_price, status=ord_status,
                                       commission=commission)
 
         self.__exec__handler.on_exec_report(exec_report)

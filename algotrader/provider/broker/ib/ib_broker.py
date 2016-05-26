@@ -79,9 +79,11 @@ class SubscriptionRegistry(object):
         return None
 
     def remove_subscription(self, req_id=None, sub_key=None):
-        if req_id and req_id in self.subscriptions:
-            del self.subscriptions[req_id]
-            del self.data_records[req_id]
+        if req_id:
+            if req_id in self.subscriptions:
+                del self.subscriptions[req_id]
+            if req_id in self.data_records:
+                del self.data_records[req_id]
             return True
         elif sub_key:
             sub_id = self.get_subsciption_id(sub_key)
@@ -114,15 +116,17 @@ class OrderRegistry(object):
         self.__ordid_clordid_dict[order.ord_id] = order.cl_ord_id
 
     def remove_order(self, order):
-        del self.__clordid__order_dict[order.cl_ord_id]
-        del self.__ordid_clordid_dict[order.ord_id]
+        if order.cl_ord_id in self.__clordid__order_dict:
+            del self.__clordid__order_dict[order.cl_ord_id]
+        if order.ord_id in self.__ordid_clordid_dict:
+            del self.__ordid_clordid_dict[order.ord_id]
 
     def get_order(self, ord_id=None, cl_ord_id=None):
         if ord_id and not cl_ord_id:
-            cl_ord_id = self.__ordid_clordid_dict[ord_id]
+            cl_ord_id = self.__ordid_clordid_dict.get(ord_id, None)
 
         if cl_ord_id:
-            return self.__clordid__order_dict[cl_ord_id]
+            return self.__clordid__order_dict.get(cl_ord_id, None)
 
     def get_ord_id(self, cl_ord_id):
         if cl_ord_id in self.__clordid__order_dict:

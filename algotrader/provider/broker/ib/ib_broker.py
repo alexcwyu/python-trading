@@ -528,19 +528,6 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         # TODO
         super(IBBroker, self).updateAccountTime(timeStamp)
 
-    def accountDownloadEnd(self, accountName):
-        """
-        IBString const & accountName
-        """
-        # TODO
-        super(IBBroker, self).accountDownloadEnd(accountName)
-
-    def currentTime(self, time):
-        """
-        long time
-        """
-        # TODO
-        super(IBBroker, self).currentTime(time)
 
     def managedAccounts(self, accountsList):
         """

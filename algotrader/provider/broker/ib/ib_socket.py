@@ -75,7 +75,7 @@ class IBSocket(swigibpy.EWrapper):
         """
         IBString const & key, IBString const & val, IBString const & currency, IBString const & accountName
         """
-        logger.debug("updateAccountValue, key=%s val=%s tickType=%s currency=%s accountName=%s", key, val, currency,
+        logger.debug("updateAccountValue, key=%s val=%s currency=%s accountName=%s", key, val, currency,
                      accountName)
 
     def updatePortfolio(self, contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL,

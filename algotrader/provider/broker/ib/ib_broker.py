@@ -137,12 +137,13 @@ class OrderRegistry(object):
 class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
     ID = "IB"
 
-    def __init__(self, port=4001, client_id=1, ref_data_mgr=None, data_event_bus=None, execution_event_bus=None):
+    def __init__(self, port=4001, client_id=1, account=None, ref_data_mgr=None, data_event_bus=None, execution_event_bus=None):
         super(IBBroker, self).__init__()
 
         self.__tws = swigibpy.EPosixClientSocket(self)
         self.__port = port
         self.__client_id = client_id
+        self.__account = account
         self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else InMemoryRefDataManager()
         self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject
         self.__execution_event_bus = execution_event_bus if execution_event_bus else EventBus.execution_subject
@@ -158,8 +159,11 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
 
         logger.info("Server version, %s", self.__tws.serverVersion())
 
-        self.__tws.reqManagedAccts()
-        # self.__tws.reqAccountUpdates()
+
+        if self.__account:
+            self.__req_acct_update()
+        else:
+            self.__tws.reqManagedAccts()
 
         self.__tws.reqAllOpenOrders()
         self.__tws.reqOpenOrders()
@@ -266,6 +270,9 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         self.__tws.requestFA(1)  # groups
         self.__tws.requestFA(2)  # profile
         self.__tws.requestFA(3)  # account_aliases
+
+    def __req_acct_update(self):
+        self.__tws.reqAccountUpdates(True, self.__account)
 
     def on_order(self, order):
         logger.debug("[%s] %s" % (self.__class__.__name__, order))
@@ -540,7 +547,9 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         IBString const & accountsList
         """
         # TODO
-        super(IBBroker, self).managedAccounts(accountsList)
+
+        self.__account = accountsList.split(",")[0]
+        self.__req_acct_update()
 
     def connectionClosed(self):
         # TODO

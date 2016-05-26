@@ -17,7 +17,7 @@ from algotrader.trading.ref_data import InMemoryRefDataManager
 from algotrader.utils import logger
 
 
-class DataRecord:
+class DataRecord(object):
     __slots__ = (
         'inst_id',
         'bid',
@@ -56,7 +56,7 @@ class DataRecord:
         self.quote_req = quote_req
 
 
-class SubscriptionRegistry:
+class SubscriptionRegistry(object):
     def __init__(self):
         self.subscriptions = {}
         self.data_records = {}
@@ -104,8 +104,8 @@ class SubscriptionRegistry:
         self.data_records.clear()
 
 
-class OrderRegistry:
-    def ___init__(self):
+class OrderRegistry(object):
+    def __init__(self):
         self.__clordid__order_dict = {}
         self.__ordid_clordid_dict = {}
 
@@ -469,7 +469,7 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
                     timestamp=datetime.datetime.now(),
                     instrument=order.instrument,
                     filled_qty=filled,
-                    filled_price=avgFillPrice,
+                    avg_price=avgFillPrice,
                     status=ord_status
                 ))
 
@@ -477,19 +477,19 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         """
         int reqId, Contract contract, Execution execution
         """
-        order = self.__ord_reg.get_order(id)
+        order = self.__ord_reg.get_order(execution.orderId)
         if order:
             self.__execution_event_bus.on_next(ExecutionReport(
                 broker_id=self.ID,
-                ord_id=order.ord_id,
+                ord_id=execution.orderId,
                 cl_ord_id=order.cl_ord_id,
                 er_id=execution.execId,
-                timestamp=datetime.datetime.now(),
+                timestamp=self.__model_factory.convert_ib_datetime(execution.time),
                 instrument=order.instrument,
                 last_qty=execution.shares,
                 last_price=execution.price,
                 filled_qty=execution.cumQty,
-                filled_price=execution.avgPrice
+                avg_price=execution.avgPrice
             ))
 
     def updateAccountValue(self, key, val, currency, accountName):

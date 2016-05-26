@@ -1,15 +1,13 @@
-from datetime import datetime
-
+import swigibpy
 from dateutil.relativedelta import relativedelta
-from swigibpy import Contract, Order, TagValue, TagValueList
 
-from algotrader.event.market_data import *
 from algotrader.event.order import *
 
 
 class IBModelFactory:
 
     IB_DATETIME_FORMAT = "%Y%m%d %H:%M:%S %Z"
+    IB_DATETIME_FORMAT2 = "%Y%m%d %H:%M:%S"
     IB_DATE_FORMAT = "%Y%m%d"
 
     sec_type_mapping = {
@@ -92,17 +90,17 @@ class IBModelFactory:
     def create_ib_order(self, order):
 
         # Order details
-        algoParams = TagValueList()
+        algoParams = swigibpy.TagValueList()
 
         if order.params:
             for k, v in order.params.items():
-                algoParams.append(TagValue(k, v))
+                algoParams.append(swigibpy.TagValue(k, v))
 
-        ib_order = Order()
+        ib_order = swigibpy.Order()
         ib_order.action = self.convert_ord_action(order.action)
         ib_order.lmtPrice = order.limit_price
         ib_order.orderType = self.convert_ord_type(order.type)
-        ib_order.totalQuantity = self.qty
+        ib_order.totalQuantity = order.qty
         ib_order.tif = self.convert_tif(order.tif)
 
         ## TODO set algo strategy from Order to IBOrder
@@ -125,7 +123,7 @@ class IBModelFactory:
         return ccy
 
     def convert_ord_type(self, ord_type):
-        return self.ord_action_mapping[ord_type]
+        return self.ord_type_mapping[ord_type]
 
     def convert_tif(self, tif):
         return self.tif_mapping[tif]
@@ -137,7 +135,7 @@ class IBModelFactory:
         from .ib_broker import IBBroker
         inst = self.__ref_data_mgr.get_inst(inst_id=inst_id)
 
-        contract = Contract()
+        contract = swigibpy.Contract()
         contract.exchange = inst.get_exch_id(IBBroker.ID)
         contract.symbol = inst.get_symbol(IBBroker.ID)
         contract.secType = self.convert_sec_type(inst.type)
@@ -149,17 +147,17 @@ class IBModelFactory:
         return self.hist_data_type_mapping.get(type, "MIDPOINT")
 
 
-    def convert_datetime(self, datetime):
-        return datetime.strftime(self.IB_DATETIME_FORMAT)
+    def convert_datetime(self, dt):
+        return dt.strftime(self.IB_DATETIME_FORMAT)
 
 
     def convert_ib_date(self, ib_date_str):
-       return datetime.strptime(ib_date_str, self.IB_DATE_FORMAT)
+       return datetime.datetime.strptime(ib_date_str, self.IB_DATE_FORMAT)
 
 
 
     def convert_ib_datetime(self, ib_datetime_str):
-        return datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT)
+        return datetime.datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT2)
 
 
     def convert_time_period(self, start_time, end_time):

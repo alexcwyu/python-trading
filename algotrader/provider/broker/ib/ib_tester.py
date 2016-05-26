@@ -1,8 +1,7 @@
 import time
 from datetime import date, timedelta
 
-from algotrader.event.event_bus import EventBus
-from algotrader.event.order import ExecutionEventHandler
+from algotrader.event.order import *
 from algotrader.provider import *
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.utils import logger
@@ -57,11 +56,7 @@ def sub_realtime_quote(broker, inst_id):
 
 
 
-if __name__ == "__main__":
-    broker = IBBroker()
-    broker.start()
-    printer = EventPrinter()
-
+def test_sub_hist_bar(broker):
     print "### requesting hist bar"
     sub_key = sub_hist_data(broker, 3, 5)
     time.sleep(5)
@@ -69,23 +64,55 @@ if __name__ == "__main__":
     broker.unsubscribe_mktdata(sub_key)
     time.sleep(2)
 
+def test_sub_realtime_bar(broker):
     print "### requesting realtime bar"
     sub_key = sub_realtime_bar(broker, 3)
     time.sleep(20)
     print "### cancelling realtime bar"
     broker.unsubscribe_mktdata(sub_key)
-
     time.sleep(2)
+
+
+def test_sub_realtime_trade(broker):
     print "### requesting realtime trade"
     sub_key = sub_realtime_trade(broker, 3)
     time.sleep(20)
     print "### cancelling realtime trade"
     broker.unsubscribe_mktdata(sub_key)
-
     time.sleep(2)
+
+def test_sub_realtime_quote(broker):
     print "### requesting realtime quote"
     sub_key = sub_realtime_quote(broker, 3)
     time.sleep(20)
     print "### cancelling realtime quote"
     broker.unsubscribe_mktdata(sub_key)
+    time.sleep(2)
 
+
+def test_mkt_order(broker):
+    order = Order(cl_ord_id=1, instrument=3, action=OrdAction.BUY, type=OrdType.MARKET, qty=1000)
+    broker.on_order(order)
+    time.sleep(10)
+
+
+def test_lmt_order_update_cancel(broker):
+    order = Order(cl_ord_id=1, instrument=3, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=100)
+    broker.on_order(order)
+    time.sleep(10)
+
+    order = Order(cl_ord_id=1, instrument=3, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=200)
+    broker.on_ord_update_req(order)
+    time.sleep(10)
+
+    broker.on_ord_cancel_req(order)
+    time.sleep(10)
+
+
+
+if __name__ == "__main__":
+    broker = IBBroker()
+    broker.start()
+    printer = EventPrinter()
+
+    test_lmt_order_update_cancel(broker)

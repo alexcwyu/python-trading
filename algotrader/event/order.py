@@ -72,7 +72,7 @@ class OrderStatusUpdate(ExecutionEvent):
     )
 
     def __init__(self, broker_id=None, ord_id=None, cl_ord_id=None, instrument=None, timestamp=None, filled_qty=0, avg_price=0, status=OrdStatus.NEW):
-        super(OrderStatusUpdate, self).__init__(broker_id, ord_id, instrument, timestamp)
+        super(OrderStatusUpdate, self).__init__(broker_id=broker_id, ord_id=ord_id, cl_ord_id=cl_ord_id, instrument=instrument, timestamp=timestamp)
         self.filled_qty = filled_qty
         self.avg_price = avg_price
         self.status = status
@@ -97,7 +97,7 @@ class ExecutionReport(OrderStatusUpdate):
     def __init__(self, broker_id=None, ord_id=None, cl_ord_id = None, instrument=None, timestamp=None, er_id=None, last_qty=0, last_price=0,
                  filled_qty=0, avg_price=0, commission=0,
                  status=OrdStatus.NEW):
-        super(ExecutionReport, self).__init__(broker_id, ord_id, cl_ord_id, instrument, timestamp, filled_qty, avg_price, status)
+        super(ExecutionReport, self).__init__(broker_id = broker_id, ord_id= ord_id, cl_ord_id=cl_ord_id, instrument=instrument, timestamp=timestamp, filled_qty=filled_qty, avg_price=avg_price, status=status)
         self.er_id = er_id
         self.last_qty = last_qty
         self.last_price = last_price

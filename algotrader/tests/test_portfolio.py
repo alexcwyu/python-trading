@@ -46,7 +46,7 @@ class TestPortfolio(TestCase):
         order1 = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
         self.portfolio.on_order(order1)
 
-        er1 = ExecutionReport(ord_id=1, er_id=1, instrument="HSI", last_qty=500, last_price=18.4,
+        er1 = ExecutionReport(ord_id=1, er_id=1, cl_ord_id=1, instrument="HSI", last_qty=500, last_price=18.4,
                               status=OrdStatus.PARTIALLY_FILLED)
         self.portfolio.on_exec_report(er1)
         self.assertEqual(500, order1.last_qty)
@@ -65,7 +65,7 @@ class TestPortfolio(TestCase):
         self.assertEqual(expected_stock_value, self.portfolio.stock_value_series.now())
         self.assertEqual(expected_total_equity, self.portfolio.total_equity_series.now())
 
-        er2 = ExecutionReport(ord_id=1, er_id=2, instrument="HSI", last_qty=500, last_price=18.2,
+        er2 = ExecutionReport(ord_id=1, er_id=2, cl_ord_id=1, instrument="HSI", last_qty=500, last_price=18.2,
                               status=OrdStatus.FILLED)
         self.portfolio.on_exec_report(er2)
         self.assertEqual(500, order1.last_qty)
@@ -89,7 +89,7 @@ class TestPortfolio(TestCase):
         order1 = Order(ord_id=1, instrument="HSI", action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
         self.portfolio.on_order(order1)
 
-        er1 = ExecutionReport(ord_id=1, er_id=1, instrument="HSI", last_qty=500, last_price=18.4,
+        er1 = ExecutionReport(ord_id=1, er_id=1, cl_ord_id=1, instrument="HSI", last_qty=500, last_price=18.4,
                               status=OrdStatus.PARTIALLY_FILLED)
         self.portfolio.on_exec_report(er1)
 

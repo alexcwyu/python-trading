@@ -35,7 +35,7 @@ class OrderTest(TestCase):
         order.add_exec_report(er1)
         self.assertEqual(200, order.leave_qty())
 
-        er2 = ExecutionReport(ord_id=1, er_id=2, instrument="HSI", filled_qty=200, last_price=18.4,
+        er2 = ExecutionReport(ord_id=1, er_id=2, instrument="HSI", last_qty=200, last_price=18.4,
                               status=OrdStatus.FILLED)
         order.add_exec_report(er2)
         self.assertEqual(0, order.leave_qty())

@@ -1,13 +1,15 @@
+from datetime import date
+
 from algotrader.chart.plotter import StrategyPlotter
+from algotrader.event.market_data import Bar, BarSize, BarType
 from algotrader.provider.broker.simulator import Simulator
-from algotrader.provider.feed.csv import PandasCSVDataFeed
+from algotrader.provider.feed.csv import CSVDataFeed
 from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
-from algotrader.strategy.sma_strategy import SMAStrategy
+from algotrader.strategy.strategy import BacktestingConfig
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio import Portfolio
 from algotrader.utils import clock
-
 
 
 class BacktestRunner(object):
@@ -24,10 +26,20 @@ class BacktestRunner(object):
 
 
 def main():
-    feed = PandasCSVDataFeed(names=['spy'])
     portfolio = Portfolio(cash=100000)
-    #strategy = SMAStrategy("sma", Simulator.ID, feed, portfolio, instrument='spy', qty=1000)
-    strategy = Down2PctStrategy("down2%", Simulator.ID, feed, portfolio, instrument='spy', qty=1000)
+
+    feed = CSVDataFeed()
+    broker = Simulator()
+
+    config = BacktestingConfig(broker_id=Simulator.ID,
+                                feed_id=CSVDataFeed.ID,
+                                data_type=Bar,
+                                bar_type=BarType.Time,
+                                bar_size=BarSize.D1,
+                                from_date=date(2010, 1, 1), to_date=date.today())
+
+    strategy = Down2PctStrategy("down2%", portfolio,
+                                instrument='SPY', qty=1000,  trading_config=config )
 
     runner = BacktestRunner(strategy)
     runner.start()
@@ -41,7 +53,7 @@ def main():
 
     # build in plot
     plotter = StrategyPlotter(strategy)
-    plotter.plot(instrument='spy')
+    plotter.plot(instrument='SPY')
 
     #import matplotlib.pyplot as plt
     #plt.show()

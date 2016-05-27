@@ -6,6 +6,9 @@ from algotrader.event import OrderEventHandler
 class Provider(object):
     __metaclass__ = abc.ABCMeta
 
+    def __init__(self):
+        super(Provider, self).__init__()
+
     @abc.abstractmethod
     def start(self):
         raise NotImplementedError()
@@ -22,15 +25,13 @@ class Provider(object):
 from algotrader.event.market_data import *
 
 
-class SubscriptionKey:
+class SubscriptionKey(object):
     __slots__ = (
         'provider_id',
         'data_type',
         'inst_id',
         'bar_type',
-        'bar_size',
-        'from_date',
-        'to_date',
+        'bar_size'
     )
 
     def __init__(self, inst_id, provider_id='IB', data_type=Bar, bar_type=BarType.Time, bar_size=BarSize.D1):
@@ -58,11 +59,7 @@ class HistDataSubscriptionKey(SubscriptionKey):
 
     def __init__(self, inst_id, provider_id='IB', data_type=Bar, bar_type=BarType.Time, bar_size=BarSize.D1,
                  from_date=None, to_date=None):
-        self.provider_id = provider_id
-        self.data_type = data_type
-        self.inst_id = inst_id
-        self.bar_type = bar_type
-        self.bar_size = bar_size
+        super(HistDataSubscriptionKey, self).__init__(inst_id=inst_id, provider_id=provider_id, data_type=data_type, bar_type=bar_type, bar_size=bar_size)
         self.from_date = from_date
         self.to_date = to_date
 
@@ -85,11 +82,7 @@ class MarketDepthSubscriptionKey(SubscriptionKey):
 
     def __init__(self, inst_id, provider_id='IB', data_type=Bar, bar_type=BarType.Time, bar_size=BarSize.D1,
                  num_rows=1):
-        self.provider_id = provider_id
-        self.data_type = data_type
-        self.inst_id = inst_id
-        self.bar_type = bar_type
-        self.bar_size = bar_size
+        super(HistDataSubscriptionKey, self).__init__(inst_id=inst_id, provider_id=provider_id, data_type=data_type, bar_type=bar_type, bar_size=bar_size)
         self.num_rows = num_rows
 
     def __eq__(self, other):
@@ -104,48 +97,69 @@ class MarketDepthSubscriptionKey(SubscriptionKey):
                  other.num_rows))
 
 
-class Feed(Provider):
+class ProviderManager(object):
     __metaclass__ = abc.ABCMeta
 
-
-    def subscribe_mktdata(self, sub_key):
-        pass
-
-    def unsubscribe_mktdata(self, sub_key):
-        pass
-
-
-class FeedManager(object):
     def __init__(self):
-        self.__feed_mapping = {}
+        self.__mapping = {}
 
-    def get_broker(self, feed_id):
-        if feed_id in self.__feed_mapping:
-            return self.__feed_mapping[feed_id]
-        return None
+    def get(self, id):
+        return self.__mapping.get(id, None)
 
-    def reg_broker(self, feed):
-        self.__feed_mapping[feed.id()] = feed
+    def register(self, provider):
+        self.__mapping[provider.id()] = provider
+
+
+class FeedManager(ProviderManager):
+    def __init__(self):
+        super(FeedManager, self).__init__()
+
+    def register(self, provider):
+        if provider and isinstance(provider, Feed):
+            super(FeedManager, self).register(provider)
 
 
 feed_mgr = FeedManager()
 
 
-class Broker(Provider, OrderEventHandler):
-    __metaclass__ = abc.ABCMeta
-
-
-class BrokerManager(object):
+class BrokerManager(ProviderManager):
     def __init__(self):
-        self.__broker_mapping = {}
+        super(BrokerManager, self).__init__()
+        pass
 
-    def get_broker(self, broker_id):
-        if broker_id in self.__broker_mapping:
-            return self.__broker_mapping[broker_id]
-        return None
-
-    def reg_broker(self, broker):
-        self.__broker_mapping[broker.id()] = broker
+    def register(self, provider):
+        if provider and isinstance(provider, Broker):
+            super(BrokerManager, self).register(provider)
 
 
 broker_mgr = BrokerManager()
+
+
+class Feed(Provider):
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self):
+        super(Provider, self).__init__()
+
+    def subscribe_all_mktdata(self, sub_keys):
+        for sub_key in sub_keys:
+            self.subscribe_mktdata(sub_key)
+
+    def unsubscribe_all_mktdata(self, sub_keys):
+        for sub_key in sub_keys:
+            self.unsubscribe_mktdata(sub_key)
+
+    @abc.abstractmethod
+    def subscribe_mktdata(self, sub_key):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def unsubscribe_mktdata(self, sub_key):
+        raise NotImplementedError()
+
+
+class Broker(Provider, OrderEventHandler):
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self):
+        super(Provider, self).__init__()

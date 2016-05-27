@@ -1,13 +1,13 @@
 from algotrader.event.order import OrdAction
 from algotrader.strategy.strategy import Strategy
-from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.technical.ma import SMA
+from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.utils import logger
 
 
 class SMAStrategy(Strategy):
-    def __init__(self, stg_id, broker_id, feed, portfolio, instrument, qty=1000):
-        super(SMAStrategy, self).__init__(stg_id, broker_id, feed, portfolio)
+    def __init__(self, stg_id, portfolio, instrument, qty, config):
+        super(SMAStrategy, self).__init__(stg_id, portfolio, instrument, config)
         self.order = None
         self.qty = qty
         self.close = inst_data_mgr.get_series("Bar.%s.86400.Close" % instrument)

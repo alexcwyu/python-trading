@@ -4,6 +4,10 @@ from algotrader.utils import logger
 
 
 class IBSocket(swigibpy.EWrapper):
+
+    def __init__(self):
+        super(IBSocket, self).__init__()
+
     def nextValidId(self, orderId):
         """
         OrderId orderId

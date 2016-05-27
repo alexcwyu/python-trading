@@ -245,6 +245,9 @@ class InMemoryRefDataManager(RefDataManager):
         return self.__exch_dict.get(exch_id, None)
 
 
+inmemory_ref_data_mgr = InMemoryRefDataManager()
+
+
 if __name__ == "__main__":
     mgr = InMemoryRefDataManager();
     print mgr.get_inst(symbol='EURUSD', exch_id='IDEALPRO')

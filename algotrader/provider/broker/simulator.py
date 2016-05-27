@@ -15,13 +15,16 @@ class Simulator(Broker, MarketDataEventHandler):
     ID = "Simulator"
 
     def __init__(self, exec_handler=order_mgr, commission=None, fill_strategy=None):
+
+        super(Simulator, self).__init__()
         self.__next_exec_id = 0
         self.__order_map = defaultdict(dict)
         self.__quote_map = {}
         self.__exec__handler = exec_handler
         self.__fill_strategy = fill_strategy if fill_strategy is not None else DefaultFillStrategy()
         self.__commission = commission if commission is not None else NoCommission()
-        broker_mgr.reg_broker(self)
+
+        broker_mgr.register(self)
 
     def start(self):
         EventBus.data_subject.subscribe(self.on_next)

@@ -9,11 +9,11 @@ import swigibpy
 
 from algotrader.event import EventBus
 from algotrader.event.order import *
-from algotrader.provider import Feed
+from algotrader.provider import Feed, broker_mgr, feed_mgr
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.provider import Broker, HistDataSubscriptionKey, MarketDepthSubscriptionKey
-from algotrader.trading.ref_data import InMemoryRefDataManager
+from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
 
 
@@ -134,7 +134,7 @@ class OrderRegistry(object):
         return None
 
 
-class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
+class IBBroker(IBSocket, Broker, Feed):
     ID = "IB"
 
     def __init__(self, port=4001, client_id=1, account=None, ref_data_mgr=None, data_event_bus=None, execution_event_bus=None):
@@ -144,7 +144,7 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         self.__port = port
         self.__client_id = client_id
         self.__account = account
-        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else InMemoryRefDataManager()
+        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
         self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject
         self.__execution_event_bus = execution_event_bus if execution_event_bus else EventBus.execution_subject
         self.__model_factory = IBModelFactory(self.__ref_data_mgr)
@@ -152,6 +152,9 @@ class IBBroker(Broker, IBSocket, MarketDataEventHandler, Feed):
         self.__ord_reg = OrderRegistry()
         self.__next_request_id = 1
         self.__next_order_id = None
+
+        feed_mgr.register(self)
+        broker_mgr.register(self)
 
     def start(self):
         if not self.__tws.eConnect("", self.__port, self.__client_id):

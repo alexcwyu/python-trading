@@ -1,13 +1,14 @@
 from algotrader.event.order import OrdAction
 from algotrader.strategy.strategy import Strategy
-from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.technical.roc import ROC
+from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.utils import logger
 
 
 class Down2PctStrategy(Strategy):
-    def __init__(self, stg_id, broker_id, feed, portfolio, instrument, qty=1000):
-        super(Down2PctStrategy, self).__init__(stg_id, broker_id, feed, portfolio)
+    def __init__(self, stg_id, portfolio, instrument, qty,
+                 trading_config):
+        super(Down2PctStrategy, self).__init__(stg_id, portfolio, instrument, trading_config)
         self.day_count = 0
         self.order = None
         self.qty = qty

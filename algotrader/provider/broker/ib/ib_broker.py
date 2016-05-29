@@ -3,6 +3,7 @@ Created on 4/5/16
 @author = 'jason'
 '''
 
+import threading
 import time
 
 import swigibpy
@@ -134,13 +135,37 @@ class OrderRegistry(object):
         return None
 
 
+class TWSPoller(threading.Thread):
+    '''Continually polls TWS for any outstanding messages.
+
+    Loops indefinitely until killed or a fatal error is encountered. Calls
+    TWS's `EClientSocketBase::checkMessages` function which blocks on socket
+    receive (synchronous I/O).
+    '''
+
+    def __init__(self, tws, daemon = False):
+        super(TWSPoller, self).__init__()
+        self.daemon = daemon
+        self._tws = tws
+
+    def run(self):
+        '''Continually poll TWS'''
+        ok = True
+        while ok:
+            ok = self._tws.checkMessages()
+
+            if ok and (not self._tws or not self._tws.isConnected()):
+                ok = False
+
+
 class IBBroker(IBSocket, Broker, Feed):
     ID = "IB"
 
-    def __init__(self, port=4001, client_id=1, account=None, ref_data_mgr=None, data_event_bus=None, execution_event_bus=None):
+    def __init__(self, port=4001, client_id=1, account=None, ref_data_mgr=None, data_event_bus=None, execution_event_bus=None, daemon=False):
         super(IBBroker, self).__init__()
 
         self.__tws = swigibpy.EPosixClientSocket(self)
+        self.__poller = TWSPoller(self.__tws, daemon=daemon)
         self.__port = port
         self.__client_id = client_id
         self.__account = account
@@ -152,31 +177,36 @@ class IBBroker(IBSocket, Broker, Feed):
         self.__ord_reg = OrderRegistry()
         self.__next_request_id = 1
         self.__next_order_id = None
+        self.__started = False
 
         feed_mgr.register(self)
         broker_mgr.register(self)
 
     def start(self):
-        if not self.__tws.eConnect("", self.__port, self.__client_id):
-            raise RuntimeError('Failed to connect TWS')
+        if not self.__started:
+            self.__started = True
+            if not self.__tws.eConnect("", self.__port, self.__client_id, poll_auto=False):
+                raise RuntimeError('Failed to connect TWS')
+            self.__poller.start()
 
-        logger.info("Server version, %s", self.__tws.serverVersion())
+            logger.info("Server version, %s", self.__tws.serverVersion())
 
 
-        if self.__account:
-            self.__req_acct_update()
-        else:
-            self.__tws.reqManagedAccts()
+            if self.__account:
+                self.__req_acct_update()
+            else:
+                self.__tws.reqManagedAccts()
 
-        self.__tws.reqAllOpenOrders()
-        self.__tws.reqOpenOrders()
+            self.__tws.reqAllOpenOrders()
+            self.__tws.reqOpenOrders()
 
-        # wait until we get the next_order_id
-        while (not self.__next_order_id):
-            time.sleep(1)
+            # wait until we get the next_order_id
+            while (not self.__next_order_id):
+                time.sleep(1)
 
     def stop(self):
         self.__tws.eDisconnect()
+        self.__started = False
         ## todo unsubscribe market data
         ## cancel order !?
 

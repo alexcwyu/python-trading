@@ -2,10 +2,10 @@ import abc
 
 from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.event.order import OrdType
-from algotrader.provider.broker.order_handler import MarketOrderHandler, LimitOrderHandler, StopLimitOrderHandler, \
+from algotrader.provider.broker.sim.order_handler import MarketOrderHandler, LimitOrderHandler, StopLimitOrderHandler, \
     StopOrderHandler, TrailingStopOrderHandler
-from algotrader.provider.broker.sim_config import SimConfig
-from algotrader.provider.broker.slippage import NoSlippage
+from algotrader.provider.broker.sim.sim_config import SimConfig
+from algotrader.provider.broker.sim.slippage import NoSlippage
 from algotrader.trading import inst_data_mgr
 
 

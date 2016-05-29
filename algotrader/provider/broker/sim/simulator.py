@@ -3,8 +3,8 @@ from collections import defaultdict
 from algotrader.event.event_bus import EventBus
 from algotrader.event.order import MarketDataEventHandler, OrdStatus, OrderStatusUpdate, \
     ExecutionReport
-from algotrader.provider.broker.commission import NoCommission
-from algotrader.provider.broker.fill_strategy import DefaultFillStrategy
+from algotrader.provider.broker.sim.commission import NoCommission
+from algotrader.provider.broker.sim.fill_strategy import DefaultFillStrategy
 from algotrader.provider.provider import broker_mgr, Broker
 from algotrader.trading import order_mgr
 from algotrader.utils import clock

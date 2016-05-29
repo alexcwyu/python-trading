@@ -1,9 +1,9 @@
 import abc
-
-from algotrader.event.market_data import Bar, Quote, Trade
-from algotrader.event.order import OrdAction
-from algotrader.provider.broker.sim_config import SimConfig
 import math
+
+from algotrader.event.market_data import Trade
+from algotrader.provider.broker.sim.sim_config import SimConfig
+
 
 class MarketDataProcessor(object):
     __metaclass__ = abc.ABCMeta

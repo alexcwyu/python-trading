@@ -11,7 +11,7 @@ dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 class CSVDataFeed(Feed):
     ID = "CSV"
 
-    def __init__(self, path = '../../data/', ref_data_mgr=None, data_event_bus=None):
+    def __init__(self, path = '../data', ref_data_mgr=None, data_event_bus=None):
         self.__path = path
         self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
         self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject

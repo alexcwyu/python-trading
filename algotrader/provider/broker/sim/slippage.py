@@ -1,7 +1,5 @@
 import abc
 
-from algotrader.event.order import OrdAction
-
 
 class Slippage(object):
     __metaclass__ = abc.ABCMeta

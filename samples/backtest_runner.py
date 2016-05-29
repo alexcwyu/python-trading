@@ -2,7 +2,7 @@ from datetime import date
 
 from algotrader.chart.plotter import StrategyPlotter
 from algotrader.event.market_data import Bar, BarSize, BarType
-from algotrader.provider.broker.simulator import Simulator
+from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.csv import CSVDataFeed
 from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
 from algotrader.strategy.strategy import BacktestingConfig

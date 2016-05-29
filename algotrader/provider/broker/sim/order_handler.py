@@ -2,8 +2,7 @@ import abc
 import sys
 
 from algotrader.event.market_data import Bar, Quote, Trade
-from algotrader.event.order import OrdAction
-from algotrader.provider.broker.data_processor import BarProcessor, TradeProcessor, QuoteProcessor
+from algotrader.provider.broker.sim.data_processor import BarProcessor, TradeProcessor, QuoteProcessor
 
 
 class FillInfo(object):

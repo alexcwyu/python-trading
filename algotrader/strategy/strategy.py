@@ -5,7 +5,7 @@ from algotrader.event.market_data import MarketDataEventHandler, Bar, BarSize, B
 from algotrader.event.order import OrdType, TIF, ExecutionEventHandler, Order
 from algotrader.provider import broker_mgr, feed_mgr, HistDataSubscriptionKey, SubscriptionKey
 from algotrader.provider.broker.ib.ib_broker import IBBroker
-from algotrader.provider.broker.simulator import Simulator
+from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.csv import CSVDataFeed
 from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.trading.order_mgr import order_mgr

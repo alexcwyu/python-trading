@@ -1,4 +1,4 @@
-AlgoTrader (Python version)
+AlgoTrader
 ===========================
 
 AlgoTrader is an **event driven algorithmic trading system**.

@@ -36,7 +36,7 @@ def main():
                                bar_size=BarSize.M1)
 
     #strategy = SMAStrategy("sma", portfolio, instrument='spy', qty=1000, trading_config=config)
-    strategy = Down2PctStrategy("down2%", portfolio, instrument='SPY', qty=1000, trading_config=config)
+    strategy = Down2PctStrategy("down2%", portfolio, instrument='GOOG', qty=1000, trading_config=config)
 
     runner = ATSRunner(strategy)
 

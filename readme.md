@@ -26,10 +26,11 @@ Main Features (Python version)
 TODO
 ----
 
- * persistance: Save the portfolio, account, result into DB and can load them back when system startup. 
+ * Persistence: Save the portfolio, account, result into DB and can load them back when system startup.
+ * Bar Factory: Aggregate bar from lower time frame bar or from quote / trade
  * Supports more CSV format, e.g. Google Finance, Quandl and NinjaTrader.
  * Supports more data feed e.g. Cassandra, InfluxDB, KDB 
- * Supports real time data persistance into various data store (e.g. CSV, Cassandra, Influx, KDB)
+ * Save real time data, persist into various data store (e.g. CSV, Cassandra, Influx, KDB)
  * Aggregated TimeSeries (multiple Key - value)
  * Event profiler.
  * TA-Lib integration, support more TA indicator
@@ -39,3 +40,5 @@ TODO
  * Supports Machine Learning Library, e.g. Theano 
  * Supports Spark
  * Supports Parallel processing, for optimization and backtest. Results should be persisted into DB and can be viewed by HTML5 UI.
+ * Supports FIX workflow, refactor order into order and orderEvent (Order contains state and with different order events: NewOrderSingle , OrderCancelRequest, OrderCancelReplaceRequest, OrderStatusRequest and execution events: ExecutionReport, OrderStatus)
+ * Remote OMS (strategies can be run separately and send order request to remote OrderServer)

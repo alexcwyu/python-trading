@@ -127,16 +127,16 @@ def test_lmt_order_update_cancel(broker, instrument=3, qty=1000, limit_price=100
 
 if __name__ == "__main__":
 
-    broker = IBBroker(daemon=False)
+    broker = IBBroker(daemon=True)
 
     broker.start()
     logger.setLevel(logging.DEBUG)
     eventLogger = EventLogger()
 
-    test_sub_hist_bar(broker)
-    # test_sub_realtime_bar(broker)
-    # test_sub_realtime_trade(broker)
-    # test_sub_realtime_quote(broker)
+    #test_sub_hist_bar(broker)
+    #test_sub_realtime_bar(broker)
+    test_sub_realtime_trade(broker)
+    test_sub_realtime_quote(broker)
 
     #test_lmt_order_update_cancel(broker)
     #test_mkt_order(broker, action=OrdAction.BUY)

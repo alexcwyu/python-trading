@@ -28,9 +28,9 @@ class CSVDataFeed(Feed):
         return CSVDataFeed.ID
 
     @staticmethod
-    def read_csv(symobl, file):
+    def read_csv(symbol, file):
         df = pd.read_csv(file, index_col='Date', parse_dates=['Date'], date_parser=dateparse)
-        df['Symbol'] = symobl
+        df['Symbol'] = symbol
         df['BarSize'] = int(BarSize.D1)
         return df
 

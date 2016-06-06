@@ -204,124 +204,157 @@ class MultiTimeSeries(object):
 class DataSeries(object):
     _slots__ = (
         'name',
-        'description',
-        'data',
+        'keys',
+        'default_key',
+        'desc',
+        'missing_value'
         'subject',
-        '_value',
-        '_prev_time',
-        '_size',
-        '_missing_value'
+
+        '__time_data_dict',
+        '__data_dict',
+        '__prev_time',
+        '__size',
     )
 
-    def __init__(self, name=None, description=None, missing_value=np.nan):
+    def __init__(self, name, keys, default_key, desc=None, missing_value=np.nan):
         self.name = name
-        self.description = description if description else name
-        self.data = defaultdict(dict)
+        self.keys = keys
+        self.default_key = default_key
+        self.desc = desc if desc else name
+        self.missing_value = missing_value
         self.subject = Subject()
-        self._value = defaultdict(list)
-        self._prev_time = defaultdict(lambda: None)
-        self._size = defaultdict(lambda: 0)
-        self._missing_value = missing_value
 
-    def add(self, time, values):
-        assert type(values) == dict
-        for key, value in values.items():
-            if self._prev_time[key] == None or time > self._prev_time[key]:
-                self.data[key][time] = value
-                self._value[key].append(value)
-                self._size[key] += 1
-                self._prev_time[key] = time
-            elif time == self._prev_time[key]:
-                self.data[key][time] = value
-                self._value[key].pop()
-                self._value[key].append(value)
-            else:
-                raise AssertionError(
-                    "Time for new Item %s cannot be earlier then previous item %s" % (time, self._prev_time))
-        self.subject.on_next((time, values))
+        self.__data_list = defaultdict(list)
+        self.__time_list = list()
+        self.__data_time_dict = defaultdict(dict)
+
+    def add(self, time, data):
+        if self.current_time() == None or time > self.current_time():
+            for key in self.keys:
+                value = data.get(key, default=self.missing_value)
+                self.__data_time_dict[key][time] = value
+                self.__data_list[key].append(value)
+                self.__time_list.append(time)
+
+        elif time == self.current_time():
+            for key in self.keys:
+                value = data.get(key, default=self.missing_value)
+                self.__data_list[key].pop()
+                self.__data_list[key].append(value)
+        else:
+            raise AssertionError(
+                "Time for new Item %s cannot be earlier then previous item %s" % (time, self._prev_time))
+        self.subject.on_next((time, data))
+
+
+    def current_time(self):
+        return  self.__time_list[-1] if self.__time_list else None
 
     def get_data(self, keys=None):
-        return self.__get_result_for_keys(keys, lambda key: self.data[key])
+        if not keys:
+            self.__data_time_dict
+        else:
+            result = {}
+            for key in keys:
+                result[key] = self.__data_time_dict[key]
 
     def get_series(self, keys=None):
-        def f(key):
-            s = pd.Series(self.data[key], name="%s.%s" % (self.name, key))
-            s.index.name = 'Time'
-            return s
+        df = pd.DataFrame(self.__data_list, index=self.__time_list)
+        if keys:
+            return df[self._get_key(keys)]
+        return df
 
-        return self.__get_result_for_keys(keys, f)
 
-    def size(self, keys=None):
-        return self.__get_result_for_keys(keys, lambda key: self._size[key])
+    def size(self):
+        return len(self.__time_list)
 
     def now(self, keys=None):
-        return self.__get_result_for_keys(keys, lambda key: self.get_by_idx(key, -1))
+        return self.get_by_idx(keys, -1)
 
-    def get_by_idx(self, key, idx=None):
-        if idx == None:
-            return self._value[key]
-        elif isinstance(idx, int) and (idx >= self._size[key] or idx < -self._size[key]):
-            return self._missing_value
-        return self._value[key][idx]
-
-    def get_by_time(self, key, time):
-        return self.data[key][time]
-
-    def ago(self, keys=None, idx=1):
-        assert idx >= 0
-        return self.__get_result_for_keys(keys, lambda key: self.get_by_idx(key, -1 - idx))
-
-    def std(self, keys=None, start=None, end=None):
-        return self.__call_np(keys, start, end, np.nanstd)
-
-    def var(self, keys=None, start=None, end=None):
-        return self.__call_np(keys, start, end, np.nanvar)
-
-    def mean(self, keys=None, start=None, end=None):
-        return self.__call_np(keys, start, end, np.nanmean)
-
-    def max(self, keys=None, start=None, end=None):
-        return self.__call_np(keys, start, end, np.nanmax)
-
-    def min(self, keys=None, start=None, end=None):
-        return self.__call_np(keys, start, end, np.nanmin)
-
-    def median(self, keys=None, start=None, end=None):
-        return self.__call_np(keys, start, end, np.nanmedian)
-
-    def __get_result_for_keys(self, keys, function):
-        result = {}
-        if not keys:
-            keys = self.data.keys()
+    def _get_key(keys= None):
+        keys = keys if keys else self.keys
         if type(keys) != set and type(keys) != list:
             keys = [keys]
+        return keys
+
+
+    def get_by_idx(self, idx=None, keys=None):
+        if isinstance(idx, int) and (idx >= self.size() or idx < -self.size()):
+            return self.__missing_value
+        keys = self._get_key(keys)
+        result = {}
         for key in keys:
-            result[key] = function(key)
+            result[key] = self.__data_list[key][idx] if idx else self.__data_list[key]
+
         return result
+
+    def get_by_time(self, time, keys=None):
+        keys = self._get_key(keys)
+        result = {}
+        for key in keys:
+            result[key] = self.__data_time_dict[key][time]
+        return result
+
+
+    def ago(self, idx=1, keys = None):
+        assert idx >= 0
+        return self.get_by_idx(-1 - idx)
+
+
+    def std(self, start=None, end=None, keys=None):
+        return self.__call_np(keys, start, end, np.nanstd)
+
+    def var(self, start=None, end=None, keys=None):
+        return self.__call_np(keys, start, end, np.nanvar)
+
+    def mean(self, start=None, end=None, keys=None):
+        return self.__call_np(keys, start, end, np.nanmean)
+
+    def max(self, start=None, end=None, keys=None):
+        return self.__call_np(keys, start, end, np.nanmax)
+
+    def min(self, start=None, end=None, keys=None):
+        return self.__call_np(keys, start, end, np.nanmin)
+
+    def median(self, start=None, end=None, keys=None):
+        return self.__call_np(keys, start, end, np.nanmedian)
+
+    # def __get_result_for_keys(self, keys, function):
+    #     result = {}
+    #     keys = self._get_key(keys)
+    #     for key in keys:
+    #         result[key] = function(key)
+    #     return result
 
     def __call_np(self, keys, start, end, np_func):
 
-        def f(key):
-            idx = self.__create_slice(key, start, end)
-            data = self.get_by_idx(key, idx)
+        def f(idx, key):
+            data = self.get_by_idx(idx, key)
             return np_func(data)
 
-        return self.__get_result_for_keys(keys, f)
+        idx = self.__create_slice(start, end)
 
-    def __create_slice(self, key, start=None, end=None):
+        result = {}
+        keys = self._get_key(keys)
+        for key in keys:
+            result[key] = f(idx, key)
+        return result
+
+
+    def __create_slice(self, start=None, end=None):
         if not end:
-            end = self.size([key])[key]
+            end = self.size()
         if start:
             return slice(start, end)
         else:
             return slice(end)
 
-    def __getitem__(self, idx):
-        key, index = idx
+
+    def __getitem__(self, index):
         if isinstance(index, slice) or isinstance(index, int):
-            return self.get_by_idx(key, index)
+            return self.get_by_idx(index)
         elif isinstance(index, datetime.datetime):
-            return self.get_by_time(key, index)
+            return self.get_by_time(index)
         raise NotImplementedError("Unsupported index type %s, %s" % (index, type(index)))
 
 

@@ -5,6 +5,8 @@ import pandas as pd
 from rx.subjects import Subject
 import datetime
 
+timestamp_key = "timestamp"
+
 class TimeSeries(object):
     _slots__ = (
         'name',
@@ -216,7 +218,7 @@ class DataSeries(object):
         '__size',
     )
 
-    def __init__(self, name, keys, default_key, desc=None, missing_value=np.nan):
+    def __init__(self, name=None, keys=None, default_key=None, desc=None, missing_value=np.nan, data_list=None):
         self.name = name
         self.keys = keys
         self.default_key = default_key
@@ -228,23 +230,32 @@ class DataSeries(object):
         self.__time_list = list()
         self.__data_time_dict = defaultdict(dict)
 
-    def add(self, time, data):
+        if data_list:
+            for data in data_list:
+                self.add(data)
+
+    def add(self, data):
+        time = data.get(timestamp_key)
+        if not self.keys:
+            self.keys = data.keys()
         if self.current_time() == None or time > self.current_time():
-            for key in self.keys:
-                value = data.get(key, default=self.missing_value)
+            self.__time_list.append(time)
+            for key in self.keys :
+                value = data.get(key, self.missing_value)
                 self.__data_time_dict[key][time] = value
                 self.__data_list[key].append(value)
-                self.__time_list.append(time)
 
         elif time == self.current_time():
             for key in self.keys:
-                value = data.get(key, default=self.missing_value)
-                self.__data_list[key].pop()
-                self.__data_list[key].append(value)
+                if key in data:
+                    value = data.get(key)
+                    self.__data_list[key].pop()
+                    self.__data_list[key].append(value)
+                    self.__data_time_dict[key][time] = value
         else:
             raise AssertionError(
                 "Time for new Item %s cannot be earlier then previous item %s" % (time, self._prev_time))
-        self.subject.on_next((time, data))
+        self.subject.on_next(data)
 
 
     def current_time(self):
@@ -252,11 +263,12 @@ class DataSeries(object):
 
     def get_data(self, keys=None):
         if not keys:
-            self.__data_time_dict
+            return self.__data_time_dict
         else:
             result = {}
             for key in keys:
                 result[key] = self.__data_time_dict[key]
+            return result
 
     def get_series(self, keys=None):
         df = pd.DataFrame(self.__data_list, index=self.__time_list)
@@ -269,36 +281,37 @@ class DataSeries(object):
         return len(self.__time_list)
 
     def now(self, keys=None):
-        return self.get_by_idx(keys, -1)
+        return self.get_by_idx(-1, keys)
 
-    def _get_key(keys= None):
+    def _get_key(self, keys= None):
         keys = keys if keys else self.keys
         if type(keys) != set and type(keys) != list:
             keys = [keys]
         return keys
 
 
-    def get_by_idx(self, idx=None, keys=None):
-        if isinstance(idx, int) and (idx >= self.size() or idx < -self.size()):
-            return self.__missing_value
+    def get_by_idx(self, idx, keys=None):
+        if (isinstance(idx, int) and (idx >= self.size() or idx < -self.size())) or idx == None:
+            return self.missing_value
         keys = self._get_key(keys)
         result = {}
         for key in keys:
-            result[key] = self.__data_list[key][idx] if idx else self.__data_list[key]
+            result[key] = self.__data_list[key][idx]
 
-        return result
+        return result if len(keys) > 1 else result[keys[0]]
 
     def get_by_time(self, time, keys=None):
         keys = self._get_key(keys)
         result = {}
         for key in keys:
             result[key] = self.__data_time_dict[key][time]
-        return result
+
+        return result if len(keys) > 1 else result[keys[0]]
 
 
     def ago(self, idx=1, keys = None):
         assert idx >= 0
-        return self.get_by_idx(-1 - idx)
+        return self.get_by_idx(-1 - idx, keys)
 
 
     def std(self, start=None, end=None, keys=None):
@@ -338,7 +351,7 @@ class DataSeries(object):
         keys = self._get_key(keys)
         for key in keys:
             result[key] = f(idx, key)
-        return result
+        return result if len(keys) > 1 else result[keys[0]]
 
 
     def __create_slice(self, start=None, end=None):
@@ -350,11 +363,15 @@ class DataSeries(object):
             return slice(end)
 
 
-    def __getitem__(self, index):
+    def __getitem__(self, pos):
+        if isinstance(pos, tuple):
+            index, keys = pos
+        else:
+            index, keys = (pos, None)
         if isinstance(index, slice) or isinstance(index, int):
-            return self.get_by_idx(index)
+            return self.get_by_idx(index, keys)
         elif isinstance(index, datetime.datetime):
-            return self.get_by_time(index)
+            return self.get_by_time(index, keys)
         raise NotImplementedError("Unsupported index type %s, %s" % (index, type(index)))
 
 

@@ -1,5 +1,5 @@
 from algotrader.performance import PortfolioAnalyzer
-from algotrader.utils.time_series import TimeSeries
+from algotrader.utils.time_series import DataSeries
 
 
 class DrawDown(PortfolioAnalyzer):
@@ -11,8 +11,7 @@ class DrawDown(PortfolioAnalyzer):
     CurrentDrawDown = "CurrentDrawDown"
 
     def __init__(self):
-        self.drawdown_series = TimeSeries(name=DrawDown.DrawDown)
-        self.drawdown_pct_series = TimeSeries(name=DrawDown.DrawDownPct)
+        self.drawdown_series = DataSeries(name=DrawDown)
         self.drawdown = 0
         self.drawdown_pct = 0
         self.high_equity = 0
@@ -39,11 +38,10 @@ class DrawDown(PortfolioAnalyzer):
 
         if self.portfolio.total_equity_series.size() >= 2:
             self.drawdown = total_equity - self.high_equity
-            self.drawdown_series.add(time, self.drawdown)
 
             if self.high_equity != 0:
                 self.drawdown_pct = abs(self.drawdown / self.high_equity)
-                self.drawdown_pct_series.add(time, self.drawdown_pct)
+            self.drawdown_series({'timestamp': time, self.DrawDown:self.drawdown,self.DrawDownPct:self.drawdown_pct})
 
     def get_result(self):
         return {DrawDown.DrawDown: self.drawdown,
@@ -54,5 +52,4 @@ class DrawDown(PortfolioAnalyzer):
                 DrawDown.CurrentDrawDown: self.current_drawdown}
 
     def get_series(self):
-        return {DrawDown.DrawDown: self.drawdown_series,
-                DrawDown.DrawDownPct: self.drawdown_pct_series}
+        return self.drawdown_series.get_series([self.DrawDown,self.DrawDownPct])

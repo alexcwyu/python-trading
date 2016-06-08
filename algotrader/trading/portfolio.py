@@ -4,7 +4,7 @@ from algotrader.event.order import OrdAction, OrderEventHandler, ExecutionEventH
 from algotrader.performance.drawdown import DrawDown
 from algotrader.performance.returns import Pnl
 from algotrader.utils import logger
-from algotrader.utils.time_series import TimeSeries
+from algotrader.utils.time_series import DataSeries
 
 
 class Position(object):
@@ -42,9 +42,7 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         self.positions = {}
         self.orders = {}
 
-        self.total_equity_series = TimeSeries()
-        self.cash_series = TimeSeries()
-        self.stock_value_series = TimeSeries()
+        self.performance_series = DataSeries()
 
         self.total_equity = 0
         self.cash = cash
@@ -107,23 +105,17 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
             self.stock_value += position.last_price * position.filled_qty()
         self.total_equity = self.stock_value + self.cash
 
-        self.stock_value_series.add(time, self.stock_value)
-        self.cash_series.add(time, self.cash)
-        self.total_equity_series.add(time, self.total_equity)
+        self.performance_series.add({"timestamp": time, "stock_value":self.stock_value, "cash": self.cash, "total_equity":self.total_equity})
 
     def get_return(self):
-        equity = self.total_equity_series.get_series()
+        equity = self.performance_series.get_series("total_equity")
         equity.name = 'equity'
         rets = equity.pct_change().dropna()
         rets.index = rets.index.tz_localize("UTC")
         return rets
 
     def get_series(self):
-        result = {
-            "TotalEquity": self.total_equity_series,
-            "Cash": self.cash_series,
-            "StockValue": self.stock_value_series
-        }
+        result =  self.performance_series.get_series('stock_value', 'cash','total_equity')
 
         for analyzer in self.analyzers:
             result.update(analyzer.get_series())

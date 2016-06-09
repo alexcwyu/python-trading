@@ -1,41 +1,61 @@
 
 from algotrader.trading.instrument_data import inst_data_mgr
-from algotrader.utils.time_series import TimeSeries
+from algotrader.utils.time_series import DataSeries
 
 
-class Indicator(TimeSeries):
+class Indicator(DataSeries):
+    VALUE = 'value'
     _slots__ = (
         'input',
+        'input_keys',
         'calculate',
     )
+
+
+    @staticmethod
+    def get_name(indicator_name, input, input_key, *args):
+        parts = [Indicator.get_input_name(input)]
+        if input_key:
+            parts.extend(DataSeries.convert_to_list(input_key))
+        if args:
+            parts.extend(args)
+        content = ",".join(str(part) for part in parts)
+        return '%s(%s)' %(indicator_name, content)
+
+
 
     @staticmethod
     def get_input_name(input):
         if isinstance(input, Indicator):
             return input.name
-        if isinstance(input, TimeSeries):
+        if isinstance(input, DataSeries):
             return "'%s'"%input.name
         return "'%s'"%input
 
-    def __init__(self, name, input, description):
-        super(Indicator, self).__init__(name, description)
-        if isinstance(input, TimeSeries):
+    def __init__(self, name, input, input_keys, desc=None):
+        super(Indicator, self).__init__(name=name, desc=desc)
+        if isinstance(input, DataSeries):
             self.input = input
         else:
             self.input = inst_data_mgr.get_series(input)
+
+        self.input_keys = self._get_key(input_keys, None)
         self.input.subject.subscribe(self.on_update)
         inst_data_mgr.add_series(self)
         self.calculate = True
         self.update_all()
 
     def update_all(self):
-        data = self.input.get_data()
-        keylist = data.keys()
-        keylist.sort()
-        for time in keylist:
-            self.on_update(time, data[time])
+        data_list = self.input.get_data()
+        for data in data_list:
+            if self.input_keys:
+                filtered_data = { key: data[key] for key in self.input_keys }
+                filtered_data['timestamp'] = data['timestamp']
+                self.on_update(filtered_data)
+            else:
+                self.on_update(data)
 
-    def on_update(self, time_value):
+    def on_update(self, data):
         raise NotImplementedError()
 
 from algotrader.technical.atr import ATR
@@ -84,7 +104,7 @@ def parse(name):
 
 
 def get_or_create_indicator(cls, *args, **kwargs):
-    name = globals()[cls].get_name(*args, **kwargs)
+    name = Indicator.get_name(cls, *args, **kwargs)
     if not inst_data_mgr.has_series(name):
         return globals()[cls](*args, **kwargs)
     return inst_data_mgr.get_series(name, create_if_missing=False)

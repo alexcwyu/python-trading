@@ -115,7 +115,7 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         return rets
 
     def get_series(self):
-        result =  self.performance_series.get_series('stock_value', 'cash','total_equity')
+        result =  self.performance_series.get_series(['stock_value', 'cash','total_equity'])
 
         for analyzer in self.analyzers:
             result.update(analyzer.get_series())

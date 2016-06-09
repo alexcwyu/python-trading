@@ -10,12 +10,12 @@ class Pnl(PortfolioAnalyzer):
         self.pnl = 0
 
     def update(self, time):
-        if self.portfolio.total_equity_series.size() >= 2:
-            self.pnl = self.portfolio.total_equity_series.get_by_idx(-1) - self.portfolio.total_equity_series.get_by_idx(-2)
+        if self.portfolio.performance_series.size() >= 2:
+            self.pnl = self.portfolio.performance_series.get_by_idx(-1,'total_equity') - self.portfolio.performance_series.get_by_idx(-2,'total_equity')
             self.pnl_series.add({'timestamp':time, Pnl.Pnl:self.pnl})
 
     def get_result(self):
         return {Pnl.Pnl: self.pnl}
 
     def get_series(self):
-        return self.pnl_series.get_series(Pnl.Pnl)
+        return {Pnl.Pnl: self.pnl_series.get_series(Pnl.Pnl)}

@@ -1,7 +1,5 @@
-from algotrader.event.market_data import Bar
 from algotrader.technical import Indicator
 from algotrader.technical.ma import SMA
-from algotrader.utils.time_series import TimeSeries
 
 
 class ATR(Indicator):
@@ -12,30 +10,35 @@ class ATR(Indicator):
         '__average',
     )
 
-    @staticmethod
-    def get_name(cls, input, length):
-        return "ATR(%s,%s)" % (Indicator.get_input_name(input), length)
-
-    def __init__(self, input, length=14, description="Average True Range"):
-        super(ATR, self).__init__(ATR.get_name(input, length), input, description)
+    def __init__(self, input, length=14, desc="Average True Range"):
+        super(ATR, self).__init__(Indicator.get_name(ATR.__name__, input, length), input, ['high', 'low', 'close'],
+                                  desc)
         self.length = int(length)
         self.__prev_close = None
         self.__value = None
         self.__average = SMA(input, self.length)
 
-    def on_update(self, time_value):
-        time, bar = time_value
-        assert isinstance(bar, Bar)
+    def on_update(self, data):
+        sma_input = {}
+        sma_input['timestamp'] = data['timestamp']
+        high = data['high']
+        low = data['low']
+        close = data['close']
 
         if self.__prev_close is None:
-            tr = bar.high - bar.low
+            tr = high - low
         else:
-            tr1 = bar.high - bar.low
-            tr2 = abs(bar.high - self.__prev_close)
-            tr3 = abs(bar.low - self.__prev_close)
+            tr1 = high - low
+            tr2 = abs(high - self.__prev_close)
+            tr3 = abs(low - self.__prev_close)
             tr = max(max(tr1, tr2), tr3)
 
-        self.__prev_close = bar.close
-        self.__average.add(time, tr)
-        self.add(time, self.__average.now())
+        self.__prev_close = close
 
+        sma_input[Indicator.VALUE] = tr
+        self.__average.add(sma_input)
+
+        result = {}
+        result['timestamp'] = data['timestamp']
+        result[Indicator.VALUE] = self.__average.now(Indicator.VALUE)
+        self.add(result)

@@ -1,7 +1,6 @@
 import numpy as np
 
 from algotrader.technical import Indicator
-from algotrader.utils.time_series import TimeSeries
 
 
 class MAX(Indicator):
@@ -9,20 +8,20 @@ class MAX(Indicator):
         'length'
     )
 
-    @staticmethod
-    def get_name(cls, input, length):
-        return "MAX(%s,%s)" % (Indicator.get_input_name(input), length)
-
-    def __init__(self, input, length, description="Maximum"):
-        super(MAX, self).__init__(MAX.get_name(input, length), input, description)
+    def __init__(self, input, input_key=None, length=0, desc="Maximum"):
+        super(MAX, self).__init__(Indicator.get_name(MAX.__class__, input, input_key, length), input, input_key,
+                                  desc)
         self.length = int(length)
 
-    def on_update(self, time_value):
-        time, value = time_value
+    def on_update(self, data):
+        result = {}
+        result['timestamp'] = data['timestamp']
         if self.input.size() >= self.length:
-            self.add(time, self.input.max(-self.length))
+            result[Indicator.VALUE] = self.input.max(-self.length, self.input_keys[0])
         else:
-            self.add(time, np.nan)
+            result[Indicator.VALUE] = np.nan
+
+        self.add(result)
 
 
 class MIN(Indicator):
@@ -30,20 +29,20 @@ class MIN(Indicator):
         'length'
     )
 
-    @staticmethod
-    def get_name(cls, input, length):
-        return "MIN(%s,%s)" % (Indicator.get_input_name(input), length)
-
-    def __init__(self, input, length, description="Minimum"):
-        super(MIN, self).__init__(MIN.get_name(input, length), input, description)
+    def __init__(self, input, input_key=None, length=0, desc="Minimum"):
+        super(MIN, self).__init__(Indicator.get_name(MIN.__class__, input, input_key, length), input, input_key,
+                                  desc)
         self.length = int(length)
 
-    def on_update(self, time_value):
-        time, value = time_value
+    def on_update(self, data):
+        result = {}
+        result['timestamp'] = data['timestamp']
         if self.input.size() >= self.length:
-            self.add(time, self.input.min(-self.length))
+            result[Indicator.VALUE] = self.input.min(-self.length, self.input_keys[0])
         else:
-            self.add(time, np.nan)
+            result[Indicator.VALUE] = np.nan
+
+        self.add(result)
 
 
 class STD(Indicator):
@@ -51,20 +50,20 @@ class STD(Indicator):
         'length'
     )
 
-    @staticmethod
-    def get_name(cls, input, length):
-        return "STD(%s,%s)" % (Indicator.get_input_name(input), length)
-
-    def __init__(self, input, length, description="Standard Deviation"):
-        super(STD, self).__init__(STD.get_name(input, length), input, description)
+    def __init__(self, input, input_key=None, length=0, desc="Standard Deviation"):
+        super(STD, self).__init__(Indicator.get_name(STD.__class__, input, input_key, length), input, input_key,
+                                  desc)
         self.length = int(length)
 
-    def on_update(self, time_value):
-        time, value = time_value
+    def on_update(self, data):
+        result = {}
+        result['timestamp'] = data['timestamp']
         if self.input.size() >= self.length:
-            self.add(time, self.input.std(-self.length))
+            result[Indicator.VALUE] = self.input.std(-self.length, self.input_keys[0])
         else:
-            self.add(time, np.nan)
+            result[Indicator.VALUE] = np.nan
+
+        self.add(result)
 
 
 class VAR(Indicator):
@@ -72,17 +71,17 @@ class VAR(Indicator):
         'length'
     )
 
-    @staticmethod
-    def get_name(cls, input, length):
-        return "VAR(%s,%s)" % (Indicator.get_input_name(input), length)
-
-    def __init__(self, input, length, description="Variance"):
-        super(VAR, self).__init__(VAR.get_name(input, length), input, description)
+    def __init__(self, input, input_key=None, length=0, desc="Variance"):
+        super(VAR, self).__init__(Indicator.get_name(VAR.__class__, input, input_key, length), input, input_key,
+                                  desc)
         self.length = int(length)
 
-    def on_update(self, time_value):
-        time, value = time_value
+    def on_update(self, data):
+        result = {}
+        result['timestamp'] = data['timestamp']
         if self.input.size() >= self.length:
-            self.add(time, self.input.std(-self.length))
+            result[Indicator.VALUE] = self.input.std(-self.length, self.input_keys[0])
         else:
-            self.add(time, np.nan)
+            result[Indicator.VALUE] = np.nan
+
+        self.add(result)

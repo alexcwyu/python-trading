@@ -16,7 +16,7 @@ class TimeSeriesPlot:
         return self.color
 
     def plot(self, ax):
-        df = self.time_series.get_series()
+        df = self.time_series
         df.plot(ax=ax, color=self.get_color(), marker=self.get_marker())
 
 
@@ -50,7 +50,7 @@ class StrategyPlotter:
         plt.show()
 
     def _plot_bar_chart(self, fig, instrument = None):
-        key = "Bar.%s.Time.86400.Close" % instrument
+        key = "Bar.%s.Time.86400" % instrument
         series = inst_data_mgr.get_series(key)
         #key = series_dict.keys()[0]
 
@@ -63,7 +63,7 @@ class StrategyPlotter:
 
         #series = series_dict[key]
         if series.size() > 0:
-            series = TimeSeriesPlot(series)
+            series = TimeSeriesPlot(series.get_series('close'))
             series.plot(ax=ax_stock)
 
         ## Plot volume
@@ -87,8 +87,8 @@ class StrategyPlotter:
         ax_equity = fig.add_axes(rect_equity, axisbg=axescolor, sharex=ax_stock)
         ax_equity.text(0.025, 0.95, 'Equity', va='top', transform=ax_equity.transAxes, fontsize=textsize)
 
-        if (self.strategy.get_portfolio().total_equity_series.size() > 0):
-            series = TimeSeriesPlot(self.strategy.get_portfolio().total_equity_series)
+        if (self.strategy.get_portfolio().performance_series.size() > 0):
+            series = TimeSeriesPlot(self.strategy.get_portfolio().performance_series.get_series("total_equity"))
             series.plot(ax=ax_equity)
 
         return ax_equity
@@ -98,8 +98,9 @@ class StrategyPlotter:
         ax_pnl = fig.add_axes(rect_pnl, axisbg=axescolor, sharex=ax_stock)
         ax_pnl.text(0.025, 0.95, 'Pnl', va='top', transform=ax_pnl.transAxes, fontsize=textsize)
 
-        if (self.strategy.get_portfolio().get_series()['Pnl'].size() > 0):
-            series = TimeSeriesPlot(self.strategy.get_portfolio().get_series()['Pnl'])
+        result = self.strategy.get_portfolio().get_series()
+        if (result['Pnl'].size > 0):
+            series = TimeSeriesPlot(result['Pnl'])
             series.plot(ax=ax_pnl)
 
         return ax_pnl
@@ -108,8 +109,10 @@ class StrategyPlotter:
 
         ax_drawdown = fig.add_axes(rect_drawdown, axisbg=axescolor, sharex=ax_stock)
         ax_drawdown.text(0.025, 0.95, 'Drawdown', va='top', transform=ax_drawdown.transAxes, fontsize=textsize)
-        if (self.strategy.get_portfolio().get_series()['DrawDown'].size() > 0):
-            series = TimeSeriesPlot(self.strategy.get_portfolio().get_series()['DrawDown'])
+
+        result = self.strategy.get_portfolio().get_series()
+        if (result['DrawDown'].size > 0):
+            series = TimeSeriesPlot(result['DrawDown'])
             series.plot(ax=ax_drawdown)
 
         return ax_drawdown

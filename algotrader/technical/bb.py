@@ -1,50 +1,46 @@
-import datetime
-
 import numpy as np
 
 from algotrader.technical import Indicator
-from algotrader.utils.time_series import TimeSeries
 from algotrader.technical.ma import SMA
 from algotrader.technical.stats import STD
-import math
+
 
 class BB(Indicator):
+    UPPER = 'uppper'
+    LOWER = 'lower'
+
     _slots__ = (
         'length',
         'num_std'
         '__sma',
-        'upper',
-        'lower',
         '__std_dev',
     )
 
-    @staticmethod
-    def get_name(cls, input, length, num_std):
-        return "BB(%s,%s,%s)" % (Indicator.get_input_name(input), length, num_std)
-
-    def __init__(self, input, length=14, num_std = 3, description="Bollinger Bands"):
-        super(BB, self).__init__(BB.get_name(input, length, num_std), input, description)
+    def __init__(self, input, input_key=None, length=14, num_std = 3, desc="Bollinger Bands"):
+        super(BB, self).__init__(Indicator.get_name(BB.__name__, input, input_key, length, num_std), input, input_key, desc)
         self.length = int(length)
         self.num_std = int(num_std)
         self.__sma = SMA(input, self.length)
         self.__std_dev = STD(input, self.length)
-        self.upper = TimeSeries("BBU(%s,%s)" % (input.name, self.length))
-        self.lower = TimeSeries("BBL(%s,%s)" % (input.name, self.length))
 
-    def on_update(self, time_value):
-        time, value = time_value
-        sma = self.__sma.now()
-        std = self.__std_dev.now()
+    def on_update(self, data):
+        result = {}
+        result['timestamp'] = data['timestamp']
+        sma = self.__sma.now(self.input_keys[0])
+        std = self.__std_dev.now(self.input_keys[0])
         if not np.isnan(sma):
             upper = sma + std * self.num_std
             lower = sma - std * self.num_std
-            self.upper.add(time, upper)
-            self.lower.add(time, lower)
-            self.add(time, sma)
+
+            result[BB.UPPER] =  upper
+            result[BB.LOWER] =  lower
+            result[Indicator.VALUE] =  sma
         else:
-            self.upper.add(time, np.nan)
-            self.lower.add(time, np.nan)
-            self.add(time, np.nan)
+            result[BB.UPPER] =  np.nan
+            result[BB.LOWER] =  np.nan
+            result[Indicator.VALUE] =  np.nan
+
+        self.add(result)
 
 
 

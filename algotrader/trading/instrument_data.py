@@ -64,10 +64,10 @@ class InstrumentDataManager(MarketDataEventHandler):
             return self.__bar_dict[instrument].close
         return None
 
-    def get_series(self, key, create_if_missing=True, cls=DataSeries, description=None, missing_value=np.nan):
+    def get_series(self, key, create_if_missing=True, cls=DataSeries, desc=None, missing_value=np.nan):
         if type(key) == str:
             if key not in self.__series_dict:
-                self.__series_dict[key] = cls(name=key, description=description, missing_value=missing_value)
+                self.__series_dict[key] = cls(name=key, desc=desc, missing_value=missing_value)
             return self.__series_dict[key]
         raise AssertionError()
 

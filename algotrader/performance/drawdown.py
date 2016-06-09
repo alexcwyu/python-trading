@@ -21,7 +21,7 @@ class DrawDown(PortfolioAnalyzer):
 
     def update(self, time):
         total_equity = self.portfolio.total_equity
-        if self.portfolio.total_equity_series.size() == 1:
+        if self.portfolio.performance_series.size() == 1:
             self.low_equity = total_equity
             self.high_equity = total_equity
         else:
@@ -36,12 +36,14 @@ class DrawDown(PortfolioAnalyzer):
                 self.current_drawdown = 1 - total_equity / self.high_equity
                 self.current_run_up = total_equity / self.low_equity - 1
 
-        if self.portfolio.total_equity_series.size() >= 2:
+        if self.portfolio.performance_series.size() >= 2:
             self.drawdown = total_equity - self.high_equity
 
             if self.high_equity != 0:
                 self.drawdown_pct = abs(self.drawdown / self.high_equity)
-            self.drawdown_series({'timestamp': time, self.DrawDown:self.drawdown,self.DrawDownPct:self.drawdown_pct})
+            self.drawdown_series.add({'timestamp': time,
+                                  DrawDown.DrawDown:self.drawdown,
+                                  DrawDown.DrawDownPct:self.drawdown_pct})
 
     def get_result(self):
         return {DrawDown.DrawDown: self.drawdown,

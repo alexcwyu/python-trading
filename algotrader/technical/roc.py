@@ -1,9 +1,6 @@
-import datetime
-
 import numpy as np
 
 from algotrader.technical import Indicator
-from algotrader.utils.time_series import TimeSeries
 
 
 def roc(prev_value, curr_value):
@@ -16,19 +13,19 @@ class ROC(Indicator):
     _slots__ = (
         'length'
     )
-    @staticmethod
-    def get_name(input, length):
-        return "ROC(%s,%s)" % (Indicator.get_input_name(input), length)
 
-    def __init__(self, input, length=1, description="Rate Of Change"):
-        super(ROC, self).__init__(ROC.get_name(input, length), input, description)
+    def __init__(self, input, input_key=None, length=1, desc="Rate Of Change"):
+        super(ROC, self).__init__(Indicator.get_name(ROC.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
 
-    def on_update(self, time_value):
-        time, value = time_value
+    def on_update(self, data):
+        result = {}
+        result['timestamp'] = data['timestamp']
         if self.input.size() > self.length:
-            prev_value = self.input.ago(self.length)
-            curr_value = self.input.now()
-            self.add(time, roc(prev_value, curr_value))
+            prev_value = self.input.ago(self.length, self.input_keys[0])
+            curr_value = self.input.now(self.input_keys[0])
+            result[Indicator.VALUE] = roc(prev_value, curr_value)
         else:
-            self.add(time, np.nan)
+            result[Indicator.VALUE] = np.nan
+
+        self.add(result)

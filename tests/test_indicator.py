@@ -6,25 +6,25 @@ from algotrader.trading.instrument_data import inst_data_mgr
 
 class IndicatorTest(TestCase):
     def test_reuse(self):
-        close = inst_data_mgr.get_series("Bar.Close")
-        sma1 = get_or_create_indicator("SMA", "Bar.Close", 3)
-        sma2 = get_or_create_indicator("SMA", "Bar.Close", 3)
-        sma3 = get_or_create_indicator("SMA", "Bar.Close", 10)
+        close = inst_data_mgr.get_series("bar")
+        sma1 = get_or_create_indicator("SMA", 'bar', 'close', 3)
+        sma2 = get_or_create_indicator("SMA", 'bar', 'close', 3)
+        sma3 = get_or_create_indicator("SMA", 'bar', 'close', 10)
 
         self.assertEquals(sma1, sma2)
         self.assertNotEquals(sma2, sma3)
         self.assertNotEquals(sma1, sma3)
 
-        sma4 = get_or_create_indicator("SMA", "SMA('Bar.Close',3)", 10)
+        sma4 = get_or_create_indicator("SMA", "SMA('bar',close,3)", 10)
         self.assertEquals(sma4.input, sma2)
 
     def test_parse(self):
-        close = parse("Bar.Close")
-        sma1 = parse("SMA('Bar.Close',3)")
-        sma2 = parse("SMA(SMA('Bar.Close',3),10)")
-        rsi = parse("RSI(SMA(SMA('Bar.Close',3),10),14)")
+        bar = parse("bar")
+        sma1 = parse("SMA('bar',close,3)")
+        sma2 = parse("SMA(SMA('bar',close,3),value,10)")
+        rsi = parse("RSI(SMA(SMA('bar',close,3),value,10),value,14, 9)")
 
-        self.assertEquals(sma1.input, close)
+        self.assertEquals(sma1.input, bar)
         self.assertEquals(3, sma1.length)
 
         self.assertEquals(sma2.input, sma1)

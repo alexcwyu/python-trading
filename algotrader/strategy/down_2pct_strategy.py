@@ -12,12 +12,12 @@ class Down2PctStrategy(Strategy):
         self.day_count = 0
         self.order = None
         self.qty = qty
-        self.close = inst_data_mgr.get_series("Bar.%s.Time.86400.Close" % instrument)
-        self.roc = ROC(self.close, 1)
+        self.close = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
+        self.roc = ROC(self.close, 'close', 1)
 
     def on_bar(self, bar):
         if self.order is None:
-            if self.roc.now() < -0.02:
+            if self.roc.now('value') < -0.02:
                 logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
                 self.order = self.market_order(instrument=bar.instrument, action=OrdAction.BUY, qty=self.qty)
                 self.day_count = 0

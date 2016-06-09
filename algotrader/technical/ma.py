@@ -1,9 +1,6 @@
-import datetime
-
 import numpy as np
 
 from algotrader.technical import Indicator
-from algotrader.utils.time_series import TimeSeries
 
 
 class SMA(Indicator):
@@ -11,24 +8,20 @@ class SMA(Indicator):
         'length'
     )
 
-    @staticmethod
-    def get_name(input, length):
-        return "SMA(%s,%s)" % (Indicator.get_input_name(input), length)
-
-    def __init__(self, input, length, description="Simple Moving Average"):
-        super(SMA, self).__init__(SMA.get_name(input, length), input, description)
+    def __init__(self, input, input_key=None, length=0, desc="Simple Moving Average"):
+        super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
 
-    def on_update(self, time_value):
-        time, value = time_value
+    def on_update(self, data):
+        result = {}
+        result['timestamp'] = data['timestamp']
         if self.input.size() >= self.length:
             value = 0.0
             for idx in range(self.input.size() - self.length, self.input.size()):
-                value += self.input.get_by_idx(idx)
+                value += self.input.get_by_idx(idx, self.input_keys[0])
             value = round(value / float(self.length), 8)
-            self.add(time, value)
+            result[Indicator.VALUE] = value
         else:
-            self.add(time, np.nan)
+            result[Indicator.VALUE] = np.nan
 
-
-
+        self.add(result)

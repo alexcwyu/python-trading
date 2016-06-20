@@ -25,6 +25,31 @@ class DataSeriesTest(TestCase):
 
         return close
 
+    @staticmethod
+    def create_random_walk_series():
+        close = DataSeries("close")
+
+        t1 = datetime.datetime(2000, 1, 1, 11, 34, 59)
+        t = t1
+        w = np.random.normal(0, 1, 1000)
+        xs = 100 + np.cumsum(w)
+
+        for value in xs:
+            close.add({"timestamp": t, "v1": value, "v2": value})
+            t = t + datetime.timedelta(0, 3)
+        return close
+
+    @staticmethod
+    def create_series_by_list(valuelist):
+        close = DataSeries("close")
+
+        t = datetime.datetime(2000, 1, 1, 11, 34, 59)
+
+        for value in valuelist:
+            close.add({"timestamp": t, "v1": value})
+            t = t + datetime.timedelta(0, 3)
+        return close
+
     def test_init_w_data(self):
 
         data_list = [{"timestamp": self.t1, "v1": 1}, {"timestamp": self.t2, "v1": 2}]
@@ -219,6 +244,15 @@ class DataSeriesTest(TestCase):
         self.assertEqual({"timestamp": self.t1, "v1": 2, "v2": np.nan}, series.get_by_idx(idx=0))
         self.assertEqual({"timestamp": self.t2, "v1": 2.4, "v2": 3.0}, series.get_by_idx(idx=1))
 
+        # test index slice
+        series2 = self.create_series_by_list(range(100))
+        sliced = series2.get_by_idx(keys='v1', idx=slice(-10,None,None))
+        self.assertEqual(len(sliced), 10)
+
+        endPoint = series2.get_by_idx(keys='v1', idx=slice(None,-1, None))
+        self.assertEqual(endPoint[0], 99)
+
+
     def test_get_by_time(self):
         series = DataSeries(keys=set(["timestamp", "v1", "v2"]))
 
@@ -320,3 +354,36 @@ class DataSeriesTest(TestCase):
         self.assertAlmostEqual(0.75096875, close.var(keys="v1"))
         self.assertAlmostEqual(0.015625, close.var(start=0, end=4, keys="v1"))
         self.assertAlmostEqual(0.07231875, close.var(start=0, end=6, keys="v1"))
+
+    def test_apply(self):
+        r = [x for x in range(20) if x % 2 == 0]
+
+        close = self.create_series_by_list(r)
+        f = lambda x : x**2
+        fvec = np.vectorize(f)
+        result = close.apply(keys="v1", func=fvec, start=None, end=None )
+
+        target = [x**2 for x in range(20) if x % 2 == 0]
+
+        try:
+            np.testing.assert_almost_equal(target, result, 9)
+        except AssertionError as e:
+            self.fail(e.message)
+
+        close = self.create_random_walk_series()
+        import talib
+        # talib.EMA is already supporting vectorized operation
+        result = close.apply(keys="v1", func=talib.EMA, start=None, end=None, timeperiod=40)
+        target = talib.EMA(np.array(close.get_series('v1')), timeperiod=40)
+
+        result[np.isnan(result)] = 0
+        target[np.isnan(target)] = 0
+
+        deviation = np.sum((result - target)**2)
+        self.assertTrue(deviation< 1e-6)
+
+        try:
+            np.testing.assert_almost_equal(target, result, 5)
+        except AssertionError as e:
+            self.fail(e.message)
+

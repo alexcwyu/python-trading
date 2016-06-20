@@ -2,6 +2,7 @@ from collections import defaultdict
 
 import numpy as np
 import pandas as pd
+from cassandra.metadata import defaultdict
 from rx.subjects import Subject
 import datetime
 
@@ -117,7 +118,6 @@ timestamp_key = "timestamp"
 #             return self.get_by_time(index)
 #         raise NotImplementedError("Unsupported index type %s, %s" % (index, type(index)))
 
-
 class DataSeries(object):
     TIMESTAMP = 'timestamp'
 
@@ -130,10 +130,19 @@ class DataSeries(object):
 
         '__data_list',
         '__time_list',
-        '__data_time_dict'
+        '__data_time_dict',
+        '__use_col_np'
     )
 
-    def __init__(self, name=None, keys=None, desc=None, missing_value=np.nan, data_list=None):
+    def __init__(self, name=None, keys=None, desc=None, missing_value=np.nan, data_list=None, use_col_np=False):
+        """
+        :param name:
+        :param keys:
+        :param desc:
+        :param missing_value:
+        :param data_list:
+        :param use_col_np: If True, the column based storage of list will used to pass to numpy function
+        """
         self.name = name
         self.keys = self._get_key(keys, None)
         self.desc = desc if desc else name
@@ -143,6 +152,7 @@ class DataSeries(object):
         self.__data_list = list()
         self.__time_list = list()
         self.__data_time_dict = defaultdict(dict)
+        self.__use_col_np = use_col_np
 
         if data_list:
             for data in data_list:
@@ -296,6 +306,24 @@ class DataSeries(object):
         else:
             return slice(end)
 
+    def apply(self, keys, start, end, func, *argv, **kwargs):
+        """
+        :param keys:
+        :param start:
+        :param end:
+        :param func: numpy vectorized function that call apply on numpy array
+        :param argv:
+        :param kwargs:
+        :return:
+        """
+        idx = self.__create_slice(start, end)
+
+        result = {}
+        keys = self._get_key(keys, self.keys)
+        for key in keys:
+            data = self.get_by_idx(idx, key)
+            result[key] = func(np.array(data), *argv, **kwargs)
+        return result if len(keys) > 1 else result[keys[0]]
 
     def __getitem__(self, pos):
         if isinstance(pos, tuple):

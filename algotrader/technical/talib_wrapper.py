@@ -1,0 +1,85 @@
+import numpy as np
+from itsdangerous import NoneAlgorithm
+
+from algotrader.technical import Indicator
+from algotrader.utils.time_series import DataSeries
+import talib as tl
+import talib
+
+
+def ds_to_high_numpy(ds, idx):
+    for k in ds.keys:
+        if k.lower() == 'high':
+            return np.array(ds.get_by_idx(keys=k, idx=idx))
+    return None
+
+
+def ds_to_low_numpy(ds, idx):
+    for k in ds.keys:
+        if k.lower() == 'low':
+            return np.array(ds.get_by_idx(keys=k, idx=idx))
+    return None
+
+
+def ds_to_open_list(ds, idx):
+    for k in ds.keys:
+        if k.lower() == 'open':
+            return np.array(ds.get_by_idx(keys=k, idx=idx))
+    return None
+
+
+def ds_to_close_numpy(ds, idx):
+    for k in ds.keys:
+        if k.lower() == 'close':
+            return np.array(ds.get_by_idx(keys=k, idx=idx))
+    return None
+
+def ds_to_volume_numpy(ds, idx):
+    for k in ds.keys:
+        if k.lower() == 'volume':
+            return np.array(ds.get_by_idx(keys=k, idx=idx))
+    return None
+
+
+def call_talib_with_hlcv(ds, count, talib_func, *args, **kwargs):
+    idx = slice(-count, None, None)
+    high = ds_to_high_numpy(ds, idx)
+    low = ds_to_low_numpy(ds, idx)
+    close = ds_to_close_numpy(ds, idx)
+    volume = ds_to_volume_numpy(ds, idx)
+
+    if high is None or low is None or low is None or volume is None:
+        return None
+
+    return talib_func(high, low, close, volume, *args, **kwargs)
+
+
+class EMA(Indicator):
+    _slots__ = (
+        'length'
+    )
+
+    def __init__(self, input, input_key=None, length=0, desc="TALib Exponential Moving Average"):
+        super(EMA, self).__init__(Indicator.get_name(EMA.__name__, input, input_key, length), input, input_key, desc)
+        self.length = int(length)
+
+    def on_update(self, data):
+
+        result = {}
+        result['timestamp'] = data['timestamp']
+        if self.input.size() >= self.length:
+            value = 0.0
+
+            input.get_by_idx()
+
+            # sliced = series2.get_by_idx(keys='v1', idx=slice(-10,None,None))
+
+
+            # for idx in range(self.input.size() - self.length, self.input.size()):
+            #     value += self.input.get_by_idx(idx, self.input_keys[0])
+            # value = round(value / float(self.length), 8)
+            result[Indicator.VALUE] = value
+        else:
+            result[Indicator.VALUE] = np.nan
+
+        self.add(result)

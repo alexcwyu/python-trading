@@ -1,8 +1,9 @@
-from algotrader.event import *
+from algotrader.event.event import Event, EventHandler
 
 
 class OrderEvent(Event):
-    pass
+    def __init__(self, timestamp=None):
+        super(OrderEvent, self).__init__(timestamp)
 
 
 class OrdAction:
@@ -50,17 +51,15 @@ class ExecutionEvent(Event):
         'broker_id',
         'ord_id',
         'cl_ord_id',
-        'instrument',
-        'timestamp'
+        'inst_id',
     )
 
-    def __init__(self, broker_id=None, ord_id=None, cl_ord_id = None, instrument=None, timestamp=None):
-        # super(ExecutionEvent, self).__init__(instrument, timestamp)
+    def __init__(self, broker_id=None, ord_id=None, cl_ord_id=None, inst_id=None, timestamp=None):
+        super(ExecutionEvent, self).__init__(timestamp)
         self.broker_id = broker_id
         self.ord_id = ord_id
         self.cl_ord_id = cl_ord_id
-        self.instrument = instrument
-        self.timestamp = timestamp
+        self.inst_id = inst_id
 
 
 class OrderStatusUpdate(ExecutionEvent):
@@ -71,19 +70,20 @@ class OrderStatusUpdate(ExecutionEvent):
 
     )
 
-    def __init__(self, broker_id=None, ord_id=None, cl_ord_id=None, instrument=None, timestamp=None, filled_qty=0, avg_price=0, status=OrdStatus.NEW):
-        super(OrderStatusUpdate, self).__init__(broker_id=broker_id, ord_id=ord_id, cl_ord_id=cl_ord_id, instrument=instrument, timestamp=timestamp)
+    def __init__(self, broker_id=None, ord_id=None, cl_ord_id=None, inst_id=None, timestamp=None, filled_qty=0,
+                 avg_price=0, status=OrdStatus.NEW):
+        super(OrderStatusUpdate, self).__init__(broker_id=broker_id, ord_id=ord_id, cl_ord_id=cl_ord_id,
+                                                inst_id=inst_id, timestamp=timestamp)
         self.filled_qty = filled_qty
         self.avg_price = avg_price
         self.status = status
-
 
     def on(self, handler):
         handler.on_ord_upd(self)
 
     def __repr__(self):
-        return "OrderStatusUpdate(broker_id = %s, ord_id = %s, cl_ord_id=%s, instrument = %s, timestamp = %s, status = %s)" \
-               % (self.broker_id, self.ord_id, self.cl_ord_id, self.instrument, self.timestamp, self.status)
+        return "OrderStatusUpdate(broker_id = %s, ord_id = %s, cl_ord_id=%s, inst_id = %s, timestamp = %s, status = %s)" \
+               % (self.broker_id, self.ord_id, self.cl_ord_id, self.inst_id, self.timestamp, self.status)
 
 
 class ExecutionReport(OrderStatusUpdate):
@@ -94,10 +94,13 @@ class ExecutionReport(OrderStatusUpdate):
         'commission'
     )
 
-    def __init__(self, broker_id=None, ord_id=None, cl_ord_id = None, instrument=None, timestamp=None, er_id=None, last_qty=0, last_price=0,
+    def __init__(self, broker_id=None, ord_id=None, cl_ord_id=None, inst_id=None, timestamp=None, er_id=None,
+                 last_qty=0, last_price=0,
                  filled_qty=0, avg_price=0, commission=0,
                  status=OrdStatus.NEW):
-        super(ExecutionReport, self).__init__(broker_id = broker_id, ord_id= ord_id, cl_ord_id=cl_ord_id, instrument=instrument, timestamp=timestamp, filled_qty=filled_qty, avg_price=avg_price, status=status)
+        super(ExecutionReport, self).__init__(broker_id=broker_id, ord_id=ord_id, cl_ord_id=cl_ord_id, inst_id=inst_id,
+                                              timestamp=timestamp, filled_qty=filled_qty, avg_price=avg_price,
+                                              status=status)
         self.er_id = er_id
         self.last_qty = last_qty
         self.last_price = last_price
@@ -107,16 +110,15 @@ class ExecutionReport(OrderStatusUpdate):
         handler.on_exec_report(self)
 
     def __repr__(self):
-        return "ExecutionReport(broker_id = %s, ord_id = %s, cl_ord_id = %s, instrument = %s, timestamp = %s" \
+        return "ExecutionReport(broker_id = %s, ord_id = %s, cl_ord_id = %s, inst_id = %s, timestamp = %s" \
                ", er_id = %s, last_qty = %s, last_price = %s, filled_qty = %s, avg_price = %s, commission = %s)" \
-               % (self.broker_id, self.ord_id, self.cl_ord_id, self.instrument, self.timestamp,
+               % (self.broker_id, self.ord_id, self.cl_ord_id, self.inst_id, self.timestamp,
                   self.er_id, self.last_qty, self.last_price, self.filled_qty, self.avg_price, self.commission)
 
 
 class Order(OrderEvent):
     __slots__ = (
-        'instrument',
-        'timestamp',
+        'inst_id',
         'ord_id',
         'cl_ord_id',
         'stg_id',
@@ -140,9 +142,11 @@ class Order(OrderEvent):
         'params'
     )
 
-    def __init__(self, instrument=None, ord_id=None, stg_id=None, broker_id=None, action=None, type=None, timestamp=None, qty=0, limit_price=0,
+    def __init__(self, inst_id=None, ord_id=None, stg_id=None, broker_id=None, action=None, type=None, timestamp=None,
+                 qty=0, limit_price=0,
                  stop_price=0, status=OrdStatus.NEW, tif=TIF.DAY, cl_ord_id=None, oca_tag=None, params=None):
-        self.instrument = instrument
+        super(Order, self).__init__(timestamp=timestamp)
+        self.inst_id = inst_id
         self.timestamp = timestamp
         self.ord_id = ord_id
         self.stg_id = stg_id
@@ -166,15 +170,15 @@ class Order(OrderEvent):
         self.update_events = []
         self.params = params if params else {}
 
-
     def on(self, handler):
         handler.on_order(self)
 
     def __repr__(self):
-        return "Order(instrument = %s, timestamp = %s,ord_id = %s, stg_id = %s, cl_ord_id = %s, broker_id = %s, action = %s, type = %s, tif = %s, status = %s" \
+        return "Order(inst_id = %s, timestamp = %s,ord_id = %s, stg_id = %s, cl_ord_id = %s, broker_id = %s, action = %s, type = %s, tif = %s, status = %s" \
                ", qty = %s, limit_price = %s, stop_price = %s, filled_qty = %s, avg_price = %s, last_qty = %s, last_price = %s ,stop_price = %s" \
                ", stop_limit_ready = %s , trailing_stop_exec_price = %s , exec_reports = %s , update_events = %s, params = %s)" \
-               % (self.instrument, self.timestamp, self.ord_id, self.stg_id, self.cl_ord_id, self.broker_id, self.action, self.type,
+               % (self.inst_id, self.timestamp, self.ord_id, self.stg_id, self.cl_ord_id, self.broker_id, self.action,
+                  self.type,
                   self.tif,
                   self.status,
                   self.qty, self.limit_price, self.stop_price, self.filled_qty, self.avg_price, self.last_qty,
@@ -195,9 +199,9 @@ class Order(OrderEvent):
         if avg_price:
             self.avg_price = avg_price
         elif self.filled_qty + exec_report.last_qty != 0:
-                self.avg_price = ((self.avg_price * self.filled_qty) + (
-                    self.last_price * self.last_qty)) / (
-                                     self.filled_qty + exec_report.last_qty)
+            self.avg_price = ((self.avg_price * self.filled_qty) + (
+                self.last_price * self.last_qty)) / (
+                                 self.filled_qty + exec_report.last_qty)
 
         filled_qty = exec_report.filled_qty
         if filled_qty:
@@ -236,6 +240,7 @@ class Order(OrderEvent):
     def is_sell(self):
         return self.action == OrdAction.SELL
 
+
 class ExecutionEventHandler(EventHandler):
     def on_ord_upd(self, ord_upd):
         pass
@@ -253,4 +258,3 @@ class OrderEventHandler(EventHandler):
 
     def on_ord_cancel_req(self, order):
         pass
-

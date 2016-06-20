@@ -1,8 +1,9 @@
-from algotrader.event import *
+from algotrader.event.event import Event, EventHandler
 
 
 class AccountEvent(Event):
-    pass
+    def __init__(self, timestamp=None):
+        super(AccountEvent, self).__init__(timestamp)
 
 
 class AccountUpdate(AccountEvent):
@@ -13,7 +14,8 @@ class AccountUpdate(AccountEvent):
         'ccy',
     )
 
-    def __init__(self, account_name, key, val, ccy):
+    def __init__(self, account_name, key, val, ccy, timestamp=None):
+        super(AccountUpdate, self).__init__(timestamp=timestamp)
         self.account_name = account_name
         self.key = key
         self.val = val
@@ -36,7 +38,8 @@ class PortfolioUpdate(AccountEvent):
     )
 
     def __init__(self, inst_id, position, mkt_price, mkt_value, avg_cost, unrealized_pnl, realized_pnl,
-                 account_name):
+                 account_name, timestamp=None):
+        super(PortfolioUpdate, self).__init__(timestamp=timestamp)
         self.inst_id = inst_id
         self.position = position
         self.mkt_price = mkt_price
@@ -73,13 +76,11 @@ class AccountValue:
 
 
 class Account(AccountEventEventHandler):
-
     def __init__(self, name):
         self.name = name
         self.account_value = {}
         self.positions = {}
         self.open_orders = []
-
 
     def on_acc_upd(self, acc_upd):
         pass
@@ -89,4 +90,3 @@ class Account(AccountEventEventHandler):
 
     def on_order(self, order):
         pass
-

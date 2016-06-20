@@ -73,7 +73,6 @@ class DataSeriesTest(TestCase):
                           {"timestamp": self.t2, "v1": 3, "v2": 3},
                           {"timestamp": self.t3, "v1": 4, "v2": 4}], series.get_data())
 
-
     def test_current_time(self):
         series = DataSeries()
         self.assertEqual(None, series.current_time())
@@ -99,7 +98,6 @@ class DataSeriesTest(TestCase):
         self.assertEqual({"v1": {self.t1: 1, self.t2: 2}, "v2": {self.t1: 1, self.t2: 2}},
                          series.get_data_dict(['v1', 'v2']))
         self.assertEqual({self.t1: 1, self.t2: 2}, series.get_data_dict('v1'))
-
 
     def test_get_data(self):
         series = DataSeries()
@@ -200,7 +198,6 @@ class DataSeriesTest(TestCase):
         self.assertEqual({"v1": 1.4, "v2": 2.4}, series.ago(0, ["v1", "v2"]))
         self.assertEqual(1.4, series.ago(0, "v1"))
         self.assertEqual(1.4, series.ago(0, ["v1"]))
-
 
     def test_get_by_idx(self):
         series = DataSeries(keys=set(["timestamp", "v1", "v2"]))

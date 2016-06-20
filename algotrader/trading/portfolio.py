@@ -8,16 +8,16 @@ from algotrader.utils.time_series import DataSeries
 
 
 class Position(object):
-    def __init__(self, instrument):
-        self.instrument = instrument
+    def __init__(self, inst_id):
+        self.inst_id = inst_id
         self.orders = {}
         self.size = 0
         self.last_price = 0
 
     def add_order(self, order):
-        if order.instrument != self.instrument:
-            raise RuntimeError("order[%s] instrument [%s] is not same as instrument [%s] of position" % (
-                order.ord_id, order.instrument, self.instrument))
+        if order.inst_id != self.inst_id:
+            raise RuntimeError("order[%s] inst_id [%s] is not same as inst_id [%s] of position" % (
+                order.ord_id, order.inst_id, self.inst_id))
 
         if order.ord_id in self.orders:
             raise RuntimeError("order[%s] already exist" % order.ord_id)
@@ -31,8 +31,8 @@ class Position(object):
         return qty
 
     def __repr__(self):
-        return "Position(instrument=%s, orders=%s, size=%s, last_price=%s)" % (
-            self.instrument, self.orders, self.size, self.last_price
+        return "Position(inst_id=%s, orders=%s, size=%s, last_price=%s)" % (
+            self.inst_id, self.orders, self.size, self.last_price
         )
 
 
@@ -57,15 +57,15 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
-        self.__update_price(bar.timestamp, bar.instrument, bar.close)
+        self.__update_price(bar.timestamp, bar.inst_id, bar.close)
 
     def on_quote(self, quote):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
-        self.__update_price(quote.timestamp, quote.instrument, quote.mid())
+        self.__update_price(quote.timestamp, quote.inst_id, quote.mid())
 
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
-        self.__update_price(trade.timestamp, trade.instrument, trade.price)
+        self.__update_price(trade.timestamp, trade.inst_id, trade.price)
 
     def on_order(self, order):
         logger.debug("[%s] %s" % (self.__class__.__name__, order))
@@ -74,9 +74,9 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
             raise RuntimeError("order[%s] already exist" % order.ord_id)
 
         self.orders[order.ord_id] = order
-        if order.instrument not in self.positions:
-            self.positions[order.instrument] = Position(instrument=order.instrument)
-        self.positions[order.instrument].add_order(order)
+        if order.inst_id not in self.positions:
+            self.positions[order.inst_id] = Position(inst_id=order.inst_id)
+        self.positions[order.inst_id].add_order(order)
 
     def on_ord_upd(self, ord_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
@@ -89,11 +89,11 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         order.add_exec_report(exec_report)
         direction = 1 if order.action == OrdAction.BUY else -1
         self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
-        self.__update_price(exec_report.timestamp, exec_report.instrument, exec_report.last_price)
+        self.__update_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
-    def __update_price(self, time, instrument, price):
-        if instrument in self.positions:
-            position = self.positions[instrument]
+    def __update_price(self, time, inst_id, price):
+        if inst_id in self.positions:
+            position = self.positions[inst_id]
             position.last_price = price
         self.__update_equity(time)
         for analyzer in self.analyzers:
@@ -105,7 +105,8 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
             self.stock_value += position.last_price * position.filled_qty()
         self.total_equity = self.stock_value + self.cash
 
-        self.performance_series.add({"timestamp": time, "stock_value":self.stock_value, "cash": self.cash, "total_equity":self.total_equity})
+        self.performance_series.add(
+            {"timestamp": time, "stock_value": self.stock_value, "cash": self.cash, "total_equity": self.total_equity})
 
     def get_return(self):
         equity = self.performance_series.get_series("total_equity")
@@ -115,7 +116,7 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         return rets
 
     def get_series(self):
-        result =  self.performance_series.get_series(['stock_value', 'cash','total_equity'])
+        result = self.performance_series.get_series(['stock_value', 'cash', 'total_equity'])
 
         for analyzer in self.analyzers:
             result.update(analyzer.get_series())

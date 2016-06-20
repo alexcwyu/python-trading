@@ -1,6 +1,4 @@
-
 class PortfolioAnalyzer(object):
-
     def update(self, time):
         pass
 

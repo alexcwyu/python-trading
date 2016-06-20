@@ -77,11 +77,11 @@ class Instrument:
             return self.alt_symbol[provider_id]
         return self.symbol
 
-
     def get_exch_id(self, provider_id):
         if self.alt_exch_id and provider_id in self.alt_exch_id:
             return self.alt_exch_id[provider_id]
         return self.exch_id
+
 
 class Exchange:
     __slots__ = (
@@ -139,7 +139,6 @@ class RefDataManager(object):
     @abc.abstractmethod
     def get_inst(self, inst_id=None, symbol=None, exch_id=None):
         raise NotImplementedError()
-
 
     @abc.abstractmethod
     def get_ccy(self, ccy_id):
@@ -238,6 +237,14 @@ class InMemoryRefDataManager(RefDataManager):
                     return inst
         return None
 
+    def search_inst(self, inst):
+        if isinstance(inst, (int, long)):
+            return self.__inst_dict.get(inst, None)
+        elif inst in self.__inst_symbol_dict:
+            return self.__inst_symbol_dict[inst]
+        else:
+            return self.get_inst(symbol=inst)
+
     def get_ccy(self, ccy_id):
         return self.__ccy_dict.get(ccy_id, None)
 
@@ -247,11 +254,7 @@ class InMemoryRefDataManager(RefDataManager):
 
 inmemory_ref_data_mgr = InMemoryRefDataManager()
 
-
 if __name__ == "__main__":
     mgr = InMemoryRefDataManager();
     print mgr.get_inst(symbol='EURUSD', exch_id='IDEALPRO')
     print mgr.get_inst(inst_id=2)
-
-
-

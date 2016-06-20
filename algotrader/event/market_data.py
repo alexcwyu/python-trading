@@ -1,4 +1,4 @@
-from algotrader.event import Event, EventHandler
+from algotrader.event.event import Event, EventHandler
 
 
 class BarSize(object):
@@ -46,13 +46,12 @@ class MDOperation:
 
 class MarketDataEvent(Event):
     __slots__ = (
-        'instrument',
-        'timestamp',
+        'inst_id',
     )
 
-    def __init__(self, instrument, timestamp):
-        self.instrument = instrument
-        self.timestamp = timestamp
+    def __init__(self, inst_id, timestamp):
+        super(MarketDataEvent, self).__init__(timestamp)
+        self.inst_id = inst_id
 
     def id(self):
         raise NotImplementedError()
@@ -71,10 +70,10 @@ class Bar(MarketDataEvent):
         'adj_close'
     )
 
-    def __init__(self, instrument=None, begin_time=None, timestamp=None, open=0, high=0, low=0, close=0, vol=0,
+    def __init__(self, inst_id=None, begin_time=None, timestamp=None, open=0, high=0, low=0, close=0, vol=0,
                  adj_close=0,
                  size=BarSize.D1, type=BarType.Time):
-        super(Bar, self).__init__(instrument, timestamp)
+        super(Bar, self).__init__(inst_id, timestamp)
         self.type = type
         self.size = size
         self.begin_time = begin_time
@@ -86,14 +85,14 @@ class Bar(MarketDataEvent):
         self.adj_close = adj_close
 
     def id(self):
-        return "Bar.%s.%s.%s" % (self.instrument, BarType.name(self.type), self.size)
+        return "Bar.%s.%s.%s" % (self.inst_id, BarType.name(self.type), self.size)
 
     def __str__(self):
-        return "Bar(instrument = %s, begin_time = %s, timestamp = %s,type = %s, size = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
+        return "Bar(inst_id = %s, begin_time = %s, timestamp = %s,type = %s, size = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
                % (
-               self.instrument, self.begin_time, self.timestamp, self.type, self.size, self.open, self.high, self.low,
-               self.close, self.vol,
-               self.adj_close)
+                   self.inst_id, self.begin_time, self.timestamp, self.type, self.size, self.open, self.high, self.low,
+                   self.close, self.vol,
+                   self.adj_close)
 
     def on(self, handler):
         handler.on_bar(self)
@@ -109,17 +108,17 @@ class Trade(MarketDataEvent):
         'size'
     )
 
-    def __init__(self, instrument=None, timestamp=None, price=0, size=0):
-        super(Trade, self).__init__(instrument, timestamp)
+    def __init__(self, inst_id=None, timestamp=None, price=0, size=0):
+        super(Trade, self).__init__(inst_id, timestamp)
         self.price = price
         self.size = size
 
     def id(self):
-        return "Trade.%s" % (self.instrument)
+        return "Trade.%s" % (self.inst_id)
 
     def __str__(self):
-        return "Trade(instrument = %s, timestamp = %s,price = %s, size = %s)" \
-               % (self.instrument, self.timestamp, self.price, self.size)
+        return "Trade(inst_id = %s, timestamp = %s,price = %s, size = %s)" \
+               % (self.inst_id, self.timestamp, self.price, self.size)
 
     def on(self, handler):
         handler.on_trade(self)
@@ -133,19 +132,19 @@ class Quote(MarketDataEvent):
         'ask_size',
     )
 
-    def __init__(self, instrument=None, timestamp=None, bid=0, bid_size=0, ask=0, ask_size=0):
-        super(Quote, self).__init__(instrument, timestamp)
+    def __init__(self, inst_id=None, timestamp=None, bid=0, bid_size=0, ask=0, ask_size=0):
+        super(Quote, self).__init__(inst_id, timestamp)
         self.bid = bid
         self.bid_size = bid_size
         self.ask = ask
         self.ask_size = ask_size
 
     def id(self):
-        return "Quote.%s" % (self.instrument)
+        return "Quote.%s" % (self.inst_id)
 
     def __str__(self):
-        return "Quote(instrument = %s, timestamp = %s,bid = %s, bid_size = %s, ask = %s, ask_size = %s)" \
-               % (self.instrument, self.timestamp, self.bid, self.bid_size, self.ask, self.ask_size)
+        return "Quote(inst_id = %s, timestamp = %s,bid = %s, bid_size = %s, ask = %s, ask_size = %s)" \
+               % (self.inst_id, self.timestamp, self.bid, self.bid_size, self.ask, self.ask_size)
 
     def on(self, handler):
         handler.on_quote(self)
@@ -168,9 +167,9 @@ class MarketDepth(MarketDataEvent):
         'size',
     )
 
-    def __init__(self, instrument=None, timestamp=None, provider_id=None, position=0, operation=None, side=None,
+    def __init__(self, inst_id=None, timestamp=None, provider_id=None, position=0, operation=None, side=None,
                  price=0.0, size=0):
-        super(MarketDepth, self).__init__(instrument, timestamp)
+        super(MarketDepth, self).__init__(inst_id, timestamp)
         self.provider_id = provider_id
         self.position = position
         self.operation = operation
@@ -179,13 +178,13 @@ class MarketDepth(MarketDataEvent):
         self.size = size
 
     def id(self):
-        return "MarketDepth.%s" % (self.instrument)
+        return "MarketDepth.%s" % (self.inst_id)
 
     def __str__(self):
-        return "MarketDepth(instrument = %s, timestamp = %s, provider_id = %s, position = %s, operation = %s, side = %s, price = %s, size = %s)" \
+        return "MarketDepth(inst_id = %s, timestamp = %s, provider_id = %s, position = %s, operation = %s, side = %s, price = %s, size = %s)" \
                % (
-               self.instrument, self.timestamp, self.provider_id, self.position, self.operation, self.side, self.price,
-               self.size)
+                   self.inst_id, self.timestamp, self.provider_id, self.position, self.operation, self.side, self.price,
+                   self.size)
 
     def on(self, handler):
         handler.on_market_depth(self)

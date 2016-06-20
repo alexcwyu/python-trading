@@ -35,7 +35,7 @@ def main():
                                bar_type=BarType.Time,
                                bar_size=BarSize.M1)
 
-    #strategy = SMAStrategy("sma", portfolio, instrument='spy', qty=1000, trading_config=config)
+    # strategy = SMAStrategy("sma", portfolio, instrument='spy', qty=1000, trading_config=config)
     strategy = Down2PctStrategy("down2%", portfolio, instrument='GOOG', qty=1000, trading_config=config)
 
     runner = ATSRunner(strategy)
@@ -47,7 +47,7 @@ def main():
     logger.info("ATS started, presss Ctrl-C to stop")
 
     # wait until stop
-    #threading.Thread.join()
+    # threading.Thread.join()
 
 
 if __name__ == "__main__":

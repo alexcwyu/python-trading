@@ -1,13 +1,11 @@
 import zerorpc
 
-from poc.zerorpc_patch import *
 from algotrader.trading.order_mgr import OrderManager
 from algotrader.utils import logger
 
 
 class RemoteOrderManager(OrderManager):
-
-    def __init__(self, address = "tcp://0.0.0.0:14242"):
+    def __init__(self, address="tcp://0.0.0.0:14242"):
         super(RemoteOrderManager, self).__init__()
         self.__address = address
 

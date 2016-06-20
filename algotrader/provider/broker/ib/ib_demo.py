@@ -22,7 +22,7 @@ class SwigIBClient(EWrapper):
     by TWS.
     '''
 
-    def __init__(self, port = 4001, client_id=12):
+    def __init__(self, port=4001, client_id=12):
         super(SwigIBClient, self).__init__()
 
         self.tws = EPosixClientSocket(self)
@@ -37,7 +37,6 @@ class SwigIBClient(EWrapper):
 
     def execDetails(self, id, contract, execution):
         pass
-
 
     def managedAccounts(self, openOrderEnd):
         pass
@@ -58,16 +57,13 @@ class SwigIBClient(EWrapper):
     def openOrder(self, orderID, contract, order, orderState):
         print("Order opened for %s" % contract.symbol)
 
-
     def openOrderEnd(self):
         pass
-
 
     def commissionReport(self, commissionReport):
         print 'Commission %s %s P&L: %s' % (commissionReport.currency,
                                             commissionReport.commission,
                                             commissionReport.realizedPNL)
-
 
     ### Historical data
     def historicalData(self, reqId, date, open, high,
@@ -81,7 +77,6 @@ class SwigIBClient(EWrapper):
             date = datetime.strptime(date, "%Y%m%d").strftime("%d %b %Y")
             print(("History %s - Open: %s, High: %s, Low: %s, Close: "
                    "%s, Volume: %d") % (date, open, high, low, close, volume))
-
 
     ### Contract details
     def contractDetailsEnd(self, reqId):
@@ -146,7 +141,6 @@ class SwigIBClient(EWrapper):
 
         self.got_contract.set()
 
-
     ### Error
     def error(self, id, errCode, errString):
 
@@ -173,18 +167,14 @@ class SwigIBClient(EWrapper):
     def pyError(self, type, val, tb):
         sys.print_exception(type, val, tb)
 
-
-
     ###
     def connect(self):
         if not self.tws.eConnect("", self.port, self.client_id):
             raise RuntimeError('Failed to connect to TWS')
 
-
     def disconnect(self):
         print("\nDisconnecting...")
         self.tws.eDisconnect()
-
 
     def create_contract(self):
         # Simple contract for GOOG
@@ -195,7 +185,6 @@ class SwigIBClient(EWrapper):
         contract.currency = "USD"
         return contract
 
-
     def request_contract_details(self, contract):
         today = datetime.today()
 
@@ -203,14 +192,13 @@ class SwigIBClient(EWrapper):
 
         # Perform the request
         self.tws.reqContractDetails(
-            42,                                         # reqId,
-            contract,                                   # contract,
+            42,  # reqId,
+            contract,  # contract,
         )
 
         print("\n====================================================================")
         print(" Contract details requested, waiting %ds for TWS responses" % WAIT_TIME)
         print("====================================================================\n")
-
 
         try:
             self.got_contract.wait(timeout=WAIT_TIME)
@@ -220,8 +208,6 @@ class SwigIBClient(EWrapper):
             if not self.got_contract.is_set():
                 print('Failed to get contract within %d seconds' % WAIT_TIME)
 
-
-
     def request_hist_data(self, contract):
         today = datetime.today()
 
@@ -229,21 +215,20 @@ class SwigIBClient(EWrapper):
 
         # Request some historical data.
         self.tws.reqHistoricalData(
-            2,                                          # tickerId,
-            contract,                                   # contract,
-            today.strftime("%Y%m%d %H:%M:%S %Z"),       # endDateTime,
-            "1 W",                                      # durationStr,
-            "1 day",                                    # barSizeSetting,
-            "TRADES",                                   # whatToShow,
-            0,                                          # useRTH,
-            1                                     # formatDate
+            2,  # tickerId,
+            contract,  # contract,
+            today.strftime("%Y%m%d %H:%M:%S %Z"),  # endDateTime,
+            "1 W",  # durationStr,
+            "1 day",  # barSizeSetting,
+            "TRADES",  # whatToShow,
+            0,  # useRTH,
+            1  # formatDate
         )
 
         print("\n====================================================================")
         print(" History requested, waiting %ds for TWS responses" % WAIT_TIME)
         print(" History requested, waiting %ds for TWS responses" % WAIT_TIME)
         print("====================================================================\n")
-
 
         try:
             self.got_history.wait(timeout=WAIT_TIME)
@@ -253,16 +238,11 @@ class SwigIBClient(EWrapper):
             if not self.got_history.is_set():
                 print('Failed to get history within %d seconds' % WAIT_TIME)
 
-
-
     def subscribe_market_data(self, contract):
         pass
 
     def unsubscribe_market_data(self, contract):
         pass
-
-
-
 
     def place_order(self, contract):
         print('Waiting for valid order id')
@@ -290,7 +270,7 @@ class SwigIBClient(EWrapper):
         order.algoStrategy = "AD"
         order.tif = 'DAT'
         order.algoParams = algoParams
-        #order.transmit = False
+        # order.transmit = False
 
 
         print("Placing order for %d %s's (id: %d)" % (order.totalQuantity,
@@ -298,15 +278,14 @@ class SwigIBClient(EWrapper):
 
         # Place the order
         self.tws.placeOrder(
-            order_id,                                   # orderId,
-            contract,                                   # contract,
-            order                                       # order
+            order_id,  # orderId,
+            contract,  # contract,
+            order  # order
         )
 
         print("\n====================================================================")
         print(" Order placed, waiting %ds for TWS responses" % WAIT_TIME)
         print("====================================================================\n")
-
 
         print("Waiting for order to be filled..")
 
@@ -319,9 +298,9 @@ class SwigIBClient(EWrapper):
                 print('Failed to fill order')
 
 
-if __name__ =="__main__":
-        ib = SwigIBClient()
-        ib.connect()
-        contract = ib.create_contract()
+if __name__ == "__main__":
+    ib = SwigIBClient()
+    ib.connect()
+    contract = ib.create_contract()
 
-        ib.request_hist_data(contract)
+    ib.request_hist_data(contract)

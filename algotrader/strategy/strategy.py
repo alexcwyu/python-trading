@@ -9,7 +9,7 @@ from algotrader.provider.feed.csv_feed import CSVDataFeed
 from algotrader.provider.provider import SubscriptionKey, HistDataSubscriptionKey, broker_mgr, feed_mgr
 from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.trading.order_mgr import order_mgr
-from algotrader.trading.ref_data import inmemory_ref_data_mgr
+from algotrader.trading.ref_data import inmemory_ref_data_mgr, Instrument
 from algotrader.utils import logger, clock
 
 
@@ -46,10 +46,10 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
                  trading_config, ref_data_mgr=None):
         self.stg_id = stg_id
         self.__portfolio = portfolio
-        self.__instruments = instruments
         self.__trading_config = trading_config
         self.__next_ord_id = 0
         self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
+        self.__instruments = self.__get_inst(instruments)
 
         self.__feed = feed_mgr.get(self.__trading_config.feed_id)
         stg_mgr.add_strategy(self)
@@ -58,6 +58,26 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
         next_ord_id = self.__next_ord_id
         self.__next_ord_id += 1
         return next_ord_id
+
+
+    def __get_inst(self, instruments):
+        insts = []
+        if isinstance(instruments, (list, tuple, set)):
+            for instrument in instruments:
+                if isinstance(instrument, (int, long)) or isinstance(instrument, str):
+                    insts.append(self.__ref_data_mgr.search_inst(inst=instrument))
+                elif isinstance(instrument, Instrument):
+                    insts.append(instrument)
+                else:
+                    raise "Unknown instrument %s" % instrument
+        elif isinstance(instruments, (int, long)) or isinstance(instruments, str):
+            insts.append(self.__ref_data_mgr.search_inst(inst=instruments))
+        elif isinstance(instruments, Instrument):
+            insts.append(instruments)
+        else:
+            raise "Unknown instrument %s" % instruments
+
+        return insts
 
     def start(self):
         self.__portfolio.start()
@@ -68,35 +88,35 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
 
         self.__feed.start()
 
-        inst = self.__ref_data_mgr.get_inst(symbol=self.__instrument)
-        if isinstance(self.__trading_config, BacktestingConfig):
-
-            sub_key = HistDataSubscriptionKey(inst_id=inst.inst_id,
-                                              provider_id=self.__trading_config.feed_id,
-                                              data_type=self.__trading_config.data_type,
-                                              bar_type=self.__trading_config.bar_type,
-                                              bar_size=self.__trading_config.bar_size,
-                                              from_date=self.__trading_config.from_date,
-                                              to_date=self.__trading_config.to_date)
-
-        else:
-            sub_key = SubscriptionKey(inst_id=inst.inst_id,
-                                      provider_id=self.__trading_config.feed_id,
-                                      data_type=self.__trading_config.data_type,
-                                      bar_type=self.__trading_config.bar_type,
-                                      bar_size=self.__trading_config.bar_size)
-        self.__feed.subscribe_mktdata(sub_key)
+        self._subscribe_market_data(self.__instruments)
+        # inst = self.__ref_data_mgr.get_inst(symbol=self.__instrument)
+        # if isinstance(self.__trading_config, BacktestingConfig):
+        #
+        #     sub_key = HistDataSubscriptionKey(inst_id=inst.inst_id,
+        #                                       provider_id=self.__trading_config.feed_id,
+        #                                       data_type=self.__trading_config.data_type,
+        #                                       bar_type=self.__trading_config.bar_type,
+        #                                       bar_size=self.__trading_config.bar_size,
+        #                                       from_date=self.__trading_config.from_date,
+        #                                       to_date=self.__trading_config.to_date)
+        #
+        # else:
+        #     sub_key = SubscriptionKey(inst_id=inst.inst_id,
+        #                               provider_id=self.__trading_config.feed_id,
+        #                               data_type=self.__trading_config.data_type,
+        #                               bar_type=self.__trading_config.bar_type,
+        #                               bar_size=self.__trading_config.bar_size)
+        # self.__feed.subscribe_mktdata(sub_key)
 
     def _subscribe_market_data(self, instruments):
-        if isinstance(instruments, (list, tuple.set)):
-            for instrument in instruments:
-                self._subscribe_inst(instrument)
+        for instrument in instruments:
+            self._subscribe_inst(instrument)
+
 
     def _subscribe_inst(self, instrument):
-        inst = self.__ref_data_mgr.search_inst(instrument)
         if isinstance(self.__trading_config, BacktestingConfig):
 
-            sub_key = HistDataSubscriptionKey(inst_id=inst.inst_id,
+            sub_key = HistDataSubscriptionKey(inst_id=instrument.inst_id,
                                               provider_id=self.__trading_config.feed_id,
                                               data_type=self.__trading_config.data_type,
                                               bar_type=self.__trading_config.bar_type,
@@ -105,7 +125,7 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
                                               to_date=self.__trading_config.to_date)
 
         else:
-            sub_key = SubscriptionKey(inst_id=inst.inst_id,
+            sub_key = SubscriptionKey(inst_id=instrument.inst_id,
                                       provider_id=self.__trading_config.feed_id,
                                       data_type=self.__trading_config.data_type,
                                       bar_type=self.__trading_config.bar_type,

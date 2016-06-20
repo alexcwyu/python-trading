@@ -1,7 +1,8 @@
 import pandas as pd
 
-from algotrader.event import EventBus, Bar, BarSize, BarType
-from algotrader.provider import Feed, feed_mgr
+from algotrader.event.event_bus import EventBus
+from algotrader.event.market_data import  Bar, BarSize, BarType
+from algotrader.provider.provider import Feed, feed_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')

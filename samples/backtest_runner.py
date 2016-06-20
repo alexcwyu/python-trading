@@ -41,7 +41,7 @@ def main():
     # strategy = Down2PctStrategy("down2%", portfolio,
     #                             instrument='SPY', qty=1000,  trading_config=config )
 
-    strategy = SMAStrategy("sma", portfolio, instrument='SPY', qty=1000, trading_config=config)
+    strategy = SMAStrategy("sma", portfolio, instrument=4, qty=1000, trading_config=config)
 
     runner = BacktestRunner(strategy)
     runner.start()
@@ -55,7 +55,7 @@ def main():
 
     # build in plot
     plotter = StrategyPlotter(strategy)
-    plotter.plot(instrument='SPY')
+    plotter.plot(instrument=4)
 
     # import matplotlib.pyplot as plt
     # plt.show()

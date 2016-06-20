@@ -7,7 +7,6 @@ import swigibpy
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import Bar, Quote, Trade, MarketDepth
 from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus
-from algotrader.provider import broker_mgr, feed_mgr
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.provider import Broker, HistDataSubscriptionKey, MarketDepthSubscriptionKey, Feed

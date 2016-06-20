@@ -1,5 +1,5 @@
 import swigibpy
-from datatime import datetime
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from algotrader.event.market_data import Bar, Quote, Trade, BarSize, MDOperation, MDSide

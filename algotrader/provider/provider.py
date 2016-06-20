@@ -2,7 +2,6 @@ import abc
 
 from algotrader.event.order import OrderEventHandler
 
-
 class Provider(object):
     __metaclass__ = abc.ABCMeta
 
@@ -22,7 +21,7 @@ class Provider(object):
         raise NotImplementedError()
 
 
-from algotrader.event.market_data import BarSize, BarType
+from algotrader.event.market_data import BarSize, BarType, Bar, Quote, Trade
 
 
 class SubscriptionKey(object):

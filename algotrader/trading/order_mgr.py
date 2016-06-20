@@ -1,7 +1,7 @@
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.order import OrderEventHandler, ExecutionEventHandler
-from algotrader.provider import broker_mgr
+from algotrader.provider.provider import broker_mgr
 from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.utils import logger
 

@@ -6,7 +6,7 @@ from algotrader.provider.broker.sim.order_handler import MarketOrderHandler, Lim
     StopOrderHandler, TrailingStopOrderHandler
 from algotrader.provider.broker.sim.sim_config import SimConfig
 from algotrader.provider.broker.sim.slippage import NoSlippage
-from algotrader.trading import inst_data_mgr
+from algotrader.trading.instrument_data import inst_data_mgr
 
 
 class FillStrategy(object):

@@ -7,7 +7,7 @@ from algotrader.event.order import OrdStatus, OrderStatusUpdate, \
 from algotrader.provider.broker.sim.commission import NoCommission
 from algotrader.provider.broker.sim.fill_strategy import DefaultFillStrategy
 from algotrader.provider.provider import broker_mgr, Broker
-from algotrader.trading import order_mgr
+from algotrader.trading.order_mgr import order_mgr
 from algotrader.utils import clock
 from algotrader.utils import logger
 
@@ -21,7 +21,7 @@ class Simulator(Broker, MarketDataEventHandler):
         self.__next_exec_id = 0
         self.__order_map = defaultdict(dict)
         self.__quote_map = {}
-        self.__exec__handler = exec_handler
+        self.__exec_handler = exec_handler
         self.__fill_strategy = fill_strategy if fill_strategy is not None else DefaultFillStrategy()
         self.__commission = commission if commission is not None else NoCommission()
 
@@ -99,7 +99,7 @@ class Simulator(Broker, MarketDataEventHandler):
     def __send_status(self, order, ord_status):
         ord_update = OrderStatusUpdate(broker_id=Simulator.ID, ord_id=order.ord_id, inst_id=order.inst_id,
                                        timestamp=clock.default_clock.current_date_time(), status=ord_status)
-        self.__exec__handler.on_ord_upd(ord_update)
+        self.__exec_handler.on_ord_upd(ord_update)
 
     def __send_exec_report(self, order, last_price, last_qty, ord_status):
         commission = self.__commission.calc(order, last_price, last_qty)
@@ -109,7 +109,7 @@ class Simulator(Broker, MarketDataEventHandler):
                                       last_price=last_price, status=ord_status,
                                       commission=commission)
 
-        self.__exec__handler.on_exec_report(exec_report)
+        self.__exec_handler.on_exec_report(exec_report)
 
     def _get_orders(self):
         return self.__order_map

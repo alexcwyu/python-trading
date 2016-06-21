@@ -68,18 +68,15 @@ class EMA(Indicator):
         result = {}
         result['timestamp'] = data['timestamp']
         if self.input.size() >= self.length:
-            value = 0.0
+            value = talib.EMA(
+                np.array(
+                    input.get_by_idx(keys=self.input,
+                                     idx=slice(-self.length, None, None))))
 
-            input.get_by_idx()
-
-            # sliced = series2.get_by_idx(keys='v1', idx=slice(-10,None,None))
-
-
-            # for idx in range(self.input.size() - self.length, self.input.size()):
-            #     value += self.input.get_by_idx(idx, self.input_keys[0])
-            # value = round(value / float(self.length), 8)
             result[Indicator.VALUE] = value
         else:
             result[Indicator.VALUE] = np.nan
 
         self.add(result)
+
+single_ds_list = ["APO", "BBANDS", "CMO", "DEMA", "EMA", "HT_DCPERIOD", "HT_DCPHASE", "HT_PHASOR", "HT_SINE", "HT_TRENDLINE", "HT_TRENDMODE", "KAMA", "LINEARREG", "LINEARREG_ANGLE", "LINEARREG_INTERCEPT" ]

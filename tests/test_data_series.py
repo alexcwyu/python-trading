@@ -249,7 +249,7 @@ class DataSeriesTest(TestCase):
         sliced = series2.get_by_idx(keys='v1', idx=slice(-10,None,None))
         self.assertEqual(len(sliced), 10)
 
-        endPoint = series2.get_by_idx(keys='v1', idx=slice(None,-1, None))
+        endPoint = series2.get_by_idx(keys='v1', idx=slice(-1, None, None))
         self.assertEqual(endPoint[0], 99)
 
 

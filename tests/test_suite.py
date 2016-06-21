@@ -15,6 +15,7 @@ from test_market_data_processor import MarketDataProcessorTest
 from test_order_handler import OrderHandlerTest
 from test_data_series import DataSeriesTest
 from test_order import OrderTest
+from test_talib_wrapper import TALibSMATest
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -32,6 +33,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(OrderHandlerTest))
     test_suite.addTest(unittest.makeSuite(DataSeriesTest))
     test_suite.addTest(unittest.makeSuite(OrderTest))
+    test_suite.addTest(unittest.makeSuite(TALibSMATest))
     return test_suite
 
 mySuit = suite()

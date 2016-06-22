@@ -1,11 +1,12 @@
 import math
+import talib
 from datetime import datetime
 from unittest import TestCase
 import numpy as np
 import datetime
-# from algotrader.technical.ma import *
 from algotrader.technical.talib_wrapper import SMA
 from algotrader.trading.instrument_data import inst_data_mgr
+from algotrader.utils.time_series import DataSeries
 
 
 class TALibSMATest(TestCase):
@@ -86,3 +87,45 @@ class TALibSMATest(TestCase):
         self.assertAlmostEquals(2.4, sma.get_by_time(t3, 'value'), places=3)
         self.assertAlmostEquals(2.8, sma.get_by_time(t4, 'value'), places=3)
         self.assertAlmostEquals(3.2, sma.get_by_time(t5, 'value'), places=3)
+
+    @staticmethod
+    def create_series_by_list(valuelist):
+        close = DataSeries("close")
+
+        t = datetime.datetime(2000, 1, 1, 11, 34, 59)
+
+        for value in valuelist:
+            close.add({"timestamp": t, "v1": value})
+            t = t + datetime.timedelta(0, 3)
+        return close
+
+    def test_compare_against_oneoff_calculation(self):
+        rw = np.cumsum(np.random.normal(0, 2, 1000)) + 100
+        close = DataSeries("close")
+        t = datetime.datetime.now()
+        sma = SMA(close, input_key='close', length=50)
+
+        result = []
+
+        for x in rw:
+            close.add({"timestamp": t, "close": x})
+            result.append(sma.now('value'))
+            t = t + datetime.timedelta(0, 3)
+
+        result = np.array(result)
+
+        # either apply or direct call is equivalent
+        target = close.apply('close', start=None, end=None, func=talib.SMA, timeperiod=50)
+        # target = talib.SMA(np.array(close.get_series('close')), timeperiod=50)
+
+        result[np.isnan(result)] = 0
+        target[np.isnan(target)] = 0
+
+        try:
+            np.testing.assert_almost_equal(target, result, 5)
+        except AssertionError as e:
+            self.fail(e.message)
+
+
+
+

@@ -53,6 +53,30 @@ def call_talib_with_hlcv(ds, count, talib_func, *args, **kwargs):
 
     return talib_func(high, low, close, volume, *args, **kwargs)
 
+class SMA(Indicator):
+    _slots__ = (
+        'length'
+    )
+
+    def __init__(self, input, input_key=None, length=0, desc="TALib Simple Moving Average"):
+        super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc)
+        self.length = int(length)
+
+    def on_update(self, data):
+
+        result = {}
+        result['timestamp'] = data['timestamp']
+        if self.input.size() >= self.length:
+            value = talib.SMA(
+                np.array(
+                    self.input.get_by_idx(keys=self.input,
+                                     idx=slice(-self.length, None, None))))
+
+            result[Indicator.VALUE] = value
+        else:
+            result[Indicator.VALUE] = np.nan
+
+        self.add(result)
 
 class EMA(Indicator):
     _slots__ = (
@@ -70,7 +94,7 @@ class EMA(Indicator):
         if self.input.size() >= self.length:
             value = talib.EMA(
                 np.array(
-                    input.get_by_idx(keys=self.input,
+                    self.input.get_by_idx(keys=self.input,
                                      idx=slice(-self.length, None, None))))
 
             result[Indicator.VALUE] = value

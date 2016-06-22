@@ -1,6 +1,5 @@
 import datetime
 import math
-from datetime import datetime
 from unittest import TestCase
 
 import numpy as np

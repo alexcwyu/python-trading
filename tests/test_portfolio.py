@@ -7,7 +7,7 @@ from algotrader.event.order import OrdAction, OrdType, Order, OrdStatus, OrderSt
 from algotrader.trading.portfolio import Portfolio
 
 
-class TestPortfolio(TestCase):
+class PortfolioTest(TestCase):
     def setUp(self):
         self.portfolio = Portfolio(cash=100000)
 

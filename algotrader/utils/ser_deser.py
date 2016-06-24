@@ -56,6 +56,7 @@ class Serializer(object):
 
 cls_cache = {}
 
+
 def decode(obj):
     if b'__datetime__' in obj:
         obj = datetime.datetime.strptime(obj["__datetime__"], "%Y%m%dT%H:%M:%S.%f")
@@ -72,6 +73,7 @@ def decode(obj):
         obj.deserialize(data)
     return obj
 
+
 def encode(obj):
     if isinstance(obj, Serializable):
         return obj.serialize()
@@ -82,15 +84,14 @@ def encode(obj):
 
 
 class MsgPackSerializer(Serializer):
-
     def serialize(self, obj):
         return msgpack.packb(obj, default=encode)
 
     def deserialize(self, data):
         return msgpack.unpackb(data, object_hook=decode)
 
-class JsonSerializer(Serializer):
 
+class JsonSerializer(Serializer):
     def serialize(self, obj):
         return json.dumps(obj, default=encode)
 

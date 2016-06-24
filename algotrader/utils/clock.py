@@ -1,11 +1,11 @@
 import abc
+import time
 
-from algotrader.event import *
-from algotrader.utils import *
+from algotrader.event.event_bus import EventBus
+from algotrader.event.market_data import MarketDataEventHandler
+from algotrader.utils import logger
 from algotrader.utils.singleton import singleton
 
-import time
-from threading import Timer
 
 class Clock:
     __metaclass__ = abc.ABCMeta
@@ -15,16 +15,16 @@ class Clock:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def add_reminder(self, on_reminder, datetime, data = None):
+    def add_reminder(self, on_reminder, datetime, data=None):
         raise NotImplementedError()
 
 
 @singleton
 class RealTimeClock(Clock):
     def current_date_time(self):
-        return datetime.datetime.now()
+        return int(time.time())
 
-    def add_reminder(self, on_reminder, datetime, data = None):
+    def add_reminder(self, on_reminder, datetime, data=None):
         return None
 
 
@@ -39,7 +39,7 @@ class SimulationClock(Clock, MarketDataEventHandler):
     def current_date_time(self):
         return self.__current_time
 
-    def add_reminder(self, on_reminder, datetime, data = None):
+    def add_reminder(self, on_reminder, datetime, data=None):
         return None
 
     def on_bar(self, bar):
@@ -54,10 +54,8 @@ class SimulationClock(Clock, MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__current_time = trade.timestamp
 
-
-    def add_reminder(self, on_reminder, datetime, data = None):
+    def add_reminder(self, on_reminder, datetime, data=None):
         return None
-
 
 
 realtime_clock = RealTimeClock()

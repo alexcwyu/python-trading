@@ -10,20 +10,22 @@ params = [
     param(MsgPackSerializer()),
     param(JsonSerializer())
 ]
+
+
 class SerializerTest(TestCase):
     @parameterized.expand(params)
     def test_bar(self, serializer):
-        item = Bar(open=18, high=19, low=17, close=17.5, vol=100, instrument='HSI', timestamp=datetime.datetime.now())
+        item = Bar(open=18, high=19, low=17, close=17.5, vol=100, inst_id=1, timestamp=datetime.datetime.now())
         SerializerTest.ser_deser(serializer, item)
 
     @parameterized.expand(params)
     def test_quote(self, serializer):
-        item = Quote(bid=18, ask=19, bid_size=200, ask_size=500, instrument='HSI', timestamp=datetime.datetime.now())
+        item = Quote(bid=18, ask=19, bid_size=200, ask_size=500, inst_id=1, timestamp=datetime.datetime.now())
         SerializerTest.ser_deser(serializer, item)
 
     @parameterized.expand(params)
     def test_trade(self, serializer):
-        item = Trade(price=20, size=200, instrument='HSI', timestamp=datetime.datetime.now())
+        item = Trade(price=20, size=200, inst_id=1, timestamp=datetime.datetime.now())
         SerializerTest.ser_deser(serializer, item)
 
     @staticmethod

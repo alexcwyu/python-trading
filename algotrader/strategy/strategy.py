@@ -3,13 +3,13 @@ from datetime import date
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler, Bar, BarSize, BarType
 from algotrader.event.order import OrdType, TIF, ExecutionEventHandler, Order
-from algotrader.provider import broker_mgr, feed_mgr, HistDataSubscriptionKey, SubscriptionKey
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.csv_feed import CSVDataFeed
+from algotrader.provider.provider import SubscriptionKey, HistDataSubscriptionKey, broker_mgr, feed_mgr
 from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.trading.order_mgr import order_mgr
-from algotrader.trading.ref_data import inmemory_ref_data_mgr
+from algotrader.trading.ref_data import inmemory_ref_data_mgr, Instrument
 from algotrader.utils import logger, clock
 
 
@@ -42,21 +42,42 @@ class BacktestingConfig(TradingConfig):
 
 
 class Strategy(ExecutionEventHandler, MarketDataEventHandler):
-    def __init__(self, stg_id, portfolio, instrument,
-                 trading_config, ref_data_mgr = None):
+    def __init__(self, stg_id, portfolio, instruments,
+                 trading_config, ref_data_mgr=None):
         self.stg_id = stg_id
         self.__portfolio = portfolio
-        self.__instrument = instrument
         self.__trading_config = trading_config
         self.__next_ord_id = 0
         self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
+        self.__instruments = self.__get_inst(instruments)
 
+        self.__feed = feed_mgr.get(self.__trading_config.feed_id)
         stg_mgr.add_strategy(self)
 
     def __get_next_ord_id(self):
         next_ord_id = self.__next_ord_id
         self.__next_ord_id += 1
         return next_ord_id
+
+
+    def __get_inst(self, instruments):
+        insts = []
+        if isinstance(instruments, (list, tuple, set)):
+            for instrument in instruments:
+                if isinstance(instrument, (int, long)) or isinstance(instrument, str):
+                    insts.append(self.__ref_data_mgr.search_inst(inst=instrument))
+                elif isinstance(instrument, Instrument):
+                    insts.append(instrument)
+                else:
+                    raise "Unknown instrument %s" % instrument
+        elif isinstance(instruments, (int, long)) or isinstance(instruments, str):
+            insts.append(self.__ref_data_mgr.search_inst(inst=instruments))
+        elif isinstance(instruments, Instrument):
+            insts.append(instruments)
+        else:
+            raise "Unknown instrument %s" % instruments
+
+        return insts
 
     def start(self):
         self.__portfolio.start()
@@ -65,14 +86,37 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
         broker = broker_mgr.get(self.__trading_config.broker_id)
         broker.start()
 
-        feed = feed_mgr.get(self.__trading_config.feed_id)
-        feed.start()
+        self.__feed.start()
+
+        self._subscribe_market_data(self.__instruments)
+        # inst = self.__ref_data_mgr.get_inst(symbol=self.__instrument)
+        # if isinstance(self.__trading_config, BacktestingConfig):
+        #
+        #     sub_key = HistDataSubscriptionKey(inst_id=inst.inst_id,
+        #                                       provider_id=self.__trading_config.feed_id,
+        #                                       data_type=self.__trading_config.data_type,
+        #                                       bar_type=self.__trading_config.bar_type,
+        #                                       bar_size=self.__trading_config.bar_size,
+        #                                       from_date=self.__trading_config.from_date,
+        #                                       to_date=self.__trading_config.to_date)
+        #
+        # else:
+        #     sub_key = SubscriptionKey(inst_id=inst.inst_id,
+        #                               provider_id=self.__trading_config.feed_id,
+        #                               data_type=self.__trading_config.data_type,
+        #                               bar_type=self.__trading_config.bar_type,
+        #                               bar_size=self.__trading_config.bar_size)
+        # self.__feed.subscribe_mktdata(sub_key)
+
+    def _subscribe_market_data(self, instruments):
+        for instrument in instruments:
+            self._subscribe_inst(instrument)
 
 
-        inst = self.__ref_data_mgr.get_inst(symbol=self.__instrument)
+    def _subscribe_inst(self, instrument):
         if isinstance(self.__trading_config, BacktestingConfig):
 
-            sub_key = HistDataSubscriptionKey(inst_id=inst.inst_id,
+            sub_key = HistDataSubscriptionKey(inst_id=instrument.inst_id,
                                               provider_id=self.__trading_config.feed_id,
                                               data_type=self.__trading_config.data_type,
                                               bar_type=self.__trading_config.bar_type,
@@ -81,12 +125,12 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
                                               to_date=self.__trading_config.to_date)
 
         else:
-            sub_key = SubscriptionKey(inst_id=inst.inst_id,
+            sub_key = SubscriptionKey(inst_id=instrument.inst_id,
                                       provider_id=self.__trading_config.feed_id,
                                       data_type=self.__trading_config.data_type,
                                       bar_type=self.__trading_config.bar_type,
                                       bar_size=self.__trading_config.bar_size)
-        feed.subscribe_mktdata(sub_key)
+        self.__feed.subscribe_mktdata(sub_key)
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
@@ -108,11 +152,11 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
         self.__portfolio.on_exec_report(exec_report)
 
-    def market_order(self, instrument, action, qty, tif=TIF.DAY):
-        return self.new_order(instrument, OrdType.MARKET, action, qty, 0.0, tif)
+    def market_order(self, inst_id, action, qty, tif=TIF.DAY):
+        return self.new_order(inst_id, OrdType.MARKET, action, qty, 0.0, tif)
 
-    def limit_order(self, instrument, action, qty, price, tif=TIF.DAY):
-        return self.new_order(instrument, OrdType.LIMIT, action, qty, price, tif)
+    def limit_order(self, inst_id, action, qty, price, tif=TIF.DAY):
+        return self.new_order(inst_id, OrdType.LIMIT, action, qty, price, tif)
 
     def stop_order(self):
         pass
@@ -123,9 +167,10 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
     def close_position(self):
         pass
 
-    def new_order(self, instrument, ord_type, action, qty, price, tif=TIF.DAY):
-        order = Order(instrument=instrument, timestamp=clock.default_clock.current_date_time(),
-                      ord_id=order_mgr.next_ord_id(), stg_id=self.stg_id, broker_id=self.__trading_config.broker_id, action=action,
+    def new_order(self, inst_id, ord_type, action, qty, price, tif=TIF.DAY):
+        order = Order(inst_id=inst_id, timestamp=clock.default_clock.current_date_time(),
+                      ord_id=order_mgr.next_ord_id(), stg_id=self.stg_id, broker_id=self.__trading_config.broker_id,
+                      action=action,
                       type=ord_type,
                       tif=tif, qty=qty,
                       limit_price=price,

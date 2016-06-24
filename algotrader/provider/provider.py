@@ -2,7 +2,6 @@ import abc
 
 from algotrader.event.order import OrderEventHandler
 
-
 class Provider(object):
     __metaclass__ = abc.ABCMeta
 
@@ -22,7 +21,7 @@ class Provider(object):
         raise NotImplementedError()
 
 
-from algotrader.event.market_data import *
+from algotrader.event.market_data import BarSize, BarType, Bar, Quote, Trade
 
 
 class SubscriptionKey(object):
@@ -59,7 +58,8 @@ class HistDataSubscriptionKey(SubscriptionKey):
 
     def __init__(self, inst_id, provider_id='IB', data_type=Bar, bar_type=BarType.Time, bar_size=BarSize.D1,
                  from_date=None, to_date=None):
-        super(HistDataSubscriptionKey, self).__init__(inst_id=inst_id, provider_id=provider_id, data_type=data_type, bar_type=bar_type, bar_size=bar_size)
+        super(HistDataSubscriptionKey, self).__init__(inst_id=inst_id, provider_id=provider_id, data_type=data_type,
+                                                      bar_type=bar_type, bar_size=bar_size)
         self.from_date = from_date
         self.to_date = to_date
 
@@ -82,7 +82,8 @@ class MarketDepthSubscriptionKey(SubscriptionKey):
 
     def __init__(self, inst_id, provider_id='IB', data_type=Bar, bar_type=BarType.Time, bar_size=BarSize.D1,
                  num_rows=1):
-        super(HistDataSubscriptionKey, self).__init__(inst_id=inst_id, provider_id=provider_id, data_type=data_type, bar_type=bar_type, bar_size=bar_size)
+        super(HistDataSubscriptionKey, self).__init__(inst_id=inst_id, provider_id=provider_id, data_type=data_type,
+                                                      bar_type=bar_type, bar_size=bar_size)
         self.num_rows = num_rows
 
     def __eq__(self, other):

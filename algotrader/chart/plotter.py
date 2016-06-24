@@ -35,7 +35,7 @@ class StrategyPlotter:
     def __init__(self, strategy):
         self.strategy = strategy
 
-    def plot(self, instrument = None):
+    def plot(self, instrument=None):
         plt.rc('axes', grid=True)
         plt.rc('grid', color='0.75', linestyle='-', linewidth=0.5)
 
@@ -49,10 +49,10 @@ class StrategyPlotter:
 
         plt.show()
 
-    def _plot_bar_chart(self, fig, instrument = None):
+    def _plot_bar_chart(self, fig, instrument=None):
         key = "Bar.%s.Time.86400" % instrument
         series = inst_data_mgr.get_series(key)
-        #key = series_dict.keys()[0]
+        # key = series_dict.keys()[0]
 
         ax_stock = fig.add_axes(rect_stock, axisbg=axescolor)  # left, bottom, width, height
 
@@ -61,7 +61,7 @@ class StrategyPlotter:
         ax_stock.set_title(key)
         # ax_stock.set_ylim(0, 1.1 * pmax)
 
-        #series = series_dict[key]
+        # series = series_dict[key]
         if series.size() > 0:
             series = TimeSeriesPlot(series.get_series('close'))
             series.plot(ax=ax_stock)

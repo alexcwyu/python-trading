@@ -11,8 +11,8 @@ Support for serialization of numpy data types with msgpack.
 
 import os
 
-import numpy as np
 import msgpack
+import numpy as np
 
 # Fall back to pure Python
 if os.environ.get('MSGPACK_PUREPYTHON'):
@@ -25,6 +25,7 @@ else:
     except:
         import msgpack.fallback as _packer
         import msgpack.fallback as _unpacker
+
 
 def encode(obj):
     """
@@ -44,6 +45,7 @@ def encode(obj):
                 'data': obj.__repr__()}
     else:
         return obj
+
 
 def decode(obj):
     """
@@ -65,6 +67,7 @@ def decode(obj):
     except KeyError:
         return obj
 
+
 # Maintain support for msgpack < 0.4.0:
 if msgpack.version < (0, 4, 0):
     class Packer(_packer.Packer):
@@ -78,6 +81,8 @@ if msgpack.version < (0, 4, 0):
                                          unicode_errors=unicode_errors,
                                          use_single_float=use_single_float,
                                          autoreset=1)
+
+
     class Unpacker(_unpacker.Unpacker):
         def __init__(self, file_like=None, read_size=0, use_list=None,
                      object_hook=decode,
@@ -108,6 +113,7 @@ else:
                                          autoreset=1,
                                          use_bin_type=1)
 
+
     class Unpacker(_unpacker.Unpacker):
         def __init__(self, file_like=None, read_size=0, use_list=None,
                      object_hook=decode,
@@ -125,6 +131,7 @@ else:
                                            max_buffer_size=max_buffer_size,
                                            ext_hook=ext_hook)
 
+
 def pack(o, stream, default=encode, **kwargs):
     """
     Pack an object and write it to a stream.
@@ -134,6 +141,7 @@ def pack(o, stream, default=encode, **kwargs):
     packer = Packer(**kwargs)
     stream.write(packer.pack(o))
 
+
 def packb(o, default=encode, **kwargs):
     """
     Pack an object and return the packed bytes.
@@ -141,6 +149,7 @@ def packb(o, default=encode, **kwargs):
 
     kwargs['default'] = default
     return Packer(**kwargs).pack(o)
+
 
 def unpack(stream, object_hook=decode, encoding='utf-8', **kwargs):
     """
@@ -150,6 +159,7 @@ def unpack(stream, object_hook=decode, encoding='utf-8', **kwargs):
     kwargs['object_hook'] = object_hook
     return _unpacker.unpack(stream, encoding=encoding, **kwargs)
 
+
 def unpackb(packed, object_hook=decode, encoding='utf-8', **kwargs):
     """
     Unpack a packed object.
@@ -158,10 +168,12 @@ def unpackb(packed, object_hook=decode, encoding='utf-8', **kwargs):
     kwargs['object_hook'] = object_hook
     return _unpacker.unpackb(packed, encoding=encoding, **kwargs)
 
+
 load = unpack
 loads = unpackb
 dump = pack
 dumps = packb
+
 
 def patch():
     """
@@ -179,20 +191,24 @@ def patch():
     setattr(msgpack, 'unpack', unpack)
     setattr(msgpack, 'unpackb', unpackb)
 
+
 if __name__ == '__main__':
     try:
-        range = xrange # Python 2
+        range = xrange  # Python 2
     except NameError:
-        pass # Python 3
+        pass  # Python 3
 
-    from unittest import main, TestCase, TestSuite
+    from unittest import main, TestCase
+
 
     class test_numpy_msgpack(TestCase):
         def setUp(self):
             patch()
+
         def encode_decode(self, x):
             x_enc = msgpack.packb(x)
             return msgpack.unpackb(x_enc)
+
         def test_numpy_scalar_bool(self):
             x = np.bool_(True)
             x_rec = self.encode_decode(x)
@@ -200,87 +216,107 @@ if __name__ == '__main__':
             x = np.bool_(False)
             x_rec = self.encode_decode(x)
             assert x == x_rec and type(x) == type(x_rec)
+
         def test_numpy_scalar_float(self):
             x = np.float32(np.random.rand())
             x_rec = self.encode_decode(x)
             assert x == x_rec and type(x) == type(x_rec)
+
         def test_numpy_scalar_complex(self):
-            x = np.complex64(np.random.rand()+1j*np.random.rand())
+            x = np.complex64(np.random.rand() + 1j * np.random.rand())
             x_rec = self.encode_decode(x)
             assert x == x_rec and type(x) == type(x_rec)
+
         def test_scalar_float(self):
             x = np.random.rand()
             x_rec = self.encode_decode(x)
             assert x == x_rec and type(x) == type(x_rec)
+
         def test_scalar_complex(self):
-            x = np.random.rand()+1j*np.random.rand()
+            x = np.random.rand() + 1j * np.random.rand()
             x_rec = self.encode_decode(x)
             assert x == x_rec and type(x) == type(x_rec)
+
         def test_list_numpy_float(self):
             x = [np.float32(np.random.rand()) for i in range(5)]
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x, y: x == y, x, x_rec)) and all(map(lambda x,y: type(x) == type(y), x, x_rec))
+            assert all(map(lambda x, y: x == y, x, x_rec)) and all(map(lambda x, y: type(x) == type(y), x, x_rec))
+
         def test_list_numpy_float_complex(self):
             x = [np.float32(np.random.rand()) for i in range(5)] + \
-                [np.complex128(np.random.rand()+1j*np.random.rand()) for i in range(5)]
+                [np.complex128(np.random.rand() + 1j * np.random.rand()) for i in range(5)]
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x,y: x == y, x, x_rec)) and all(map(lambda x,y: type(x) == type(y), x, x_rec))
+            assert all(map(lambda x, y: x == y, x, x_rec)) and all(map(lambda x, y: type(x) == type(y), x, x_rec))
+
         def test_list_float(self):
             x = [np.random.rand() for i in range(5)]
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x,y: x == y, x, x_rec)) and all(map(lambda x,y: type(x) == type(y), x, x_rec))
+            assert all(map(lambda x, y: x == y, x, x_rec)) and all(map(lambda x, y: type(x) == type(y), x, x_rec))
+
         def test_list_float_complex(self):
-            x = [(np.random.rand()+1j*np.random.rand()) for i in range(5)]
+            x = [(np.random.rand() + 1j * np.random.rand()) for i in range(5)]
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x, y: x == y, x, x_rec)) and all(map(lambda x,y: type(x) == type(y), x, x_rec))
+            assert all(map(lambda x, y: x == y, x, x_rec)) and all(map(lambda x, y: type(x) == type(y), x, x_rec))
+
         def test_list_str(self):
-            x = ['x'*i for i in range(5)]
+            x = ['x' * i for i in range(5)]
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x,y: x == y, x, x_rec)) and all(map(lambda x,y: type(x) == type(y), x, x_rec))
+            assert all(map(lambda x, y: x == y, x, x_rec)) and all(map(lambda x, y: type(x) == type(y), x, x_rec))
+
         def test_dict_float(self):
             x = {'foo': 1.0, 'bar': 2.0}
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x,y: x == y, x.values(), x_rec.values())) and \
-                   all(map(lambda x,y: type(x) == type(y), x.values(), x_rec.values()))
+            assert all(map(lambda x, y: x == y, x.values(), x_rec.values())) and \
+                   all(map(lambda x, y: type(x) == type(y), x.values(), x_rec.values()))
+
         def test_dict_complex(self):
-            x = {'foo': 1.0+1.0j, 'bar': 2.0+2.0j}
+            x = {'foo': 1.0 + 1.0j, 'bar': 2.0 + 2.0j}
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x,y: x == y, x.values(), x_rec.values())) and \
-                   all(map(lambda x,y: type(x) == type(y), x.values(), x_rec.values()))
+            assert all(map(lambda x, y: x == y, x.values(), x_rec.values())) and \
+                   all(map(lambda x, y: type(x) == type(y), x.values(), x_rec.values()))
+
         def test_dict_str(self):
             x = {'foo': 'xxx', 'bar': 'yyyy'}
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x,y: x == y, x.values(), x_rec.values())) and \
-                   all(map(lambda x,y: type(x) == type(y), x.values(), x_rec.values()))
+            assert all(map(lambda x, y: x == y, x.values(), x_rec.values())) and \
+                   all(map(lambda x, y: type(x) == type(y), x.values(), x_rec.values()))
+
         def test_dict_numpy_float(self):
             x = {'foo': np.float32(1.0), 'bar': np.float32(2.0)}
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x,y: x == y, x.values(), x_rec.values())) and \
-                   all(map(lambda x,y: type(x) == type(y), x.values(), x_rec.values()))
+            assert all(map(lambda x, y: x == y, x.values(), x_rec.values())) and \
+                   all(map(lambda x, y: type(x) == type(y), x.values(), x_rec.values()))
+
         def test_dict_numpy_complex(self):
-            x = {'foo': np.complex128(1.0+1.0j), 'bar': np.complex128(2.0+2.0j)}
+            x = {'foo': np.complex128(1.0 + 1.0j), 'bar': np.complex128(2.0 + 2.0j)}
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x,y: x == y, x.values(), x_rec.values())) and \
-                   all(map(lambda x,y: type(x) == type(y), x.values(), x_rec.values()))
+            assert all(map(lambda x, y: x == y, x.values(), x_rec.values())) and \
+                   all(map(lambda x, y: type(x) == type(y), x.values(), x_rec.values()))
+
         def test_numpy_array_float(self):
             x = np.random.rand(5).astype(np.float32)
             x_rec = self.encode_decode(x)
             assert np.all(x == x_rec) and x.dtype == x_rec.dtype
+
         def test_numpy_array_complex(self):
-            x = (np.random.rand(5)+1j*np.random.rand(5)).astype(np.complex128)
+            x = (np.random.rand(5) + 1j * np.random.rand(5)).astype(np.complex128)
             x_rec = self.encode_decode(x)
             assert np.all(x == x_rec) and x.dtype == x_rec.dtype
+
         def test_numpy_array_float_2d(self):
-            x = np.random.rand(5,5).astype(np.float32)
+            x = np.random.rand(5, 5).astype(np.float32)
             x_rec = self.encode_decode(x)
             assert np.all(x == x_rec) and x.dtype == x_rec.dtype
+
         def test_numpy_array_str(self):
             x = np.array(['aaa', 'bbbb', 'ccccc'])
             x_rec = self.encode_decode(x)
             assert np.all(x == x_rec) and x.dtype == x_rec.dtype
+
         def test_list_mixed(self):
             x = [1.0, np.float32(3.5), np.complex128(4.25), 'foo']
             x_rec = self.encode_decode(x)
-            assert all(map(lambda x,y: x == y, x, x_rec)) and all(map(lambda x,y: type(x) == type(y), x, x_rec))
+            assert all(map(lambda x, y: x == y, x, x_rec)) and all(map(lambda x, y: type(x) == type(y), x, x_rec))
+
 
     main()

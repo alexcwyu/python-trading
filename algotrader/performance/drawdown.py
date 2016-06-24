@@ -42,8 +42,8 @@ class DrawDown(PortfolioAnalyzer):
             if self.high_equity != 0:
                 self.drawdown_pct = abs(self.drawdown / self.high_equity)
             self.drawdown_series.add({'timestamp': time,
-                                  DrawDown.DrawDown:self.drawdown,
-                                  DrawDown.DrawDownPct:self.drawdown_pct})
+                                      DrawDown.DrawDown: self.drawdown,
+                                      DrawDown.DrawDownPct: self.drawdown_pct})
 
     def get_result(self):
         return {DrawDown.DrawDown: self.drawdown,
@@ -54,4 +54,4 @@ class DrawDown(PortfolioAnalyzer):
                 DrawDown.CurrentDrawDown: self.current_drawdown}
 
     def get_series(self):
-        return self.drawdown_series.get_series([self.DrawDown,self.DrawDownPct])
+        return self.drawdown_series.get_series([self.DrawDown, self.DrawDownPct])

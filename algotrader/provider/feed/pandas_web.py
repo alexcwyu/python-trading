@@ -1,13 +1,14 @@
+import abc
 import logging
 from datetime import date
+from datetime import datetime
 
 import pandas as pd
 import pandas.io.data as web
 
-from algotrader.event import EventBus
-from algotrader.event import EventLogger
-from algotrader.event.order import *
-from algotrader.provider import *
+from algotrader.event.event_bus import EventBus, EventLogger
+from algotrader.event.market_data import Bar, BarType, BarSize
+from algotrader.provider.provider import HistDataSubscriptionKey, Feed, feed_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
 
@@ -34,11 +35,9 @@ class PandasWebDataFeed(Feed):
     def subscribe_mktdata(self, sub_key):
         self.__load_data([sub_key])
 
-
     @abc.abstractmethod
     def process_row(self, row):
         raise NotImplementedError
-
 
     def __load_data(self, sub_keys):
 
@@ -77,9 +76,9 @@ class YahooDataFeed(PandasWebDataFeed):
     def id(self):
         return YahooDataFeed.ID
 
-
     def process_row(self, index, row):
-        return Bar(instrument=row['Symbol'],
+        inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
+        return Bar(inst_id=inst.inst_id,
                    timestamp=index,
                    open=row['Open'],
                    high=row['High'],
@@ -88,6 +87,7 @@ class YahooDataFeed(PandasWebDataFeed):
                    vol=row['Volume'],
                    adj_close=row['Adj Close'],
                    size=row['BarSize'])
+
 
 class GoogleDataFeed(PandasWebDataFeed):
     ID = "Google"
@@ -98,9 +98,9 @@ class GoogleDataFeed(PandasWebDataFeed):
     def id(self):
         return GoogleDataFeed.ID
 
-
     def process_row(self, index, row):
-        return Bar(instrument=row['Symbol'],
+        inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
+        return Bar(inst_id=inst.inst_id,
                    timestamp=index,
                    open=row['Open'],
                    high=row['High'],
@@ -109,12 +109,13 @@ class GoogleDataFeed(PandasWebDataFeed):
                    vol=row['Volume'],
                    size=row['BarSize'])
 
+
 if __name__ == "__main__":
     feed = YahooDataFeed()
 
     today = date.today()
     sub_key = HistDataSubscriptionKey(inst_id=3, provider_id=YahooDataFeed.ID, data_type=Bar, bar_size=BarSize.D1,
-                                      from_date=datetime.datetime(2010, 1, 1), to_date=today)
+                                      from_date=datetime(2010, 1, 1), to_date=today)
 
     logger.setLevel(logging.DEBUG)
     eventLogger = EventLogger()

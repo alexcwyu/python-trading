@@ -4,7 +4,6 @@ from algotrader.chart.plotter import StrategyPlotter
 from algotrader.event.market_data import Bar, BarSize, BarType
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.csv_feed import CSVDataFeed
-from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
 from algotrader.strategy.sma_strategy import SMAStrategy
 from algotrader.strategy.strategy import BacktestingConfig
 from algotrader.trading.instrument_data import inst_data_mgr
@@ -33,16 +32,16 @@ def main():
     broker = Simulator()
 
     config = BacktestingConfig(broker_id=Simulator.ID,
-                                feed_id=CSVDataFeed.ID,
-                                data_type=Bar,
-                                bar_type=BarType.Time,
-                                bar_size=BarSize.D1,
-                                from_date=date(2010, 1, 1), to_date=date.today())
+                               feed_id=CSVDataFeed.ID,
+                               data_type=Bar,
+                               bar_type=BarType.Time,
+                               bar_size=BarSize.D1,
+                               from_date=date(2010, 1, 1), to_date=date.today())
 
     # strategy = Down2PctStrategy("down2%", portfolio,
     #                             instrument='SPY', qty=1000,  trading_config=config )
 
-    strategy = SMAStrategy("sma", portfolio, instrument='SPY', qty=1000,  trading_config=config )
+    strategy = SMAStrategy("sma", portfolio, instrument=4, qty=1000, trading_config=config)
 
     runner = BacktestRunner(strategy)
     runner.start()
@@ -50,16 +49,16 @@ def main():
 
     # pyfolio
     rets = strategy.get_portfolio().get_return()
-    #import pyfolio as pf
-    #pf.create_returns_tear_sheet(rets)
-    #pf.create_full_tear_sheet(rets)
+    # import pyfolio as pf
+    # pf.create_returns_tear_sheet(rets)
+    # pf.create_full_tear_sheet(rets)
 
     # build in plot
     plotter = StrategyPlotter(strategy)
-    plotter.plot(instrument='SPY')
+    plotter.plot(instrument=4)
 
-    #import matplotlib.pyplot as plt
-    #plt.show()
+    # import matplotlib.pyplot as plt
+    # plt.show()
 
 
 if __name__ == "__main__":

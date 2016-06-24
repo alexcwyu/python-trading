@@ -11,7 +11,7 @@ def gain_loss(prev_value, next_value):
     else:
         gain = change
         loss = 0
-    print "change=%s, gain=%s, loss=%s"%(change, gain, loss)
+    print "change=%s, gain=%s, loss=%s" % (change, gain, loss)
     return gain, loss
 
 
@@ -67,15 +67,15 @@ class RSI(Indicator):
         if self.input.size() > self.length:
             if self.__prev_gain is None:
                 avg_gain, avg_loss = avg_gain_loss(self.input, self.input_keys[0], 0, self.input.size())
-                print "1. gain=%0.2f, loss=%0.2f"%(avg_gain, avg_loss)
+                print "1. gain=%0.2f, loss=%0.2f" % (avg_gain, avg_loss)
             else:
-                prev_value = self.input.ago(1,self.input_keys[0])
+                prev_value = self.input.ago(1, self.input_keys[0])
                 curr_value = self.input.now(self.input_keys[0])
                 curr_gain, curr_loss = gain_loss(prev_value, curr_value)
                 avg_gain = (self.__prev_gain * (self.length - 1) + curr_gain) / float(self.length)
                 avg_loss = (self.__prev_loss * (self.length - 1) + curr_loss) / float(self.length)
 
-                print "2. gain=%0.2f, loss=%0.2f"%(avg_gain, avg_loss)
+                print "2. gain=%0.2f, loss=%0.2f" % (avg_gain, avg_loss)
 
             if avg_loss == 0:
                 rsi_value = 100
@@ -84,7 +84,7 @@ class RSI(Indicator):
                 rsi_value = 100 - 100 / (1 + rs)
                 self.__prev_gain = avg_gain
                 self.__prev_loss = avg_loss
-                print "%0.2f, %0.2f"%(rs, rsi_value)
+                print "%0.2f, %0.2f" % (rs, rsi_value)
 
             result[Indicator.VALUE] = rsi_value
         else:
@@ -92,20 +92,21 @@ class RSI(Indicator):
 
         self.add(result)
 
+
 if __name__ == "__main__":
     import datetime
     from algotrader.utils.time_series import DataSeries
+
     close = DataSeries("close")
     rsi = RSI(close, input_key='close', length=14)
     print rsi.name
     t = datetime.datetime.now()
 
-
     values = [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
-             45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
+              45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
 
     for idx, value in enumerate(values):
-        close.add({'timestamp':t, 'close':value})
+        close.add({'timestamp': t, 'close': value})
         t = t + datetime.timedelta(0, 3)
 
         print idx, rsi.now()

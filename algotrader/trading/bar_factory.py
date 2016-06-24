@@ -32,16 +32,16 @@ class BarInputType:
 
 class BarRequest:
     _slots__ = (
-        'instrument',
+        'inst_id',
         'input_type',
         'input_size',
         'output_type',
         'output_size',
     )
 
-    def __init__(self, instrument, input_type=BarInputType.Trade, input_size=None, output_type=BarType.Time,
+    def __init__(self, inst_id, input_type=BarInputType.Trade, input_size=None, output_type=BarType.Time,
                  output_size=BarSize.M1):
-        self.instrument = instrument
+        self.inst_id = inst_id
         self.input_type = input_type
         self.input_size = input_size
         self.output_type = output_type
@@ -77,28 +77,28 @@ class BarFactory(Subscribable, MarketDataEventHandler):
 
         input_subject.subscribe(self.on_next)
 
-    def add_request(self, instrument, input_type=BarInputType.Trade, input_size=None, output_type=BarType.Time,
+    def add_request(self, inst_id, input_type=BarInputType.Trade, input_size=None, output_type=BarType.Time,
                     output_size=BarSize.M1):
         if input_type == 'Quote' or input_type == 'Trade':
             input_size = None
-        self.requests[instrument][(input_type, input_size)].add((output_type, output_size))
+        self.requests[inst_id][(input_type, input_size)].add((output_type, output_size))
 
     def on_bar(self, bar):
-        if bar.instrument in self.requests and ('Bar', bar.size) in self.requests[bar.instrument]:
-            for type, size in self.requests[bar.instrument][('Bar', bar.size)]:
+        if bar.inst_id in self.requests and ('Bar', bar.size) in self.requests[bar.inst_id]:
+            for type, size in self.requests[bar.inst_id][('Bar', bar.size)]:
                 print "OK %s" % bar
-                self.update(type, size, bar.instrument, bar.timestamp, bar.close, bar.vol)
+                self.update(type, size, bar.inst_id, bar.timestamp, bar.close, bar.vol)
 
         else:
             print "ignore %s" % bar
 
     def on_quote(self, quote):
 
-        if quote.instrument in self.requests and ('Quote', None) in self.requests[quote.instrument]:
-            for type, size in self.requests[quote.instrument][('Quote', None)]:
+        if quote.inst_id in self.requests and ('Quote', None) in self.requests[quote.inst_id]:
+            for type, size in self.requests[quote.inst_id][('Quote', None)]:
                 if type == BarInputType.BidAsk:
-                    self.update(type, size, quote.instrument, quote.timestamp, quote.bid, quote.bid_size)
-                    self.update(type, size, quote.instrument, quote.timestamp, quote.ask, quote.ask_size)
+                    self.update(type, size, quote.inst_id, quote.timestamp, quote.bid, quote.bid_size)
+                    self.update(type, size, quote.inst_id, quote.timestamp, quote.ask, quote.ask_size)
                 else:
                     if type == BarInputType.Bid:
                         price = quote.bid
@@ -114,37 +114,36 @@ class BarFactory(Subscribable, MarketDataEventHandler):
                         price = quote.ask - quote.bid
                         vol = 0
 
-                    last_data = self.inst_price_vol.get(quote.instrument, None)
+                    last_data = self.inst_price_vol.get(quote.inst_id, None)
                     last_price = last_data[0] if last_data else 0
                     last_vol = last_data[1] if last_data else 0
 
                     if price != last_price and vol != last_vol:
-                        self.inst_price_vol[quote.instrument] = (price, vol)
-                        self.update(type, size, quote.instrument, quote.timestamp, price, vol)
+                        self.inst_price_vol[quote.inst_id] = (price, vol)
+                        self.update(type, size, quote.inst_id, quote.timestamp, price, vol)
 
     def on_trade(self, trade):
-        if trade.instrument in self.requests and ('Trade', None) in self.requests[trade.instrument]:
-            for type, size in self.requests[trade.instrument][('Trade', None)]:
-                self.update(type, size, trade.instrument.trade.timestamp, trade.price, trade.size)
+        if trade.inst_id in self.requests and ('Trade', None) in self.requests[trade.inst_id]:
+            for type, size in self.requests[trade.inst_id][('Trade', None)]:
+                self.update(type, size, trade.inst_id.trade.timestamp, trade.price, trade.size)
 
-    def update(self, type, size, instrument, timestamp, price, vol):
-        bar = self.inst_bar_dict[instrument][(type, size)]
+    def update(self, type, size, inst_id, timestamp, price, vol):
+        bar = self.inst_bar_dict[inst_id][(type, size)]
 
         if type == BarType.Time:
 
             if not bar:
-                bar = Bar(instrument=instrument,
+                bar = Bar(inst_id=inst_id,
                           type=type,
                           size=size,
                           timestamp=timestamp,
-                          begin_time= timestamp,
+                          begin_time=timestamp,
                           open=price, high=price, low=price, close=price, vol=vol)
-                self.inst_bar_dict[instrument][(type, size)] = bar
+                self.inst_bar_dict[inst_id][(type, size)] = bar
 
                 remind_time = timestamp + datetime.timedelta(0, size)
                 self.add_reminder(remind_time)
             else:
-
 
                 bar.timestamp = timestamp
                 if price > bar.high:
@@ -156,13 +155,13 @@ class BarFactory(Subscribable, MarketDataEventHandler):
                 bar.vol += vol
         elif type == BarType.Tick:
             if not bar:
-                bar = Bar(instrument=instrument,
+                bar = Bar(inst_id=inst_id,
                           type=type,
                           size=1,
                           timestamp=timestamp,
-                          begin_time= timestamp,
+                          begin_time=timestamp,
                           open=price, high=price, low=price, close=price, vol=vol)
-                self.inst_bar_dict[instrument][(type, size)] = bar
+                self.inst_bar_dict[inst_id][(type, size)] = bar
             else:
 
                 bar.timestamp = timestamp
@@ -175,17 +174,17 @@ class BarFactory(Subscribable, MarketDataEventHandler):
                 bar.vol += vol
 
                 if bar.size >= size:
-                    self.__emit(instrument, (type, size))
+                    self.__emit(inst_id, (type, size))
 
         elif type == BarType.Volume:
             if not bar:
-                bar = Bar(instrument=instrument,
+                bar = Bar(inst_id=inst_id,
                           type=type,
                           size=size,
                           timestamp=timestamp,
-                          begin_time= timestamp,
+                          begin_time=timestamp,
                           open=price, high=price, low=price, close=price, vol=vol)
-                self.inst_bar_dict[instrument][(type, size)] = bar
+                self.inst_bar_dict[inst_id][(type, size)] = bar
             else:
                 bar.timestamp = timestamp
                 if price > bar.high:
@@ -196,7 +195,7 @@ class BarFactory(Subscribable, MarketDataEventHandler):
                 bar.vol += vol
 
                 if bar.vol >= size:
-                    self.__emit(instrument, (type, size))
+                    self.__emit(inst_id, (type, size))
 
     def add_reminder(self, time):
         if time not in self.time_set:
@@ -212,18 +211,18 @@ class BarFactory(Subscribable, MarketDataEventHandler):
                         self.__emit(inst, bar_type)
         self.time_set.remove(time)
 
-    def __create_bar(self, instrument, type, size, timestamp, price, vol):
-        bar = Bar(instrument="%s*****" %instrument,
+    def __create_bar(self, inst_id, type, size, timestamp, price, vol):
+        bar = Bar(inst_id=inst_id,
                   type=type,
                   size=size,
                   timestamp=timestamp,
                   open=price, high=price, low=price, close=price, vol=vol)
-        self.inst_bar_dict[instrument][(type, size)] = bar
+        self.inst_bar_dict[inst_id][(type, size)] = bar
         return bar
 
-    def __emit(self, instrument, bar_type):
+    def __emit(self, inst_id, bar_type):
 
-        bar = self.inst_bar_dict[instrument][bar_type]
-        self.inst_bar_dict[instrument][bar_type] = None
+        bar = self.inst_bar_dict[inst_id][bar_type]
+        self.inst_bar_dict[inst_id][bar_type] = None
         if bar:
             self.output_subject.on_next(bar)

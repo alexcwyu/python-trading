@@ -1,7 +1,7 @@
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.order import OrderEventHandler, ExecutionEventHandler
-from algotrader.provider import broker_mgr
+from algotrader.provider.provider import broker_mgr
 from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.utils import logger
 
@@ -46,7 +46,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
         stg.on_exec_report(exec_report)
 
     def send_order(self, order):
-        #order.ord_id = self.next_ord_id()
+        # order.ord_id = self.next_ord_id()
         self.__orders[order.ord_id] = order
         broker_mgr.get(order.broker_id).on_order(order)
         return order

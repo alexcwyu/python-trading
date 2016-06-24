@@ -1,14 +1,19 @@
-import datetime
+import time
 
 from rx.observable import Observer
 
 from algotrader.utils import logger
 from algotrader.utils.ser_deser import Serializable
-current_time = datetime.datetime.now()
-
 
 
 class Event(Serializable):
+    __slots__ = (
+        'timestamp'
+    )
+
+    def __init__(self, timestamp=None):
+        self.timestamp = timestamp if timestamp else int(time.time())
+
     def on(self, handler):
         pass
 

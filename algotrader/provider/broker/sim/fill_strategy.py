@@ -6,7 +6,7 @@ from algotrader.provider.broker.sim.order_handler import MarketOrderHandler, Lim
     StopOrderHandler, TrailingStopOrderHandler
 from algotrader.provider.broker.sim.sim_config import SimConfig
 from algotrader.provider.broker.sim.slippage import NoSlippage
-from algotrader.trading import inst_data_mgr
+from algotrader.trading.instrument_data import inst_data_mgr
 
 
 class FillStrategy(object):
@@ -26,7 +26,7 @@ class FillStrategy(object):
 
 
 class DefaultFillStrategy(FillStrategy):
-    def __init__(self, sim_config=None, slippage = None):
+    def __init__(self, sim_config=None, slippage=None):
         self.__sim_config = sim_config if sim_config else SimConfig()
         self.__slippage = slippage if slippage else NoSlippage()
         self.__market_ord_handler = MarketOrderHandler(self.__sim_config, self.__slippage)
@@ -39,9 +39,9 @@ class DefaultFillStrategy(FillStrategy):
         fill_info = None
         config = self.__sim_config
 
-        quote = inst_data_mgr.get_quote(order.instrument)
-        trade = inst_data_mgr.get_trade(order.instrument)
-        bar = inst_data_mgr.get_bar(order.instrument)
+        quote = inst_data_mgr.get_quote(order.inst_id)
+        trade = inst_data_mgr.get_trade(order.inst_id)
+        bar = inst_data_mgr.get_bar(order.inst_id)
 
         if not fill_info and config.fill_on_quote and config.fill_on_bar_mode == SimConfig.FillMode.LAST and quote:
             fill_info = self.process_w_market_data(order, quote, True)

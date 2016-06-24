@@ -1,19 +1,16 @@
-'''
-Created on 4/5/16
-@author = 'jason'
-'''
-
 import threading
 import time
+from datetime import datetime
 
 import swigibpy
 
-from algotrader.event import EventBus
-from algotrader.event.order import *
-from algotrader.provider import Feed, broker_mgr, feed_mgr
+from algotrader.event.event_bus import EventBus
+from algotrader.event.market_data import Bar, Quote, Trade, MarketDepth
+from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
-from algotrader.provider.provider import Broker, HistDataSubscriptionKey, MarketDepthSubscriptionKey
+from algotrader.provider.provider import Broker, HistDataSubscriptionKey, MarketDepthSubscriptionKey, Feed
+from algotrader.provider.provider import feed_mgr, broker_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
 
@@ -143,7 +140,7 @@ class TWSPoller(threading.Thread):
     receive (synchronous I/O).
     '''
 
-    def __init__(self, tws, daemon = False):
+    def __init__(self, tws, daemon=False):
         super(TWSPoller, self).__init__()
         self.daemon = daemon
         self._tws = tws
@@ -161,7 +158,8 @@ class TWSPoller(threading.Thread):
 class IBBroker(IBSocket, Broker, Feed):
     ID = "IB"
 
-    def __init__(self, port=4001, client_id=1, account=None, ref_data_mgr=None, data_event_bus=None, execution_event_bus=None, daemon=False):
+    def __init__(self, port=4001, client_id=1, account=None, ref_data_mgr=None, data_event_bus=None,
+                 execution_event_bus=None, daemon=False):
         super(IBBroker, self).__init__()
 
         self.__tws = swigibpy.EPosixClientSocket(self)
@@ -190,7 +188,6 @@ class IBBroker(IBSocket, Broker, Feed):
             self.__poller.start()
 
             logger.info("Server version, %s", self.__tws.serverVersion())
-
 
             if self.__account:
                 self.__req_acct_update()
@@ -314,7 +311,7 @@ class IBBroker(IBSocket, Broker, Feed):
         self.__ord_reg.add_order(order)
 
         ib_order = self.__model_factory.create_ib_order(order)
-        contract = self.__model_factory.create_ib_contract(order.instrument)
+        contract = self.__model_factory.create_ib_contract(order.inst_id)
 
         self.__tws.placeOrder(order.ord_id, contract, ib_order)
 
@@ -326,7 +323,7 @@ class IBBroker(IBSocket, Broker, Feed):
             self.__ord_reg.add_order(order)
 
             ib_order = self.__model_factory.create_ib_order(order)
-            contract = self.__model_factory.create_ib_contract(order.instrument)
+            contract = self.__model_factory.create_ib_contract(order.inst_id)
             self.__tws.placeOrder(order.ord_id, contract, ib_order)
         else:
             logger.error("cannot find old order, cl_ord_id = %s" % order.cl_ord_id)
@@ -407,7 +404,7 @@ class IBBroker(IBSocket, Broker, Feed):
     def __emit_market_data(self, field, record):
         if record.quote_req and (
                                 field == swigibpy.BID or field == swigibpy.BID_SIZE or field == swigibpy.ASK or field == swigibpy.ASK_SIZE) and record.bid > 0 and record.ask > 0:
-            self.__data_event_bus.on_next(Quote(instrument=record.inst_id, timestamp=datetime.datetime.now(),
+            self.__data_event_bus.on_next(Quote(inst_id=record.inst_id, timestamp=datetime.now(),
                                                 bid=record.bid,
                                                 bid_size=record.bid_size,
                                                 ask=record.ask,
@@ -415,7 +412,7 @@ class IBBroker(IBSocket, Broker, Feed):
 
         if record.trade_req and (field == swigibpy.LAST or field == swigibpy.LAST_SIZE) and record.last > 0:
             self.__data_event_bus.on_next(
-                Trade(instrument=record.inst_id, timestamp=datetime.datetime.now(), price=record.last,
+                Trade(inst_id=record.inst_id, timestamp=datetime.now(), price=record.last,
                       size=record.last_size))
 
     def updateMktDepth(self, id, position, operation, side, price, size):
@@ -425,7 +422,7 @@ class IBBroker(IBSocket, Broker, Feed):
         # TODO fix provider_id
         sub_key = self.__data_sub_reg.get_subscription_key(id)
         self.__data_event_bus.on_next(
-            MarketDepth(instrument=sub_key.inst_id, timestamp=datetime.datetime.now(), provider_id=self.ID,
+            MarketDepth(inst_id=sub_key.inst_id, timestamp=datetime.now(), provider_id=self.ID,
                         position=position,
                         operation=self.__model_factory.convert_ib_md_operation(operation),
                         side=self.__model_factory.convert_ib_md_side(side),
@@ -439,7 +436,7 @@ class IBBroker(IBSocket, Broker, Feed):
         # TODO fix provider_id
         sub_key = self.__data_sub_reg.get_subscription_key(id)
         self.__data_event_bus.on_next(
-            MarketDepth(instrument=sub_key.inst_id, timestamp=datetime.datetime.now(), provider_id=self.ID,
+            MarketDepth(inst_id=sub_key.inst_id, timestamp=datetime.now(), provider_id=self.ID,
                         position=position,
                         operation=self.__model_factory.convert_ib_md_operation(operation),
                         side=self.__model_factory.convert_ib_md_side(side),
@@ -466,7 +463,7 @@ class IBBroker(IBSocket, Broker, Feed):
             record.vol = volume
             timestamp = self.__model_factory.convert_ib_date(date)
             self.__data_event_bus.on_next(
-                Bar(instrument=record.inst_id, timestamp=timestamp, open=open, high=high, low=low,
+                Bar(inst_id=record.inst_id, timestamp=timestamp, open=open, high=high, low=low,
                     close=close, vol=volume, size=sub_key.bar_size))
 
     def realtimeBar(self, reqId, time, open, high, low, close, volume, wap, count):
@@ -485,9 +482,9 @@ class IBBroker(IBSocket, Broker, Feed):
             record.close = close
             record.vol = volume
 
-            timestamp = datetime.datetime.fromtimestamp(time)
+            timestamp = datetime.fromtimestamp(time)
             self.__data_event_bus.on_next(
-                Bar(instrument=record.inst_id, timestamp=timestamp, open=open, high=high, low=low, close=close,
+                Bar(inst_id=record.inst_id, timestamp=timestamp, open=open, high=high, low=low, close=close,
                     vol=volume, size=sub_key.bar_size))
 
     def orderStatus(self, id, status, filled, remaining, avgFillPrice, permId,
@@ -510,8 +507,8 @@ class IBBroker(IBSocket, Broker, Feed):
                     broker_id=self.ID,
                     ord_id=order.ord_id,
                     cl_ord_id=order.cl_ord_id,
-                    timestamp=datetime.datetime.now(),
-                    instrument=order.instrument,
+                    timestamp=datetime.now(),
+                    inst_id=order.inst_id,
                     filled_qty=filled,
                     avg_price=avgFillPrice,
                     status=ord_status
@@ -529,7 +526,7 @@ class IBBroker(IBSocket, Broker, Feed):
                 cl_ord_id=order.cl_ord_id,
                 er_id=execution.execId,
                 timestamp=self.__model_factory.convert_ib_datetime(execution.time),
-                instrument=order.instrument,
+                inst_id=order.inst_id,
                 last_qty=execution.shares,
                 last_price=execution.price,
                 filled_qty=execution.cumQty,
@@ -560,7 +557,6 @@ class IBBroker(IBSocket, Broker, Feed):
         """
         # TODO
         super(IBBroker, self).updateAccountTime(timeStamp)
-
 
     def managedAccounts(self, accountsList):
         """

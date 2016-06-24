@@ -27,18 +27,14 @@ class NoSlippage(Slippage):
 
 
 class VolumeShareSlippage(Slippage):
-
-    def __init__(self, price_impact = 0.1):
+    def __init__(self, price_impact=0.1):
         self.price_impact = price_impact
 
     def calc_price(self, order, price, qty, avail_qty):
 
         vol_share = float(qty) / float(avail_qty)
-        impacted_price = vol_share **2 * self.price_impact
+        impacted_price = vol_share ** 2 * self.price_impact
         if order.is_buy():
             return price * (1 + impacted_price)
         else:
             return price * (1 - impacted_price)
-
-
-

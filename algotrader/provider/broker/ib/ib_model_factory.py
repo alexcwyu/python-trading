@@ -1,11 +1,12 @@
 import swigibpy
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from algotrader.event.order import *
+from algotrader.event.market_data import Bar, Quote, Trade, BarSize, MDOperation, MDSide
+from algotrader.event.order import OrdAction, OrdType, TIF, OrdStatus
 
 
 class IBModelFactory:
-
     IB_DATETIME_FORMAT = "%Y%m%d %H:%M:%S %Z"
     IB_DATETIME_FORMAT2 = "%Y%m%d %H:%M:%S"
     IB_DATE_FORMAT = "%Y%m%d"
@@ -43,44 +44,42 @@ class IBModelFactory:
     }
 
     hist_data_type_mapping = {
-        Bar : "TRADES",
-        Quote : "BID_ASK",
-        Trade : "TRADES"
+        Bar: "TRADES",
+        Quote: "BID_ASK",
+        Trade: "TRADES"
     }
 
     bar_size_mapping = {
-        BarSize.S1 : "1 secs",
-        BarSize.S5 : "5 secs",
-        BarSize.S15 : "15 secs",
-        BarSize.S30 : "30 secs",
-        BarSize.M1 : "1 min",
-        BarSize.M2 : "2 mins",
-        BarSize.M5 : "5 mins",
-        BarSize.M15 : "15 mins",
-        BarSize.M30 : "30 mins",
-        BarSize.H1 : "1 hour",
-        BarSize.D1 : "1 day",
+        BarSize.S1: "1 secs",
+        BarSize.S5: "5 secs",
+        BarSize.S15: "15 secs",
+        BarSize.S30: "30 secs",
+        BarSize.M1: "1 min",
+        BarSize.M2: "2 mins",
+        BarSize.M5: "5 mins",
+        BarSize.M15: "15 mins",
+        BarSize.M30: "30 mins",
+        BarSize.H1: "1 hour",
+        BarSize.D1: "1 day",
 
     }
-
 
     ib_md_operation_map = {
-        0 : MDOperation.Insert,
-        1 : MDOperation.Update,
-        2 : MDOperation.Delete
+        0: MDOperation.Insert,
+        1: MDOperation.Update,
+        2: MDOperation.Delete
     }
 
-
     ib_md_side_map = {
-        0 : MDSide.Ask,
-        1 : MDSide.Bid
+        0: MDSide.Ask,
+        1: MDSide.Bid
     }
 
     ib_ord_status_map = {
-        "Submitted" : OrdStatus.NEW,
-        "PendingCancel" : OrdStatus.PENDING_CANCEL,
-        "Cancelled" : OrdStatus.CANCELLED,
-        "Inactive" : OrdStatus.REJECTED
+        "Submitted": OrdStatus.NEW,
+        "PendingCancel": OrdStatus.PENDING_CANCEL,
+        "Cancelled": OrdStatus.CANCELLED,
+        "Inactive": OrdStatus.REJECTED
 
     }
 
@@ -108,7 +107,7 @@ class IBModelFactory:
         # ib_order.algoParams = algoParams
 
         ## TODO double check
-        if order.oca_tag :
+        if order.oca_tag:
             ib_order.ocaGroup = order.oca_tag
         return ib_order
 
@@ -142,32 +141,26 @@ class IBModelFactory:
         contract.currency = self.convert_sec_type(inst.ccy_id)
         return contract
 
-
     def convert_hist_data_type(self, type):
         return self.hist_data_type_mapping.get(type, "MIDPOINT")
-
 
     def convert_datetime(self, dt):
         return dt.strftime(self.IB_DATETIME_FORMAT)
 
-
     def convert_ib_date(self, ib_date_str):
-       return datetime.datetime.strptime(ib_date_str, self.IB_DATE_FORMAT)
-
-
+        return datetime.strptime(ib_date_str, self.IB_DATE_FORMAT)
 
     def convert_ib_datetime(self, ib_datetime_str):
-        return datetime.datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT2)
-
+        return datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT2)
 
     def convert_time_period(self, start_time, end_time):
         diff = relativedelta(end_time, start_time)
         if diff.years:
-            if diff.months and diff.months >=11:
+            if diff.months and diff.months >= 11:
                 return "%s Y" % (diff.years + 1)
             return "%s Y" % diff.years
         elif diff.months:
-            if diff.days and diff.days >=27:
+            if diff.days and diff.days >= 27:
                 return "%s M" % (diff.months + 1)
             return "%s M" % diff.months
         elif diff.days:
@@ -175,14 +168,11 @@ class IBModelFactory:
         else:
             return "1 M"
 
-
     def convert_bar_size(self, bar_size):
         return self.bar_size_mapping.get(bar_size, "5 secs")
 
-
     def convert_ib_md_operation(self, ib_md_operation):
         return self.ib_md_operation_map[ib_md_operation]
-
 
     def convert_ib_md_side(self, ib_md_side):
         return self.ib_md_side_map[ib_md_side]

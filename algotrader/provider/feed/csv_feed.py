@@ -1,17 +1,17 @@
 import pandas as pd
 
-from algotrader.event import EventBus, Bar, BarSize, BarType
-from algotrader.provider import Feed, feed_mgr
+from algotrader.event.event_bus import EventBus
+from algotrader.event.market_data import  Bar, BarSize, BarType
+from algotrader.provider.provider import Feed, feed_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 
-
 class CSVDataFeed(Feed):
     ID = "CSV"
 
-    def __init__(self, path = '../data', ref_data_mgr=None, data_event_bus=None):
+    def __init__(self, path='../data', ref_data_mgr=None, data_event_bus=None):
         self.__path = path
         self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
         self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject
@@ -46,7 +46,7 @@ class CSVDataFeed(Feed):
         for sub_key in sub_keys:
 
             ## TODO support different format, e.g. BAR, Quote, Trade csv files
-            if sub_key.data_type==Bar and sub_key.bar_type==BarType.Time and sub_key.bar_size==BarSize.D1:
+            if sub_key.data_type == Bar and sub_key.bar_type == BarType.Time and sub_key.bar_size == BarSize.D1:
                 inst = self.__ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.ID)
                 df = self.read_csv(symbol, '%s/%s.csv' % (self.__path, symbol.lower()))
@@ -56,8 +56,9 @@ class CSVDataFeed(Feed):
 
         for index, row in self.df.iterrows():
             ## TODO support bar filtering // from date, to date
+            inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
             self.__data_event_bus.on_next(
-                Bar(instrument=row['Symbol'],
+                Bar(inst_id=inst.inst_id,
                     timestamp=index,
                     open=row['Open'],
                     high=row['High'],

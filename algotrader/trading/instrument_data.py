@@ -21,7 +21,7 @@ class InstrumentDataManager(MarketDataEventHandler):
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
-        self.__bar_dict[bar.instrument] = bar
+        self.__bar_dict[bar.inst_id] = bar
 
         self.get_series(bar.id()).add(
             {"timestamp": bar.timestamp, "open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
@@ -29,7 +29,7 @@ class InstrumentDataManager(MarketDataEventHandler):
 
     def on_quote(self, quote):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
-        self.__quote_dict[quote.instrument] = quote
+        self.__quote_dict[quote.inst_id] = quote
 
         self.get_series(quote.id()).add(
             {"timestamp": quote.timestamp, "bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
@@ -37,31 +37,31 @@ class InstrumentDataManager(MarketDataEventHandler):
 
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
-        self.__trade_dict[trade.instrument] = trade
+        self.__trade_dict[trade.inst_id] = trade
         self.get_series(trade.id()).add({"timestamp": trade.timestamp, "price": trade.price, "size": trade.size})
 
-    def get_bar(self, instrument):
-        if instrument in self.__bar_dict:
-            return self.__bar_dict[instrument]
+    def get_bar(self, inst_id):
+        if inst_id in self.__bar_dict:
+            return self.__bar_dict[inst_id]
         return None
 
-    def get_quote(self, instrument):
-        if instrument in self.__quote_dict:
-            return self.__quote_dict[instrument]
+    def get_quote(self, inst_id):
+        if inst_id in self.__quote_dict:
+            return self.__quote_dict[inst_id]
         return None
 
-    def get_trade(self, instrument):
-        if instrument in self.__trade_dict:
-            return self.__trade_dict[instrument]
+    def get_trade(self, inst_id):
+        if inst_id in self.__trade_dict:
+            return self.__trade_dict[inst_id]
         return None
 
-    def get_latest_price(self, instrument):
-        if instrument in self.__trade_dict:
-            return self.__trade_dict[instrument].price
-        elif instrument in self.__quote_dict:
-            return self.__quote_dict[instrument].mid()
-        elif instrument in self.__bar_dict:
-            return self.__bar_dict[instrument].close
+    def get_latest_price(self, inst_id):
+        if inst_id in self.__trade_dict:
+            return self.__trade_dict[inst_id].price
+        elif inst_id in self.__quote_dict:
+            return self.__quote_dict[inst_id].mid()
+        elif inst_id in self.__bar_dict:
+            return self.__bar_dict[inst_id].close
         return None
 
     def get_series(self, key, create_if_missing=True, cls=DataSeries, desc=None, missing_value=np.nan):

@@ -1,8 +1,5 @@
-# from rx.concurrency import GEventScheduler
-# from rx.observable import Observable, Observer
-# import rx
-
 from rx.subjects import Subject
+
 from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.order import ExecutionEventHandler
 from algotrader.utils import logger

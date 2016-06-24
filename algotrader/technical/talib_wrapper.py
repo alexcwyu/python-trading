@@ -69,10 +69,10 @@ class SMA(Indicator):
         if self.input.size() >= self.length:
             value = talib.SMA(
                 np.array(
-                    self.input.get_by_idx(keys=self.input,
-                                     idx=slice(-self.length, None, None))))
+                    self.input.get_by_idx(keys=self.input_keys,
+                                     idx=slice(-self.length, None, None))), timeperiod=self.length)
 
-            result[Indicator.VALUE] = value
+            result[Indicator.VALUE] = value[-1]
         else:
             result[Indicator.VALUE] = np.nan
 
@@ -94,10 +94,10 @@ class EMA(Indicator):
         if self.input.size() >= self.length:
             value = talib.EMA(
                 np.array(
-                    self.input.get_by_idx(keys=self.input,
-                                     idx=slice(-self.length, None, None))))
+                    self.input.get_by_idx(keys=self.input_keys,
+                                     idx=slice(-self.length, None, None))), timeperiod=self.length)
 
-            result[Indicator.VALUE] = value
+            result[Indicator.VALUE] = value[-1]
         else:
             result[Indicator.VALUE] = np.nan
 

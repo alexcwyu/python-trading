@@ -116,49 +116,120 @@ class ExecutionReport(OrderStatusUpdate):
                   self.er_id, self.last_qty, self.last_price, self.filled_qty, self.avg_price, self.commission)
 
 
-class Order(OrderEvent):
+class NewOrderRequest(OrderEvent):
     __slots__ = (
-        'inst_id',
-        'ord_id',
         'cl_ord_id',
-        'stg_id',
+        'cl_id',
         'broker_id',
-        'oca_tag'
+        'inst_id',
         'action',
         'type',
         'qty',
         'limit_price'
+        'stop_price',
         'tif',
+        'oca_tag',
+        'params'
+    )
+
+    def __init__(self, timestamp=None, cl_id=None, cl_ord_id=None, broker_id=None, inst_id=None, action=None, type=None,
+                 qty=0, limit_price=0,
+                 stop_price=0, tif=TIF.DAY, oca_tag=None, params=None):
+        super(NewOrderSingle, self).__init__(timestamp=timestamp)
+        self.inst_id = inst_id
+        self.cl_id = cl_id
+        self.cl_ord_id = cl_ord_id
+        self.broker_id = broker_id
+        self.action = action
+        self.type = type
+        self.qty = qty
+        self.limit_price = limit_price
+        self.stop_price = stop_price
+        self.tif = tif
+        self.oca_tag = oca_tag
+        self.params = params if params else {}
+
+    def on(self, handler):
+        handler.on_order(self)
+
+    def __repr__(self):
+        return "NewOrderRequest(timestamp = %s, inst_id = %s, cl_id = %s, cl_ord_id = %s, broker_id = %s, action = %s" \
+               ", type = %s, qty = %s, limit_price = %s, stop_price = %s, tif = %s, oca_tag = %s, params = %s)" \
+               % (self.timestamp, self.inst_id, self.cl_id, self.cl_ord_id, self.broker_id, self.action,
+                  self.type, self.qty, self.limit_price, self.stop_price, self.tif, self.oca_tag, self.params)
+
+    def is_buy(self):
+        return self.action == OrdAction.BUY
+
+    def is_sell(self):
+        return self.action == OrdAction.SELL
+
+
+class OrderReplaceRequest(OrderEvent):
+
+
+class OrderCancelRequest(OrderEvent):
+
+
+class Order()
+    __slots__ = (
+        'inst_id',
+        'timestamp',
+        'ord_id',
+        'cl_id',
+        'cl_ord_id',
+        'broker_id',
+        'action',
+        'type',
+        'qty',
+        'limit_price'
+        'stop_price',
+        'tif',
+        'oca_tag',
+        'params',
         'status',
         'filled_qty',
         'avg_price',
         'last_qty',
         'last_price',
-        'stop_price',
         'stop_limit_ready',
         'trailing_stop_exec_price',
-        'exec_reports',
-        'update_events',
-        'params'
+        'ord_events',
+        'exec_events',
     )
 
-    def __init__(self, inst_id=None, ord_id=None, stg_id=None, broker_id=None, action=None, type=None, timestamp=None,
-                 qty=0, limit_price=0,
-                 stop_price=0, status=OrdStatus.NEW, tif=TIF.DAY, cl_ord_id=None, oca_tag=None, params=None):
-        super(Order, self).__init__(timestamp=timestamp)
-        self.inst_id = inst_id
-        self.timestamp = timestamp
+    def __init__(self, ord_id, nos = None):
         self.ord_id = ord_id
-        self.stg_id = stg_id
-        self.cl_ord_id = cl_ord_id
-        self.broker_id = broker_id
-        self.oca_tag = oca_tag
-        self.action = action
-        self.type = type
-        self.qty = qty
-        self.limit_price = limit_price
-        self.tif = tif
-        self.status = status
+        if nos:
+            self.on_new_order_request(nos)
+
+    def on(self, handler):
+        handler.on_order(self)
+
+    def __repr__(self):
+        return "Order(inst_id = %s, timestamp = %s,ord_id = %s, cl_id = %s, cl_ord_id = %s, broker_id = %s, action = %s, type = %s" \
+               ", qty = %s, limit_price = %s, stop_price = %s, tif = %s, oca_tag = %s, params = %s" \
+               ", status = %s, filled_qty = %s, avg_price = %s, last_qty = %s, last_price = %s ,stop_price = %s" \
+               ", stop_limit_ready = %s , trailing_stop_exec_price = %s , ord_events = %s , exec_events = %s)" \
+               % (self.inst_id, self.timestamp, self.ord_id, self.cl_id, self.cl_ord_id, self.broker_id, self.action, self.type,
+                  self.qty, self.limit_price, self.stop_price, self.tif, self.oca_tag, self.params,
+                  self.status, self.filled_qty, self.avg_price, self.last_qty, self.last_price, self.stop_price,
+                  self.stop_limit_ready, self.trailing_stop_exec_price, self.ord_events, self.exec_events)
+
+    def on_new_order_request(self, nos):
+        self.inst_id = nos.inst_id
+        self.timestamp = nos.timestamp
+        self.cl_id = nos.cl_id
+        self.cl_ord_id = nos.cl_ord_id
+        self.broker_id = nos.broker_id
+        self.action = nos.action
+        self.type = nos.type
+        self.qty = nos.qty
+        self.limit_price = nos.limit_price
+        self.tif = nos.tif
+        self.oca_tag = nos.oca_tag
+        self.params = nos.params
+        self.status = OrdStatus.NEW
         self.filled_qty = 0
         self.avg_price = 0
         self.last_qty = 0
@@ -166,31 +237,22 @@ class Order(OrderEvent):
         self.stop_price = stop_price
         self.stop_limit_ready = False
         self.trailing_stop_exec_price = 0
-        self.exec_reports = []
-        self.update_events = []
-        self.params = params if params else {}
+        self.ord_events = [nos]
+        self.exec_events = []
 
-    def on(self, handler):
-        handler.on_order(self)
 
-    def __repr__(self):
-        return "Order(inst_id = %s, timestamp = %s,ord_id = %s, stg_id = %s, cl_ord_id = %s, broker_id = %s, action = %s, type = %s, tif = %s, status = %s" \
-               ", qty = %s, limit_price = %s, stop_price = %s, filled_qty = %s, avg_price = %s, last_qty = %s, last_price = %s ,stop_price = %s" \
-               ", stop_limit_ready = %s , trailing_stop_exec_price = %s , exec_reports = %s , update_events = %s, params = %s)" \
-               % (self.inst_id, self.timestamp, self.ord_id, self.stg_id, self.cl_ord_id, self.broker_id, self.action,
-                  self.type,
-                  self.tif,
-                  self.status,
-                  self.qty, self.limit_price, self.stop_price, self.filled_qty, self.avg_price, self.last_qty,
-                  self.last_price, self.stop_price, self.stop_limit_ready, self.trailing_stop_exec_price,
-                  self.exec_reports, self.update_events, self.params)
+    def on_order_replace_request(self, ord_replace_req):
+        self.ord_events.append(ord_replace_req)
+
+    def on_order_cancel_request(self, ord_cancel_req):
+        self.ord_events.append(ord_cancel_req)
 
     def add_exec_report(self, exec_report):
         if exec_report.ord_id != self.ord_id:
             raise Exception("exec_report [%s] order_id [%s] is not same as current order id [%s]" % (
                 exec_report.er_id, exec_report.ord_id, self.ord_id))
 
-        self.exec_reports.append(exec_report)
+        self.exec_events.append(exec_report)
         self.last_price = exec_report.last_price
         self.last_qty = exec_report.last_qty
 
@@ -221,8 +283,13 @@ class Order(OrderEvent):
             raise Exception(
                 "ord_upd  order_id [%s] is not same as current order id [%s]" % (ord_upd.ord_id, self.ord_id))
 
-        self.update_events.append(ord_upd)
+        self.exec_events.append(ord_upd)
         self.status = ord_upd.status
+
+    def get_events(self, type):
+        if not type:
+            return events
+        return [event for event in events if isinstance(event, type)]
 
     def is_done(self):
         return self.status == OrdStatus.REJECTED or self.status == OrdStatus.CANCELLED or self.status == OrdStatus.FILLED

@@ -36,13 +36,13 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
     def on_ord_upd(self, ord_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
         order = self.__orders[ord_upd.ord_id]
-        stg = stg_mgr.get_strategy(order.stg_id)
+        stg = stg_mgr.get_strategy(order.cl_id)
         stg.on_ord_upd(ord_upd)
 
     def on_exec_report(self, exec_report):
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
         order = self.__orders[exec_report.ord_id]
-        stg = stg_mgr.get_strategy(order.stg_id)
+        stg = stg_mgr.get_strategy(order.cl_id)
         stg.on_exec_report(exec_report)
 
     def send_order(self, order):

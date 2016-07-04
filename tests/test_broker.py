@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from algotrader.event.market_data import Bar
-from algotrader.event.order import ExecutionEventHandler, Order, OrdStatus, OrdAction, OrdType
+from algotrader.event.order import ExecutionEventHandler, NewOrderSingle, OrdStatus, OrdAction, OrdType
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.trading.instrument_data import inst_data_mgr
 
@@ -32,7 +32,7 @@ class SimulatorTest(TestCase):
         orders = self.simulator._get_orders()
         self.assertEqual(0, len(orders))
 
-        order1 = Order(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
         self.simulator.on_order(order1)
 
         orders = self.simulator._get_orders()
@@ -67,7 +67,7 @@ class SimulatorTest(TestCase):
         orders = self.simulator._get_orders()
         self.assertEqual(0, len(orders))
 
-        order1 = Order(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
         self.simulator.on_order(order1)
 
         orders = self.simulator._get_orders()

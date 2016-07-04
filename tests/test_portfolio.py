@@ -3,7 +3,7 @@ from collections import defaultdict
 from unittest import TestCase
 
 from algotrader.event.market_data import Trade, Bar, Quote
-from algotrader.event.order import OrdAction, OrdType, Order, OrdStatus, OrderStatusUpdate, ExecutionReport
+from algotrader.event.order import OrdAction, OrdType, NewOrderSingle, OrdStatus, OrderStatusUpdate, ExecutionReport
 from algotrader.trading.portfolio import Portfolio
 
 
@@ -16,8 +16,8 @@ class PortfolioTest(TestCase):
 
     def test_position(self):
 
-        order1 = Order(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
-        order2 = Order(ord_id=2, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1800, limit_price=18.2)
+        order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        order2 = NewOrderSingle(ord_id=2, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1800, limit_price=18.2)
 
         self.assertEqual(0, len(self.portfolio.positions))
         self.assertEqual(100000, self.portfolio.cash)
@@ -35,7 +35,7 @@ class PortfolioTest(TestCase):
 
     def test_on_ord_update(self):
 
-        order1 = Order(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
         self.portfolio.on_order(order1)
 
         status_update = OrderStatusUpdate(ord_id=1, inst_id=1, status=OrdStatus.NEW)
@@ -44,7 +44,7 @@ class PortfolioTest(TestCase):
 
     def test_on_exec_report(self):
 
-        order1 = Order(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
         self.portfolio.on_order(order1)
 
         er1 = ExecutionReport(ord_id=1, er_id=1, cl_ord_id=1, inst_id=1, last_qty=500, last_price=18.4,
@@ -87,8 +87,8 @@ class PortfolioTest(TestCase):
 
     def test_on_market_date_update(self):
 
-        order1 = Order(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5,
-                       timestamp=0)
+        order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5,
+                                timestamp=0)
         self.portfolio.on_order(order1)
 
         er1 = ExecutionReport(ord_id=1, er_id=1, cl_ord_id=1, inst_id=1, last_qty=500, last_price=18.4,

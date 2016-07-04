@@ -2,7 +2,7 @@ from datetime import date
 
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler, Bar, BarSize, BarType
-from algotrader.event.order import OrdType, TIF, ExecutionEventHandler, Order
+from algotrader.event.order import OrdType, TIF, ExecutionEventHandler, NewOrderSingle
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.csv_feed import CSVDataFeed
@@ -168,13 +168,13 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler):
         pass
 
     def new_order(self, inst_id, ord_type, action, qty, price, tif=TIF.DAY):
-        order = Order(inst_id=inst_id, timestamp=clock.default_clock.current_date_time(),
-                      ord_id=order_mgr.next_ord_id(), stg_id=self.stg_id, broker_id=self.__trading_config.broker_id,
-                      action=action,
-                      type=ord_type,
-                      tif=tif, qty=qty,
-                      limit_price=price,
-                      cl_ord_id=self.__get_next_ord_id())
+        order = NewOrderSingle(inst_id=inst_id, timestamp=clock.default_clock.current_date_time(),
+                               ord_id=order_mgr.next_ord_id(), cl_id=self.stg_id, broker_id=self.__trading_config.broker_id,
+                               action=action,
+                               type=ord_type,
+                               tif=tif, qty=qty,
+                               limit_price=price,
+                               cl_ord_id=self.__get_next_ord_id())
         self.__portfolio.on_order(order)
         order = order_mgr.send_order(order)
         return order

@@ -7,8 +7,7 @@ class Position(object):
     def __init__(self, inst_id):
         self.inst_id = inst_id
         self.orders = defaultdict(dict)
-        self.ordered_size = 0
-        self.filled_qty_dict = {}
+        self.filled_qty_dict = defaultdict(dict)
         self.last_price = 0
 
     def add_order(self, order):
@@ -18,29 +17,45 @@ class Position(object):
 
         if order.cl_ord_id in self.orders[order.cl_id]:
             raise RuntimeError("order[%s][%s] already exist" % (order.cl_id, order.cl_ord_id))
+
         self.orders[order.cl_id][order.cl_ord_id] = order
-        self.ordered_size += order.qty if order.action == OrdAction.BUY else -order.qty
 
-    def add_position(self, ord_id, filled_qty):
-        existing_filled_qty = self.filled_qty_dict.get(ord_id, 0)
-        total_filled_qty = existing_filled_qty + filled_qty
-        self.filled_qty_dict[ord_id] = total_filled_qty
+    def add_position(self, cl_id, cl_ord_id, filled_qty):
+        existing_filled_qty = self.filled_qty_dict[cl_id].get(cl_ord_id, 0)
+        updated_filled_qty = existing_filled_qty + filled_qty
+        self.filled_qty_dict[cl_id][cl_ord_id] = updated_filled_qty
 
-    def total_qty(self):
-        qty = 0
-        for filled_qty in self.filled_qty_dict.values():
-            qty += filled_qty
-        return qty
+    def filled_qty(self):
+        total = 0
+        for cl_id, cl_filled_qty_dict in self.filled_qty_dict.iteritems():
+            for cl_ord_id, reg_qty in cl_filled_qty_dict.iteritems():
+                if cl_ord_id in self.orders[cl_id]:
+                    order = self.orders[cl_id][cl_ord_id]
+                    direction = 1 if order.action == OrdAction.BUY else -1
+                    qty = order.filled_qty * direction
+                    assert qty == reg_qty
+                    total += qty
+                else:
+                    # exec report is added to position before order is registered to position. This could be happened in backtest.
+                    total += reg_qty
+        return total
+
+    def ordered_qty(self):
+        total = 0
+        for cl_orders in self.orders.values():
+            for order in cl_orders.values():
+                total += order.qty if order.action == OrdAction.BUY else -order.qty
+        return total
 
     def current_value(self):
-        return self.last_price * self.total_qty()
+        return self.last_price * self.filled_qty()
 
     def all_orders(self):
         return [order for cl_orders in self.orders.values() for order in cl_orders.values()]
 
     def __repr__(self):
-        return "Position(inst_id=%s, orders=%s, size=%s, last_price=%s)" % (
-            self.inst_id, self.orders, self.size, self.last_price
+        return "Position(inst_id=%s, orders=%s, filled_qty_dict=%s, last_price=%s)" % (
+            self.inst_id, self.orders, self.filled_qty_dict, self.last_price
         )
 
 
@@ -66,9 +81,9 @@ class PositionHolder(MarketDataEventHandler):
             position = self.positions[inst_id]
             position.last_price = price
 
-    def add_positon(self, inst_id, ord_id, qty):
+    def add_positon(self, inst_id, cl_id, cl_ord_id, qty):
         position = self.get_position(inst_id)
-        position.add_position(ord_id, qty)
+        position.add_position(cl_id, cl_ord_id, qty)
 
     def on_bar(self, bar):
         self.update_position_price(bar.timestamp, bar.inst_id, bar.close)

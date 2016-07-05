@@ -103,7 +103,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         direction = 1 if new_ord_req.action == OrdAction.BUY else -1
         if exec_report.last_qty > 0:
             self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
-            self.add_positon(exec_report.inst_id, exec_report.ord_id, direction * exec_report.last_qty)
+            self.add_positon(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id, direction * exec_report.last_qty)
             self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
     def update_position_price(self, timestamp, inst_id, price):

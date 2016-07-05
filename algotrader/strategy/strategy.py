@@ -123,7 +123,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler):
             ord_req = self.__ord_req[exec_report.cl_ord_id]
             direction = 1 if ord_req.action == OrdAction.BUY else -1
             if exec_report.last_qty > 0:
-                self.add_positon(exec_report.inst_id, exec_report.ord_id, direction * exec_report.last_qty)
+                self.add_positon(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id, direction * exec_report.last_qty)
                 self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
     def market_order(self, inst_id, action, qty, tif=TIF.DAY, oca_tag=None, params=None):

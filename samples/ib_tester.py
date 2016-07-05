@@ -85,7 +85,7 @@ def test_mkt_order(broker, inst_id=3, action=OrdAction.BUY, qty=1000):
     print "### testing market order"
     cl_ord_id = next_cl_ord_id()
     order = NewOrderSingle(cl_ord_id=cl_ord_id, inst_id=inst_id, action=action, type=OrdType.MARKET, qty=1000)
-    broker.on_order(order)
+    broker.on_new_ord_req(order)
     time.sleep(10)
 
 
@@ -94,13 +94,13 @@ def test_lmt_order_update_cancel(broker, inst_id=3, qty=1000, limit_price=100):
     cl_ord_id = next_cl_ord_id()
     order = NewOrderSingle(cl_ord_id=cl_ord_id, inst_id=inst_id, action=OrdAction.BUY, type=OrdType.LIMIT, qty=qty,
                            limit_price=limit_price)
-    broker.on_order(order)
+    broker.on_new_ord_req(order)
     time.sleep(10)
 
     print "### testing order update"
     order = NewOrderSingle(cl_ord_id=cl_ord_id, inst_id=inst_id, action=OrdAction.BUY, type=OrdType.LIMIT, qty=qty * 2,
                            limit_price=limit_price * 1.2)
-    broker.on_ord_update_req(order)
+    broker.on_ord_replace_req(order)
     time.sleep(10)
 
     print "### testing order cancel"

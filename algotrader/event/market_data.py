@@ -1,5 +1,6 @@
 from algotrader.event.event import Event, EventHandler
 
+from algotrader.utils import logger
 
 class BarSize(object):
     S1 = 1
@@ -191,14 +192,16 @@ class MarketDepth(MarketDataEvent):
 
 
 class MarketDataEventHandler(EventHandler):
+
     def on_bar(self, bar):
-        pass
+        logger.debug("[%s] %s" % (self.__class__.__name__, bar))
 
     def on_quote(self, quote):
-        pass
+        logger.debug("[%s] %s" % (self.__class__.__name__, quote))
 
     def on_trade(self, trade):
-        pass
+        logger.debug("[%s] %s" % (self.__class__.__name__, trade))
 
     def on_market_depth(self, market_depth):
-        pass
+        logger.debug("[%s] %s" % (self.__class__.__name__, market_depth))
+

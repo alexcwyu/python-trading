@@ -13,7 +13,7 @@ class FillStrategy(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def process_new_order(self, order):
+    def process_new_order(self, new_ord_req):
         raise NotImplementedError()
 
     @abc.abstractmethod
@@ -21,7 +21,7 @@ class FillStrategy(object):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def process_w_price_qty(self, order, price, qty):
+    def process_w_price_qty(self, new_ord_req, price, qty):
         raise NotImplementedError()
 
 
@@ -35,24 +35,24 @@ class DefaultFillStrategy(FillStrategy):
         self.__stop_ord_handler = StopOrderHandler(self.__sim_config, self.__slippage)
         self.__trailing_stop_ord_handler = TrailingStopOrderHandler(self.__sim_config, self.__slippage)
 
-    def process_new_order(self, order):
+    def process_new_order(self, new_ord_req):
         fill_info = None
         config = self.__sim_config
 
-        quote = inst_data_mgr.get_quote(order.inst_id)
-        trade = inst_data_mgr.get_trade(order.inst_id)
-        bar = inst_data_mgr.get_bar(order.inst_id)
+        quote = inst_data_mgr.get_quote(new_ord_req.inst_id)
+        trade = inst_data_mgr.get_trade(new_ord_req.inst_id)
+        bar = inst_data_mgr.get_bar(new_ord_req.inst_id)
 
         if not fill_info and config.fill_on_quote and config.fill_on_bar_mode == SimConfig.FillMode.LAST and quote:
-            fill_info = self.process_w_market_data(order, quote, True)
+            fill_info = self.process_w_market_data(new_ord_req, quote, True)
         elif not fill_info and config.fill_on_trade and config.fill_on_trade_mode == SimConfig.FillMode.LAST and trade:
-            fill_info = self.process_w_market_data(order, trade, True)
+            fill_info = self.process_w_market_data(new_ord_req, trade, True)
         elif not fill_info and config.fill_on_bar and config.fill_on_bar_mode == SimConfig.FillMode.LAST and bar:
-            fill_info = self.process_w_market_data(order, bar, True)
+            fill_info = self.process_w_market_data(new_ord_req, bar, True)
 
         return fill_info
 
-    def process_w_market_data(self, order, event, new_order=False):
+    def process_w_market_data(self, new_ord_req, event, new_order=False):
 
         config = self.__sim_config
 
@@ -62,27 +62,27 @@ class DefaultFillStrategy(FillStrategy):
                 or (isinstance(event, Quote) and not config.fill_on_quote):
             return None
 
-        if order.type == OrdType.MARKET:
-            return self.__market_ord_handler.process(order, event, new_order)
-        elif order.type == OrdType.LIMIT:
-            return self.__limit_ord_handler.process(order, event, new_order)
-        elif order.type == OrdType.STOP_LIMIT:
-            return self.__stop_limit_ord_handler.process(order, event, new_order)
-        elif order.type == OrdType.STOP:
-            return self.__stop_ord_handler.process(order, event, new_order)
-        elif order.type == OrdType.TRAILING_STOP:
-            return self.__trailing_stop_ord_handler.process(order, event, new_order)
+        if new_ord_req.type == OrdType.MARKET:
+            return self.__market_ord_handler.process(new_ord_req, event, new_order)
+        elif new_ord_req.type == OrdType.LIMIT:
+            return self.__limit_ord_handler.process(new_ord_req, event, new_order)
+        elif new_ord_req.type == OrdType.STOP_LIMIT:
+            return self.__stop_limit_ord_handler.process(new_ord_req, event, new_order)
+        elif new_ord_req.type == OrdType.STOP:
+            return self.__stop_ord_handler.process(new_ord_req, event, new_order)
+        elif new_ord_req.type == OrdType.TRAILING_STOP:
+            return self.__trailing_stop_ord_handler.process(new_ord_req, event, new_order)
         assert False
 
-    def process_w_price_qty(self, order, price, qty):
-        if order.type == OrdType.MARKET:
-            return self.__market_ord_handler.process_w_price_qty(order, price, qty)
-        elif order.type == OrdType.LIMIT:
-            return self.__limit_ord_handler.process_w_price_qty(order, price, qty)
-        elif order.type == OrdType.STOP_LIMIT:
-            return self.__stop_limit_ord_handler.process_w_price_qty(order, price, qty)
-        elif order.type == OrdType.STOP:
-            return self.__stop_ord_handler.process_w_price_qty(order, price, qty)
-        elif order.type == OrdType.TRAILING_STOP:
-            return self.__trailing_stop_ord_handler.process_w_price_qty(order, price, qty)
+    def process_w_price_qty(self, new_ord_req, price, qty):
+        if new_ord_req.type == OrdType.MARKET:
+            return self.__market_ord_handler.process_w_price_qty(new_ord_req, price, qty)
+        elif new_ord_req.type == OrdType.LIMIT:
+            return self.__limit_ord_handler.process_w_price_qty(new_ord_req, price, qty)
+        elif new_ord_req.type == OrdType.STOP_LIMIT:
+            return self.__stop_limit_ord_handler.process_w_price_qty(new_ord_req, price, qty)
+        elif new_ord_req.type == OrdType.STOP:
+            return self.__stop_ord_handler.process_w_price_qty(new_ord_req, price, qty)
+        elif new_ord_req.type == OrdType.TRAILING_STOP:
+            return self.__trailing_stop_ord_handler.process_w_price_qty(new_ord_req, price, qty)
         return None

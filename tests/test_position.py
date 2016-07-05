@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from algotrader.event.order import NewOrderSingle, OrdAction, OrdType, ExecutionReport, OrdStatus
-from algotrader.trading.portfolio import Position
+from algotrader.trading.position import Position
 
 
 class PositionTest(TestCase):

@@ -225,6 +225,25 @@ class InMemoryRefDataManager(RefDataManager):
 
         self.__exch_dict[exch.exch_id] = exch
 
+    def get_insts(self, instruments):
+        insts = []
+        if isinstance(instruments, (list, tuple, set)):
+            for instrument in instruments:
+                if isinstance(instrument, (int, long)) or isinstance(instrument, str):
+                    insts.append(self.search_inst(inst=instrument))
+                elif isinstance(instrument, Instrument):
+                    insts.append(instrument)
+                else:
+                    raise "Unknown instrument %s" % instrument
+        elif isinstance(instruments, (int, long)) or isinstance(instruments, str):
+            insts.append(self.search_inst(inst=instruments))
+        elif isinstance(instruments, Instrument):
+            insts.append(instruments)
+        else:
+            raise "Unknown instrument %s" % instruments
+
+        return insts
+
     def get_inst(self, inst_id=None, symbol=None, exch_id=None):
         if inst_id:
             return self.__inst_dict.get(inst_id, None)

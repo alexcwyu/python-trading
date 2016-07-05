@@ -33,7 +33,7 @@ class SimulatorTest(TestCase):
         self.assertEqual(0, len(orders))
 
         order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
-        self.simulator.on_order(order1)
+        self.simulator.on_new_ord_req(order1)
 
         orders = self.simulator._get_orders()
         self.assertEqual(1, len(orders))
@@ -68,7 +68,7 @@ class SimulatorTest(TestCase):
         self.assertEqual(0, len(orders))
 
         order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
-        self.simulator.on_order(order1)
+        self.simulator.on_new_ord_req(order1)
 
         orders = self.simulator._get_orders()
         self.assertEqual(1, len(orders))

@@ -86,29 +86,29 @@ class IBModelFactory:
     def __init__(self, ref_data_mgr):
         self.__ref_data_mgr = ref_data_mgr
 
-    def create_ib_order(self, order):
+    def create_ib_order(self, new_ord_req):
 
         # Order details
         algoParams = swigibpy.TagValueList()
 
-        if order.params:
-            for k, v in order.params.items():
+        if new_ord_req.params:
+            for k, v in new_ord_req.params.items():
                 algoParams.append(swigibpy.TagValue(k, v))
 
         ib_order = swigibpy.Order()
-        ib_order.action = self.convert_ord_action(order.action)
-        ib_order.lmtPrice = order.limit_price
-        ib_order.orderType = self.convert_ord_type(order.type)
-        ib_order.totalQuantity = order.qty
-        ib_order.tif = self.convert_tif(order.tif)
+        ib_order.action = self.convert_ord_action(new_ord_req.action)
+        ib_order.lmtPrice = new_ord_req.limit_price
+        ib_order.orderType = self.convert_ord_type(new_ord_req.type)
+        ib_order.totalQuantity = new_ord_req.qty
+        ib_order.tif = self.convert_tif(new_ord_req.tif)
 
         ## TODO set algo strategy from Order to IBOrder
         # ib_order.algoStrategy = "AD"
         # ib_order.algoParams = algoParams
 
         ## TODO double check
-        if order.oca_tag:
-            ib_order.ocaGroup = order.oca_tag
+        if new_ord_req.oca_tag:
+            ib_order.ocaGroup = new_ord_req.oca_tag
         return ib_order
 
     def convert_sec_type(self, inst_type):

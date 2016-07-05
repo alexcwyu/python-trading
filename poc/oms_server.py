@@ -15,7 +15,7 @@ class RemoteOrderManager(OrderManager):
         logger.info("starting OMS")
         self.__server.run()
 
-    def on_order(self, order):
+    def on_new_ord_req(self, order):
         logger.info("[%s] %s" % (self.__class__.__name__, order))
         return order
 

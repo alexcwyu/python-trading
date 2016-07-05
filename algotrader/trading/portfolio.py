@@ -1,49 +1,26 @@
+from collections import defaultdict
+
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler
 from algotrader.event.order import OrdAction, OrderEventHandler, ExecutionEventHandler
 from algotrader.performance.drawdown import DrawDown
 from algotrader.performance.returns import Pnl
+from algotrader.trading.order_mgr import order_mgr
+from algotrader.trading.position import Position, PositionHolder
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
+from algotrader.trading.position import Position
+from algotrader.trading.portfolio_mgr import portf_mgr
 
 
-class Position(object):
-    def __init__(self, inst_id):
-        self.inst_id = inst_id
-        self.orders = {}
-        self.size = 0
-        self.last_price = 0
-
-    def add_order(self, order):
-        if order.inst_id != self.inst_id:
-            raise RuntimeError("order[%s] inst_id [%s] is not same as inst_id [%s] of position" % (
-                order.ord_id, order.inst_id, self.inst_id))
-
-        if order.ord_id in self.orders:
-            raise RuntimeError("order[%s] already exist" % order.ord_id)
-        self.orders[order.ord_id] = order
-        self.size += order.qty if order.action == OrdAction.BUY else -order.qty
-
-    def filled_qty(self):
-        qty = 0
-        for key, order in self.orders.iteritems():
-            qty += order.filled_qty if order.action == OrdAction.BUY else -order.filled_qty
-        return qty
-
-    def __repr__(self):
-        return "Position(inst_id=%s, orders=%s, size=%s, last_price=%s)" % (
-            self.inst_id, self.orders, self.size, self.last_price
-        )
-
-
-class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
-    def __init__(self, portfolio_id="test", cash=1000000, analyzers=None):
-        self.portfolio_id = portfolio_id
-        self.positions = {}
+class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
+    def __init__(self, portf_id="test", cash=1000000, analyzers=None):
+        super(Portfolio, self).__init__()
+        self.portf_id = portf_id
+        self.ord_reqs = defaultdict(dict)
         self.orders = {}
 
         self.performance_series = DataSeries()
-
         self.total_equity = 0
         self.cash = cash
         self.stock_value = 0
@@ -51,58 +28,82 @@ class Portfolio(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler
         self.analyzers = analyzers if analyzers is not None else [Pnl(), DrawDown()]
         for analyzer in self.analyzers:
             analyzer.set_portfolio(self)
+        self.started = False
+        portf_mgr.add_portfolio(self)
 
     def start(self):
-        EventBus.data_subject.subscribe(self.on_next)
+        if not self.started:
+            self.started = True
+            order_mgr.start()
+            EventBus.data_subject.subscribe(self.on_next)
+
 
     def on_bar(self, bar):
-        logger.debug("[%s] %s" % (self.__class__.__name__, bar))
-        self.__update_price(bar.timestamp, bar.inst_id, bar.close)
+        super(Portfolio, self).on_bar(bar)
+        self.__update_equity(bar.timestamp, bar.inst_id, bar.close)
 
     def on_quote(self, quote):
-        logger.debug("[%s] %s" % (self.__class__.__name__, quote))
-        self.__update_price(quote.timestamp, quote.inst_id, quote.mid())
+        super(Portfolio, self).on_quote(quote)
+        self.__update_equity(quote.timestamp, quote.inst_id, quote.mid())
 
     def on_trade(self, trade):
-        logger.debug("[%s] %s" % (self.__class__.__name__, trade))
-        self.__update_price(trade.timestamp, trade.inst_id, trade.price)
+        super(Portfolio, self).on_trade(trade)
+        self.__update_equity(trade.timestamp, trade.inst_id, trade.price)
 
-    def on_order(self, order):
-        logger.debug("[%s] %s" % (self.__class__.__name__, order))
+    def send_order(self, new_ord_req):
+        logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))
 
-        if order.ord_id in self.orders:
-            raise RuntimeError("order[%s] already exist" % order.ord_id)
+        if new_ord_req.cl_ord_id in self.ord_reqs[new_ord_req.cl_id]:
+            raise RuntimeError("ord_reqs[%s][%s] already exist" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
+        self.ord_reqs[new_ord_req.cl_id][new_ord_req.cl_ord_id] = new_ord_req
+
+        order = order_mgr.send_order(new_ord_req)
 
         self.orders[order.ord_id] = order
-        if order.inst_id not in self.positions:
-            self.positions[order.inst_id] = Position(inst_id=order.inst_id)
-        self.positions[order.inst_id].add_order(order)
+        self.open_position(order=order)
+        return order
+
+    def cancel_order(self, ord_cancel_req):
+        logger.debug("[%s] %s" % (self.__class__.__name__, ord_cancel_req))
+        order = order_mgr.cancel_order(ord_cancel_req)
+        return order
+
+    def replace_order(self, ord_replace_req):
+        logger.debug("[%s] %s" % (self.__class__.__name__, ord_replace_req))
+        order = order_mgr.replace_order(ord_replace_req)
+        return order
+
+    def on_new_ord_req(self, new_ord_req):
+        if new_ord_req.portf_id == self.portf_id:
+            self.send_order(new_ord_req)
+
+    def on_ord_cancel_req(self, ord_cancel_req):
+        if ord_cancel_req.portf_id == self.portf_id:
+            self.cancel_order(ord_cancel_req)
+
+    def on_ord_replace_req(self, ord_replace_req):
+        if ord_replace_req.portf_id == self.portf_id:
+            self.replace_order(ord_replace_req)
 
     def on_ord_upd(self, ord_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
-        order = self.orders[ord_upd.ord_id]
-        order.update_status(ord_upd)
 
     def on_exec_report(self, exec_report):
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
-        order = self.orders[exec_report.ord_id]
-        order.add_exec_report(exec_report)
-        direction = 1 if order.action == OrdAction.BUY else -1
+
+        if exec_report.cl_ord_id not in self.ord_reqs[exec_report.cl_id]:
+            raise Exception("Order not found, ord_reqs[%s][%s]" % (exec_report.cl_id, exec_report.cl_ord_id))
+
+        new_ord_req = self.ord_reqs[exec_report.cl_id][exec_report.cl_ord_id]
+        direction = 1 if new_ord_req.action == OrdAction.BUY else -1
         self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
         self.__update_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
-    def __update_price(self, time, inst_id, price):
-        if inst_id in self.positions:
-            position = self.positions[inst_id]
-            position.last_price = price
-        self.__update_equity(time)
-        for analyzer in self.analyzers:
-            analyzer.update(time)
 
     def __update_equity(self, time):
         self.stock_value = 0
         for position in self.positions.itervalues():
-            self.stock_value += position.last_price * position.filled_qty()
+            self.stock_value += position.current_value()
         self.total_equity = self.stock_value + self.cash
 
         self.performance_series.add(

@@ -23,12 +23,12 @@ class PortfolioTest(TestCase):
         self.assertEqual(100000, self.portfolio.cash)
         self.assertTrue(math.isnan(self.portfolio.performance_series.now("total_equity")))
 
-        self.portfolio.on_order(order1)
+        self.portfolio.on_new_ord_req(order1)
         self.check_order(self.portfolio, [order1], {1: (1000, 0)})
         self.assertEqual(100000, self.portfolio.cash)
         self.assertTrue(math.isnan(self.portfolio.performance_series.now("total_equity")))
 
-        self.portfolio.on_order(order2)
+        self.portfolio.on_new_ord_req(order2)
         self.check_order(self.portfolio, [order1, order2], {1: (2800, 0)})
         self.assertEqual(100000, self.portfolio.cash)
         self.assertTrue(math.isnan(self.portfolio.performance_series.now("total_equity")))
@@ -36,7 +36,7 @@ class PortfolioTest(TestCase):
     def test_on_ord_update(self):
 
         order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
-        self.portfolio.on_order(order1)
+        self.portfolio.on_new_ord_req(order1)
 
         status_update = OrderStatusUpdate(ord_id=1, inst_id=1, status=OrdStatus.NEW)
         self.portfolio.on_ord_upd(status_update)
@@ -45,7 +45,7 @@ class PortfolioTest(TestCase):
     def test_on_exec_report(self):
 
         order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
-        self.portfolio.on_order(order1)
+        self.portfolio.on_new_ord_req(order1)
 
         er1 = ExecutionReport(ord_id=1, er_id=1, cl_ord_id=1, inst_id=1, last_qty=500, last_price=18.4,
                               status=OrdStatus.PARTIALLY_FILLED)
@@ -89,7 +89,7 @@ class PortfolioTest(TestCase):
 
         order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5,
                                 timestamp=0)
-        self.portfolio.on_order(order1)
+        self.portfolio.on_new_ord_req(order1)
 
         er1 = ExecutionReport(ord_id=1, er_id=1, cl_ord_id=1, inst_id=1, last_qty=500, last_price=18.4,
                               status=OrdStatus.PARTIALLY_FILLED, timestamp=1)

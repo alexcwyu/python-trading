@@ -2,7 +2,8 @@ from datetime import date
 
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler, Bar, BarSize, BarType
-from algotrader.event.order import OrdType, TIF, ExecutionEventHandler, NewOrderRequest, OrderReplaceRequest, OrderCancelRequest
+from algotrader.event.order import OrdAction, OrdType, TIF, ExecutionEventHandler, NewOrderRequest, OrderReplaceRequest, \
+    OrderCancelRequest
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.csv_feed import CSVDataFeed
@@ -57,12 +58,13 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler):
         self.__feed = feed_mgr.get(self.__trading_config.feed_id)
         stg_mgr.add_strategy(self)
         self.started = False
+        self.__ord_req = {}
+        self.__order = {}
 
     def __get_next_ord_id(self):
         next_ord_id = self.__next_ord_id
         self.__next_ord_id += 1
         return next_ord_id
-
 
     def start(self):
         if not self.started:
@@ -112,16 +114,25 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler):
         super(Strategy, self).on_market_depth(market_depth)
 
     def on_ord_upd(self, ord_upd):
-        super(Strategy, self).on_ord_upd(ord_upd)
+        if ord_upd.cl_id == self.stg_id:
+            super(Strategy, self).on_ord_upd(ord_upd)
 
     def on_exec_report(self, exec_report):
-        super(Strategy, self).on_exec_report(exec_report)
+        if exec_report.cl_id == self.stg_id:
+            super(Strategy, self).on_exec_report(exec_report)
+            ord_req = self.__ord_req[exec_report.cl_ord_id]
+            direction = 1 if ord_req.action == OrdAction.BUY else -1
+            if exec_report.last_qty > 0:
+                self.add_positon(exec_report.inst_id, exec_report.ord_id, direction * exec_report.last_qty)
+                self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
     def market_order(self, inst_id, action, qty, tif=TIF.DAY, oca_tag=None, params=None):
-        return self.new_order(inst_id=inst_id, action=action, type=OrdType.MARKET, qty=qty, limit_price=0.0, tif=tif, oca_tag=oca_tag, params=params)
+        return self.new_order(inst_id=inst_id, action=action, type=OrdType.MARKET, qty=qty, limit_price=0.0, tif=tif,
+                              oca_tag=oca_tag, params=params)
 
     def limit_order(self, inst_id, action, qty, price, tif=TIF.DAY, oca_tag=None, params=None):
-        return self.new_order(inst_id=inst_id, action=action, type=OrdType.LIMIT, qty=qty, limit_price=price, tif=tif, oca_tag=oca_tag, params=params)
+        return self.new_order(inst_id=inst_id, action=action, type=OrdType.LIMIT, qty=qty, limit_price=price, tif=tif,
+                              oca_tag=oca_tag, params=params)
 
     def stop_order(self):
         # TODO
@@ -157,9 +168,10 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler):
                               tif=tif,
                               oca_tag=oca_tag,
                               params=params)
-
+        self.__ord_req[req.cl_ord_id] = req
         order = self.__portfolio.send_order(req)
-        self.open_position(order=order)
+        self.__order[order.cl_ord_id] = order
+        self.get_position(order.inst_id).add_order(order)
         return order
 
     def cancel_order(self, cl_ord_id=None):

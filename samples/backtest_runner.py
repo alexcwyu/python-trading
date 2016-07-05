@@ -5,6 +5,7 @@ from algotrader.event.market_data import Bar, BarSize, BarType
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.csv_feed import CSVDataFeed
 from algotrader.strategy.sma_strategy import SMAStrategy
+from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
 from algotrader.strategy.strategy import BacktestingConfig
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
@@ -38,10 +39,10 @@ def main():
                                bar_size=BarSize.D1,
                                from_date=date(2010, 1, 1), to_date=date.today())
 
-    # strategy = Down2PctStrategy("down2%", portfolio,
-    #                             instrument='SPY', qty=1000,  trading_config=config )
+    strategy = Down2PctStrategy("down2%", portfolio,
+                                instrument=4, qty=1000,  trading_config=config )
 
-    strategy = SMAStrategy("sma", portfolio, instrument=4, qty=1000, trading_config=config)
+    #strategy = SMAStrategy("sma", portfolio, instrument=4, qty=1000, trading_config=config)
 
     runner = BacktestRunner(strategy)
     runner.start()

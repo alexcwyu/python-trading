@@ -146,5 +146,5 @@ class PortfolioTest(TestCase):
             for pos_order in pos_orders:
                 self.assertEquals(pos_order, position.orders[pos_order.cl_id][pos_order.cl_ord_id])
 
-            self.assertEqual(ord_qty, position.size)
-            self.assertEqual(fill_qty, position.filled_qty())
+            self.assertEqual(ord_qty, position.ordered_size)
+            self.assertEqual(fill_qty, position.total_qty())

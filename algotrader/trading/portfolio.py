@@ -63,9 +63,8 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         self.ord_reqs[new_ord_req.cl_id][new_ord_req.cl_ord_id] = new_ord_req
 
         order = order_mgr.send_order(new_ord_req)
-
         self.orders[order.cl_id][order.cl_ord_id] = order
-        self.open_position(order=order)
+        self.get_position(order.inst_id).add_order(order)
         return order
 
     def cancel_order(self, ord_cancel_req):
@@ -91,7 +90,8 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
             self.replace_order(ord_replace_req)
 
     def on_ord_upd(self, ord_upd):
-        logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
+        if ord_upd.portf_id == self.portf_id:
+            logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
 
     def on_exec_report(self, exec_report):
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
@@ -101,8 +101,10 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
 
         new_ord_req = self.ord_reqs[exec_report.cl_id][exec_report.cl_ord_id]
         direction = 1 if new_ord_req.action == OrdAction.BUY else -1
-        self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
-        self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
+        if exec_report.last_qty > 0:
+            self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
+            self.add_positon(exec_report.inst_id, exec_report.ord_id, direction * exec_report.last_qty)
+            self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
     def update_position_price(self, timestamp, inst_id, price):
         super(Portfolio, self).update_position_price(timestamp, inst_id, price)

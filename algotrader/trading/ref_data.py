@@ -174,7 +174,6 @@ class InMemoryRefDataManager(RefDataManager):
 
                 alt_exch_id = {}
                 if row['alt_exch_id']:
-                    print row['alt_exch_id']
                     for item in row['alt_exch_id'].split(";"):
                         kv = item.split("=")
                         alt_exch_id[kv[0]] = kv[1]

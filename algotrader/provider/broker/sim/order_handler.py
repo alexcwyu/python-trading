@@ -3,7 +3,7 @@ import sys
 
 from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.provider.broker.sim.data_processor import BarProcessor, TradeProcessor, QuoteProcessor
-
+from collections import defaultdict
 
 class FillInfo(object):
     def __init__(self, fill_qty, fill_price):
@@ -87,50 +87,57 @@ class LimitOrderHandler(SimOrderHandler):
 class StopLimitOrderHandler(SimOrderHandler):
     def __init__(self, config):
         super(StopLimitOrderHandler, self).__init__(config)
+        self.__stop_limit_ready = defaultdict(dict)
 
     def process_w_bar(self, new_ord_req, bar, qty, new_order=False):
+        stop_limit_ready = self.__stop_limit_ready[new_ord_req.cl_id].get(new_ord_req.cl_ord_id, False)
         if new_ord_req.is_buy():
-            if not new_ord_req.stop_limit_ready and bar.high >= new_ord_req.stop_price:
-                new_ord_req.stop_limit_ready = True
-            elif new_ord_req.stop_limit_ready and bar.low <= new_ord_req.limit_price:
+            if not stop_limit_ready and bar.high >= new_ord_req.stop_price:
+                self.__stop_limit_ready[new_ord_req.cl_id][new_ord_req.cl_ord_id] = True
+            elif stop_limit_ready and bar.low <= new_ord_req.limit_price:
                 return FillInfo(qty, new_ord_req.limit_price)
         elif new_ord_req.is_sell():
-            if not new_ord_req.stop_limit_ready and bar.low <= new_ord_req.stop_price:
-                new_ord_req.stop_limit_ready = True
-            elif new_ord_req.stop_limit_ready and bar.high >= new_ord_req.limit_price:
+            if not stop_limit_ready and bar.low <= new_ord_req.stop_price:
+                self.__stop_limit_ready[new_ord_req.cl_id][new_ord_req.cl_ord_id] = True
+            elif stop_limit_ready and bar.high >= new_ord_req.limit_price:
                 return FillInfo(qty, new_ord_req.limit_price)
         return None
 
     def process_w_price_qty(self, new_ord_req, price, qty):
+        stop_limit_ready = self.__stop_limit_ready[new_ord_req.cl_id].get(new_ord_req.cl_ord_id, False)
         if new_ord_req.is_buy():
-            if not new_ord_req.stop_limit_ready and price >= new_ord_req.stop_price:
-                new_ord_req.stop_limit_ready = True
-            elif new_ord_req.stop_limit_ready and price <= new_ord_req.limit_price:
+            if not stop_limit_ready and price >= new_ord_req.stop_price:
+                self.__stop_limit_ready[new_ord_req.cl_id][new_ord_req.cl_ord_id] = True
+            elif stop_limit_ready and price <= new_ord_req.limit_price:
                 return FillInfo(qty, price)
         elif new_ord_req.is_sell():
-            if not new_ord_req.stop_limit_ready and price <= new_ord_req.stop_price:
-                new_ord_req.stop_limit_ready = True
-            elif new_ord_req.stop_limit_ready and price >= new_ord_req.limit_price:
+            if not stop_limit_ready and price <= new_ord_req.stop_price:
+                self.__stop_limit_ready[new_ord_req.cl_id][new_ord_req.cl_ord_id] = True
+            elif stop_limit_ready and price >= new_ord_req.limit_price:
                 return FillInfo(qty, price)
         return None
 
+    def stop_limit_ready(self, cl_id, cl_ord_id):
+        return self.__stop_limit_ready[cl_id].get(cl_ord_id, False)
 
 class StopOrderHandler(SimOrderHandler):
     def __init__(self, config, slippage=None):
         super(StopOrderHandler, self).__init__(config)
         self.__slippage = slippage
+        self.__stop_limit_ready = defaultdict(dict)
 
     def process_w_bar(self, new_ord_req, bar, qty, new_order=False):
+        stop_limit_ready = self.__stop_limit_ready[new_ord_req.cl_id].get(new_ord_req.cl_ord_id, False)
         if new_ord_req.is_buy():
             if bar.high >= new_ord_req.stop_price:
-                new_ord_req.stop_limit_ready = True
+                self.__stop_limit_ready[new_ord_req.cl_id][new_ord_req.cl_ord_id] = True
                 fill_price = new_ord_req.stop_price
                 if self.__slippage:
                     fill_price = self.__slippage.calc_price_w_bar(new_ord_req, fill_price, qty, bar)
                 return FillInfo(qty, fill_price)
         elif new_ord_req.is_sell():
             if bar.low <= new_ord_req.stop_price:
-                new_ord_req.stop_limit_ready = True
+                self.__stop_limit_ready[new_ord_req.cl_id][new_ord_req.cl_ord_id] = True
                 fill_price = new_ord_req.stop_price
                 if self.__slippage:
                     fill_price = self.__slippage.calc_price_w_bar(new_ord_req, fill_price, qty, bar)
@@ -138,44 +145,51 @@ class StopOrderHandler(SimOrderHandler):
         return None
 
     def process_w_price_qty(self, new_ord_req, price, qty):
+        stop_limit_ready = self.__stop_limit_ready[new_ord_req.cl_id].get(new_ord_req.cl_ord_id, False)
         if new_ord_req.is_buy():
             if price >= new_ord_req.stop_price:
-                new_ord_req.stop_limit_ready = True
+                self.__stop_limit_ready[new_ord_req.cl_id][new_ord_req.cl_ord_id] = True
                 return FillInfo(qty, price)
         elif new_ord_req.is_sell():
             if price <= new_ord_req.stop_price:
-                new_ord_req.stop_limit_ready = True
+                self.__stop_limit_ready[new_ord_req.cl_id][new_ord_req.cl_ord_id] = True
                 return FillInfo(qty, price)
         return None
 
+    def stop_limit_ready(self, cl_id, cl_ord_id):
+        return self.__stop_limit_ready[cl_id].get(cl_ord_id, False)
 
 class TrailingStopOrderHandler(SimOrderHandler):
     def __init__(self, config, slippage=None):
         super(TrailingStopOrderHandler, self).__init__(config)
         self.__slippage = slippage
+        self.__trailing_stop_exec_price = defaultdict(dict)
 
     def _init_order_trailing_stop(self, new_ord_req):
-        if new_ord_req.trailing_stop_exec_price == 0:
+        trailing_stop_exec_price = self.__trailing_stop_exec_price[new_ord_req.cl_id].get(new_ord_req.cl_ord_id, 0)
+        if trailing_stop_exec_price == 0:
             if new_ord_req.is_buy():
-                new_ord_req.trailing_stop_exec_price = sys.float_info.max
+                self.__trailing_stop_exec_price[new_ord_req.cl_id][new_ord_req.cl_ord_id] = sys.float_info.max
             elif new_ord_req.is_sell():
-                new_ord_req.trailing_stop_exec_price = sys.float_info.min
+                self.__trailing_stop_exec_price[new_ord_req.cl_id][new_ord_req.cl_ord_id] = sys.float_info.min
 
     def process_w_bar(self, new_ord_req, bar, qty, new_order=False):
         self._init_order_trailing_stop(new_ord_req)
+        trailing_stop_exec_price = self.__trailing_stop_exec_price[new_ord_req.cl_id][new_ord_req.cl_ord_id]
         if new_ord_req.is_buy():
-            new_ord_req.trailing_stop_exec_price = min(new_ord_req.trailing_stop_exec_price, bar.low + new_ord_req.stop_price)
-
-            if bar.high >= new_ord_req.trailing_stop_exec_price:
-                fill_price = new_ord_req.trailing_stop_exec_price
+            trailing_stop_exec_price = min(trailing_stop_exec_price, bar.low + new_ord_req.stop_price)
+            self.__trailing_stop_exec_price[new_ord_req.cl_id][new_ord_req.cl_ord_id] = trailing_stop_exec_price
+            if bar.high >= trailing_stop_exec_price:
+                fill_price = trailing_stop_exec_price
                 if self.__slippage:
                     fill_price = self.__slippage.calc_price_w_bar(new_ord_req, fill_price, qty, bar)
                 return FillInfo(qty, fill_price)
         elif new_ord_req.is_sell():
-            new_ord_req.trailing_stop_exec_price = max(new_ord_req.trailing_stop_exec_price, bar.high - new_ord_req.stop_price)
+            trailing_stop_exec_price = max(trailing_stop_exec_price, bar.high - new_ord_req.stop_price)
+            self.__trailing_stop_exec_price[new_ord_req.cl_id][new_ord_req.cl_ord_id] = trailing_stop_exec_price
 
-            if bar.low <= new_ord_req.trailing_stop_exec_price:
-                fill_price = new_ord_req.trailing_stop_exec_price
+            if bar.low <= trailing_stop_exec_price:
+                fill_price = trailing_stop_exec_price
                 if self.__slippage:
                     fill_price = self.__slippage.calc_price_w_bar(new_ord_req, fill_price, qty, bar)
                 return FillInfo(qty, fill_price)
@@ -183,12 +197,18 @@ class TrailingStopOrderHandler(SimOrderHandler):
 
     def process_w_price_qty(self, new_ord_req, price, qty):
         self._init_order_trailing_stop(new_ord_req)
+        trailing_stop_exec_price = self.__trailing_stop_exec_price[new_ord_req.cl_id][new_ord_req.cl_ord_id]
         if new_ord_req.is_buy():
-            new_ord_req.trailing_stop_exec_price = min(new_ord_req.trailing_stop_exec_price, price + new_ord_req.stop_price)
-            if price >= new_ord_req.trailing_stop_exec_price:
-                return FillInfo(qty, new_ord_req.trailing_stop_exec_price)
+            trailing_stop_exec_price = min(trailing_stop_exec_price, price + new_ord_req.stop_price)
+            self.__trailing_stop_exec_price[new_ord_req.cl_id][new_ord_req.cl_ord_id] = trailing_stop_exec_price
+            if price >= trailing_stop_exec_price:
+                return FillInfo(qty, trailing_stop_exec_price)
         elif new_ord_req.is_sell():
-            new_ord_req.trailing_stop_exec_price = max(new_ord_req.trailing_stop_exec_price, price - new_ord_req.stop_price)
-            if price <= new_ord_req.trailing_stop_exec_price:
-                return FillInfo(qty, new_ord_req.trailing_stop_exec_price)
+            trailing_stop_exec_price = max(trailing_stop_exec_price, price - new_ord_req.stop_price)
+            self.__trailing_stop_exec_price[new_ord_req.cl_id][new_ord_req.cl_ord_id] = trailing_stop_exec_price
+            if price <= trailing_stop_exec_price:
+                return FillInfo(qty, trailing_stop_exec_price)
         return None
+
+    def trailing_stop_exec_price(self, cl_id, cl_ord_id):
+        return self.__trailing_stop_exec_price[cl_id].get(cl_ord_id, 0)

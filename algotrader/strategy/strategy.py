@@ -11,6 +11,7 @@ from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr, Instrument
 from algotrader.utils import logger
 from algotrader.trading.position import Position, PositionHolder
+from algotrader.utils.clock import simluation_clock, realtime_clock
 
 
 class TradingConfig(object):
@@ -30,14 +31,14 @@ class LiveTradingConfig(TradingConfig):
     def __init__(self, broker_id=IBBroker.ID, feed_id=IBBroker.ID, data_type=Bar, bar_type=BarType.Time,
                  bar_size=BarSize.S1):
         super(LiveTradingConfig, self).__init__(broker_id=broker_id, feed_id=feed_id, data_type=data_type,
-                                                bar_type=bar_type, bar_size=bar_size, )
+                                                bar_type=bar_type, bar_size=bar_size, clock=realtime_clock)
 
 
 class BacktestingConfig(TradingConfig):
     def __init__(self, broker_id=Simulator.ID, feed_id=CSVDataFeed.ID, data_type=Bar, bar_type=BarType.Time,
                  bar_size=BarSize.D1, from_date=date(2010, 1, 1), to_date=date.today()):
         super(BacktestingConfig, self).__init__(broker_id=broker_id, feed_id=feed_id, data_type=data_type,
-                                                bar_type=bar_type, bar_size=bar_size)
+                                                bar_type=bar_type, bar_size=bar_size, clock=simluation_clock)
         self.from_date = from_date
         self.to_date = to_date
 

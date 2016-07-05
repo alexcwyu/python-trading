@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from algotrader.event.market_data import Bar
-from algotrader.event.order import ExecutionEventHandler, NewOrderSingle, OrdStatus, OrdAction, OrdType
+from algotrader.event.order import ExecutionEventHandler, NewOrderRequest, OrdStatus, OrdAction, OrdType
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.trading.instrument_data import inst_data_mgr
 
@@ -32,18 +32,18 @@ class SimulatorTest(TestCase):
         orders = self.simulator._get_orders()
         self.assertEqual(0, len(orders))
 
-        order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        order1 = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
         self.simulator.on_new_ord_req(order1)
 
         orders = self.simulator._get_orders()
         self.assertEqual(1, len(orders))
-        self.assertTrue(order1.inst_id in orders)
         self.assertEqual(1, len(orders[order1.inst_id]))
-        self.assertTrue(order1.ord_id in orders[order1.inst_id])
+        self.assertEqual(1, len(orders[order1.inst_id][order1.cl_id]))
+        self.assertIsNotNone(orders[order1.inst_id][order1.cl_id][order1.cl_ord_id])
         self.assertEqual(1, len(self.exec_handler.exec_reports))
 
         exec_report = self.exec_handler.exec_reports[0]
-        self.assert_exec_report(exec_report, order1.ord_id, 0, 0, OrdStatus.SUBMITTED)
+        self.assert_exec_report(exec_report, order1.cl_id, order1.cl_ord_id, 0, 0, OrdStatus.SUBMITTED)
 
         bar1 = Bar(inst_id=1, open=20, high=21, low=19, close=20.5, vol=1000)
         bar2 = Bar(inst_id=1, open=16, high=18, low=15, close=17, vol=1000)
@@ -56,7 +56,7 @@ class SimulatorTest(TestCase):
         self.simulator.on_bar(bar2)
         self.assertEqual(1, len(self.exec_handler.exec_reports))
         exec_report = self.exec_handler.exec_reports[0]
-        self.assert_exec_report(exec_report, order1.ord_id, 1000, 18.5, OrdStatus.FILLED)
+        self.assert_exec_report(exec_report, order1.cl_id, order1.cl_ord_id, 1000, 18.5, OrdStatus.FILLED)
 
     def test_on_limit_order_immediate_fill(self):
         bar1 = Bar(inst_id=1, open=20, high=21, low=19, close=20.5, vol=1000)
@@ -67,24 +67,25 @@ class SimulatorTest(TestCase):
         orders = self.simulator._get_orders()
         self.assertEqual(0, len(orders))
 
-        order1 = NewOrderSingle(ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        order1 = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
         self.simulator.on_new_ord_req(order1)
 
         orders = self.simulator._get_orders()
         self.assertEqual(1, len(orders))
-        self.assertTrue(order1.inst_id in orders)
-        self.assertEqual(0, len(orders[order1.inst_id]))
+        self.assertEqual(1, len(orders[order1.inst_id]))
+        self.assertEqual(0, len(orders[order1.inst_id][order1.cl_id]))
 
         self.assertEqual(2, len(self.exec_handler.exec_reports))
 
         exec_report = self.exec_handler.exec_reports[0]
-        self.assert_exec_report(exec_report, order1.ord_id, 0, 0, OrdStatus.SUBMITTED)
+        self.assert_exec_report(exec_report, order1.cl_id, order1.cl_ord_id, 0, 0, OrdStatus.SUBMITTED)
 
         exec_report = self.exec_handler.exec_reports[1]
-        self.assert_exec_report(exec_report, order1.ord_id, 1000, 18.5, OrdStatus.FILLED)
+        self.assert_exec_report(exec_report, order1.cl_id, order1.cl_ord_id, 1000, 18.5, OrdStatus.FILLED)
 
-    def assert_exec_report(self, exec_report, ord_id, last_qty, last_price, status):
-        self.assertEqual(ord_id, exec_report.ord_id)
+    def assert_exec_report(self, exec_report, cl_id, cl_ord_id, last_qty, last_price, status):
+        self.assertEqual(cl_id, exec_report.cl_id)
+        self.assertEqual(cl_ord_id, exec_report.cl_ord_id)
         self.assertEqual(last_qty, exec_report.last_qty)
         self.assertEqual(last_price, exec_report.last_price)
         self.assertEqual(status, exec_report.status)

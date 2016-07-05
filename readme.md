@@ -40,5 +40,5 @@ TODO
  * Supports Machine Learning Library, e.g. Theano 
  * Supports Spark
  * Supports Parallel processing, for optimization and backtest. Results should be persisted into DB and can be viewed by HTML5 UI.
- * Supports FIX workflow, refactor order into order and orderEvent (Order contains state and with different order events: NewOrderSingle , OrderCancelRequest, OrderCancelReplaceRequest, OrderStatusRequest and execution events: ExecutionReport, OrderStatus)
+ * Supports FIX workflow, refactor order into order and orderEvent (Order contains state and with different order events: NewOrderRequest , OrderCancelRequest, OrderCancelReplaceRequest, OrderStatusRequest and execution events: ExecutionReport, OrderStatus)
  * Remote OMS (strategies can be run separately and send order request to remote OrderServer)

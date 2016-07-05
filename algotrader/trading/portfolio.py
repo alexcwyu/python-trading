@@ -18,7 +18,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         super(Portfolio, self).__init__()
         self.portf_id = portf_id
         self.ord_reqs = defaultdict(dict)
-        self.orders = {}
+        self.orders = defaultdict(dict)
 
         self.performance_series = DataSeries()
         self.total_equity = 0
@@ -37,6 +37,11 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
             order_mgr.start()
             EventBus.data_subject.subscribe(self.on_next)
 
+    def all_orders(self):
+        return [order for cl_orders in self.orders.values() for order in cl_orders.values()]
+
+    def get_order(self, cl_id, cl_ord_id):
+        return self.orders[cl_id].get(cl_ord_id, None)
 
     def on_bar(self, bar):
         super(Portfolio, self).on_bar(bar)
@@ -59,7 +64,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
 
         order = order_mgr.send_order(new_ord_req)
 
-        self.orders[order.ord_id] = order
+        self.orders[order.cl_id][order.cl_ord_id] = order
         self.open_position(order=order)
         return order
 
@@ -97,10 +102,15 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         new_ord_req = self.ord_reqs[exec_report.cl_id][exec_report.cl_ord_id]
         direction = 1 if new_ord_req.action == OrdAction.BUY else -1
         self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
-        self.__update_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
+        self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
+    def update_position_price(self, timestamp, inst_id, price):
+        super(Portfolio, self).update_position_price(timestamp, inst_id, price)
+        self.__update_equity(timestamp, inst_id, price)
+        for analyzer in self.analyzers:
+            analyzer.update(timestamp)
 
-    def __update_equity(self, time):
+    def __update_equity(self, time, inst_id, price):
         self.stock_value = 0
         for position in self.positions.itervalues():
             self.stock_value += position.current_value()

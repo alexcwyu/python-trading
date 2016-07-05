@@ -4,7 +4,7 @@ from datetime import date, timedelta
 
 from algotrader.event import EventLogger
 from algotrader.event.market_data import Bar, Trade, Quote, BarSize
-from algotrader.event.order import NewOrderSingle, OrdAction, OrdType
+from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.provider import SubscriptionKey, HistDataSubscriptionKey
 from algotrader.utils import logger
@@ -84,7 +84,7 @@ def test_sub_realtime_quote(broker):
 def test_mkt_order(broker, inst_id=3, action=OrdAction.BUY, qty=1000):
     print "### testing market order"
     cl_ord_id = next_cl_ord_id()
-    order = NewOrderSingle(cl_ord_id=cl_ord_id, inst_id=inst_id, action=action, type=OrdType.MARKET, qty=1000)
+    order = NewOrderRequest(cl_ord_id=cl_ord_id, inst_id=inst_id, action=action, type=OrdType.MARKET, qty=1000)
     broker.on_new_ord_req(order)
     time.sleep(10)
 
@@ -92,13 +92,13 @@ def test_mkt_order(broker, inst_id=3, action=OrdAction.BUY, qty=1000):
 def test_lmt_order_update_cancel(broker, inst_id=3, qty=1000, limit_price=100):
     print "### testing limit order"
     cl_ord_id = next_cl_ord_id()
-    order = NewOrderSingle(cl_ord_id=cl_ord_id, inst_id=inst_id, action=OrdAction.BUY, type=OrdType.LIMIT, qty=qty,
+    order = NewOrderRequest(cl_ord_id=cl_ord_id, inst_id=inst_id, action=OrdAction.BUY, type=OrdType.LIMIT, qty=qty,
                            limit_price=limit_price)
     broker.on_new_ord_req(order)
     time.sleep(10)
 
     print "### testing order update"
-    order = NewOrderSingle(cl_ord_id=cl_ord_id, inst_id=inst_id, action=OrdAction.BUY, type=OrdType.LIMIT, qty=qty * 2,
+    order = NewOrderRequest(cl_ord_id=cl_ord_id, inst_id=inst_id, action=OrdAction.BUY, type=OrdType.LIMIT, qty=qty * 2,
                            limit_price=limit_price * 1.2)
     broker.on_ord_replace_req(order)
     time.sleep(10)

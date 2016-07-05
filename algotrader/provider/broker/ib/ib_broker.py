@@ -106,32 +106,35 @@ class SubscriptionRegistry(object):
 
 class OrderReqRegistry(object):
     def __init__(self):
-        self.__clordid__order_dict = defaultdict(dict)
-        self.__ordid_clordid_dict = {}
+        self.__clordid_ordreq_dict = defaultdict(dict)
+        self.__ordid_ordreq_dict = {}
+        self.__clordid_ordid_dict = defaultdict(dict)
 
-    def add_ord_req(self, new_ord_req):
-        self.__clordid__order_dict[new_ord_req.cl_id][new_ord_req.cl_ord_id] = new_ord_req
-        self.__ordid_clordid_dict[new_ord_req.ord_id] = new_ord_req
+    def add_ord_req(self, ord_id, new_ord_req):
+        self.__clordid_ordreq_dict[new_ord_req.cl_id][new_ord_req.cl_ord_id] = new_ord_req
+        self.__ordid_ordreq_dict[ord_id] = new_ord_req
+        self.__clordid_ordid_dict[new_ord_req.cl_id][new_ord_req.cl_ord_id] = ord_id
 
-    def remove_ord_req(self, new_ord_req):
-        if new_ord_req.cl_id in self.__clordid__order_dict:
-            cl_ord_map = self.__clordid__order_dict[new_ord_req.cl_id]
+
+    def remove_ord_req(self, ord_id, new_ord_req):
+        if new_ord_req.cl_id in self.__clordid_ordreq_dict:
+            cl_ord_map = self.__clordid_ordreq_dict[new_ord_req.cl_id]
             if new_ord_req.cl_ord_id in cl_ord_map:
                 del cl_ord_map[new_ord_req.cl_ord_id]
-        if new_ord_req.ord_id in self.__ordid_clordid_dict:
-            del self.__ordid_clordid_dict[new_ord_req.ord_id]
+        if ord_id in self.__ordid_ordreq_dict:
+            del self.__ordid_ordreq_dict[ord_id]
 
     def get_ord_req(self, ord_id=None, cl_id=None, cl_ord_id=None):
         if ord_id:
             return self._get_ord_id_ordid_clordid_dict.get(ord_id, None)
 
         if cl_id and cl_ord_id:
-            return self.__clordid__order_dict.get(cl_ord_id, None)
+            return self.__clordid_ordreq_dict.get(cl_ord_id, None)
 
     def get_ord_id(self, cl_id, cl_ord_id):
-        if cl_id in self.__clordid__order_dict:
-            if cl_ord_id in self.__clordid__order_dict[cl_id]:
-                return self.__clordid__order_dict[cl_id][cl_ord_id].ord_id
+        if cl_id in self.__clordid_ordid_dict:
+            if cl_ord_id in self.__clordid_ordid_dict[cl_id]:
+                return self.__clordid_ordid_dict[cl_id][cl_ord_id]
         return None
 
 
@@ -310,44 +313,41 @@ class IBBroker(IBSocket, Broker, Feed):
     def on_new_ord_req(self, new_ord_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))
 
-        # TODO...why? duplicated ord_id_setting....
-        new_ord_req.ord_id = self.next_order_id()
-        self.__ord_req_reg.add_ord_req(new_ord_req)
+        ord_id = self.next_order_id()
+        self.__ord_req_reg.add_ord_req(ord_id, new_ord_req)
 
         ib_order = self.__model_factory.create_ib_order(new_ord_req)
         contract = self.__model_factory.create_ib_contract(new_ord_req.inst_id)
 
-        self.__tws.placeOrder(new_ord_req.ord_id, contract, ib_order)
+        self.__tws.placeOrder(ord_id, contract, ib_order)
 
     def on_ord_replace_req(self, ord_replace_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_replace_req))
 
         existing_ord_req = self.__ord_req_reg.get_ord_req(cl_id=ord_replace_req.cl_id, cl_ord_id=ord_replace_req.cl_ord_id)
-        if existing_ord_req and existing_ord_req.ord_id:
-            ord_replace_req.ord_id = existing_ord_req.ord_id
+        if existing_ord_req:
 
-            # TODO fix this
+            ord_id = self.__ord_req_reg.get_ord_id(cl_id=ord_replace_req.cl_id, cl_ord_id=ord_replace_req.cl_ord_id)
+
             updated_ord_req = existing_ord_req.update_ord_request(ord_replace_req)
 
-            self.__ord_req_reg.add_ord_req(updated_ord_req)
+            self.__ord_req_reg.add_ord_req(ord_id, updated_ord_req)
 
             ib_order = self.__model_factory.create_ib_order(updated_ord_req)
             contract = self.__model_factory.create_ib_contract(updated_ord_req.inst_id)
-            self.__tws.placeOrder(updated_ord_req.ord_id, contract, ib_order)
+            self.__tws.placeOrder(ord_id, contract, ib_order)
         else:
             logger.error("cannot find old order, cl_ord_id = %s" % ord_replace_req.cl_ord_id)
 
     def on_ord_cancel_req(self, ord_cancel_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_cancel_req))
 
-        ord_id = ord_cancel_req.ord_id
-        if not ord_id:
-            ord_id = self.__ord_req_reg.get_ord_id(cl_id=ord_cancel_req.cl_id, cl_ord_id=ord_cancel_req.cl_ord_id)
+        ord_id = self.__ord_req_reg.get_ord_id(cl_id=ord_cancel_req.cl_id, cl_ord_id=ord_cancel_req.cl_ord_id)
 
         if ord_id:
             self.__tws.cancelOrder(ord_id)
         else:
-            logger.error("cannot find old order, ord_id = %s, cl_ord_id = %s" % (ord_cancel_req.ord_id, ord_cancel_req.cl_ord_id))
+            logger.error("cannot find old order, cl_id = %s, cl_ord_id = %s" % (ord_cancel_req.cl_id, ord_cancel_req.cl_ord_id))
 
     def __req_open_orders(self):
         self.__tws.reqOpenOrders()
@@ -515,7 +515,7 @@ class IBBroker(IBSocket, Broker, Feed):
             if create_er:
                 self.__execution_event_bus.on_next(OrderStatusUpdate(
                     broker_id=self.ID,
-                    ord_id=new_ord_req.ord_id,
+                    ord_id=id,
                     cl_id=new_ord_req.cl_id,
                     cl_ord_id=new_ord_req.cl_ord_id,
                     timestamp=datetime.now(),
@@ -533,7 +533,7 @@ class IBBroker(IBSocket, Broker, Feed):
         if new_ord_req:
             self.__execution_event_bus.on_next(ExecutionReport(
                 broker_id=self.ID,
-                ord_id=new_ord_req.ord_id,
+                ord_id=execution.orderId,
                 cl_id=new_ord_req.cl_id,
                 cl_ord_id=new_ord_req.cl_ord_id,
                 er_id=execution.execId,

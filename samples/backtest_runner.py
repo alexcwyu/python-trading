@@ -57,8 +57,8 @@ def main():
     plotter = StrategyPlotter(strategy)
     plotter.plot(instrument=4)
 
-    # import matplotlib.pyplot as plt
-    # plt.show()
+    #import matplotlib.pyplot as plt
+    #plt.show()
 
 
 if __name__ == "__main__":

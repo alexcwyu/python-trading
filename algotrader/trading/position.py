@@ -29,15 +29,7 @@ class Position(object):
         total = 0
         for cl_id, cl_filled_qty_dict in self.filled_qty_dict.iteritems():
             for cl_ord_id, reg_qty in cl_filled_qty_dict.iteritems():
-                if cl_ord_id in self.orders[cl_id]:
-                    order = self.orders[cl_id][cl_ord_id]
-                    direction = 1 if order.action == OrdAction.BUY else -1
-                    qty = order.filled_qty * direction
-                    assert qty == reg_qty
-                    total += qty
-                else:
-                    # exec report is added to position before order is registered to position. This could be happened in backtest.
-                    total += reg_qty
+                total += reg_qty
         return total
 
     def ordered_qty(self):
@@ -68,13 +60,6 @@ class PositionHolder(MarketDataEventHandler):
             self.positions[inst_id] = Position(inst_id=inst_id)
         position = self.positions[inst_id]
         return position
-
-    # def add_order_to_position(self, order):
-    #     if order.inst_id not in self.positions:
-    #         self.positions[order.inst_id] = Position(inst_id=order.inst_id)
-    #     position = self.positions[order.inst_id]
-    #     position.add_order(order)
-    #     return position
 
     def update_position_price(self, time, inst_id, price):
         if inst_id in self.positions:

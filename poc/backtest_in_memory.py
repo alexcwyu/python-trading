@@ -1,5 +1,6 @@
 
 from datetime import date
+from datetime import datetime
 from datetime import timedelta
 
 from algotrader.chart.plotter import StrategyPlotter
@@ -17,7 +18,7 @@ from algotrader.trading.portfolio import Portfolio
 from algotrader.utils import clock
 import pandas as pd
 import numpy as np
-import  math
+import math
 
 
 class BacktestRunner(object):
@@ -46,7 +47,7 @@ def main():
 
     portfolio = Portfolio(cash=100000)
 
-    start_date = date(2000, 1, 1)
+    start_date = datetime(2000, 1, 1)
     num_days = 3000
 
     dates = [start_date + timedelta(days=i) for i in range(num_days)]
@@ -98,14 +99,14 @@ def main():
     # strategy = Down2PctStrategy("down2%", portfolio,
     #                             instrument=0, qty=1000,  trading_config=config, ref_data_mgr=mgr)
 
-    strategy = SMAStrategy("sma", portfolio, instrument=0, qty=1000, trading_config=config)
+    strategy = SMAStrategy("sma", portfolio, instrument=0, qty=1, trading_config=config)
 
     runner = BacktestRunner(strategy)
     runner.start()
     print portfolio.get_result()
 
     # pyfolio
-    # rets = strategy.get_portfolio().get_return()
+    rets = strategy.get_portfolio().get_return()
     # import pyfolio as pf
     # pf.create_returns_tear_sheet(rets)
     # pf.create_full_tear_sheet(rets)
@@ -117,6 +118,15 @@ def main():
     #import matplotlib.pyplot as plt
     #plt.show()
 
+    import talib
+    sma10 = talib.SMA(df.Close.values, 10)
+    sma25 = talib.SMA(df.Close.values, 25)
+
+#    signal = pd.Series(1*(sma10 > sma25),index=df.index.tz_localize("UTC"))
+    signal = pd.Series(1*(sma10 > sma25),index=df.index)
+    target_rets = df["Close"].pct_change()*signal.shift(1)
+    target_rets.index = target_rets.index.tz_localize("UTC")
+    print target_rets.values[1:] - rets.values
 
 if __name__ == "__main__":
     main()

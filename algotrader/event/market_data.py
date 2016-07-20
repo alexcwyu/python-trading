@@ -1,6 +1,22 @@
 from algotrader.event.event import Event, EventHandler
 
 from algotrader.utils import logger
+import datetime
+
+
+class MarketDataEventHandler(EventHandler):
+    def on_bar(self, bar):
+        logger.debug("[%s] %s" % (self.__class__.__name__, bar))
+
+    def on_quote(self, quote):
+        logger.debug("[%s] %s" % (self.__class__.__name__, quote))
+
+    def on_trade(self, trade):
+        logger.debug("[%s] %s" % (self.__class__.__name__, trade))
+
+    def on_market_depth(self, market_depth):
+        logger.debug("[%s] %s" % (self.__class__.__name__, market_depth))
+
 
 class BarSize(object):
     S1 = 1
@@ -58,6 +74,7 @@ class MarketDataEvent(Event):
         raise NotImplementedError()
 
 
+from algotrader.utils.clock import Clock
 class Bar(MarketDataEvent):
     __slots__ = (
         'type',
@@ -102,6 +119,37 @@ class Bar(MarketDataEvent):
         # return self.adj_close if self.adj_close > 0 else self.close
         return self.close
 
+    def to_dict(self, all_data=False):
+        data = {"timestamp": self.timestamp, "open": self.open, "high": self.high, "low": self.low, "close": self.close,
+                "vol": self.vol}
+
+        if all_data:
+            data['begin_time'] = self.begin_time
+            data['inst_id'] = self.inst_id
+            data['type'] = self.type
+            data['size'] = self.size
+            data['adj_close'] = self.adj_close
+
+        return data
+
+    @staticmethod
+    def get_next_bar_start_time(timestamp, bar_size):
+        return Bar.get_current_bar_start_time(timestamp, bar_size) + bar_size * 1000
+
+    @staticmethod
+    def get_current_bar_end_time(timestamp, bar_size):
+        return Bar.get_next_bar_start_time(timestamp, bar_size) - 1
+
+    @staticmethod
+    def get_current_bar_start_time(timestamp, bar_size):
+        if bar_size < BarSize.D1:
+            return int(timestamp / (bar_size * 1000)) * bar_size * 1000
+        else:
+            dt = datetime.datetime.fromtimestamp(timestamp / 1000)
+            dt = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
+            next_ts = Clock.datetime_to_unixtimemillis(dt)
+            return next_ts
+
 
 class Trade(MarketDataEvent):
     __slots__ = (
@@ -123,6 +171,14 @@ class Trade(MarketDataEvent):
 
     def on(self, handler):
         handler.on_trade(self)
+
+    def to_dict(self, all_data=False):
+        data = {"timestamp": self.timestamp, "price": self.price, "size": self.size}
+
+        if all_data:
+            data['inst_id'] = self.inst_id
+
+        return data
 
 
 class Quote(MarketDataEvent):
@@ -157,6 +213,13 @@ class Quote(MarketDataEvent):
             return self.bid
         return self.ask
 
+    def to_dict(self, all_data=False):
+        data = {"timestamp": self.timestamp, "bid": self.bid, "ask": self.ask, "bid_size": self.bid_size,
+                "ask_size": self.ask_size}
+        if all_data:
+            data['inst_id'] = self.inst_id
+        return data
+
 
 class MarketDepth(MarketDataEvent):
     __slots__ = (
@@ -189,19 +252,3 @@ class MarketDepth(MarketDataEvent):
 
     def on(self, handler):
         handler.on_market_depth(self)
-
-
-class MarketDataEventHandler(EventHandler):
-
-    def on_bar(self, bar):
-        logger.debug("[%s] %s" % (self.__class__.__name__, bar))
-
-    def on_quote(self, quote):
-        logger.debug("[%s] %s" % (self.__class__.__name__, quote))
-
-    def on_trade(self, trade):
-        logger.debug("[%s] %s" % (self.__class__.__name__, trade))
-
-    def on_market_depth(self, market_depth):
-        logger.debug("[%s] %s" % (self.__class__.__name__, market_depth))
-

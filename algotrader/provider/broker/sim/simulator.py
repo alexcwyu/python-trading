@@ -123,7 +123,7 @@ class Simulator(Broker, MarketDataEventHandler):
                                        cl_id=new_ord_req.cl_id,
                                        cl_ord_id=new_ord_req.cl_ord_id,
                                        inst_id=new_ord_req.inst_id,
-                                       timestamp=clock.default_clock.current_date_time(),
+                                       timestamp=clock.default_clock.now(),
                                        status=ord_status)
         self.__exec_handler.on_ord_upd(ord_update)
 
@@ -135,7 +135,7 @@ class Simulator(Broker, MarketDataEventHandler):
                                       cl_id=new_ord_req.cl_id,
                                       cl_ord_id=new_ord_req.cl_ord_id,
                                       inst_id=new_ord_req.inst_id,
-                                      timestamp=clock.default_clock.current_date_time(),
+                                      timestamp=clock.default_clock.now(),
                                       er_id=self.next_exec_id(),
                                       last_qty=last_qty,
                                       last_price=last_price,

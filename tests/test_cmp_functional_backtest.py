@@ -48,7 +48,8 @@ class TestCompareWithFunctionalBacktest(TestCase):
                                     "name" : ["New York Stock Exchange"]})
         mgr = MockRefDataManager(inst_df=inst_df,ccy_df=ccy_df,exch_df=exchange_df)
 
-        portfolio = Portfolio(cash=1000000)
+        init_cash = 1000000
+        portfolio = Portfolio(cash=init_cash)
 
         start_date = datetime(2000, 1, 1)
         num_days = 3000
@@ -99,7 +100,8 @@ class TestCompareWithFunctionalBacktest(TestCase):
         mgr.get_insts([instrument])
         mgr.get_inst(instrument)
 
-        strategy = SMAStrategy("sma", portfolio, instrument=0, qty=1000, trading_config=config)
+        lot_size = 10000
+        strategy = SMAStrategy("sma", portfolio, instrument=0, qty=lot_size, trading_config=config)
 
         runner = BacktestRunner(strategy)
         runner.start()
@@ -111,13 +113,23 @@ class TestCompareWithFunctionalBacktest(TestCase):
         sma25 = talib.SMA(df.Close.values, 25)
 
         signal = pd.Series(1*(sma10 > sma25),index=df.index)
-        target_rets = df["Close"].pct_change()*signal.shift(1)
-        target_rets.index = target_rets.index.tz_localize("UTC")
-        print target_rets
-        print rets
+
+        cash = []
+        stock_value = []
+        cash.append(init_cash)
+        stock_value.append(0)
+        for i in xrange(1, signal.shape[0]):
+            cash.append(cash[-1] - lot_size*(signal[i]-signal[i-1])*df['Close'][i])
+            stock_value.append(lot_size*signal[i]*df['Close'][i])
+
+        target_port = pd.DataFrame({"cash": cash,
+                                    "stock_value": stock_value})
+
+        target_port["total_equity"] = target_port["cash"] + target_port["stock_value"]
+        target_port["return"] = target_port["total_equity"].pct_change()
 
         try:
-            np.testing.assert_almost_equal(target_rets[1:], rets.values, 5)
+            np.testing.assert_almost_equal(target_port["return"].values[1:], rets.values, 5)
         except AssertionError as e:
             self.fail(e.message)
 

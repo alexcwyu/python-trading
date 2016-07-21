@@ -14,6 +14,7 @@ from test_portfolio import PortfolioTest
 from test_position import PositionTest
 from test_ser_deser import SerializerTest
 from test_talib_wrapper import TALibSMATest
+from test_cmp_functional_backtest import TestCompareWithFunctionalBacktest
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -31,6 +32,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(PositionTest))
     test_suite.addTest(unittest.makeSuite(SerializerTest))
     test_suite.addTest(unittest.makeSuite(TALibSMATest))
+    test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
     return test_suite
 
 mySuit = suite()

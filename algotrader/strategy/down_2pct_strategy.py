@@ -7,8 +7,8 @@ from algotrader.utils import logger
 
 class Down2PctStrategy(Strategy):
     def __init__(self, stg_id, portfolio, instrument, qty,
-                 trading_config):
-        super(Down2PctStrategy, self).__init__(stg_id, portfolio, instrument, trading_config)
+                 trading_config, ref_data_mgr=None):
+        super(Down2PctStrategy, self).__init__(stg_id, portfolio, instrument, trading_config, ref_data_mgr)
         self.day_count = 0
         self.order = None
         self.qty = qty

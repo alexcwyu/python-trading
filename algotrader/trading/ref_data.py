@@ -65,6 +65,9 @@ class Instrument:
         self.strike = float(strike) if strike else 0.0
         self.margin = float(margin) if margin else 0.0
 
+    def __repr__(self):
+        return self.__str__()
+
     def __str__(self):
         return "Instrument(inst_id = %s, name = %s, type = %s, symbol = %s, exch_id = %s, ccy_id = %s)" \
                % (self.inst_id, self.name, self.type, self.symbol, self.exch_id, self.ccy_id)

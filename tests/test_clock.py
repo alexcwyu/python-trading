@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.utils.clock import simluation_clock, realtime_clock, Clock
-
+import gevent
 
 class ClockTest(TestCase):
     endtime = []
@@ -106,14 +106,22 @@ class ClockTest(TestCase):
         ts = Clock.datetime_to_unixtimemillis(datetime.datetime.now())
         ts2 = realtime_clock.now()
         self.assertTrue(abs(ts - ts2) <= 10)
+        time.sleep(2)
+        ts3 = realtime_clock.now()
+        self.assertAlmostEqual(abs(ts3 - ts2), 2000, -2)
 
     def test_real_time_clock_schedule_absolute(self):
+        from rx.concurrency.mainloopscheduler import GEventScheduler
+        import gevent
+        s1 =gevent.core.time()
+        s2 = datetime.datetime.fromtimestamp(s1/1000)
+        print s1, s2
         start = realtime_clock.now()
         dt = Clock.unixtimemillis_to_datetime(start)
-        abs_time = dt + datetime.timedelta(seconds=1)
+        abs_time = dt + datetime.timedelta(seconds=2)
         realtime_clock.schedule_absolute(abs_time, ClockTest.action)
         self.assertEquals([], ClockTest.endtime)
-        time.sleep(1.1)
+        gevent.sleep(10)
         self.assertEquals(1, len(ClockTest.endtime))
         self.assertTrue(abs(ClockTest.endtime[0] - start) > 10)
 

@@ -30,9 +30,14 @@ class Serializable(object):
                 self.__dict__[k] = v
 
     def __data__(self):
-        return {s: getattr(self, s) for s in
-                chain.from_iterable(getattr(cls, '__slots__', []) for cls in self.__class__.__mro__) if
-                hasattr(self, s)}
+        attr_list = []
+        for cls in self.__class__.__mro__:
+            attrs = getattr(cls, '__slots__', [])
+            if isinstance(attrs, (list, tuple)):
+                attr_list.append(attrs)
+            else:
+                attr_list.append([attrs])
+        return {s: getattr(self, s) for s in chain.from_iterable(attr_list) if hasattr(self, s)}
 
     def __eq__(self, other):
         return (isinstance(other, self.__class__)

@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from rx.subjects import Subject
 
-from algotrader.event import EventBus
+from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import MarketDataEventHandler, Bar, BarType, BarSize
 from algotrader.utils.clock import default_clock
 

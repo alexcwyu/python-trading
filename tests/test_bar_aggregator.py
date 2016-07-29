@@ -1,338 +1,263 @@
-import datetime
 from unittest import TestCase
 
-import numpy as np
-import pandas as pd
-from algotrader.event.market_data import Bar, Trade, Quote
-from algotrader.utils.time_series import DataSeries
-from algotrader.trading.bar_aggregator import BarAggregator
+from algotrader.event.market_data import Trade, Bar, Quote
+from algotrader.trading.bar_aggregator import BarAggregator, BarInputType, BarType
 from algotrader.utils.clock import simluation_clock
-from algotrader.event.event_bus import EventBus, EventLogger
+from algotrader.utils.time_series import DataSeries
+
 
 class BarAggregatorTest(TestCase):
+    class DummyEventBus:
+        def __init__(self):
+            self.items = []
+
+        def reset(self):
+            self.items = []
+
+        def on_next(self, item):
+            print item
+            self.items.append(item)
 
     def setUp(self):
         simluation_clock.reset()
-
-    def test_init_w_keys(self):
-        series = DataSeries()
-
-        agg = BarAggregator(data_bus=EventBus.data_subject, clock=simluation_clock)
-
-        series.add(Trade(timestamp= 0, inst_id = 1, price=20, size=200).to_dict())
-
-        result = series.get_data()
-
-        self.assertEqual(1, len(result))
-        self.assertTrue("timestamp" in result[0])
-        self.assertTrue("v1" in result[0])
-        self.assertFalse("v2" in result[0])
-
-    def test_add(self):
-        series = DataSeries()
-
-        self.assertTrue(len(series.get_data()) == 0)
-
-        series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
-        series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
-
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 2, "v2": 2}], series.get_data())
-
-        series.add({"timestamp": self.t2, "v1": 3, "v2": 3})
-
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 3, "v2": 3}], series.get_data())
-
-        series.add({"timestamp": self.t3, "v1": 4, "v2": 4})
-
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 3, "v2": 3},
-                          {"timestamp": self.t3, "v1": 4, "v2": 4}], series.get_data())
-
-    def test_current_time(self):
-        series = DataSeries()
-        self.assertEqual(None, series.current_time())
-
-        series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
-        self.assertEqual(self.t1, series.current_time())
-
-        series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
-        self.assertEqual(self.t1, series.current_time())
-
-        series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
-        self.assertEqual(self.t2, series.current_time())
-
-    def test_get_data_dict(self):
-        series = DataSeries()
-
-        series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
-        series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
-
-        self.assertEqual({"timestamp": {self.t1: self.t1, self.t2: self.t2}, "v1": {self.t1: 1, self.t2: 2},
-                          "v2": {self.t1: 1, self.t2: 2}}, series.get_data_dict())
-
-        self.assertEqual({"v1": {self.t1: 1, self.t2: 2}, "v2": {self.t1: 1, self.t2: 2}},
-                         series.get_data_dict(['v1', 'v2']))
-        self.assertEqual({self.t1: 1, self.t2: 2}, series.get_data_dict('v1'))
-
-    def test_get_data(self):
-        series = DataSeries()
-
-        series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
-        series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
-
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 2, "v2": 2}], series.get_data())
-
-    def test_get_series(self):
-
-        close = self.__create_series()
-
-        t = self.t1
-        time_idx = []
-        for idx, value in enumerate(self.values):
-            time_idx.append(t)
-            t = t + datetime.timedelta(0, 3)
-
-        v1 = pd.Series(self.values, index=time_idx, name='v1')
-        v2 = pd.Series(self.values, index=time_idx, name='v2')
-
-        self.assertTrue(v1.equals(close.get_series('v1')))
-
-        result = close.get_series(['v1', 'v2'])
-        self.assertTrue(len(result) == 2)
-        self.assertTrue(v1.equals(result['v1']))
-        self.assertTrue(v2.equals(result['v2']))
-
-    def test_get_data_frame(self):
-        close = self.__create_series()
-
-        t = self.t1
-        time_idx = []
-        for idx, value in enumerate(self.values):
-            time_idx.append(t)
-            t = t + datetime.timedelta(0, 3)
-
-        v1 = pd.Series(self.values, index=time_idx, name='v1')
-        v2 = pd.Series(self.values, index=time_idx, name='v2')
-
-        df1 = pd.DataFrame({'v1': v1})
-        df2 = pd.DataFrame({'v1': v1, 'v2': v2})
-
-        self.assertTrue(df1.equals(close.get_data_frame('v1')))
-        self.assertTrue(df2.equals(close.get_data_frame(['v1', 'v2'])))
-
-    def test_size(self):
-        series = DataSeries()
-        self.assertEqual(0, series.size())
-
-        series.add({"timestamp": self.t1, "v1": 1})
-        self.assertEqual(1, series.size())
-
-        series.add({"timestamp": self.t2, "v1": 1})
-        self.assertEqual(2, series.size())
-
-    def test_now(self):
-        series = DataSeries()
-        self.assertTrue(np.isnan(series.now()))
-
-        series.add({"timestamp": self.t1, "v1": 1, "v2": 2})
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.now())
-
-        series.add({"timestamp": self.t2, "v1": 1.2, "v2": 2.2})
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.now())
-
-        series.add({"timestamp": self.t3, "v1": 1.3, "v2": 2.3})
-        series.add({"timestamp": self.t4, "v1": 1.4, "v2": 2.4})
-
-        self.assertEqual({"timestamp": self.t4, "v1": 1.4, "v2": 2.4}, series.now())
-        self.assertEqual(1.4, series.now(["v1"]))
-        self.assertEqual({"v1": 1.4, "v2": 2.4}, series.now(["v1", "v2"]))
-
-    def test_ago(self):
-        series = DataSeries()
-        self.assertTrue(np.isnan(series.now()))
-
-        series.add({"timestamp": self.t1, "v1": 1, "v2": 2})
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(0))
-
-        series.add({"timestamp": self.t2, "v1": 1.2, "v2": 2.2})
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(0))
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(1))
-
-        series.add({"timestamp": self.t3, "v1": 1.3, "v2": 2.3})
-        self.assertEqual({"timestamp": self.t3, "v1": 1.3, "v2": 2.3}, series.ago(0))
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(1))
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(2))
-
-        series.add({"timestamp": self.t4, "v1": 1.4, "v2": 2.4})
-        self.assertEqual({"timestamp": self.t4, "v1": 1.4, "v2": 2.4}, series.ago(0))
-        self.assertEqual({"timestamp": self.t3, "v1": 1.3, "v2": 2.3}, series.ago(1))
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(2))
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(3))
-
-        self.assertEqual({"v1": 1.4, "v2": 2.4}, series.ago(0, ["v1", "v2"]))
-        self.assertEqual(1.4, series.ago(0, "v1"))
-        self.assertEqual(1.4, series.ago(0, ["v1"]))
-
-    def test_get_by_idx(self):
-        series = DataSeries(keys=set(["timestamp", "v1", "v2"]))
-
-        series.add({"timestamp": self.t1, "v1": 2})
-        series.add({"timestamp": self.t2, "v1": 2.4})
-        series.add({"timestamp": self.t2, "v2": 3.0})
-
-        # index and key
-        self.assertEqual(2, series.get_by_idx(idx=0, keys="v1"))
-        self.assertTrue(np.isnan(series.get_by_idx(idx=0, keys="v2")))
-        self.assertEqual(2.4, series.get_by_idx(idx=1, keys="v1"))
-        self.assertEqual(3.0, series.get_by_idx(idx=1, keys="v2"))
-
-        # index only
-        self.assertEqual({"timestamp": self.t1, "v1": 2, "v2": np.nan}, series.get_by_idx(idx=0))
-        self.assertEqual({"timestamp": self.t2, "v1": 2.4, "v2": 3.0}, series.get_by_idx(idx=1))
-
-        # test index slice
-        series2 = self.create_series_by_list(range(100))
-        sliced = series2.get_by_idx(keys='v1', idx=slice(-10,None,None))
-        self.assertEqual(len(sliced), 10)
-
-        endPoint = series2.get_by_idx(keys='v1', idx=slice(-1, None, None))
-        self.assertEqual(endPoint[0], 99)
-
-
-    def test_get_by_time(self):
-        series = DataSeries(keys=set(["timestamp", "v1", "v2"]))
-
-        # time and key
-        series.add({"timestamp": self.t1, "v1": 2})
-        series.add({"timestamp": self.t2, "v1": 2.4})
-        series.add({"timestamp": self.t2, "v2": 3.0})
-
-        self.assertEqual(2, series.get_by_time(time=self.t1, keys="v1"))
-        self.assertTrue(np.isnan(series.get_by_time(time=self.t1, keys="v2")))
-        self.assertEqual(2.4, series.get_by_time(time=self.t2, keys="v1"))
-        self.assertEqual(3.0, series.get_by_time(time=self.t2, keys="v2"))
-        # time only
-        self.assertEqual({"timestamp": self.t1, "v1": 2, "v2": np.nan}, series.get_by_time(time=self.t1))
-        self.assertEqual({"timestamp": self.t2, "v1": 2.4, "v2": 3.0}, series.get_by_time(time=self.t2))
-
-    def test_override_w_same_time(self):
-        series = DataSeries(keys=set(["timestamp", "v1", "v2", "v3"]))
-
-        series.add({"timestamp": self.t1, "v1": 2, "v2": 3})
-        self.assertEqual(1, series.size())
-        self.assertEqual(2, series.get_by_idx(0, "v1"))
-        self.assertEqual(2, series.get_by_time(self.t1, "v1"))
-        self.assertEqual(3, series.get_by_idx(0, "v2"))
-        self.assertEqual(3, series.get_by_time(self.t1, "v2"))
-        self.assertTrue(np.isnan(series.get_by_idx(0, "v3")))
-        self.assertTrue(np.isnan(series.get_by_time(self.t1, "v3")))
-
-        series.add({"timestamp": self.t1, "v1": 2.4, "v2": 3.4, "v3": 1.1})
-        self.assertEqual(1, series.size())
-        self.assertEqual(2.4, series.get_by_idx(0, "v1"))
-        self.assertEqual(2.4, series.get_by_time(self.t1, "v1"))
-        self.assertEqual(3.4, series.get_by_idx(0, "v2"))
-        self.assertEqual(3.4, series.get_by_time(self.t1, "v2"))
-        self.assertEqual(1.1, series.get_by_idx(0, "v3"))
-        self.assertEqual(1.1, series.get_by_time(self.t1, "v3"))
-
-        series.add({"timestamp": self.t2, "v1": 2.6, "v2": 3.6})
-        self.assertEqual(2, series.size())
-        self.assertEqual(2.4, series.get_by_idx(0, "v1"))
-        self.assertEqual(2.4, series.get_by_time(self.t1, "v1"))
-        self.assertEqual(3.4, series.get_by_idx(0, "v2"))
-        self.assertEqual(3.4, series.get_by_time(self.t1, "v2"))
-        self.assertEqual(1.1, series.get_by_idx(0, "v3"))
-        self.assertEqual(1.1, series.get_by_time(self.t1, "v3"))
-
-        self.assertEqual(2.6, series.get_by_idx(1, "v1"))
-        self.assertEqual(2.6, series.get_by_time(self.t2, "v1"))
-        self.assertEqual(3.6, series.get_by_idx(1, "v2"))
-        self.assertEqual(3.6, series.get_by_time(self.t2, "v2"))
-        self.assertTrue(np.isnan(series.get_by_idx(1, "v3")))
-        self.assertTrue(np.isnan(series.get_by_time(self.t2, "v3")))
-
-    def test_subscript(self):
-        close = self.__create_series()
-        self.assertEquals([np.nan, np.nan], close[0:2, "v1"])
-        self.assertEquals({"v1": [np.nan, np.nan, 44.34, 44.09], "v2": [np.nan, np.nan, 44.34, 44.09]},
-                          close[0:4, ["v1", "v2"]])
-
-        self.assertEquals([np.nan, np.nan, 44.34, 44.09], close[0:4, "v1"])
-        self.assertEquals([np.nan, np.nan, 44.34, 44.09, 44.15, 43.61, 44.33, 44.83], close[0:8, "v1"])
-        self.assertEquals([45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.0], close[-8:, "v1"])
-
-    def test_mean(self):
-        close = self.__create_series()
-        self.assertAlmostEqual(45.2425, close.mean(start=-80, keys="v1"))
-        self.assertAlmostEqual({"v1": 45.2425, "v2": 45.2425}, close.mean(start=-80, keys=["v1", "v2"]))
-
-        self.assertAlmostEqual(45.2425, close.mean(keys="v1"))
-        self.assertAlmostEqual(44.215, close.mean(start=0, end=4, keys="v1"))
-        self.assertAlmostEqual(44.0475, close.mean(start=0, end=6, keys="v1"))
-
-    def test_median(self):
-        close = self.__create_series()
-        self.assertAlmostEqual(45.515, close.median(keys="v1"))
-        self.assertAlmostEqual(44.215, close.median(start=0, end=4, keys="v1"))
-        self.assertAlmostEqual(44.12, close.median(start=0, end=6, keys="v1"))
-
-    def test_max(self):
-        close = self.__create_series()
-        self.assertAlmostEqual(46.28, close.max(keys="v1"))
-        self.assertAlmostEqual(44.34, close.max(start=0, end=4, keys="v1"))
-        self.assertAlmostEqual(44.34, close.max(start=0, end=6, keys="v1"))
-
-    def test_min(self):
-        close = self.__create_series()
-        self.assertAlmostEqual(43.61, close.min(keys="v1"))
-        self.assertAlmostEqual(44.09, close.min(start=0, end=4, keys="v1"))
-        self.assertAlmostEqual(43.61, close.min(start=0, end=6, keys="v1"))
-
-    def test_std(self):
-        close = self.__create_series()
-        self.assertAlmostEqual(0.866584531364, close.std(keys="v1"))
-        self.assertAlmostEqual(0.125, close.std(start=0, end=4, keys="v1"))
-        self.assertAlmostEqual(0.268921456935, close.std(start=0, end=6, keys="v1"))
-
-    def test_var(self):
-        close = self.__create_series()
-        self.assertAlmostEqual(0.75096875, close.var(keys="v1"))
-        self.assertAlmostEqual(0.015625, close.var(start=0, end=4, keys="v1"))
-        self.assertAlmostEqual(0.07231875, close.var(start=0, end=6, keys="v1"))
-
-    def test_apply(self):
-        r = [x for x in range(20) if x % 2 == 0]
-
-        close = self.create_series_by_list(r)
-        f = lambda x : x**2
-        fvec = np.vectorize(f)
-        result = close.apply(keys="v1", func=fvec, start=None, end=None )
-
-        target = [x**2 for x in range(20) if x % 2 == 0]
-
-        try:
-            np.testing.assert_almost_equal(target, result, 9)
-        except AssertionError as e:
-            self.fail(e.message)
-
-        close = self.create_random_walk_series()
-        import talib
-        # talib.EMA is already supporting vectorized operation
-        result = close.apply(keys="v1", func=talib.EMA, start=None, end=None, timeperiod=40)
-        target = talib.EMA(np.array(close.get_series('v1')), timeperiod=40)
-
-        result[np.isnan(result)] = 0
-        target[np.isnan(target)] = 0
-
-        deviation = np.sum((result - target)**2)
-        self.assertTrue(deviation< 1e-6)
-
-        try:
-            np.testing.assert_almost_equal(target, result, 5)
-        except AssertionError as e:
-            self.fail(e.message)
-
+        self.input = DataSeries()
+        self.event_bus = BarAggregatorTest.DummyEventBus()
+        self.time = 9000000000
+        simluation_clock.update_time(self.time)
+
+    def update(self, input, data):
+        simluation_clock.update_time(data.timestamp)
+        self.input.add(data.to_dict())
+
+    def test_time_bar_from_trade(self):
+        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input)
+        agg.start()
+        self.assertEqual(0, len(self.event_bus.items))
+
+        self.time += 10000
+        t = Trade(timestamp=self.time, inst_id=1, price=20, size=200)
+        self.update(self.input, t)
+        self.assertEqual(1, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        # expect get a aggregated bar at 9000059999
+        self.time += 49999
+        t = Trade(timestamp=self.time, inst_id=1, price=10, size=200)
+        self.update(self.input, t)
+
+        items = self.event_bus.items
+        self.assertEqual(1, len(items))
+        self.assertEqual(0, agg.count())
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000000000, timestamp=9000059999, type=1, size=60, open=20, high=20, low=10,
+                close=10, vol=400, adj_close=0), items[0])
+
+    def test_time_bar_from_bid(self):
+        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+                            input_type=BarInputType.Bid)
+        agg.start()
+        self.assertEqual(0, len(self.event_bus.items))
+
+        self.time += 10000
+        t = Quote(timestamp=self.time, inst_id=1, bid=30, bid_size=100)
+        self.update(self.input, t)
+        self.assertEqual(1, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 10000
+        t = Quote(timestamp=self.time, inst_id=1, bid=10, bid_size=200)
+        self.update(self.input, t)
+        self.assertEqual(2, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 10000
+        t = Quote(timestamp=self.time, inst_id=1, bid=70, bid_size=300)
+        self.update(self.input, t)
+        self.assertEqual(3, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 29998
+        t = Quote(timestamp=self.time, inst_id=1, bid=50, bid_size=400)
+        self.update(self.input, t)
+        self.assertEqual(4, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 3
+        simluation_clock.update_time(self.time)
+        items = self.event_bus.items
+        self.assertEqual(1, len(items))
+        self.assertEqual(0, agg.count())
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000000000, timestamp=9000059999, type=1, size=60, open=30, high=70, low=10,
+                close=50, vol=1000, adj_close=0), items[0])
+
+    def test_time_bar_from_ask(self):
+        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+                            input_type=BarInputType.Ask)
+        agg.start()
+        self.assertEqual(0, len(self.event_bus.items))
+
+        self.time += 10000
+        t = Quote(timestamp=self.time, inst_id=1, ask=30, ask_size=100)
+        self.update(self.input, t)
+        self.assertEqual(1, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 60000
+        t = Quote(timestamp=self.time, inst_id=1, ask=70, ask_size=300)
+        self.update(self.input, t)
+        items = self.event_bus.items
+        self.assertEqual(1, len(items))
+        self.assertEqual(1, agg.count())
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000000000, timestamp=9000059999, type=1, size=60, open=30, high=30, low=30,
+                close=30, vol=100, adj_close=0), items[0])
+
+        self.event_bus.reset()
+
+        self.time += 49999
+        t = Quote(timestamp=self.time, inst_id=1, ask=20, ask_size=100)
+        self.update(self.input, t)
+        items = self.event_bus.items
+        self.assertEqual(1, len(items))
+        self.assertEqual(0, agg.count())
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000060000, timestamp=9000119999, type=1, size=60, open=70, high=70, low=20,
+                close=20, vol=400, adj_close=0), items[0])
+
+
+    def test_time_bar_from_bidask(self):
+        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+                            input_type=BarInputType.BidAsk)
+        agg.start()
+        self.assertEqual(0, len(self.event_bus.items))
+
+        self.time += 10000
+        t = Quote(timestamp=self.time, inst_id=1, ask=30, ask_size=100, bid=0, bid_size=200)
+        self.update(self.input, t)
+        self.assertEqual(1, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 10000
+        t = Quote(timestamp=self.time, inst_id=1, ask=20, ask_size=150, bid=10, bid_size=0)
+        self.update(self.input, t)
+        self.assertEqual(2, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 39999
+        t = Quote(timestamp=self.time, inst_id=1, ask=70, ask_size=300, bid=80, bid_size=10)
+        self.update(self.input, t)
+        items = self.event_bus.items
+        self.assertEqual(1, len(items))
+        self.assertEqual(0, agg.count())
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000000000, timestamp=9000059999, type=1, size=60, open=30, high=80, low=20,
+                close=80, vol=260, adj_close=0), items[0])
+
+
+    def test_time_bar_from_mid(self):
+        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+                            input_type=BarInputType.Middle)
+        agg.start()
+        self.assertEqual(0, len(self.event_bus.items))
+
+        self.time += 59999
+        t = Quote(timestamp=self.time, inst_id=1, ask=30, ask_size=100, bid=18, bid_size=200)
+        self.update(self.input, t)
+        items = self.event_bus.items
+        self.assertEqual(1, len(items))
+        self.assertEqual(0, agg.count())
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000000000, timestamp=9000059999, type=1, size=60, open=24, high=24, low=24,
+                close=24, vol=150, adj_close=0), items[0])
+
+
+    def test_tick_bar_from_trade(self):
+        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input, output_bar_type=BarType.Tick, output_size=3)
+        agg.start()
+        self.assertEqual(0, len(self.event_bus.items))
+
+        self.time += 60000
+        t = Trade(timestamp=self.time, inst_id=1, price=20, size=200)
+        self.update(self.input, t)
+        self.assertEqual(1, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 60000
+        t = Trade(timestamp=self.time, inst_id=1, price=80, size=100)
+        self.update(self.input, t)
+        self.assertEqual(2, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 60000
+        t = Trade(timestamp=self.time, inst_id=1, price=10, size=200)
+        self.update(self.input, t)
+
+        items = self.event_bus.items
+        self.assertEqual(1, len(items))
+        self.assertEqual(0, agg.count())
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000060000, timestamp=9000180000, type=BarType.Tick, size=3, open=20, high=80, low=10,
+                close=10, vol=500, adj_close=0), items[0])
+
+
+    def test_vol_bar_from_trade(self):
+        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input, output_bar_type=BarType.Volume, output_size=1000)
+        agg.start()
+        self.assertEqual(0, len(self.event_bus.items))
+
+        self.time += 60000
+        t = Trade(timestamp=self.time, inst_id=1, price=20, size=200)
+        self.update(self.input, t)
+        self.assertEqual(1, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 60000
+        t = Trade(timestamp=self.time, inst_id=1, price=80, size=100)
+        self.update(self.input, t)
+        self.assertEqual(2, agg.count())
+        self.assertTrue(len(self.event_bus.items) == 0)
+
+        self.time += 60000
+        t = Trade(timestamp=self.time, inst_id=1, price=10, size=1000)
+        self.update(self.input, t)
+
+        items = self.event_bus.items
+        self.assertEqual(1, len(items))
+        self.assertEqual(1, agg.count())
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000060000, timestamp=9000180000, type=BarType.Volume, size=1000, open=20, high=80, low=10,
+                close=10, vol=1000, adj_close=0), items[0])
+
+        self.event_bus.reset()
+
+        self.time += 60000
+        t = Trade(timestamp=self.time, inst_id=1, price=50, size=2800)
+        self.update(self.input, t)
+
+        items = self.event_bus.items
+        self.assertEqual(3, len(items))
+        self.assertEqual(1, agg.count())
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000180000, timestamp=9000240000, type=BarType.Volume, size=1000, open=10, high=50, low=10,
+                close=50, vol=1000, adj_close=0), items[0])
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000240000, timestamp=9000240000, type=BarType.Volume, size=1000, open=50, high=50, low=50,
+                close=50, vol=1000, adj_close=0), items[1])
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000240000, timestamp=9000240000, type=BarType.Volume, size=1000, open=50, high=50, low=50,
+                close=50, vol=1000, adj_close=0), items[2])
+
+
+        self.event_bus.reset()
+
+        self.time += 60000
+        t = Trade(timestamp=self.time, inst_id=1, price=20, size=900)
+        self.update(self.input, t)
+
+        items = self.event_bus.items
+        self.assertEqual(1, len(items))
+        self.assertEqual(0, agg.count())
+        self.assertEqual(
+            Bar(inst_id=1, begin_time=9000240000, timestamp=9000300000, type=BarType.Volume, size=1000, open=50, high=50, low=20,
+                close=20, vol=1000, adj_close=0), items[0])

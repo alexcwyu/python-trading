@@ -1,12 +1,14 @@
-from rx.subjects import Subject
+from rx.observable import Observable
 
 from algotrader.event.market_data import MarketDataEventHandler, BarType, BarSize, Quote, Trade, Bar
 from algotrader.trading.bar_factory import BarInputType
 from algotrader.utils.time_series import DataSeries
-import datetime
-from rx.observable import Observable
+
+from algotrader.utils import logger
+
 class BarAggregator(MarketDataEventHandler):
-    def __init__(self, data_bus, clock, inst_data_mgr, inst_id, input,
+    def __init__(self, data_bus, clock, inst_id, input,
+                 inst_data_mgr = None,
                  input_type=BarInputType.Trade,
                  output_bar_type=BarType.Time,
                  output_size=BarSize.M1):
@@ -28,10 +30,10 @@ class BarAggregator(MarketDataEventHandler):
         self.__input.subject.subscribe(on_next=self.on_update)
         if self.__output_bar_type == BarType.Time:
             current_ts = self.__clock.now()
-            next_ts = Bar.get_next_bar_start_time(current_ts, BarSize.S5)
+            next_ts = Bar.get_next_bar_start_time(current_ts, self.__output_size)
             diff = next_ts - current_ts
-            Observable.timer(int(diff), self.__output_size * 1000, self.__clock.scheduler).subscribe(on_next=self.publish)
-
+            Observable.timer(int(diff), self.__output_size * 1000, self.__clock.scheduler).subscribe(
+                on_next=self.publish)
 
     def __reset(self):
         self.__new_bar = True
@@ -45,38 +47,48 @@ class BarAggregator(MarketDataEventHandler):
         self.__volume = 0
 
     def on_bar(self, bar):
-        self.set_value(bar['timestamp'], bar['open'], bar['high'], bar['low'], bar['close'], bar['vol'])
+        self.set_value(bar.get('timestamp', None), bar.get('open', None), bar.get('high', None), bar.get('low', None), bar.get('close',None), bar.get('vol', 0))
 
     def on_quote(self, quote):
         value = 0
         size = 0
         if self.__input_type == BarInputType.Ask:
-            value = quote['ask']
-            size = quote['ask_size']
+            value = quote.get('ask', None)
+            size = quote.get('ask_size', 0)
         if self.__input_type == BarInputType.Bid:
-            value = quote['bid']
-            size = quote['bid_size']
+            value = quote.get('bid', None)
+            size = quote.get('bid_size', 0)
         if self.__input_type == BarInputType.BidAsk:
-            value = quote['bid'] if quote['bid'] > 0 else quote['ask']
-            size = quote['bid_size'] if quote['bid'] > 0 else quote['ask_size']
+            if quote.get('bid', 0) > 0 and quote.get('bid_size', 0) > 0:
+                value = quote.get('bid', None)
+                size = quote.get('bid_size', 0)
+            else:
+                value = quote.get('ask', None)
+                size = quote.get('ask_size', 0)
         if self.__input_type == BarInputType.Middle:
-            value = (quote['ask'] + quote['bid']) / 2
-            size = int((quote['ask_size'] + quote['bid_size']) / 2)
+            value = (quote['ask'] + quote['bid']) / 2 if 'bid' in quote and 'ask' in quote else None
+            size = int((quote.get('ask_size', 0) + quote.get('bid_size',0)) / 2)
 
-        self.set_value(quote['timestamp'], value, value, value, value, size)
+        self.set_value(quote.get('timestamp', None), value, value, value, value, size)
 
     def on_trade(self, trade):
-        value = trade['price']
-        size = trade['size']
+        value = trade.get('price', None)
+        size = trade.get('size', 0)
 
-        self.set_value(trade['timestamp'], value, value, value, value, size)
+        self.set_value(trade.get('timestamp', None), value, value, value, value, size)
 
     def set_value(self, timestamp, open, high, low, close, size):
-        self.publish();
+        if timestamp is None or close is None:
+            logger.warning("[%s] ignore update timestamp=%s, open=%s, high=%s, low=%s, close=%s, size=%s" % (self.__class__.__name__, timestamp, open, high, low, close, size))
+            return
+        #self.publish();
         if self.__new_bar:
-            self.__start_time = timestamp
+
             if self.__output_bar_type == BarType.Time:
+                self.__start_time = Bar.get_current_bar_start_time(timestamp, self.__output_size)
                 self.__end_time = Bar.get_current_bar_end_time(timestamp, self.__output_size)
+            else:
+                self.__start_time = timestamp
             self.__open = open
             self.__low = low
             self.__high = high
@@ -98,10 +110,8 @@ class BarAggregator(MarketDataEventHandler):
         self.__timestamp = data['timestamp']
 
         ## Time Bar, need to check if require publish existing before handling new update
-        if self.__output_bar_type == BarType.Time:
-            bar_end_time = Bar.get_current_bar_end_time(self.__clock.now() + 100, self.__output_size)
-            if self.__timestamp >= self.__end_time or bar_end_time >= self.__end_time:
-                self.publish()
+        if self.__output_bar_type == BarType.Time and self.__count > 0 and self.__timestamp > self.__end_time:
+            self.publish()
 
         if self.__input_type == BarInputType.Bar:
             func = self.on_bar
@@ -117,21 +127,32 @@ class BarAggregator(MarketDataEventHandler):
 
         func(data)
 
+
+        ## Time Bar
+        if self.__output_bar_type == BarType.Time and self.__count > 0 and self.__timestamp >= self.__end_time:
+            self.publish()
+
         ## Tick Bar
-        if self.__output_bar_type == BarType.Tick and self.__count >= self.__output_size:
+        elif self.__output_bar_type == BarType.Tick and self.__count >= self.__output_size:
             self.publish()
 
         ## Vol Bar
-        if self.__output_bar_type == BarType.Volume and self.__volume >= self.__output_size:
-            residual = self.__volume - self.__output_size if self.__output_bar_type == BarType.Volume else 0
-            self.publish()
-            if residual:
-                func(data)
-                self.__volume = residual
+        elif self.__output_bar_type == BarType.Volume:
+            while self.__volume >= self.__output_size:
+                residual = self.__volume - self.__output_size
+                self.__volume = self.__output_size
+                self.publish()
+                if residual:
+                    func(data)
+                    self.__volume = residual
 
     def publish(self, *args):
 
         if self.__count > 0:
+
+            if self.__output_bar_type == BarType.Time:
+                self.__timestamp = self.__end_time
+
             bar = Bar(inst_id=self.__inst_id,
                       begin_time=self.__start_time,
                       timestamp=self.__timestamp,
@@ -147,6 +168,9 @@ class BarAggregator(MarketDataEventHandler):
             self.__reset()
 
 
-data_feed = Subject()
+    def count(self):
+        return self.__count
 
-aggregator = BarAggregator()
+# data_feed = Subject()
+#
+# aggregator = BarAggregator()

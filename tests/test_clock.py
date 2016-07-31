@@ -2,17 +2,23 @@ import datetime
 import time
 from unittest import TestCase
 
+import gevent
+
 from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.utils.clock import simluation_clock, realtime_clock, Clock
-import gevent
+
 
 class ClockTest(TestCase):
     endtime = []
     ts = 1467870720000
 
     @staticmethod
-    def action(*arg):
+    def simclock_action(*arg):
         ClockTest.endtime.append(simluation_clock.now())
+
+    @staticmethod
+    def realtime_action(*arg):
+        ClockTest.endtime.append(realtime_clock.now())
 
     def setUp(self):
         simluation_clock.reset()
@@ -45,7 +51,7 @@ class ClockTest(TestCase):
         self.assertEquals(0, simluation_clock.now())
 
     def test_simulation_clock_schedule_absolute(self):
-        simluation_clock.schedule_absolute(ClockTest.ts + 1000, ClockTest.action)
+        simluation_clock.schedule_absolute(ClockTest.ts + 1000, ClockTest.simclock_action)
 
         self.assertEquals([], ClockTest.endtime)
 
@@ -59,7 +65,7 @@ class ClockTest(TestCase):
         self.assertEquals([ClockTest.ts + 1000], ClockTest.endtime)
 
     def test_simulation_schedule_absolute_beyond_trigger_time(self):
-        simluation_clock.schedule_absolute(ClockTest.ts + 1000, ClockTest.action)
+        simluation_clock.schedule_absolute(ClockTest.ts + 1000, ClockTest.simclock_action)
 
         self.assertEquals([], ClockTest.endtime)
 
@@ -67,7 +73,7 @@ class ClockTest(TestCase):
         self.assertEquals([ClockTest.ts + 5000], ClockTest.endtime)
 
     def test_simulation_schedule_relative(self):
-        simluation_clock.schedule_relative(datetime.timedelta(seconds=3), ClockTest.action)
+        simluation_clock.schedule_relative(datetime.timedelta(seconds=3), ClockTest.simclock_action)
 
         self.assertEquals([], ClockTest.endtime)
 
@@ -81,7 +87,7 @@ class ClockTest(TestCase):
         self.assertEquals([ClockTest.ts + 3000], ClockTest.endtime)
 
     def test_simulation_schedule_relative_beyond_trigger_time(self):
-        simluation_clock.schedule_relative(3000, ClockTest.action)
+        simluation_clock.schedule_relative(3000, ClockTest.simclock_action)
 
         self.assertEquals([], ClockTest.endtime)
 
@@ -108,27 +114,34 @@ class ClockTest(TestCase):
         self.assertTrue(abs(ts - ts2) <= 10)
         time.sleep(2)
         ts3 = realtime_clock.now()
-        self.assertAlmostEqual(abs(ts3 - ts2), 2000, -2)
+        self.assertAlmostEqual(ts3 - ts2, 2000, -2)
 
     def test_real_time_clock_schedule_absolute(self):
-        from rx.concurrency.mainloopscheduler import GEventScheduler
-        import gevent
-        s1 =gevent.core.time()
-        s2 = datetime.datetime.fromtimestamp(s1/1000)
-        print s1, s2
         start = realtime_clock.now()
         dt = Clock.unixtimemillis_to_datetime(start)
-        abs_time = dt + datetime.timedelta(seconds=2)
-        realtime_clock.schedule_absolute(abs_time, ClockTest.action)
-        self.assertEquals([], ClockTest.endtime)
-        gevent.sleep(10)
-        self.assertEquals(1, len(ClockTest.endtime))
-        self.assertTrue(abs(ClockTest.endtime[0] - start) > 10)
-
-    def test_real_time_clock_schedule_relative(self):
-        start = realtime_clock.now()
-        realtime_clock.schedule_relative(datetime.timedelta(seconds=1), ClockTest.action)
+        abs_time = dt + datetime.timedelta(seconds=1)
+        realtime_clock.schedule_absolute(abs_time, ClockTest.realtime_action)
         self.assertEquals([], ClockTest.endtime)
         time.sleep(1.1)
         self.assertEquals(1, len(ClockTest.endtime))
-        self.assertTrue(abs(ClockTest.endtime[0] - start) > 10)
+        self.assertAlmostEqual(1000, ClockTest.endtime[0] - start, -2)
+
+    def test_real_time_clock_schedule_relative(self):
+        start = realtime_clock.now()
+        print start
+        print realtime_clock.unixtimemillis_to_datetime(start)
+        realtime_clock.schedule_relative(datetime.timedelta(seconds=1), ClockTest.realtime_action)
+        self.assertEquals([], ClockTest.endtime)
+        time.sleep(1.1)
+        self.assertEquals(1, len(ClockTest.endtime))
+        self.assertAlmostEqual(1000, ClockTest.endtime[0] - start, -2)
+
+    def test_real_time_clock_now(self):
+        s1 = gevent.core.time()
+        s2 = datetime.datetime.fromtimestamp(s1)
+        print s1, s2
+        s3 = realtime_clock.now()
+        s4 = realtime_clock.unixtimemillis_to_datetime(s3)
+        print s3, s4
+
+        self.assertAlmostEqual(s1 * 1000, s3, -2)

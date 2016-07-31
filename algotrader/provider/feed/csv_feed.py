@@ -4,7 +4,7 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import  Bar, BarSize, BarType
 from algotrader.provider.provider import Feed, feed_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
-
+from algotrader.utils.clock import Clock
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 
@@ -59,7 +59,7 @@ class CSVDataFeed(Feed):
             inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
             self.__data_event_bus.on_next(
                 Bar(inst_id=inst.inst_id,
-                    timestamp=index,
+                    timestamp=Clock.datetime_to_unixtimemillis(index),
                     open=row['Open'],
                     high=row['High'],
                     low=row['Low'],

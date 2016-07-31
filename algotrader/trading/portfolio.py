@@ -125,7 +125,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         equity = self.performance_series.get_series("total_equity")
         equity.name = 'equity'
         rets = equity.pct_change().dropna()
-        rets.index = rets.index.tz_localize("UTC")
+        #rets.index = rets.index.tz_localize("UTC")
         return rets
 
     def get_series(self):

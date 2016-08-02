@@ -12,7 +12,8 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
 from gevent import monkey
-monkey.patch_all()
+monkey.patch_time()
+monkey.patch_socket()
 
 class Clock:
     __metaclass__ = abc.ABCMeta

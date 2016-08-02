@@ -1,15 +1,24 @@
 from rx.observable import Observable
 
-from algotrader.event.market_data import BarType, BarSize, Quote, Trade, Bar
 from algotrader.event.event_handler import MarketDataEventHandler
-from algotrader.trading.bar_factory import BarInputType
+from algotrader.event.market_data import BarType, BarSize, Quote, Trade, Bar
+from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
 
-from algotrader.utils import logger
+
+class BarInputType:
+    Bar = 0
+    Trade = 1
+    Bid = 2
+    Ask = 3
+    BidAsk = 4
+    Middle = 5
+    Spread = 6
+
 
 class BarAggregator(MarketDataEventHandler):
     def __init__(self, data_bus, clock, inst_id, input,
-                 inst_data_mgr = None,
+                 inst_data_mgr=None,
                  input_type=BarInputType.Trade,
                  output_bar_type=BarType.Time,
                  output_size=BarSize.M1):
@@ -48,7 +57,8 @@ class BarAggregator(MarketDataEventHandler):
         self.__volume = 0
 
     def on_bar(self, bar):
-        self.set_value(bar.get('timestamp', None), bar.get('open', None), bar.get('high', None), bar.get('low', None), bar.get('close',None), bar.get('vol', 0))
+        self.set_value(bar.get('timestamp', None), bar.get('open', None), bar.get('high', None), bar.get('low', None),
+                       bar.get('close', None), bar.get('vol', 0))
 
     def on_quote(self, quote):
         value = 0
@@ -68,7 +78,7 @@ class BarAggregator(MarketDataEventHandler):
                 size = quote.get('ask_size', 0)
         if self.__input_type == BarInputType.Middle:
             value = (quote['ask'] + quote['bid']) / 2 if 'bid' in quote and 'ask' in quote else None
-            size = int((quote.get('ask_size', 0) + quote.get('bid_size',0)) / 2)
+            size = int((quote.get('ask_size', 0) + quote.get('bid_size', 0)) / 2)
 
         self.set_value(quote.get('timestamp', None), value, value, value, value, size)
 
@@ -80,9 +90,9 @@ class BarAggregator(MarketDataEventHandler):
 
     def set_value(self, timestamp, open, high, low, close, size):
         if timestamp is None or close is None:
-            logger.warning("[%s] ignore update timestamp=%s, open=%s, high=%s, low=%s, close=%s, size=%s" % (self.__class__.__name__, timestamp, open, high, low, close, size))
+            logger.warning("[%s] ignore update timestamp=%s, open=%s, high=%s, low=%s, close=%s, size=%s" % (
+                self.__class__.__name__, timestamp, open, high, low, close, size))
             return
-        #self.publish();
         if self.__new_bar:
 
             if self.__output_bar_type == BarType.Time:
@@ -128,7 +138,6 @@ class BarAggregator(MarketDataEventHandler):
 
         func(data)
 
-
         ## Time Bar
         if self.__output_bar_type == BarType.Time and self.__count > 0 and self.__timestamp >= self.__end_time:
             self.publish()
@@ -168,10 +177,5 @@ class BarAggregator(MarketDataEventHandler):
             self.__data_bus.on_next(bar)
             self.__reset()
 
-
     def count(self):
         return self.__count
-
-# data_feed = Subject()
-#
-# aggregator = BarAggregator()

@@ -1,7 +1,8 @@
 from unittest import TestCase
 
 from algotrader.event.market_data import Bar
-from algotrader.event.order import ExecutionEventHandler, NewOrderRequest, OrdStatus, OrdAction, OrdType
+from algotrader.event.order import NewOrderRequest, OrdStatus, OrdAction, OrdType
+from algotrader.event.event_handler import ExecutionEventHandler
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.trading.instrument_data import inst_data_mgr
 

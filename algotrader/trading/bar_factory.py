@@ -4,7 +4,8 @@ from collections import defaultdict
 from rx.subjects import Subject
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.market_data import MarketDataEventHandler, Bar, BarType, BarSize
+from algotrader.event.market_data import Bar, BarType, BarSize
+from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils.clock import default_clock
 
 

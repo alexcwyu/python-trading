@@ -5,6 +5,26 @@ from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, OrdStatu
 
 
 class OrderTest(TestCase):
+    def test_is_buy(self):
+        order = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+                            limit_price=18.5))
+        self.assertTrue(order.is_buy())
+        self.assertFalse(order.is_sell())
+
+    def test_is_sell(self):
+        order = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.SELL, type=OrdType.LIMIT, qty=1000,
+                            limit_price=18.5))
+        self.assertFalse(order.is_buy())
+        self.assertTrue(order.is_sell())
+
+        order = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.SSHORT, type=OrdType.LIMIT, qty=1000,
+                            limit_price=18.5))
+        self.assertFalse(order.is_buy())
+        self.assertTrue(order.is_sell())
+
     def test_is_done(self):
         order = Order(
             NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
@@ -76,7 +96,6 @@ class OrderTest(TestCase):
         with self.assertRaises(Exception) as ex:
             order.on_ord_upd(status_update)
 
-
     def test_update_status_with_diff_ord_id(self):
         order = Order(
             NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
@@ -89,7 +108,6 @@ class OrderTest(TestCase):
         status_update = OrderStatusUpdate(cl_id='test', cl_ord_id=1, ord_id=3, inst_id=1, status=OrdStatus.SUBMITTED)
         with self.assertRaises(Exception) as ex:
             order.on_ord_upd(status_update)
-
 
     def test_exec_report(self):
         order = Order(
@@ -124,7 +142,6 @@ class OrderTest(TestCase):
         self.assertEqual(1000, order.filled_qty)
         self.assertAlmostEqual(18.4, order.avg_price)
         self.assertEqual(OrdStatus.FILLED, order.status)
-
 
     def test_exec_report_with_diff_ord_id(self):
         order = Order(

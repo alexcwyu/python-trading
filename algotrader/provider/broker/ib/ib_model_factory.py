@@ -55,7 +55,6 @@ class IBModelFactory:
         BarSize.S15: "15 secs",
         BarSize.S30: "30 secs",
         BarSize.M1: "1 min",
-        BarSize.M2: "2 mins",
         BarSize.M5: "5 mins",
         BarSize.M15: "15 mins",
         BarSize.M30: "30 mins",

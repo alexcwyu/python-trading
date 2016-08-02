@@ -1,6 +1,7 @@
 import abc
 
-from algotrader.event.order import OrderEventHandler
+from algotrader.event.event_handler import OrderEventHandler
+
 
 class Provider(object):
     __metaclass__ = abc.ABCMeta

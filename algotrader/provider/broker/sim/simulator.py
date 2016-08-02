@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.market_data import MarketDataEventHandler
+from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.event.order import OrdStatus, OrderStatusUpdate, \
     ExecutionReport
 from algotrader.provider.broker.sim.commission import NoCommission

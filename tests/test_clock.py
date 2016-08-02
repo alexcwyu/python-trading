@@ -1,7 +1,7 @@
 import datetime
 import time
 from unittest import TestCase
-
+import pytz
 import gevent
 
 from algotrader.event.market_data import Bar, Quote, Trade
@@ -19,6 +19,11 @@ class ClockTest(TestCase):
     @staticmethod
     def realtime_action(*arg):
         ClockTest.endtime.append(realtime_clock.now())
+
+
+    @classmethod
+    def tearDownClass(cls):
+        simluation_clock.reset()
 
     def setUp(self):
         simluation_clock.reset()
@@ -97,16 +102,18 @@ class ClockTest(TestCase):
     def test_timestamp_conversion(self):
         dt = datetime.datetime(year=2000, month=1, day=1, hour=7, minute=30, second=30)
         ts = Clock.datetime_to_unixtimemillis(dt)
-        dt2 = Clock.unixtimemillis_to_datetime(ts)
+        self.assertEqual(946683030000, ts)
 
+        dt2 = Clock.unixtimemillis_to_datetime(ts)
         self.assertEquals(dt, dt2)
 
         dt3 = datetime.datetime.fromtimestamp(0)
+
         ts2 = Clock.datetime_to_unixtimemillis(dt3)
         dt4 = Clock.unixtimemillis_to_datetime(ts2)
-
         self.assertEquals(0, ts2)
         self.assertEquals(dt3, dt4)
+
 
     def test_real_time_clock_now(self):
         ts = Clock.datetime_to_unixtimemillis(datetime.datetime.now())

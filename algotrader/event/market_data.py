@@ -1,21 +1,6 @@
-from algotrader.event.event import Event, EventHandler
-
-from algotrader.utils import logger
 import datetime
 
-
-class MarketDataEventHandler(EventHandler):
-    def on_bar(self, bar):
-        logger.debug("[%s] %s" % (self.__class__.__name__, bar))
-
-    def on_quote(self, quote):
-        logger.debug("[%s] %s" % (self.__class__.__name__, quote))
-
-    def on_trade(self, trade):
-        logger.debug("[%s] %s" % (self.__class__.__name__, trade))
-
-    def on_market_depth(self, market_depth):
-        logger.debug("[%s] %s" % (self.__class__.__name__, market_depth))
+from algotrader.event.event import Event
 
 
 class BarSize(object):
@@ -24,7 +9,6 @@ class BarSize(object):
     S15 = 15
     S30 = 30
     M1 = 60
-    M2 = 120
     M5 = 5 * 60
     M15 = 15 * 60
     M30 = 30 * 60
@@ -75,6 +59,8 @@ class MarketDataEvent(Event):
 
 
 from algotrader.utils.clock import Clock
+
+
 class Bar(MarketDataEvent):
     __slots__ = (
         'type',
@@ -146,9 +132,7 @@ class Bar(MarketDataEvent):
             return int(timestamp / (bar_size * 1000)) * bar_size * 1000
         else:
             dt = datetime.datetime.fromtimestamp(timestamp / 1000)
-            dt = datetime.datetime(year=dt.year, month=dt.month, day=dt.day)
-            next_ts = Clock.datetime_to_unixtimemillis(dt)
-            return next_ts
+            return Clock.datetime_to_unixtimemillis(datetime.datetime(year=dt.year, month=dt.month, day=dt.day))
 
 
 class Trade(MarketDataEvent):

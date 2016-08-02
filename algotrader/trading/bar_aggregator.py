@@ -1,6 +1,7 @@
 from rx.observable import Observable
 
-from algotrader.event.market_data import MarketDataEventHandler, BarType, BarSize, Quote, Trade, Bar
+from algotrader.event.market_data import BarType, BarSize, Quote, Trade, Bar
+from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.trading.bar_factory import BarInputType
 from algotrader.utils.time_series import DataSeries
 

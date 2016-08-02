@@ -5,3 +5,6 @@ inst_id,name,type,symbol,exch_id,ccy_id,alt_symbol,alt_exch_id,sector,group,put_
 3,Google,STK,GOOG,SMART,USD,IB=GOOG
 4,SPY,ETF,SPY,NYSEARCA,USD
 5,SPX,IDX,SPX,CBOE,USD
+6,VIX,IDX,VIX,CBOE,USD
+7,XIV,ETF,XIV,NYSEARCA,USD
+8,XLV,ETF,XLV,NYSEARCA,USD

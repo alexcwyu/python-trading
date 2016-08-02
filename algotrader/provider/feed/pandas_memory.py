@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.event_logger import EventLogger
+from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
 from algotrader.provider.provider import HistDataSubscriptionKey, Feed, feed_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr

@@ -1,5 +1,5 @@
 from algotrader.event.order import OrdAction
-from algotrader.event.market_data import MarketDataEventHandler
+from algotrader.event.event_handler import MarketDataEventHandler
 from collections import defaultdict
 
 

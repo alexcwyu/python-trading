@@ -1,7 +1,7 @@
-from algotrader.event.event import Event, EventHandler
-from algotrader.utils import logger
-
 import copy
+
+from algotrader.event.event import Event
+from algotrader.event.event_handler import OrderEventHandler, ExecutionEventHandler
 
 
 class OrderEvent(Event):
@@ -11,7 +11,7 @@ class OrderEvent(Event):
         'cl_ord_id',
     )
 
-    def __init__(self, timestamp=None, cl_id = None, cl_ord_id = None):
+    def __init__(self, timestamp=None, cl_id=None, cl_ord_id=None):
         super(OrderEvent, self).__init__(timestamp)
         self.cl_id = cl_id
         self.cl_ord_id = cl_ord_id
@@ -56,6 +56,7 @@ class OrdStatus:
     REJECTED = 10
     UNKNOWN = -1
 
+
 class NewOrderRequest(OrderEvent):
     __slots__ = (
         'portf_id',
@@ -71,7 +72,8 @@ class NewOrderRequest(OrderEvent):
         'params'
     )
 
-    def __init__(self, timestamp=None, cl_id=None, cl_ord_id=None, portf_id = None, broker_id=None, inst_id=None, action=None, type=None,
+    def __init__(self, timestamp=None, cl_id=None, cl_ord_id=None, portf_id=None, broker_id=None, inst_id=None,
+                 action=None, type=None,
                  qty=0, limit_price=0,
                  stop_price=0, tif=TIF.DAY, oca_tag=None, params=None):
         super(NewOrderRequest, self).__init__(timestamp=timestamp, cl_id=cl_id, cl_ord_id=cl_ord_id)
@@ -100,8 +102,7 @@ class NewOrderRequest(OrderEvent):
         return self.action == OrdAction.BUY
 
     def is_sell(self):
-        return self.action == OrdAction.SELL
-
+        return self.action == OrdAction.SELL or self.action == OrdAction.SSHORT
 
     def update_ord_request(self, ord_replace_request):
         new_req = copy.copy(self)
@@ -125,7 +126,6 @@ class NewOrderRequest(OrderEvent):
 
 
 class OrderReplaceRequest(OrderEvent):
-
     __slots__ = (
         'type',
         'qty',
@@ -147,7 +147,6 @@ class OrderReplaceRequest(OrderEvent):
         self.oca_tag = oca_tag
         self.params = params if params else {}
 
-
     def __repr__(self):
         return "OrderReplaceRequest(timestamp = %s, cl_id = %s, cl_ord_id = %s, " \
                ", type = %s, qty = %s, limit_price = %s, stop_price = %s, tif = %s, oca_tag = %s, params = %s)" \
@@ -155,7 +154,7 @@ class OrderReplaceRequest(OrderEvent):
                   self.type, self.qty, self.limit_price, self.stop_price, self.tif, self.oca_tag, self.params)
 
     def on(self, handler):
-            handler.on_ord_replace_req(self)
+        handler.on_ord_replace_req(self)
 
 
 class OrderCancelRequest(OrderEvent):
@@ -172,8 +171,7 @@ class OrderCancelRequest(OrderEvent):
                % (self.timestamp, self.cl_id, self.cl_ord_id, self.params)
 
     def on(self, handler):
-            handler.on_ord_cancel_req(self)
-
+        handler.on_ord_cancel_req(self)
 
 
 class ExecutionEvent(Event):
@@ -202,7 +200,8 @@ class OrderStatusUpdate(ExecutionEvent):
 
     )
 
-    def __init__(self, broker_id=None, ord_id=None, cl_id=None, cl_ord_id=None, inst_id=None, timestamp=None, filled_qty=0,
+    def __init__(self, broker_id=None, ord_id=None, cl_id=None, cl_ord_id=None, inst_id=None, timestamp=None,
+                 filled_qty=0,
                  avg_price=0, status=OrdStatus.NEW):
         super(OrderStatusUpdate, self).__init__(broker_id=broker_id, ord_id=ord_id, cl_id=cl_id, cl_ord_id=cl_ord_id,
                                                 inst_id=inst_id, timestamp=timestamp)
@@ -226,11 +225,13 @@ class ExecutionReport(OrderStatusUpdate):
         'commission'
     )
 
-    def __init__(self, broker_id=None, ord_id=None, cl_id=None, cl_ord_id=None, inst_id=None, timestamp=None, er_id=None,
+    def __init__(self, broker_id=None, ord_id=None, cl_id=None, cl_ord_id=None, inst_id=None, timestamp=None,
+                 er_id=None,
                  last_qty=0, last_price=0,
                  filled_qty=0, avg_price=0, commission=0,
                  status=OrdStatus.NEW):
-        super(ExecutionReport, self).__init__(broker_id=broker_id, ord_id=ord_id, cl_id=cl_id, cl_ord_id=cl_ord_id, inst_id=inst_id,
+        super(ExecutionReport, self).__init__(broker_id=broker_id, ord_id=ord_id, cl_id=cl_id, cl_ord_id=cl_ord_id,
+                                              inst_id=inst_id,
                                               timestamp=timestamp, filled_qty=filled_qty, avg_price=avg_price,
                                               status=status)
         self.er_id = er_id
@@ -246,48 +247,6 @@ class ExecutionReport(OrderStatusUpdate):
                ", er_id = %s, last_qty = %s, last_price = %s, filled_qty = %s, avg_price = %s, commission = %s)" \
                % (self.broker_id, self.ord_id, self.cl_id, self.cl_ord_id, self.inst_id, self.timestamp,
                   self.er_id, self.last_qty, self.last_price, self.filled_qty, self.avg_price, self.commission)
-
-
-
-
-class ExecutionEventHandler(EventHandler):
-    def on_ord_upd(self, ord_upd):
-        logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
-
-    def on_exec_report(self, exec_report):
-        logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
-
-
-
-class OrderEventHandler(EventHandler):
-
-    # Sync interface, return Order
-    def send_order(self, new_ord_req):
-        raise NotImplementedError()
-
-    # Sync interface, return Order
-    def cancel_order(self, ord_cancel_req):
-        raise NotImplementedError()
-
-    # Sync interface, return Order
-    def replace_order(self, ord_replace_req):
-        raise NotImplementedError()
-
-    # Async interface
-    def on_new_ord_req(self, new_ord_req):
-        logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))
-        self.send_order(new_ord_req)
-
-    # Async interface
-    def on_ord_replace_req(self, ord_replace_req):
-        logger.debug("[%s] %s" % (self.__class__.__name__, ord_replace_req))
-        self.replace_order(ord_replace_req)
-
-    # Async interface
-    def on_ord_cancel_req(self, ord_cancel_req):
-        logger.debug("[%s] %s" % (self.__class__.__name__, ord_cancel_req))
-        self.cancel_order(ord_cancel_req)
-
 
 
 class Order(OrderEventHandler, ExecutionEventHandler):
@@ -317,7 +276,7 @@ class Order(OrderEventHandler, ExecutionEventHandler):
         'events'
     )
 
-    def __init__(self, nos = None):
+    def __init__(self, nos=None):
         if nos:
             self.on_new_ord_req(nos)
 
@@ -326,7 +285,8 @@ class Order(OrderEventHandler, ExecutionEventHandler):
                ", qty = %s, limit_price = %s, stop_price = %s, tif = %s, oca_tag = %s, params = %s" \
                ", status = %s, filled_qty = %s, avg_price = %s, last_qty = %s, last_price = %s ,stop_price = %s" \
                ", stop_limit_ready = %s , trailing_stop_exec_price = %s , ord_events = %s , exec_events = %s)" \
-               % (self.timestamp, self.cl_id, self.cl_ord_id, self.portf_id, self.broker_id, self.broker_ord_id, self.inst_id, self.action, self.type,
+               % (self.timestamp, self.cl_id, self.cl_ord_id, self.portf_id, self.broker_id, self.broker_ord_id,
+                  self.inst_id, self.action, self.type,
                   self.qty, self.limit_price, self.stop_price, self.tif, self.oca_tag, self.params,
                   self.status, self.filled_qty, self.avg_price, self.last_qty, self.last_price, self.stop_price,
                   self.stop_limit_ready, self.trailing_stop_exec_price, self.ord_events, self.exec_events)
@@ -337,7 +297,7 @@ class Order(OrderEventHandler, ExecutionEventHandler):
         self.cl_ord_id = nos.cl_ord_id
         self.portf_id = nos.portf_id
         self.broker_id = nos.broker_id
-        self.broker_ord_id=None
+        self.broker_ord_id = None
         self.inst_id = nos.inst_id
         self.action = nos.action
         self.type = nos.type
@@ -356,7 +316,6 @@ class Order(OrderEventHandler, ExecutionEventHandler):
         self.trailing_stop_exec_price = 0
         self.events = [nos]
 
-
     def on_ord_replace_req(self, ord_replace_req):
         self.events.append(ord_replace_req)
 
@@ -365,12 +324,15 @@ class Order(OrderEventHandler, ExecutionEventHandler):
 
     def on_exec_report(self, exec_report):
         if exec_report.cl_id != self.cl_id or exec_report.cl_ord_id != self.cl_ord_id:
-            raise Exception("exec_report [%s] cl_id [%s] cl_ord_id [%s] is not same as current order cl_id [%s] cl_ord_id [%s]" % (exec_report.er_id, exec_report.cl_id, exec_report.cl_ord_id, self.cl_id, self.cl_ord_id))
+            raise Exception(
+                "exec_report [%s] cl_id [%s] cl_ord_id [%s] is not same as current order cl_id [%s] cl_ord_id [%s]" % (
+                exec_report.er_id, exec_report.cl_id, exec_report.cl_ord_id, self.cl_id, self.cl_ord_id))
 
         if not self.broker_ord_id:
             self.broker_ord_id = exec_report.ord_id
         elif self.broker_ord_id != exec_report.ord_id:
-            raise Exception("exec_report [%s] ord_id [%s] is not same as current order ord_id [%s]" % (exec_report.er_id, exec_report.ord_id, self.broker_ord_id))
+            raise Exception("exec_report [%s] ord_id [%s] is not same as current order ord_id [%s]" % (
+            exec_report.er_id, exec_report.ord_id, self.broker_ord_id))
 
         self.last_price = exec_report.last_price
         self.last_qty = exec_report.last_qty
@@ -402,13 +364,14 @@ class Order(OrderEventHandler, ExecutionEventHandler):
     def on_ord_upd(self, ord_upd):
         if ord_upd.cl_id != self.cl_id or ord_upd.cl_ord_id != self.cl_ord_id:
             raise Exception(
-                "ord_upd ord_id [%s] cl_id [%s] cl_ord_id [%s] is not same as current order cl_id [%s] cl_ord_id [%s]" % (ord_upd.ord_id, ord_upd.cl_id, ord_upd.cl_ord_id, self.cl_id, self.cl_ord_id))
+                "ord_upd ord_id [%s] cl_id [%s] cl_ord_id [%s] is not same as current order cl_id [%s] cl_ord_id [%s]" % (
+                ord_upd.ord_id, ord_upd.cl_id, ord_upd.cl_ord_id, self.cl_id, self.cl_ord_id))
 
         if not self.broker_ord_id:
             self.broker_ord_id = ord_upd.ord_id
         elif self.broker_ord_id != ord_upd.ord_id:
-            raise Exception("ord_upd [%s] is not same as current order ord_id [%s]" % (ord_upd.ord_id, self.broker_ord_id))
-
+            raise Exception(
+                "ord_upd [%s] is not same as current order ord_id [%s]" % (ord_upd.ord_id, self.broker_ord_id))
 
         self.status = ord_upd.status
 
@@ -433,5 +396,4 @@ class Order(OrderEventHandler, ExecutionEventHandler):
         return self.action == OrdAction.BUY
 
     def is_sell(self):
-        return self.action == OrdAction.SELL
-
+        return self.action == OrdAction.SELL  or self.action == OrdAction.SSHORT

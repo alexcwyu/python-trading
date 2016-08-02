@@ -38,7 +38,6 @@ bar_sizes = [
     ("S15", BarSize.S15),
     ("S30", BarSize.S30),
     ("M1 ", BarSize.M1),
-    ("M2 ", BarSize.M2),
     ("M5 ", BarSize.M5),
     ("M15", BarSize.M15),
     ("M30", BarSize.M30),

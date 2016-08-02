@@ -25,6 +25,11 @@ class BarAggregatorTest(TestCase):
         self.time = 9000000000
         simluation_clock.update_time(self.time)
 
+
+    @classmethod
+    def tearDownClass(cls):
+        simluation_clock.reset()
+
     def update(self, input, data):
         simluation_clock.update_time(data.timestamp)
         self.input.add(data.to_dict())

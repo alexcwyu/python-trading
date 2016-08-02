@@ -9,7 +9,7 @@ from rx.concurrency.eventloopscheduler import EventLoopScheduler
 
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.market_data import MarketDataEventHandler
+from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
 from gevent import monkey
 monkey.patch_all()
@@ -114,7 +114,9 @@ class SimulationClock(Clock, MarketDataEventHandler):
 
     def reset(self):
         self.__current_timestamp_mills = 0
-        self.scheduler.reset()
+        if self.scheduler:
+            self.scheduler.stop()
+        self.scheduler = SimulationScheduler(initial_clock=self.__current_timestamp_mills / 1000)
 
 
 realtime_clock = RealTimeClock()

@@ -3,7 +3,7 @@ from collections import defaultdict
 import numpy as np
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.market_data import MarketDataEventHandler
+from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
 

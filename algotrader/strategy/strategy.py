@@ -1,7 +1,8 @@
 from datetime import date
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.market_data import MarketDataEventHandler, Bar, BarSize, BarType
+from algotrader.event.market_data import Bar, BarSize, BarType
+from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
 from algotrader.event.order import OrdAction, OrdType, TIF, ExecutionEventHandler, NewOrderRequest, OrderReplaceRequest, \
     OrderCancelRequest
 from algotrader.provider.broker.ib.ib_broker import IBBroker
@@ -154,7 +155,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler):
                   inst_id=None, action=None, type=None,
                   qty=0, limit_price=0,
                   stop_price=0, tif=TIF.DAY, oca_tag=None, params=None):
-        req = NewOrderRequest(timestamp=self.__trading_config.clock.current_date_time(),
+        req = NewOrderRequest(timestamp=self.__trading_config.clock.now(),
                               cl_id=self.stg_id,
                               cl_ord_id=self.__get_next_ord_id(),
                               portf_id=self.__portfolio.portf_id,
@@ -175,13 +176,13 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler):
         return order
 
     def cancel_order(self, cl_ord_id=None):
-        req = OrderCancelRequest(timestamp=self.__trading_config.clock.current_date_time(),
+        req = OrderCancelRequest(timestamp=self.__trading_config.clock.now(),
                                  cl_id=self.stg_id, cl_ord_id=cl_ord_id)
         order = self.__portfolio.cancel_order(req)
         return order
 
     def replace_order(self, cl_ord_id=None, type=None, qty=None, limit_price=None, stop_price=None, tif=None):
-        req = OrderReplaceRequest(timestamp=self.__trading_config.clock.current_date_time(),
+        req = OrderReplaceRequest(timestamp=self.__trading_config.clock.now(),
                                   cl_id=self.stg_id, cl_ord_id=cl_ord_id, type=type, qty=qty, limit_price=limit_price,
                                   stop_price=stop_price, tif=tif)
         order = self.__portfolio.replace_order(req)

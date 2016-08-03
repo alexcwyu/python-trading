@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.market_data import MarketDataEventHandler
+from algotrader.event.event_handler import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
 from algotrader.event.order import OrdAction, OrderEventHandler, ExecutionEventHandler
 from algotrader.performance.drawdown import DrawDown
 from algotrader.performance.returns import Pnl
@@ -125,7 +125,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         equity = self.performance_series.get_series("total_equity")
         equity.name = 'equity'
         rets = equity.pct_change().dropna()
-        rets.index = rets.index.tz_localize("UTC")
+        #rets.index = rets.index.tz_localize("UTC")
         return rets
 
     def get_series(self):

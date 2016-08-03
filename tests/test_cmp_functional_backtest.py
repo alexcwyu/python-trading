@@ -41,6 +41,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
     def test_with_sma(self):
         symbols = ['SPY', 'VXX', 'XLV', 'XIV']
 
+        clock.simluation_clock.now()
         inst_df = build_inst_dataframe_from_list(symbols)
         ccy_df = pd.DataFrame({ "ccy_id" : ["USD" , "HKD" ],
                                 "name" : ["US Dollar", "HK Dollar"] })

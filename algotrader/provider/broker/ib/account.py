@@ -1,4 +1,5 @@
-from algotrader.event.event import Event, EventHandler
+from algotrader.event.event import Event
+from algotrader.event.event_handler import AccountEventEventHandler
 
 
 class AccountEvent(Event):
@@ -51,14 +52,6 @@ class PortfolioUpdate(AccountEvent):
 
     def on(self, handler):
         handler.on_portf_upd(self)
-
-
-class AccountEventEventHandler(EventHandler):
-    def on_acc_upd(self, acc_upd):
-        pass
-
-    def on_portf_upd(self, portf_upd):
-        pass
 
 
 class AccountValue:

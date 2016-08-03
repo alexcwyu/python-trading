@@ -54,13 +54,13 @@ class IBSocket(swigibpy.EWrapper):
         """
         TickerId tickerId, TickType tickType, double value
         """
-        logger.debug("tickGeneric, tickerId=%s tickType=%s tickType=%s value=%s", tickerId, tickType, value)
+        logger.debug("tickGeneric, tickerId=%s tickType=%s value=%s", tickerId, tickType, value)
 
     def tickString(self, tickerId, tickType, value):
         """
         TickerId tickerId, TickType tickType, IBString const & value
         """
-        logger.debug("tickString, tickerId=%s tickType=%s tickType=%s value=%s", tickerId, tickType, value)
+        logger.debug("tickString, tickerId=%s tickType=%s value=%s", tickerId, tickType, value)
 
     def tickEFP(self, tickerId, tickType, basisPoints, formattedBasisPoints, totalDividends, holdDays, futureExpiry,
                 dividendImpact, dividendsToExpiry):

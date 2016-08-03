@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 from algotrader.event.market_data import Bar, Quote, Trade, BarSize, MDOperation, MDSide
 from algotrader.event.order import OrdAction, OrdType, TIF, OrdStatus
-
+from algotrader.utils.clock import Clock
 
 class IBModelFactory:
     IB_DATETIME_FORMAT = "%Y%m%d %H:%M:%S %Z"
@@ -55,7 +55,6 @@ class IBModelFactory:
         BarSize.S15: "15 secs",
         BarSize.S30: "30 secs",
         BarSize.M1: "1 min",
-        BarSize.M2: "2 mins",
         BarSize.M5: "5 mins",
         BarSize.M15: "15 mins",
         BarSize.M30: "30 mins",
@@ -148,10 +147,13 @@ class IBModelFactory:
         return dt.strftime(self.IB_DATETIME_FORMAT)
 
     def convert_ib_date(self, ib_date_str):
-        return datetime.strptime(ib_date_str, self.IB_DATE_FORMAT)
+        return Clock.datetime_to_unixtimemillis(datetime.strptime(ib_date_str, self.IB_DATE_FORMAT))
 
     def convert_ib_datetime(self, ib_datetime_str):
-        return datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT2)
+        return Clock.datetime_to_unixtimemillis(datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT2))
+
+    def convert_ib_time(self, ib_time):
+        return Clock.datetime_to_unixtimemillis(datetime.fromtimestamp(ib_time))
 
     def convert_time_period(self, start_time, end_time):
         diff = relativedelta(end_time, start_time)

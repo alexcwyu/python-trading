@@ -5,11 +5,13 @@ from datetime import datetime
 
 import pandas as pd
 
-from algotrader.event.event_bus import EventBus, EventLogger
+from algotrader.event.event_bus import EventBus
+from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
 from algotrader.provider.provider import HistDataSubscriptionKey, Feed, feed_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
+from algotrader.utils.clock import Clock
 
 
 class PandasMemoryDataFeed(Feed):
@@ -57,7 +59,7 @@ class PandasMemoryDataFeed(Feed):
     def process_row(self, index, row):
         inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
         return Bar(inst_id=inst.inst_id,
-                   timestamp=index,
+                   timestamp=Clock.datetime_to_unixtimemillis(index),
                    open=row['Open'],
                    high=row['High'],
                    low=row['Low'],

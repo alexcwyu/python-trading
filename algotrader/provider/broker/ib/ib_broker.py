@@ -14,6 +14,7 @@ from algotrader.provider.provider import feed_mgr, broker_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
 from collections import defaultdict
+from algotrader.utils.clock import realtime_clock, Clock
 
 class DataRecord(object):
     __slots__ = (
@@ -126,10 +127,12 @@ class OrderReqRegistry(object):
 
     def get_ord_req(self, ord_id=None, cl_id=None, cl_ord_id=None):
         if ord_id:
-            return self._get_ord_id_ordid_clordid_dict.get(ord_id, None)
+            return self.__ordid_ordreq_dict.get(ord_id, None)
 
         if cl_id and cl_ord_id:
-            return self.__clordid_ordreq_dict.get(cl_ord_id, None)
+            if cl_id in self.__clordid_ordreq_dict:
+                return self.__clordid_ordreq_dict.get(cl_id).get(cl_ord_id, None)
+            return None
 
     def get_ord_id(self, cl_id, cl_ord_id):
         if cl_id in self.__clordid_ordid_dict:
@@ -415,7 +418,7 @@ class IBBroker(IBSocket, Broker, Feed):
     def __emit_market_data(self, field, record):
         if record.quote_req and (
                                 field == swigibpy.BID or field == swigibpy.BID_SIZE or field == swigibpy.ASK or field == swigibpy.ASK_SIZE) and record.bid > 0 and record.ask > 0:
-            self.__data_event_bus.on_next(Quote(inst_id=record.inst_id, timestamp=datetime.now(),
+            self.__data_event_bus.on_next(Quote(inst_id=record.inst_id, timestamp=realtime_clock.now(),
                                                 bid=record.bid,
                                                 bid_size=record.bid_size,
                                                 ask=record.ask,
@@ -423,7 +426,7 @@ class IBBroker(IBSocket, Broker, Feed):
 
         if record.trade_req and (field == swigibpy.LAST or field == swigibpy.LAST_SIZE) and record.last > 0:
             self.__data_event_bus.on_next(
-                Trade(inst_id=record.inst_id, timestamp=datetime.now(), price=record.last,
+                Trade(inst_id=record.inst_id, timestamp=realtime_clock.now(), price=record.last,
                       size=record.last_size))
 
     def updateMktDepth(self, id, position, operation, side, price, size):
@@ -433,7 +436,7 @@ class IBBroker(IBSocket, Broker, Feed):
         # TODO fix provider_id
         sub_key = self.__data_sub_reg.get_subscription_key(id)
         self.__data_event_bus.on_next(
-            MarketDepth(inst_id=sub_key.inst_id, timestamp=datetime.now(), provider_id=self.ID,
+            MarketDepth(inst_id=sub_key.inst_id, timestamp=realtime_clock.now(), provider_id=self.ID,
                         position=position,
                         operation=self.__model_factory.convert_ib_md_operation(operation),
                         side=self.__model_factory.convert_ib_md_side(side),
@@ -447,7 +450,7 @@ class IBBroker(IBSocket, Broker, Feed):
         # TODO fix provider_id
         sub_key = self.__data_sub_reg.get_subscription_key(id)
         self.__data_event_bus.on_next(
-            MarketDepth(inst_id=sub_key.inst_id, timestamp=datetime.now(), provider_id=self.ID,
+            MarketDepth(inst_id=sub_key.inst_id, timestamp=realtime_clock.now(), provider_id=self.ID,
                         position=position,
                         operation=self.__model_factory.convert_ib_md_operation(operation),
                         side=self.__model_factory.convert_ib_md_side(side),
@@ -493,7 +496,7 @@ class IBBroker(IBSocket, Broker, Feed):
             record.close = close
             record.vol = volume
 
-            timestamp = datetime.fromtimestamp(time)
+            timestamp = self.__model_factory.convert_ib_time(time)
             self.__data_event_bus.on_next(
                 Bar(inst_id=record.inst_id, timestamp=timestamp, open=open, high=high, low=low, close=close,
                     vol=volume, size=sub_key.bar_size))
@@ -518,7 +521,7 @@ class IBBroker(IBSocket, Broker, Feed):
                     ord_id=id,
                     cl_id=new_ord_req.cl_id,
                     cl_ord_id=new_ord_req.cl_ord_id,
-                    timestamp=datetime.now(),
+                    timestamp=realtime_clock.now(),
                     inst_id=new_ord_req.inst_id,
                     filled_qty=filled,
                     avg_price=avgFillPrice,

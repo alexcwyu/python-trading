@@ -2,9 +2,9 @@ import logging
 import time
 from datetime import date, timedelta
 
-from algotrader.event import EventLogger
+from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, Trade, Quote, BarSize
-from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
+from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, OrderReplaceRequest, OrderCancelRequest
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.provider import SubscriptionKey, HistDataSubscriptionKey
 from algotrader.utils import logger
@@ -92,34 +92,34 @@ def test_mkt_order(broker, inst_id=3, action=OrdAction.BUY, qty=1000):
 def test_lmt_order_update_cancel(broker, inst_id=3, qty=1000, limit_price=100):
     print "### testing limit order"
     cl_ord_id = next_cl_ord_id()
-    order = NewOrderRequest(cl_ord_id=cl_ord_id, inst_id=inst_id, action=OrdAction.BUY, type=OrdType.LIMIT, qty=qty,
+    order = NewOrderRequest(cl_id=1, cl_ord_id=1, inst_id=inst_id, action=OrdAction.BUY, type=OrdType.LIMIT, qty=qty,
                            limit_price=limit_price)
     broker.on_new_ord_req(order)
-    time.sleep(10)
+    time.sleep(5)
 
     print "### testing order update"
-    order = NewOrderRequest(cl_ord_id=cl_ord_id, inst_id=inst_id, action=OrdAction.BUY, type=OrdType.LIMIT, qty=qty * 2,
+    order = OrderReplaceRequest(cl_id=1, cl_ord_id=1, type=OrdType.LIMIT, qty=qty * 2,
                            limit_price=limit_price * 1.2)
     broker.on_ord_replace_req(order)
-    time.sleep(10)
+    time.sleep(5)
 
     print "### testing order cancel"
     broker.on_ord_cancel_req(order)
-    time.sleep(10)
+    time.sleep(5)
 
 
 if __name__ == "__main__":
-    broker = IBBroker(daemon=True)
+    broker = IBBroker(daemon=True,client_id =10)
 
     broker.start()
     logger.setLevel(logging.DEBUG)
     eventLogger = EventLogger()
 
-    # test_sub_hist_bar(broker)
-    # test_sub_realtime_bar(broker)
-    test_sub_realtime_trade(broker)
-    test_sub_realtime_quote(broker)
+    #test_sub_hist_bar(broker)
+    #test_sub_realtime_bar(broker)
+    #test_sub_realtime_trade(broker)
+    #test_sub_realtime_quote(broker)
 
-    # test_lmt_order_update_cancel(broker)
-    # test_mkt_order(broker, action=OrdAction.BUY)
-    # test_mkt_order(broker, action=OrdAction.SELL)
+    #test_lmt_order_update_cancel(broker)
+    #test_mkt_order(broker, action=OrdAction.BUY)
+    test_mkt_order(broker, action=OrdAction.SELL)

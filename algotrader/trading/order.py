@@ -1,8 +1,9 @@
 from algotrader.event.event_handler import OrderEventHandler, ExecutionEventHandler
 from algotrader.event.order import OrdStatus, OrdAction
+from algotrader.utils.ser_deser import TradeData
 
 
-class Order(OrderEventHandler, ExecutionEventHandler):
+class Order(OrderEventHandler, ExecutionEventHandler, TradeData):
     __slots__ = (
         'timestamp',
         'cl_id',

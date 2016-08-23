@@ -1,8 +1,9 @@
 from algotrader.event.event_handler import AccountEventHandler
 
 from collections import defaultdict
+from algotrader.utils.ser_deser import TradeData
 
-class Account(AccountEventHandler):
+class Account(AccountEventHandler, TradeData):
     def __init__(self, name):
         self.name = name
         self.key_ccy_value = defaultdict(dict)

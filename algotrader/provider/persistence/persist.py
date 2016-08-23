@@ -78,6 +78,10 @@ class TradeDataStore(TimeSeriesDataStore):
         raise NotImplementedError()
 
     @abc.abstractmethod
+    def save_strategy(self, strategy):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
     def save_account_event(self, account_event):
         raise NotImplementedError()
 

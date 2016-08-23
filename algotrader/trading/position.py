@@ -2,8 +2,9 @@ from algotrader.event.order import OrdAction
 from algotrader.event.event_handler import MarketDataEventHandler
 from collections import defaultdict
 
+from algotrader.utils.ser_deser import TradeData
 
-class Position(object):
+class Position(TradeData):
     def __init__(self, inst_id):
         self.inst_id = inst_id
         self.orders = defaultdict(dict)

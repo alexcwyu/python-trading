@@ -3,7 +3,7 @@ from datetime import date
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import Bar, BarSize, BarType
 from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
-from algotrader.event.order import OrdAction, OrdType, TIF, ExecutionEventHandler, NewOrderRequest, OrderReplaceRequest, \
+from algotrader.event.order import OrdAction, OrdType, TIF, NewOrderRequest, OrderReplaceRequest, \
     OrderCancelRequest
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.broker.sim.simulator import Simulator
@@ -14,6 +14,7 @@ from algotrader.trading.ref_data import inmemory_ref_data_mgr, Instrument
 from algotrader.utils import logger
 from algotrader.trading.position import Position, PositionHolder
 from algotrader.utils.clock import simluation_clock, realtime_clock
+from algotrader.utils.ser_deser import TradeData
 
 
 class TradingConfig(object):
@@ -45,7 +46,7 @@ class BacktestingConfig(TradingConfig):
         self.to_date = to_date
 
 
-class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler):
+class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, TradeData):
     def __init__(self, stg_id, portfolio, instruments,
                  trading_config, ref_data_mgr=None, next_ord_id=0):
         super(Strategy, self).__init__()

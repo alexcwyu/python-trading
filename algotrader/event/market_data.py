@@ -1,7 +1,7 @@
 import datetime
 
 from algotrader.event.event import Event
-
+from algotrader.provider.persistence.persist import Persistable
 
 class BarSize(object):
     S1 = 1
@@ -45,7 +45,7 @@ class MDOperation:
     Delete = 2
 
 
-class MarketDataEvent(Event):
+class MarketDataEvent(Event, Persistable):
     __slots__ = (
         'inst_id',
     )
@@ -118,6 +118,11 @@ class Bar(MarketDataEvent):
 
         return data
 
+
+    def save(self, data_store):
+        data_store.save_bar(self)
+
+
     @staticmethod
     def get_next_bar_start_time(timestamp, bar_size):
         return Bar.get_current_bar_start_time(timestamp, bar_size) + bar_size * 1000
@@ -165,6 +170,10 @@ class Trade(MarketDataEvent):
         return data
 
 
+    def save(self, data_store):
+        data_store.save_trade(self)
+
+
 class Quote(MarketDataEvent):
     __slots__ = (
         'bid',
@@ -205,6 +214,10 @@ class Quote(MarketDataEvent):
         return data
 
 
+    def save(self, data_store):
+        data_store.save_quote(self)
+
+
 class MarketDepth(MarketDataEvent):
     __slots__ = (
         'provider_id',
@@ -236,3 +249,6 @@ class MarketDepth(MarketDataEvent):
 
     def on(self, handler):
         handler.on_market_depth(self)
+
+    def save(self, data_store):
+        data_store.save_market_depth(self)

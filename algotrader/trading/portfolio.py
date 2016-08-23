@@ -1,19 +1,19 @@
 from collections import defaultdict
 
 from algotrader.event.event_bus import EventBus
-from algotrader.event.event_handler import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
+from algotrader.event.event_handler import AccountEventHandler
+from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.event.order import OrdAction, OrderEventHandler, ExecutionEventHandler
 from algotrader.performance.drawdown import DrawDown
 from algotrader.performance.returns import Pnl
 from algotrader.trading.order_mgr import order_mgr
-from algotrader.trading.position import Position, PositionHolder
+from algotrader.trading.portfolio_mgr import portf_mgr
+from algotrader.trading.position import PositionHolder
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
-from algotrader.trading.position import Position
-from algotrader.trading.portfolio_mgr import portf_mgr
 
 
-class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
+class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler):
     def __init__(self, portf_id="test", cash=1000000, analyzers=None):
         super(Portfolio, self).__init__()
         self.portf_id = portf_id
@@ -103,7 +103,8 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         direction = 1 if new_ord_req.action == OrdAction.BUY else -1
         if exec_report.last_qty > 0:
             self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
-            self.add_positon(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id, direction * exec_report.last_qty)
+            self.add_positon(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id,
+                             direction * exec_report.last_qty)
             self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
     def update_position_price(self, timestamp, inst_id, price):
@@ -125,7 +126,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         equity = self.performance_series.get_series("total_equity")
         equity.name = 'equity'
         rets = equity.pct_change().dropna()
-        #rets.index = rets.index.tz_localize("UTC")
+        # rets.index = rets.index.tz_localize("UTC")
         return rets
 
     def get_series(self):
@@ -145,3 +146,10 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         for analyzer in self.analyzers:
             result.update(analyzer.get_result())
         return result
+
+    def on_acc_upd(self, acc_upd):
+        pass
+
+    def on_portf_upd(self, portf_upd):
+        # TODO
+        pass

@@ -2,6 +2,12 @@ import abc
 import csv
 import os
 
+from algotrader.utils.ser_deser import Serializable
+
+
+class ReferenceData(Serializable):
+    pass
+
 
 class InstType:
     Stock = 'STK'
@@ -19,7 +25,7 @@ class CallPut:
     Put = "P"
 
 
-class Instrument:
+class Instrument(ReferenceData):
     __slots__ = (
         'inst_id',
         'name',
@@ -86,7 +92,7 @@ class Instrument:
         return self.exch_id
 
 
-class Exchange:
+class Exchange(ReferenceData):
     __slots__ = (
         'exch_id',
         'name'
@@ -101,7 +107,7 @@ class Exchange:
                % (self.exch_id, self.name)
 
 
-class Currency:
+class Currency(ReferenceData):
     __slots__ = (
         'ccy_id',
         'name'
@@ -154,9 +160,13 @@ class RefDataManager(object):
 
 class InMemoryRefDataManager(RefDataManager):
     def __init__(self):
-        self.inst_file = os.path.abspath(os.path.join(os.path.dirname(__file__), 'instrument.csv'))
-        self.ccy_file = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ccy.csv'))
-        self.exch_file = os.path.abspath(os.path.join(os.path.dirname(__file__), 'exch.csv'))
+        self.inst_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/instrument.csv'))
+        self.ccy_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/ccy.csv'))
+        self.exch_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/exch.csv'))
+
+        # self.inst_file = 'instrument.csv'
+        # self.ccy_file = 'ccy.csv'
+        # self.exch_file = 'exch.csv'
 
         self.__inst_dict = {}
         self.__inst_symbol_dict = {}

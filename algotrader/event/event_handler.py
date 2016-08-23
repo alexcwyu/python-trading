@@ -66,12 +66,13 @@ class ExecutionEventHandler(EventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
 
 
-class AccountEventEventHandler(EventHandler):
+class AccountEventHandler(EventHandler):
     def on_acc_upd(self, acc_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, acc_upd))
 
     def on_portf_upd(self, portf_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, portf_upd))
+
 
 
 class EventLogger(ExecutionEventHandler, MarketDataEventHandler):

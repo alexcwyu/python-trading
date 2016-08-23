@@ -1,5 +1,4 @@
 from algotrader.event.event import Event
-from algotrader.event.event_handler import AccountEventEventHandler
 
 
 class AccountEvent(Event):
@@ -11,16 +10,16 @@ class AccountUpdate(AccountEvent):
     __slots__ = (
         'account_name',
         'key',
-        'val',
         'ccy',
+        'val',
     )
 
-    def __init__(self, account_name, key, val, ccy, timestamp=None):
+    def __init__(self, account_name, key, ccy, val, timestamp=None):
         super(AccountUpdate, self).__init__(timestamp=timestamp)
         self.account_name = account_name
         self.key = key
-        self.val = val
         self.ccy = ccy
+        self.val = val
 
     def on(self, handler):
         handler.on_acc_upd(self)
@@ -53,33 +52,18 @@ class PortfolioUpdate(AccountEvent):
     def on(self, handler):
         handler.on_portf_upd(self)
 
+#
+# class AccountValue:
+#     __slots__ = (
+#         'key',
+#         'value'
+#     )
+#
+#     def __init__(self, key, value):
+#         self.key = key
+#         self.value = value
+#
+#     def __repr__(self):
+#         return '%s = %s' % (self.key, self.value)
 
-class AccountValue:
-    __slots__ = (
-        'key',
-        'value'
-    )
 
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
-
-    def __repr__(self):
-        return '%s = %s' % (self.key, self.value)
-
-
-class Account(AccountEventEventHandler):
-    def __init__(self, name):
-        self.name = name
-        self.account_value = {}
-        self.positions = {}
-        self.open_orders = []
-
-    def on_acc_upd(self, acc_upd):
-        pass
-
-    def on_portf_upd(self, portf_upd):
-        pass
-
-    def on_order(self, order):
-        pass

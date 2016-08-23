@@ -3,7 +3,8 @@ from collections import defaultdict
 from unittest import TestCase
 
 from algotrader.event.market_data import Trade, Bar, Quote
-from algotrader.event.order import Order, OrdAction, OrdType, NewOrderRequest, OrdStatus, OrderStatusUpdate, ExecutionReport
+from algotrader.event.order import OrdAction, OrdType, NewOrderRequest, OrdStatus, OrderStatusUpdate, ExecutionReport
+from algotrader.trading.order import Order
 from algotrader.trading.portfolio import Portfolio
 from algotrader.trading.order_mgr import order_mgr
 

@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, ExecutionReport, OrdStatus, Order
+from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, ExecutionReport, OrdStatus
+from algotrader.trading.order import Order
 from algotrader.trading.position import Position
 
 

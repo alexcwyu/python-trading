@@ -1,23 +1,14 @@
 from algotrader.technical import Indicator
-from algotrader.technical.ma import SMA
+from algotrader.technical.pipeline import PipeLine
 
 
-class ATR(Indicator):
+class Rank(PipeLine):
     _slots__ = (
-        'length',
-        '__prev_close',
-        '__value',
-        '__average',
     )
 
-    def __init__(self, input, length=14, desc="Average True Range"):
-        super(ATR, self).__init__(Indicator.get_name(ATR.__name__, input, length), input, ['high', 'low', 'close'],
-                                  desc)
-        self.length = int(length)
-        self.__prev_close = None
-        self.__value = None
-        self.__average = SMA(input, self.length)
-        super(ATR, self).update_all()
+    def __init__(self, inputs, input_key='close', desc="Rank"):
+        super(Rank, self).__init__(Indicator.get_name(Rank.__name__, input),
+                                   input,  input_key, desc)
 
     def on_update(self, data):
         sma_input = {}

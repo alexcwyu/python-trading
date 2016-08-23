@@ -23,6 +23,12 @@ class DataSeries(object):
         '__use_col_np'
     )
 
+    @staticmethod
+    def get_name(ds):
+        if isinstance(input, DataSeries):
+            return "'%s'" % input.name
+        return "'%s'" % input
+
     def __init__(self, name=None, keys=None, desc=None, missing_value=np.nan, data_list=None, use_col_np=False):
         """
         :param name:

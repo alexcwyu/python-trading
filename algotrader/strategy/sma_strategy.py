@@ -11,8 +11,8 @@ class SMAStrategy(Strategy):
         self.buy_order = None
         self.qty = qty
         self.bar = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
-        self.sma_fast = SMA(self.bar, 'close', 10)
-        self.sma_slow = SMA(self.bar, 'close', 25)
+        self.sma_fast = SMA(self.bar, 'close', length=10)
+        self.sma_slow = SMA(self.bar, 'close', length=25)
 
     def on_bar(self, bar):
         if self.buy_order is None and self.sma_fast.now('value') > self.sma_slow.now('value'):

@@ -23,6 +23,7 @@ class BB(Indicator):
         self.num_std = int(num_std)
         self.__sma = SMA(input, self.length)
         self.__std_dev = STD(input, self.length)
+        super(BB, self).update_all()
 
     def on_update(self, data):
         result = {}

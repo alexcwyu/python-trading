@@ -11,6 +11,7 @@ class SMA(Indicator):
     def __init__(self, input, input_key=None, length=0, desc="Simple Moving Average"):
         super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
+        super(SMA, self).update_all()
 
     def on_update(self, data):
         result = {}

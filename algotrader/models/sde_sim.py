@@ -1,5 +1,6 @@
 
 import numpy as np
+import math
 
 def euler(drift, diffusion, x0, T, Tstep, Nsim):
     """
@@ -14,7 +15,7 @@ def euler(drift, diffusion, x0, T, Tstep, Nsim):
     :return: np array of simulated stochastic process
     """
     dt = T/(Tstep-1)
-    dW = np.random.normal(0, dt, Nsim*Tstep).reshape(Nsim, Tstep)
+    dW = np.random.normal(0, math.sqrt(dt), Nsim*Tstep).reshape(Nsim, Tstep)
 
     x = np.zeros([Nsim, Tstep])
     t = np.linspace(0, T, Tstep)

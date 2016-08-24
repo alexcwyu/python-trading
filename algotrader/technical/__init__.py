@@ -39,7 +39,7 @@ class Indicator(DataSeries):
         self.input.subject.subscribe(self.on_update)
         inst_data_mgr.add_series(self)
         self.calculate = True
-        self.update_all()
+        # self.update_all()
 
     def update_all(self):
         data_list = self.input.get_data()

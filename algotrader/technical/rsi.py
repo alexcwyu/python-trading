@@ -59,6 +59,7 @@ class RSI(Indicator):
         self.length = int(length)
         self.__prev_gain = None
         self.__prev_loss = None
+        super(RSI, self).update_all()
 
     def on_update(self, data):
         result = {}

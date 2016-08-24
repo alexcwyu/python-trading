@@ -12,6 +12,7 @@ class MAX(Indicator):
         super(MAX, self).__init__(Indicator.get_name(MAX.__class__, input, input_key, length), input, input_key,
                                   desc)
         self.length = int(length)
+        super(MAX, self).update_all()
 
     def on_update(self, data):
         result = {}
@@ -33,6 +34,7 @@ class MIN(Indicator):
         super(MIN, self).__init__(Indicator.get_name(MIN.__class__, input, input_key, length), input, input_key,
                                   desc)
         self.length = int(length)
+        super(MIN, self).update_all()
 
     def on_update(self, data):
         result = {}
@@ -54,6 +56,7 @@ class STD(Indicator):
         super(STD, self).__init__(Indicator.get_name(STD.__class__, input, input_key, length), input, input_key,
                                   desc)
         self.length = int(length)
+        super(STD, self).update_all()
 
     def on_update(self, data):
         result = {}

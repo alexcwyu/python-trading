@@ -17,6 +17,7 @@ class ROC(Indicator):
     def __init__(self, input, input_key=None, length=1, desc="Rate Of Change"):
         super(ROC, self).__init__(Indicator.get_name(ROC.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
+        super(ROC, self).update_all()
 
     def on_update(self, data):
         result = {}

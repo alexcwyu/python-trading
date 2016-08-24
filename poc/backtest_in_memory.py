@@ -93,6 +93,7 @@ def main():
 
     instrument = 0
     close = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
+
     mgr.get_insts([instrument])
     mgr.get_inst(instrument)
 

@@ -17,6 +17,7 @@ class ATR(Indicator):
         self.__prev_close = None
         self.__value = None
         self.__average = SMA(input, self.length)
+        super(ATR, self).update_all()
 
     def on_update(self, data):
         sma_input = {}

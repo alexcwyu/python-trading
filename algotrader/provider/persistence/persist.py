@@ -100,3 +100,6 @@ class Persistable:
 
     def load(self):
         pass
+
+    def id(self):
+        return None

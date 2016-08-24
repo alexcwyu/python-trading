@@ -23,7 +23,7 @@ class InstrumentDataManager(MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
         self.__bar_dict[bar.inst_id] = bar
 
-        self.get_series(bar.id()).add(
+        self.get_series(bar.series_id()).add(
             {"timestamp": bar.timestamp, "open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
              "vol": bar.vol})
 
@@ -31,14 +31,14 @@ class InstrumentDataManager(MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
         self.__quote_dict[quote.inst_id] = quote
 
-        self.get_series(quote.id()).add(
+        self.get_series(quote.series_id()).add(
             {"timestamp": quote.timestamp, "bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
              "ask_size": quote.ask_size})
 
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__trade_dict[trade.inst_id] = trade
-        self.get_series(trade.id()).add({"timestamp": trade.timestamp, "price": trade.price, "size": trade.size})
+        self.get_series(trade.series_id()).add({"timestamp": trade.timestamp, "price": trade.price, "size": trade.size})
 
     def get_bar(self, inst_id):
         if inst_id in self.__bar_dict:

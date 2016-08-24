@@ -8,13 +8,14 @@ from algotrader.event.order import OrdAction, OrdType, TIF, NewOrderRequest, Ord
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.csv_feed import CSVDataFeed
-from algotrader.provider.provider import SubscriptionKey, HistDataSubscriptionKey, broker_mgr, feed_mgr
+from algotrader.provider.provider import HistDataSubscriptionKey, broker_mgr, feed_mgr
+from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey
 from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr, Instrument
 from algotrader.utils import logger
 from algotrader.trading.position import Position, PositionHolder
 from algotrader.utils.clock import simluation_clock, realtime_clock
-from algotrader.utils.ser_deser import TradeData
+from algotrader.trading.trade_data import TradeData
 
 
 class TradingConfig(object):
@@ -102,6 +103,9 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Tr
                                       bar_type=self.__trading_config.bar_type,
                                       bar_size=self.__trading_config.bar_size)
         self.__feed.subscribe_mktdata(sub_key)
+
+    def id(self):
+        return self.stg_id
 
     def on_bar(self, bar):
         super(Strategy, self).on_bar(bar)

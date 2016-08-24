@@ -1,7 +1,8 @@
 from algotrader.event.event_handler import AccountEventHandler
 
 from collections import defaultdict
-from algotrader.utils.ser_deser import TradeData
+from algotrader.trading.trade_data import TradeData
+
 
 class Account(AccountEventHandler, TradeData):
     def __init__(self, name):
@@ -18,3 +19,6 @@ class Account(AccountEventHandler, TradeData):
 
     def on_order(self, order):
         pass
+
+    def id(self):
+        return self.name

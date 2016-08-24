@@ -11,7 +11,7 @@ from algotrader.trading.portfolio_mgr import portf_mgr
 from algotrader.trading.position import PositionHolder
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
-from algotrader.utils.ser_deser import TradeData
+from algotrader.trading.trade_data import TradeData
 
 
 class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler, TradeData):
@@ -37,6 +37,9 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
             self.started = True
             order_mgr.start()
             EventBus.data_subject.subscribe(self.on_next)
+
+    def id(self):
+        return self.portf_id
 
     def all_orders(self):
         return [order for cl_orders in self.orders.values() for order in cl_orders.values()]

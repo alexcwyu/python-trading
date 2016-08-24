@@ -6,7 +6,8 @@ from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, Trade, Quote, BarSize
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, OrderReplaceRequest, OrderCancelRequest
 from algotrader.provider.broker.ib.ib_broker import IBBroker
-from algotrader.provider.provider import SubscriptionKey, HistDataSubscriptionKey
+from algotrader.provider.provider import HistDataSubscriptionKey
+from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey
 from algotrader.utils import logger
 
 today = date.today()

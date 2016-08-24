@@ -1,7 +1,6 @@
 import datetime
 
 from algotrader.event.event import Event
-from algotrader.provider.persistence.persist import Persistable
 
 class BarSize(object):
     S1 = 1
@@ -45,7 +44,7 @@ class MDOperation:
     Delete = 2
 
 
-class MarketDataEvent(Event, Persistable):
+class MarketDataEvent(Event):
     __slots__ = (
         'inst_id',
     )
@@ -54,9 +53,11 @@ class MarketDataEvent(Event, Persistable):
         super(MarketDataEvent, self).__init__(timestamp)
         self.inst_id = inst_id
 
-    def id(self):
+    def series_id(self):
         raise NotImplementedError()
 
+    def id(self):
+        return "%s-%s" %(self.series_id(), self.timestamp)
 
 from algotrader.utils.clock import Clock
 
@@ -88,8 +89,9 @@ class Bar(MarketDataEvent):
         self.vol = vol
         self.adj_close = adj_close
 
-    def id(self):
+    def series_id(self):
         return "Bar.%s.%s.%s" % (self.inst_id, BarType.name(self.type), self.size)
+
 
     def __str__(self):
         return "Bar(inst_id = %s, begin_time = %s, timestamp = %s,type = %s, size = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
@@ -151,7 +153,7 @@ class Trade(MarketDataEvent):
         self.price = price
         self.size = size
 
-    def id(self):
+    def series_id(self):
         return "Trade.%s" % (self.inst_id)
 
     def __str__(self):
@@ -189,7 +191,7 @@ class Quote(MarketDataEvent):
         self.ask = ask
         self.ask_size = ask_size
 
-    def id(self):
+    def series_id(self):
         return "Quote.%s" % (self.inst_id)
 
     def __str__(self):

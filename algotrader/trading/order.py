@@ -1,6 +1,6 @@
 from algotrader.event.event_handler import OrderEventHandler, ExecutionEventHandler
 from algotrader.event.order import OrdStatus, OrdAction
-from algotrader.utils.ser_deser import TradeData
+from algotrader.trading.trade_data import TradeData
 
 
 class Order(OrderEventHandler, ExecutionEventHandler, TradeData):
@@ -151,3 +151,7 @@ class Order(OrderEventHandler, ExecutionEventHandler, TradeData):
 
     def is_sell(self):
         return self.action == OrdAction.SELL  or self.action == OrdAction.SSHORT
+
+
+    def id(self):
+        return self.cl_id +"."+self.cl_ord_id

@@ -1,8 +1,9 @@
 from algotrader.utils.clock import realtime_clock
 from algotrader.utils.ser_deser import Serializable
 
+from algotrader.provider.persistence.persist import Persistable
 
-class Event(Serializable):
+class Event(Serializable, Persistable):
     __slots__ = (
         'timestamp'   # timestamp in unix timestamp millis sec
     )

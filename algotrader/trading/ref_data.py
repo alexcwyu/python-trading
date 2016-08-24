@@ -3,9 +3,10 @@ import csv
 import os
 
 from algotrader.utils.ser_deser import Serializable
+from algotrader.provider.persistence.persist import Persistable
 
 
-class ReferenceData(Serializable):
+class ReferenceData(Serializable, Persistable):
     pass
 
 
@@ -106,6 +107,8 @@ class Exchange(ReferenceData):
         return "Exchange(exch_id = %s, name = %s)" \
                % (self.exch_id, self.name)
 
+    def id(self):
+        return self.exch_id
 
 class Currency(ReferenceData):
     __slots__ = (
@@ -121,6 +124,8 @@ class Currency(ReferenceData):
         return "Currency(ccy_id = %s, name = %s)" \
                % (self.ccy_id, self.name)
 
+    def id(self):
+        return self.ccy_id
 
 class RefDataManager(object):
     __metaclass__ = abc.ABCMeta

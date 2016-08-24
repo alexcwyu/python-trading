@@ -47,10 +47,6 @@ class Serializable(object):
         return not self.__eq__(other)
 
 
-class TradeData(Serializable):
-    pass
-
-
 class Serializer(object):
     __metaclass__ = abc.ABCMeta
 

@@ -2,6 +2,8 @@ from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.utils.time_series import DataSeries
 from algotrader.technical import Indicator
 import numpy as np
+import pandas as pd
+
 
 class PipeLine(Indicator):
     VALUE = 'value'
@@ -34,7 +36,7 @@ class PipeLine(Indicator):
 
         return ",".join(str(part) for part in parts)
 
-    def __init__(self, name, inputs, input_keys, desc=None):
+    def __init__(self, name, inputs, input_keys, length=None, desc=None):
         super(PipeLine, self).__init__(name=name, desc=desc)
         f = lambda i: i \
             if isinstance(i, DataSeries) or isinstance(i, Indicator) \
@@ -52,6 +54,10 @@ class PipeLine(Indicator):
                 input_names.append(Indicator.get_name(i))
             else:
                 input_names.append(i)
+
+        self.length = length if length is not None else 1
+        self.input_names = input_names
+        self.df = pd.DataFrame(index=range(self.length), columns=input_names)
         self.input_names_pos = dict(zip(input_names,
                                         range(len(input_names))))
 
@@ -59,9 +65,12 @@ class PipeLine(Indicator):
         self.input.subject.subscribe(self.on_update)
         inst_data_mgr.add_series(self)
         self.calculate = True
-        # self.current_slice = np.empty(len(self.input_keys))
-        self.current_slice = None
+        self.__curr_timestamp = None
         # self.update_all()
+
+    def _flush_and_create(self):
+        self.df = pd.DataFrame(index=range(self.length), columns=self.input_names)
+
 
     def update_all(self):
         data_list = self.input.get_data()
@@ -73,8 +82,24 @@ class PipeLine(Indicator):
             else:
                 self.on_update(data)
 
+    def all_filled(self):
+        check_df = self.df.isnull()*1
+        return False if check_df.sum(axis=1).sum(axis=0) > 0 else True
+
     def on_update(self, data):
-        raise NotImplementedError()
+        if data['timestamp'] != self.__curr_timestamp:
+            self.__curr_timestamp = data['timestamp']
+            self._flush_and_create()
+
+        data_name = data['name']
+        if data_name in self.input_names:
+            j = self.input_names_pos[data_name]
+            self.df[data_name] = self.inputs[j].get_by_idx(
+                keys=self.input_keys,
+                idx=slice(-self.length, None, None))
+
+
+
 
 
 

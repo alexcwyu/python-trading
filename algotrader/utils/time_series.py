@@ -1,13 +1,13 @@
 import datetime
 from collections import defaultdict
-
+from algotrader.provider.persistence.persist import Persistable
 import numpy as np
 import pandas as pd
 from rx.subjects import Subject
 
 timestamp_key = "timestamp"
 
-class DataSeries(object):
+class DataSeries(Persistable):
     TIMESTAMP = 'timestamp'
 
     _slots__ = (
@@ -46,6 +46,15 @@ class DataSeries(object):
         if data_list:
             for data in data_list:
                 self.add(data)
+
+
+    def deserialize(self, map):
+        super(DataSeries, self).deserialize(map)
+        self.subject = Subject()
+        dd = defaultdict(dict)
+        dd.update(self.__data_time_dict)
+        self.__data_time_dict = dd
+
 
     def add(self, data):
         time = data.get(timestamp_key)

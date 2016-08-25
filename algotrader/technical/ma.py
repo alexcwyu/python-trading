@@ -8,7 +8,7 @@ class SMA(Indicator):
         'length'
     )
 
-    def __init__(self, input, input_key=None, length=0, desc="Simple Moving Average"):
+    def __init__(self, input=None, input_key=None, length=0, desc="Simple Moving Average"):
         super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
 

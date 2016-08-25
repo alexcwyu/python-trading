@@ -11,10 +11,9 @@ from algotrader.trading.portfolio_mgr import portf_mgr
 from algotrader.trading.position import PositionHolder
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
-from algotrader.trading.trade_data import TradeData
+from algotrader.provider.persistence.persist import Persistable
 
-
-class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler, TradeData):
+class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler, Persistable):
     def __init__(self, portf_id="test", cash=1000000, analyzers=None):
         super(Portfolio, self).__init__()
         self.portf_id = portf_id

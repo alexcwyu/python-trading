@@ -1,55 +1,19 @@
-from datetime import date
-
 from algotrader.event.event_bus import EventBus
-from algotrader.event.market_data import Bar, BarSize, BarType
 from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
 from algotrader.event.order import OrdAction, OrdType, TIF, NewOrderRequest, OrderReplaceRequest, \
     OrderCancelRequest
-from algotrader.provider.broker.ib.ib_broker import IBBroker
-from algotrader.provider.broker.sim.simulator import Simulator
-from algotrader.provider.feed.csv_feed import CSVDataFeed
-from algotrader.provider.provider import HistDataSubscriptionKey, broker_mgr, feed_mgr
+from algotrader.provider.persistence.persist import Persistable
+from algotrader.provider.provider import broker_mgr, feed_mgr
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey
 from algotrader.strategy.strategy_mgr import stg_mgr
-from algotrader.trading.ref_data import inmemory_ref_data_mgr, Instrument
-from algotrader.utils import logger
-from algotrader.trading.position import Position, PositionHolder
-from algotrader.utils.clock import simluation_clock, realtime_clock
-from algotrader.trading.trade_data import TradeData
+from algotrader.trading.config import BacktestingConfig
+from algotrader.trading.position import PositionHolder
+from algotrader.trading.ref_data import inmemory_ref_data_mgr
 
 
-class TradingConfig(object):
-    def __init__(self, broker_id, feed_id,
-                 data_type,
-                 bar_type,
-                 bar_size, clock):
-        self.broker_id = broker_id
-        self.feed_id = feed_id
-        self.data_type = data_type
-        self.bar_type = bar_type
-        self.bar_size = bar_size
-        self.clock = clock
-
-
-class LiveTradingConfig(TradingConfig):
-    def __init__(self, broker_id=IBBroker.ID, feed_id=IBBroker.ID, data_type=Bar, bar_type=BarType.Time,
-                 bar_size=BarSize.S1):
-        super(LiveTradingConfig, self).__init__(broker_id=broker_id, feed_id=feed_id, data_type=data_type,
-                                                bar_type=bar_type, bar_size=bar_size, clock=realtime_clock)
-
-
-class BacktestingConfig(TradingConfig):
-    def __init__(self, broker_id=Simulator.ID, feed_id=CSVDataFeed.ID, data_type=Bar, bar_type=BarType.Time,
-                 bar_size=BarSize.D1, from_date=date(2010, 1, 1), to_date=date.today()):
-        super(BacktestingConfig, self).__init__(broker_id=broker_id, feed_id=feed_id, data_type=data_type,
-                                                bar_type=bar_type, bar_size=bar_size, clock=simluation_clock)
-        self.from_date = from_date
-        self.to_date = to_date
-
-
-class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, TradeData):
-    def __init__(self, stg_id, portfolio, instruments,
-                 trading_config, ref_data_mgr=None, next_ord_id=0):
+class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable):
+    def __init__(self, stg_id=None, portfolio=None, instruments=None,
+                 trading_config=None, ref_data_mgr=None, next_ord_id=0):
         super(Strategy, self).__init__()
         self.stg_id = stg_id
         self.__portfolio = portfolio
@@ -58,7 +22,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Tr
         self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
         self.__instruments = self.__ref_data_mgr.get_insts(instruments)
 
-        self.__feed = feed_mgr.get(self.__trading_config.feed_id)
+        self.__feed = feed_mgr.get(self.__trading_config.feed_id) if self.__trading_config else None
         stg_mgr.add_strategy(self)
         self.started = False
         self.__ord_req = {}

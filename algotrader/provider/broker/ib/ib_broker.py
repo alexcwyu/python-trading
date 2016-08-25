@@ -9,7 +9,7 @@ from algotrader.event.market_data import Bar, Quote, Trade, MarketDepth
 from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus, NewOrderRequest, OrderCancelRequest, OrderReplaceRequest
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
-from algotrader.provider.provider import Broker, MarketDepthSubscriptionKey, Feed
+from algotrader.provider.provider import Broker, Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey, MarketDepthSubscriptionKey
 from algotrader.provider.provider import feed_mgr, broker_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr

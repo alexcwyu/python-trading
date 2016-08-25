@@ -1,8 +1,6 @@
 from pymongo import MongoClient
 
 from algotrader.provider.persistence.persist import RefDataStore, TradeDataStore, TimeSeriesDataStore
-
-from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.utils.ser_deser import JsonSerializer
 
 
@@ -48,38 +46,38 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore):
     def load_all(self, clazz):
         raise NotImplementedError()
 
+    @staticmethod
+    def _serialize(self, serializable):
+        return serializable.id(), serializable.serialize()
 
     # RefDataStore
     def save_instrument(self, instrument):
-        raise NotImplementedError()
+        id, packed = MongoDBDataStore._serialize(instrument)
+        self.instruments.update({'_id': id}, packed, upsert=True)
 
     def save_exchange(self, exchange):
-        raise NotImplementedError()
+        id, packed = MongoDBDataStore._serialize(exchange)
+        self.exchanges.update({'_id': id}, packed, upsert=True)
 
     def save_currency(self, currency):
-        raise NotImplementedError()
-
+        id, packed = MongoDBDataStore._serialize(currency)
+        self.currencies.update({'_id': id}, packed, upsert=True)
 
     # TimeSeriesDataStore
     def save_bar(self, bar):
-        packed = bar.serialize()
-        id = bar.id()
+        id, packed = MongoDBDataStore._serialize(bar)
         self.bars.update({'_id': id}, packed, upsert=True)
 
-
     def save_quote(self, quote):
-        packed = quote.serialize()
-        id = quote.id()
+        id, packed = MongoDBDataStore._serialize(quote)
         self.quotes.update({'_id': id}, packed, upsert=True)
 
     def save_trade(self, trade):
-        packed = trade.serialize()
-        id = trade.id()
+        id, packed = MongoDBDataStore._serialize(trade)
         self.trades.update({'_id': id}, packed, upsert=True)
 
     def save_market_depth(self, market_depth):
-        packed = market_depth.serialize()
-        id = market_depth.id()
+        id, packed = MongoDBDataStore._serialize(market_depth)
         self.market_depths.update({'_id': id}, packed, upsert=True)
 
     def save_time_series(self, timeseries):

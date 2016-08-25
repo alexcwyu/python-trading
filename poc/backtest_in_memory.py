@@ -10,7 +10,7 @@ from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.strategy.sma_strategy import SMAStrategy
 from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
-from algotrader.strategy.strategy import BacktestingConfig
+from algotrader.trading.config import BacktestingConfig
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
 from algotrader.trading.order_mgr import order_mgr

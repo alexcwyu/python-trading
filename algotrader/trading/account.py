@@ -1,11 +1,11 @@
 from algotrader.event.event_handler import AccountEventHandler
 
 from collections import defaultdict
-from algotrader.trading.trade_data import TradeData
+from algotrader.provider.persistence.persist import Persistable
 
 
-class Account(AccountEventHandler, TradeData):
-    def __init__(self, name):
+class Account(AccountEventHandler, Persistable):
+    def __init__(self, name=None):
         self.name = name
         self.key_ccy_value = defaultdict(dict)
         self.positions = {}

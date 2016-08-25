@@ -6,7 +6,7 @@ from algotrader.utils.ser_deser import Serializable
 from algotrader.provider.persistence.persist import Persistable
 
 
-class ReferenceData(Serializable, Persistable):
+class ReferenceData(Persistable):
     pass
 
 
@@ -50,10 +50,10 @@ class Instrument(ReferenceData):
 
     )
 
-    def __init__(self, inst_id, name, type, symbol, exch_id, ccy_id, alt_symbol=None, alt_exch_id=None,
+    def __init__(self, inst_id=None, name=None, type=None, symbol=None, exch_id=None, ccy_id=None, alt_symbol=None, alt_exch_id=None,
                  sector=None, group=None,
                  put_call=None, expiry_date=None, und_inst_id=None, factor=1, strike=0.0, margin=0.0):
-        self.inst_id = int(inst_id)
+        self.inst_id = int(inst_id) if inst_id else None
         self.name = name
         self.type = type
         self.symbol = symbol
@@ -72,12 +72,12 @@ class Instrument(ReferenceData):
         self.strike = float(strike) if strike else 0.0
         self.margin = float(margin) if margin else 0.0
 
-    def __repr__(self):
-        return self.__str__()
-
-    def __str__(self):
-        return "Instrument(inst_id = %s, name = %s, type = %s, symbol = %s, exch_id = %s, ccy_id = %s)" \
-               % (self.inst_id, self.name, self.type, self.symbol, self.exch_id, self.ccy_id)
+    # def __repr__(self):
+    #     return self.__str__()
+    #
+    # def __str__(self):
+    #     return "Instrument(inst_id = %s, name = %s, type = %s, symbol = %s, exch_id = %s, ccy_id = %s)" \
+    #            % (self.inst_id, self.name, self.type, self.symbol, self.exch_id, self.ccy_id)
 
     def id(self):
         return self.symbol + "@" + self.exch_id
@@ -99,13 +99,13 @@ class Exchange(ReferenceData):
         'name'
     )
 
-    def __init__(self, exch_id, name):
+    def __init__(self, exch_id=None, name=None):
         self.exch_id = exch_id
         self.name = name
-
-    def __str__(self):
-        return "Exchange(exch_id = %s, name = %s)" \
-               % (self.exch_id, self.name)
+    #
+    # def __str__(self):
+    #     return "Exchange(exch_id = %s, name = %s)" \
+    #            % (self.exch_id, self.name)
 
     def id(self):
         return self.exch_id
@@ -116,13 +116,13 @@ class Currency(ReferenceData):
         'name'
     )
 
-    def __init__(self, ccy_id, name):
+    def __init__(self, ccy_id=None, name=None):
         self.ccy_id = ccy_id
         self.name = name
-
-    def __str__(self):
-        return "Currency(ccy_id = %s, name = %s)" \
-               % (self.ccy_id, self.name)
+    #
+    # def __str__(self):
+    #     return "Currency(ccy_id = %s, name = %s)" \
+    #            % (self.ccy_id, self.name)
 
     def id(self):
         return self.ccy_id

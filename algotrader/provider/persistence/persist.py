@@ -1,7 +1,7 @@
 import abc
 
 from algotrader.provider.provider import Provider
-
+from algotrader.utils.ser_deser import Serializable
 
 class Query():
     __metaclass__ = abc.ABCMeta
@@ -94,7 +94,7 @@ class TradeDataStore(TimeSeriesDataStore):
         raise NotImplementedError()
 
 
-class Persistable:
+class Persistable(Serializable):
     def save(self, data_store):
         pass
 

@@ -1,7 +1,8 @@
 import datetime
 
+from rx.subjects import Subject
 from algotrader.utils import msgpack_numpy as m
-
+from itertools import chain
 m.patch()
 import importlib
 import msgpack
@@ -9,6 +10,7 @@ import abc
 import json
 from itertools import chain
 
+ignore_cls = (Subject)
 
 class Serializable(object):
     def serialize(self):
@@ -47,6 +49,11 @@ class Serializable(object):
         return not self.__eq__(other)
 
 
+    def __repr__(self):
+        items = ("%s = %r" % (k, v) for k, v in chain(self.__data__().items(), self.__dict__.items()))
+        return "%s(%s)" % (self.__class__.__name__, ', '.join(items))
+
+
 class Serializer(object):
     __metaclass__ = abc.ABCMeta
 
@@ -62,9 +69,12 @@ class Serializer(object):
 cls_cache = {}
 
 
+
 def decode(obj):
     if b'__datetime__' in obj:
         obj = datetime.datetime.strptime(obj["__datetime__"], "%Y%m%dT%H:%M:%S.%f")
+    elif b'__date__' in obj:
+        obj = datetime.datetime.strptime(obj["__date__"], "%Y%m%d").date()
     elif b'@t' in obj:
         data = obj
         module = obj[b'@p']
@@ -84,7 +94,11 @@ def encode(obj):
         return obj.serialize()
     if isinstance(obj, datetime.datetime):
         return {'__datetime__': obj.strftime("%Y%m%dT%H:%M:%S.%f")}
+    if isinstance(obj, datetime.date):
+        return {'__date__': obj.strftime("%Y%m%d")}
 
+    if isinstance(obj, ignore_cls):
+        return None
     return obj
 
 

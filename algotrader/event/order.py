@@ -91,11 +91,11 @@ class NewOrderRequest(OrderEvent):
     def on(self, handler):
         handler.on_new_ord_req(self)
 
-    def __repr__(self):
-        return "NewOrderRequest(timestamp = %s, cl_id = %s, cl_ord_id = %s, portf_id = %s, broker_id = %s, inst_id = %s, action = %s" \
-               ", type = %s, qty = %s, limit_price = %s, stop_price = %s, tif = %s, oca_tag = %s, params = %s)" \
-               % (self.timestamp, self.cl_id, self.cl_ord_id, self.portf_id, self.broker_id, self.inst_id, self.action,
-                  self.type, self.qty, self.limit_price, self.stop_price, self.tif, self.oca_tag, self.params)
+    # def __repr__(self):
+    #     return "NewOrderRequest(timestamp = %s, cl_id = %s, cl_ord_id = %s, portf_id = %s, broker_id = %s, inst_id = %s, action = %s" \
+    #            ", type = %s, qty = %s, limit_price = %s, stop_price = %s, tif = %s, oca_tag = %s, params = %s)" \
+    #            % (self.timestamp, self.cl_id, self.cl_ord_id, self.portf_id, self.broker_id, self.inst_id, self.action,
+    #               self.type, self.qty, self.limit_price, self.stop_price, self.tif, self.oca_tag, self.params)
 
     def is_buy(self):
         return self.action == OrdAction.BUY
@@ -145,12 +145,12 @@ class OrderReplaceRequest(OrderEvent):
         self.tif = tif
         self.oca_tag = oca_tag
         self.params = params if params else {}
-
-    def __repr__(self):
-        return "OrderReplaceRequest(timestamp = %s, cl_id = %s, cl_ord_id = %s, " \
-               ", type = %s, qty = %s, limit_price = %s, stop_price = %s, tif = %s, oca_tag = %s, params = %s)" \
-               % (self.timestamp, self.cl_id, self.cl_ord_id,
-                  self.type, self.qty, self.limit_price, self.stop_price, self.tif, self.oca_tag, self.params)
+    #
+    # def __repr__(self):
+    #     return "OrderReplaceRequest(timestamp = %s, cl_id = %s, cl_ord_id = %s, " \
+    #            ", type = %s, qty = %s, limit_price = %s, stop_price = %s, tif = %s, oca_tag = %s, params = %s)" \
+    #            % (self.timestamp, self.cl_id, self.cl_ord_id,
+    #               self.type, self.qty, self.limit_price, self.stop_price, self.tif, self.oca_tag, self.params)
 
     def on(self, handler):
         handler.on_ord_replace_req(self)
@@ -164,10 +164,10 @@ class OrderCancelRequest(OrderEvent):
     def __init__(self, timestamp=None, cl_id=None, cl_ord_id=None, params=None):
         super(OrderCancelRequest, self).__init__(timestamp=timestamp, cl_id=cl_id, cl_ord_id=cl_ord_id)
         self.params = params if params else {}
-
-    def __repr__(self):
-        return "OrderCancelRequest(timestamp = %s, cl_id = %s, cl_ord_id = %s, params = %s)" \
-               % (self.timestamp, self.cl_id, self.cl_ord_id, self.params)
+    #
+    # def __repr__(self):
+    #     return "OrderCancelRequest(timestamp = %s, cl_id = %s, cl_ord_id = %s, params = %s)" \
+    #            % (self.timestamp, self.cl_id, self.cl_ord_id, self.params)
 
     def on(self, handler):
         handler.on_ord_cancel_req(self)
@@ -210,10 +210,10 @@ class OrderStatusUpdate(ExecutionEvent):
 
     def on(self, handler):
         handler.on_ord_upd(self)
-
-    def __repr__(self):
-        return "OrderStatusUpdate(broker_id = %s, ord_id = %s, cl_id=%s, cl_ord_id=%s, inst_id = %s, timestamp = %s, status = %s)" \
-               % (self.broker_id, self.ord_id, self.cl_id, self.cl_ord_id, self.inst_id, self.timestamp, self.status)
+    #
+    # def __repr__(self):
+    #     return "OrderStatusUpdate(broker_id = %s, ord_id = %s, cl_id=%s, cl_ord_id=%s, inst_id = %s, timestamp = %s, status = %s)" \
+    #            % (self.broker_id, self.ord_id, self.cl_id, self.cl_ord_id, self.inst_id, self.timestamp, self.status)
 
 
 class ExecutionReport(OrderStatusUpdate):
@@ -240,11 +240,11 @@ class ExecutionReport(OrderStatusUpdate):
 
     def on(self, handler):
         handler.on_exec_report(self)
-
-    def __repr__(self):
-        return "ExecutionReport(broker_id = %s, ord_id = %s, cl_id=%s, cl_ord_id = %s, inst_id = %s, timestamp = %s" \
-               ", er_id = %s, last_qty = %s, last_price = %s, filled_qty = %s, avg_price = %s, commission = %s)" \
-               % (self.broker_id, self.ord_id, self.cl_id, self.cl_ord_id, self.inst_id, self.timestamp,
-                  self.er_id, self.last_qty, self.last_price, self.filled_qty, self.avg_price, self.commission)
+    #
+    # def __repr__(self):
+    #     return "ExecutionReport(broker_id = %s, ord_id = %s, cl_id=%s, cl_ord_id = %s, inst_id = %s, timestamp = %s" \
+    #            ", er_id = %s, last_qty = %s, last_price = %s, filled_qty = %s, avg_price = %s, commission = %s)" \
+    #            % (self.broker_id, self.ord_id, self.cl_id, self.cl_ord_id, self.inst_id, self.timestamp,
+    #               self.er_id, self.last_qty, self.last_price, self.filled_qty, self.avg_price, self.commission)
 
 

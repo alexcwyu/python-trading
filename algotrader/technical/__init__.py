@@ -30,16 +30,19 @@ class Indicator(DataSeries):
 
     def __init__(self, name, input, input_keys, desc=None):
         super(Indicator, self).__init__(name=name, desc=desc)
-        if isinstance(input, DataSeries):
-            self.input = input
-        else:
-            self.input = inst_data_mgr.get_series(input)
 
         self.input_keys = self._get_key(input_keys, None)
-        self.input.subject.subscribe(self.on_update)
         inst_data_mgr.add_series(self)
         self.calculate = True
-        self.update_all()
+
+        if input:
+            if isinstance(input, DataSeries):
+                self.input = input
+            else:
+                self.input = inst_data_mgr.get_series(input)
+
+            self.input.subject.subscribe(self.on_update)
+            self.update_all()
 
     def update_all(self):
         data_list = self.input.get_data()

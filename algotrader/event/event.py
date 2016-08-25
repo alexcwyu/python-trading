@@ -3,7 +3,7 @@ from algotrader.utils.ser_deser import Serializable
 
 from algotrader.provider.persistence.persist import Persistable
 
-class Event(Serializable, Persistable):
+class Event(Persistable):
     __slots__ = (
         'timestamp'   # timestamp in unix timestamp millis sec
     )
@@ -14,6 +14,3 @@ class Event(Serializable, Persistable):
     def on(self, handler):
         pass
 
-    def __repr__(self):
-        items = ("%s = %r" % (k, v) for k, v in self.__dict__.items())
-        return "%s(%s)" % (self.__class__.__name__, ', '.join(items))

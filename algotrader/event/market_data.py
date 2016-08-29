@@ -2,6 +2,14 @@ import datetime
 
 from algotrader.event.event import Event
 
+
+class MarketDataType(object):
+    Bar = 'Bar'
+    Quote = 'Quote'
+    Trade = 'Trade'
+    MarketDepth = 'MarketDepth'
+
+
 class BarSize(object):
     S1 = 1
     S5 = 5
@@ -57,7 +65,8 @@ class MarketDataEvent(Event):
         raise NotImplementedError()
 
     def id(self):
-        return "%s-%s" %(self.series_id(), self.timestamp)
+        return "%s-%s" % (self.series_id(), self.timestamp)
+
 
 from algotrader.utils.clock import Clock
 
@@ -92,7 +101,6 @@ class Bar(MarketDataEvent):
     def series_id(self):
         return "Bar.%s.%s.%s" % (self.inst_id, BarType.name(self.type), self.size)
 
-
     # def __str__(self):
     #     return "Bar(inst_id = %s, begin_time = %s, timestamp = %s,type = %s, size = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
     #            % (
@@ -120,10 +128,8 @@ class Bar(MarketDataEvent):
 
         return data
 
-
     def save(self, data_store):
         data_store.save_bar(self)
-
 
     @staticmethod
     def get_next_bar_start_time(timestamp, bar_size):
@@ -171,7 +177,6 @@ class Trade(MarketDataEvent):
 
         return data
 
-
     def save(self, data_store):
         data_store.save_trade(self)
 
@@ -193,6 +198,7 @@ class Quote(MarketDataEvent):
 
     def series_id(self):
         return "Quote.%s" % (self.inst_id)
+
     #
     # def __str__(self):
     #     return "Quote(inst_id = %s, timestamp = %s,bid = %s, bid_size = %s, ask = %s, ask_size = %s)" \
@@ -214,7 +220,6 @@ class Quote(MarketDataEvent):
         if all_data:
             data['inst_id'] = self.inst_id
         return data
-
 
     def save(self, data_store):
         data_store.save_quote(self)
@@ -242,6 +247,7 @@ class MarketDepth(MarketDataEvent):
 
     def id(self):
         return "MarketDepth.%s" % (self.inst_id)
+
     #
     # def __str__(self):
     #     return "MarketDepth(inst_id = %s, timestamp = %s, provider_id = %s, position = %s, operation = %s, side = %s, price = %s, size = %s)" \

@@ -1,44 +1,86 @@
+import abc
 from datetime import date
 
-from algotrader.event.market_data import Bar, BarType, BarSize
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.csv_feed import CSVDataFeed
 from algotrader.provider.persistence.persist import Persistable
-from algotrader.utils.clock import realtime_clock, simluation_clock
+from algotrader.trading.ref_data import RefDataManagerType
+from algotrader.utils.clock import ClockType
 
+from algotrader.provider.subscription import BarSubscriptionType
+from algotrader.event.market_data import Bar, BarType, BarSize, MarketDataType
 
 class Config(Persistable):
-    pass
+    __metaclass__ = abc.ABCMeta
 
 
 class ApplicationConfig(Config):
     pass
 
+
 class TradingConfig(Config):
-    def __init__(self, broker_id, feed_id,
-                 data_type,
-                 bar_type,
-                 bar_size, clock):
-        self.broker_id = broker_id
+    __metaclass__ = abc.ABCMeta
+
+    __slots__ = (
+        'portfolio_id',
+        'instrument_ids',
+        'subscription_types',
+        'feed_id',
+        'broker_id',
+        'ref_data_mgr_type',
+        'clock_type',
+        'stg_configs'
+
+    )
+
+    def __init__(self, portfolio_id,
+                 subscription_types,
+                 instrument_ids,
+                 feed_id, broker_id,
+                 ref_data_mgr_type, clock_type, stg_configs):
+        self.portfolio_id = portfolio_id
+
+        self.instrument_ids = instrument_ids
+        if not isinstance(self.instrument_ids, (list, tuple)):
+            self.instrument_ids = [self.instrument_ids]
+
+        self.subscription_types = subscription_types if subscription_types else [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)]
+        if not isinstance(self.subscription_types, (list, tuple)):
+            self.subscription_types = [self.subscription_types]
+
         self.feed_id = feed_id
-        self.data_type = data_type
-        self.bar_type = bar_type
-        self.bar_size = bar_size
-        self.clock = clock
+        self.broker_id = broker_id
+        self.ref_data_mgr_type = ref_data_mgr_type
+        self.clock_type = clock_type
+        self.stg_configs = stg_configs
 
 
 class LiveTradingConfig(TradingConfig):
-    def __init__(self, broker_id=IBBroker.ID, feed_id=IBBroker.ID, data_type=Bar, bar_type=BarType.Time,
-                 bar_size=BarSize.S1):
-        super(LiveTradingConfig, self).__init__(broker_id=broker_id, feed_id=feed_id, data_type=data_type,
-                                                bar_type=bar_type, bar_size=bar_size, clock=realtime_clock)
+    def __init__(self, portfolio_id, instrument_ids, subscription_types=None,
+                 feed_id=IBBroker.ID, broker_id=IBBroker.ID,
+                 ref_data_mgr_type=RefDataManagerType.InMemory, stg_configs=None):
+        super(LiveTradingConfig, self).__init__(portfolio_id=portfolio_id, instrument_ids=instrument_ids,
+                                                subscription_types=subscription_types,
+                                                feed_id=feed_id, broker_id=broker_id,
+                                                ref_data_mgr_type=ref_data_mgr_type, clock_type=ClockType.RealTime,
+                                                stg_configs=stg_configs)
 
 
 class BacktestingConfig(TradingConfig):
-    def __init__(self, broker_id=Simulator.ID, feed_id=CSVDataFeed.ID, data_type=Bar, bar_type=BarType.Time,
-                 bar_size=BarSize.D1, from_date=date(2010, 1, 1), to_date=date.today()):
-        super(BacktestingConfig, self).__init__(broker_id=broker_id, feed_id=feed_id, data_type=data_type,
-                                                bar_type=bar_type, bar_size=bar_size, clock=simluation_clock)
+    __slots__ = (
+        'from_date',
+        'to_date',
+    )
+
+    def __init__(self, portfolio_id, instrument_ids, subscription_types=None,
+                 from_date=date(2010, 1, 1), to_date=date.today(),
+                 feed_id=CSVDataFeed.ID, broker_id=Simulator.ID,
+                 ref_data_mgr_type=RefDataManagerType.InMemory, stg_configs=None):
+        super(BacktestingConfig, self).__init__(portfolio_id=portfolio_id, instrument_ids=instrument_ids,
+                                                subscription_types=subscription_types,
+                                                feed_id=feed_id, broker_id=broker_id,
+                                                ref_data_mgr_type=ref_data_mgr_type, clock_type=ClockType.Simulation,
+                                                stg_configs=stg_configs)
         self.from_date = from_date
         self.to_date = to_date

@@ -5,10 +5,18 @@ from collections import defaultdict
 from algotrader.provider.persistence.persist import Persistable
 
 class Position(Persistable):
+    __slots__ = (
+        'inst_id',
+        'orders',
+        'filled_qty_dict',
+        'last_price'
+    )
+
+
     def __init__(self, inst_id=None):
         self.inst_id = inst_id
-        self.orders = defaultdict(dict)
-        self.filled_qty_dict = defaultdict(dict)
+        self.orders = {}
+        self.filled_qty_dict = {}
         self.last_price = 0
 
     def add_order(self, order):
@@ -19,9 +27,12 @@ class Position(Persistable):
         if order.cl_ord_id in self.orders[order.cl_id]:
             raise RuntimeError("order[%s][%s] already exist" % (order.cl_id, order.cl_ord_id))
 
+        self.orders[order.cl_id] = {}
         self.orders[order.cl_id][order.cl_ord_id] = order
 
     def add_position(self, cl_id, cl_ord_id, filled_qty):
+        if cl_id not in self.filled_qty_dict:
+            self.filled_qty_dict[cl_id] = {}
         existing_filled_qty = self.filled_qty_dict[cl_id].get(cl_ord_id, 0)
         updated_filled_qty = existing_filled_qty + filled_qty
         self.filled_qty_dict[cl_id][cl_ord_id] = updated_filled_qty
@@ -53,6 +64,11 @@ class Position(Persistable):
 
 
 class PositionHolder(MarketDataEventHandler):
+    __slots__ = (
+        'positions'
+    )
+
+
     def __init__(self):
         self.positions = {}
 
@@ -67,7 +83,7 @@ class PositionHolder(MarketDataEventHandler):
             position = self.positions[inst_id]
             position.last_price = price
 
-    def add_positon(self, inst_id, cl_id, cl_ord_id, qty):
+    def add_position(self, inst_id, cl_id, cl_ord_id, qty):
         position = self.get_position(inst_id)
         position.add_position(cl_id, cl_ord_id, qty)
 

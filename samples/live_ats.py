@@ -3,8 +3,9 @@ Created on 4/16/16
 @author = 'jason'
 '''
 
-from algotrader.event.market_data import Bar, BarSize, BarType
+from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker.ib.ib_broker import IBBroker
+from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
 from algotrader.trading.config import LiveTradingConfig
 from algotrader.trading.instrument_data import inst_data_mgr
@@ -18,25 +19,23 @@ class ATSRunner(object):
         self.__stg = stg
 
     def start(self):
-        # clock.default_clock = clock.realtime_clock
         inst_data_mgr.start()
         order_mgr.start()
-
         self.__stg.start()
 
 
 def main():
-    portfolio = Portfolio(cash=100000)
+    portfolio = Portfolio(portf_id='test', cash=100000)
     broker = IBBroker(client_id=2)
 
-    config = LiveTradingConfig(broker_id=IBBroker.ID,
-                               feed_id=IBBroker.ID,
-                               data_type=Bar,
-                               bar_type=BarType.Time,
-                               bar_size=BarSize.M1)
+    config = LiveTradingConfig(portfolio_id='test',
+                               instrument_ids=[4],
+                               subscription_types=[BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.M1)],
+                               broker_id=IBBroker.ID,
+                               feed_id=IBBroker.ID)
 
-    # strategy = SMAStrategy("sma", portfolio, instrument='spy', qty=1000, trading_config=config)
-    strategy = Down2PctStrategy("down2%", portfolio, instrument='GOOG', qty=1000, trading_config=config)
+    # strategy = SMAStrategy("sma", qty=1000, trading_config=config)
+    strategy = Down2PctStrategy("down2%", qty=1000, trading_config=config)
 
     runner = ATSRunner(strategy)
 

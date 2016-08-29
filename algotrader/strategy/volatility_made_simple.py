@@ -9,14 +9,14 @@ from rx.subjects import BehaviorSubject
 
 
 class VixVxvRatio(Strategy):
-    def __init__(self, stg_id, portfolio, qty, threshold,
+    def __init__(self, stg_id, qty, threshold,
                  trading_config, ref_data_mgr=None):
         self.xiv = ref_data_mgr.get_inst('XIV', 'SMART')
         self.vxx = ref_data_mgr.get_inst('VXX', 'SMART')
         self.vxv = ref_data_mgr.get_inst('VXV', 'SMART')
         self.vix = ref_data_mgr.get_inst('VIX', 'SMART') # TODO: Review index
         instruments = [self.vxx, self.xiv, self.vix]
-        super(VixVxvRatio, self).__init__(stg_id, portfolio, instruments, trading_config, ref_data_mgr)
+        super(VixVxvRatio, self).__init__(stg_id=stg_id, trading_config=trading_config, ref_data_mgr=ref_data_mgr)
         self.threshold = threshold
         self.day_count = 0
         self.order = None
@@ -55,14 +55,14 @@ class VixVxvRatio(Strategy):
 
 
 class VxvVxmtRatio(Strategy):
-    def __init__(self, stg_id, portfolio, qty, threshold,
+    def __init__(self, stg_id, qty, threshold,
                  trading_config, ref_data_mgr=None):
         self.xiv = ref_data_mgr.get_inst('XIV', 'SMART')
         self.vxx = ref_data_mgr.get_inst('VXX', 'SMART')
         self.vxv = ref_data_mgr.get_inst('VXV', 'SMART')
         self.vxmt = ref_data_mgr.get_inst('VXMT', 'SMART')
         instruments = [self.vxx, self.xiv, self.vxmt]
-        super(VxvVxmtRatio, self).__init__(stg_id, portfolio, instruments, trading_config, ref_data_mgr)
+        super(VxvVxmtRatio, self).__init__(stg_id=stg_id, trading_config=trading_config, ref_data_mgr=ref_data_mgr)
         self.threshold = threshold
         self.day_count = 0
         self.order = None

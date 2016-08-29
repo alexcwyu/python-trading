@@ -8,38 +8,48 @@ from algotrader.provider.subscription import SubscriptionKey, HistDataSubscripti
 from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.trading.config import BacktestingConfig
 from algotrader.trading.position import PositionHolder
-from algotrader.trading.ref_data import inmemory_ref_data_mgr
+from algotrader.trading.ref_data import inmemory_ref_data_mgr, get_ref_data_mgr
+from algotrader.trading.portfolio_mgr import portf_mgr
 
 
 class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable):
-    def __init__(self, stg_id=None, portfolio=None, instruments=None,
-                 trading_config=None, ref_data_mgr=None, next_ord_id=0):
+    __slots__ = (
+        'stg_id',
+        'trading_config',
+        'next_ord_id',
+        'ord_req',
+        'order',
+    )
+
+    def __init__(self, stg_id=None, next_ord_id=0, trading_config=None, ref_data_mgr=None):
         super(Strategy, self).__init__()
         self.stg_id = stg_id
-        self.__portfolio = portfolio
-        self.__trading_config = trading_config
-        self.__next_ord_id = next_ord_id
-        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
-        self.__instruments = self.__ref_data_mgr.get_insts(instruments)
+        self.trading_config = trading_config
+        self.next_ord_id = next_ord_id
+        self.ord_req = {}
+        self.order = {}
 
-        self.__feed = feed_mgr.get(self.__trading_config.feed_id) if self.__trading_config else None
+        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else get_ref_data_mgr(self.trading_config.ref_data_mgr_type) if self.trading_config else None
+        self.__started = False
         stg_mgr.add_strategy(self)
-        self.started = False
-        self.__ord_req = {}
-        self.__order = {}
 
     def __get_next_ord_id(self):
-        next_ord_id = self.__next_ord_id
-        self.__next_ord_id += 1
+        next_ord_id = self.next_ord_id
+        self.next_ord_id += 1
         return next_ord_id
 
     def start(self):
-        if not self.started:
-            self.started = True
+        if not self.__started:
+
+            self.__ref_data_mgr = self.__ref_data_mgr if self.__ref_data_mgr else get_ref_data_mgr(self.trading_config.ref_data_mgr_type)
+            self.__portfolio = portf_mgr.get_portfolio(self.trading_config.portfolio_id)
+            self.__feed = feed_mgr.get(self.trading_config.feed_id) if self.trading_config else None
+            self.__instruments = self.__ref_data_mgr.get_insts(self.trading_config.instrument_ids)
+            self.__started = True
             self.__portfolio.start()
 
-            broker = broker_mgr.get(self.__trading_config.broker_id)
-            broker.start()
+            self.__broker = broker_mgr.get(self.trading_config.broker_id)
+            self.__broker.start()
 
             EventBus.data_subject.subscribe(self.on_next)
             self._subscribe_market_data(self.__instruments)
@@ -47,26 +57,21 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
 
     def _subscribe_market_data(self, instruments):
         for instrument in instruments:
-            self._subscribe_inst(instrument)
+            for subscription_type in self.trading_config.subscription_types:
+                if isinstance(self.trading_config, BacktestingConfig):
 
-    def _subscribe_inst(self, instrument):
-        if isinstance(self.__trading_config, BacktestingConfig):
+                    sub_key = HistDataSubscriptionKey(inst_id=instrument.inst_id,
+                                                      provider_id=self.trading_config.feed_id,
+                                                      subscription_type=subscription_type,
+                                                      from_date=self.trading_config.from_date,
+                                                      to_date=self.trading_config.to_date)
 
-            sub_key = HistDataSubscriptionKey(inst_id=instrument.inst_id,
-                                              provider_id=self.__trading_config.feed_id,
-                                              data_type=self.__trading_config.data_type,
-                                              bar_type=self.__trading_config.bar_type,
-                                              bar_size=self.__trading_config.bar_size,
-                                              from_date=self.__trading_config.from_date,
-                                              to_date=self.__trading_config.to_date)
+                else:
+                    sub_key = SubscriptionKey(inst_id=instrument.inst_id,
+                                              provider_id=self.trading_config.feed_id,
+                                              subscription_type=subscription_type)
+                self.__feed.subscribe_mktdata(sub_key)
 
-        else:
-            sub_key = SubscriptionKey(inst_id=instrument.inst_id,
-                                      provider_id=self.__trading_config.feed_id,
-                                      data_type=self.__trading_config.data_type,
-                                      bar_type=self.__trading_config.bar_type,
-                                      bar_size=self.__trading_config.bar_size)
-        self.__feed.subscribe_mktdata(sub_key)
 
     def id(self):
         return self.stg_id
@@ -90,10 +95,11 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
     def on_exec_report(self, exec_report):
         if exec_report.cl_id == self.stg_id:
             super(Strategy, self).on_exec_report(exec_report)
-            ord_req = self.__ord_req[exec_report.cl_ord_id]
+            ord_req = self.ord_req[exec_report.cl_ord_id]
             direction = 1 if ord_req.action == OrdAction.BUY else -1
             if exec_report.last_qty > 0:
-                self.add_positon(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id, direction * exec_report.last_qty)
+                self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id,
+                                  direction * exec_report.last_qty)
                 self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
     def market_order(self, inst_id, action, qty, tif=TIF.DAY, oca_tag=None, params=None):
@@ -138,9 +144,9 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
                               tif=tif,
                               oca_tag=oca_tag,
                               params=params)
-        self.__ord_req[req.cl_ord_id] = req
+        self.ord_req[req.cl_ord_id] = req
         order = self.__portfolio.send_order(req)
-        self.__order[order.cl_ord_id] = order
+        self.order[order.cl_ord_id] = order
         self.get_position(order.inst_id).add_order(order)
         return order
 

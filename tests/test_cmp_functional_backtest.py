@@ -22,6 +22,7 @@ from algotrader.utils import clock
 import pandas as pd
 import numpy as np
 import math
+from algotrader.provider.subscription import BarSubscriptionType
 
 
 class BacktestRunner(object):
@@ -51,7 +52,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
         mgr = MockRefDataManager(inst_df=inst_df,ccy_df=ccy_df,exch_df=exchange_df)
 
         init_cash = 1000000
-        portfolio = Portfolio(cash=init_cash)
+        portfolio = Portfolio(portf_id='test', cash=init_cash)
 
         start_date = datetime(2000, 1, 1)
         num_days = 3000
@@ -89,21 +90,21 @@ class TestCompareWithFunctionalBacktest(TestCase):
 
         broker = Simulator()
 
-        config = BacktestingConfig(broker_id=Simulator.ID,
-                                   feed_id=PandasMemoryDataFeed.ID,
-                                   data_type=Bar,
-                                   bar_type=BarType.Time,
-                                   bar_size=BarSize.D1,
-                                   from_date=dates[0], to_date=dates[-1])
-
-
         instrument = 0
+
+        config = BacktestingConfig(portfolio_id='test',
+                               instrument_ids=[instrument],
+                               subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                               from_date=dates[0], to_date=dates[-1],
+                               broker_id=Simulator.ID,
+                               feed_id=PandasMemoryDataFeed.ID)
+
         close = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
         mgr.get_insts([instrument])
         mgr.get_inst(instrument)
 
         lot_size = 10000
-        strategy = SMAStrategy("sma", portfolio, instrument=0, qty=lot_size, trading_config=config)
+        strategy = SMAStrategy("sma", qty=lot_size, trading_config=config)
 
         runner = BacktestRunner(strategy)
         runner.start()
@@ -148,7 +149,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
         mgr = MockRefDataManager(inst_df=inst_df, ccy_df=ccy_df, exch_df=exchange_df)
 
         init_cash = 1000000
-        portfolio = Portfolio(cash=init_cash)
+        portfolio = Portfolio(portf_id='test', cash=init_cash)
 
         start_date = datetime(2000, 1, 1)
         num_days = 3000
@@ -184,19 +185,18 @@ class TestCompareWithFunctionalBacktest(TestCase):
         feed = PandasMemoryDataFeed(dict_df, ref_data_mgr=mgr)
         broker = Simulator()
 
-        config = BacktestingConfig(broker_id=Simulator.ID,
-                                   feed_id=PandasMemoryDataFeed.ID,
-                                   data_type=Bar,
-                                   bar_type=BarType.Time,
-                                   bar_size=BarSize.D1,
-                                   from_date=dates[0], to_date=dates[-1])
-
-
         instrument = 0
+        config = BacktestingConfig(portfolio_id='test',
+                               instrument_ids=[instrument],
+                               subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                               from_date=dates[0], to_date=dates[-1],
+                               broker_id=Simulator.ID,
+                               feed_id=PandasMemoryDataFeed.ID)
+
+
         close = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
 
-        strategy = MertonOptimalBaby("mtnb", portfolio=portfolio,
-                                     instrument=0, arate=arate, vol=vol, trading_config=config)
+        strategy = MertonOptimalBaby("mtnb", arate=arate, vol=vol, trading_config=config)
 
         runner = BacktestRunner(strategy)
         runner.start()

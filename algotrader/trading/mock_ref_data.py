@@ -2,7 +2,7 @@ import abc
 import csv
 import os
 import pandas as pd
-from algotrader.trading.ref_data import RefDataManager, Instrument, Currency, Exchange
+from algotrader.trading.ref_data import RefDataManager, Instrument, Currency, Exchange, RefDataManagerType
 
 
 class MockRefDataManager(RefDataManager):
@@ -111,6 +111,10 @@ class MockRefDataManager(RefDataManager):
 
     def get_exch(self, exch_id):
         return self.__exch_dict.get(exch_id, None)
+
+    def type(self):
+        return RefDataManagerType.Mock
+
 
 
 def build_inst_dataframe_from_list(symbols, type='ETF', exch_id='NYSE', ccy_id='USD'):

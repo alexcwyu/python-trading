@@ -3,11 +3,10 @@ import time
 from datetime import date, timedelta
 
 from algotrader.event.event_handler import EventLogger
-from algotrader.event.market_data import Bar, Trade, Quote, BarSize
+from algotrader.event.market_data import Bar, Trade, Quote, BarSize, BarType
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, OrderReplaceRequest, OrderCancelRequest
 from algotrader.provider.broker.ib.ib_broker import IBBroker
-from algotrader.provider.provider import HistDataSubscriptionKey
-from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey
+from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, TradeSubscriptionType
 from algotrader.utils import logger
 
 today = date.today()
@@ -22,26 +21,26 @@ def next_cl_ord_id():
 
 
 def sub_hist_data(broker, inst_id, day_ago):
-    sub_key = HistDataSubscriptionKey(inst_id=inst_id, provider_id=IBBroker.ID, data_type=Bar, bar_size=BarSize.D1,
+    sub_key = HistDataSubscriptionKey(inst_id=inst_id, provider_id=IBBroker.ID, subscription_type=BarSubscriptionType(data_type=Bar, bar_size=BarSize.D1),
                                       from_date=(today - timedelta(days=day_ago)), to_date=today)
     broker.subscribe_mktdata(sub_key)
     return sub_key
 
 
 def sub_realtime_bar(broker, inst_id):
-    sub_key = SubscriptionKey(inst_id=inst_id, provider_id=IBBroker.ID, data_type=Bar, bar_size=BarSize.S5)
+    sub_key = SubscriptionKey(inst_id=inst_id, provider_id=IBBroker.ID, subscription_type=BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.S5))
     broker.subscribe_mktdata(sub_key)
     return sub_key
 
 
 def sub_realtime_trade(broker, inst_id):
-    sub_key = SubscriptionKey(inst_id=inst_id, provider_id=IBBroker.ID, data_type=Trade, bar_size=BarSize.S1)
+    sub_key = SubscriptionKey(inst_id=inst_id, provider_id=IBBroker.ID, subscription_type=TradeSubscriptionType())
     broker.subscribe_mktdata(sub_key)
     return sub_key
 
 
 def sub_realtime_quote(broker, inst_id):
-    sub_key = SubscriptionKey(inst_id=inst_id, provider_id=IBBroker.ID, data_type=Quote, bar_size=BarSize.S1)
+    sub_key = SubscriptionKey(inst_id=inst_id, provider_id=IBBroker.ID, subscription_type=QuoteSubscriptionType())
     broker.subscribe_mktdata(sub_key)
     return sub_key
 

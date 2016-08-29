@@ -2,18 +2,19 @@ import abc
 import datetime
 import time
 
-from rx.concurrency.mainloopscheduler import GEventScheduler
-from rx.concurrency.historicalscheduler import HistoricalScheduler
-from rx.concurrency.newthreadscheduler import NewThreadScheduler
+from gevent import monkey
 from rx.concurrency.eventloopscheduler import EventLoopScheduler
-
+from rx.concurrency.historicalscheduler import HistoricalScheduler
+from rx.concurrency.mainloopscheduler import GEventScheduler
+from rx.concurrency.newthreadscheduler import NewThreadScheduler
 
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
-from gevent import monkey
+
 monkey.patch_time()
 monkey.patch_socket()
+
 
 class Clock:
     __metaclass__ = abc.ABCMeta
@@ -60,6 +61,7 @@ class RealTimeScheduler(NewThreadScheduler):
 
         scheduler = EventLoopScheduler(thread_factory=self.thread_factory, exit_if_empty=True)
         return scheduler.schedule_relative(duetime, action, state)
+
 
 class RealTimeClock(Clock):
     def __init__(self, scheduler=None):
@@ -125,3 +127,14 @@ realtime_clock = RealTimeClock()
 simluation_clock = SimulationClock()
 
 default_clock = realtime_clock  # default setting
+
+
+class ClockType:
+    Simulation = "Simulation"
+    RealTime = "RealTime"
+
+
+def get_clock(clock_type=ClockType.RealTime):
+    if clock_type == ClockType.Simulation:
+        return simluation_clock
+    return realtime_clock

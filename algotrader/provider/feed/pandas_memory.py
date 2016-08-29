@@ -9,7 +9,7 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
 from algotrader.provider.provider import Feed, feed_mgr
-from algotrader.provider.subscription import HistDataSubscriptionKey
+from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
 from algotrader.utils.clock import Clock
@@ -74,7 +74,7 @@ class PandasMemoryDataFeed(Feed):
         for sub_key in sub_keys:
             if not isinstance(sub_key, HistDataSubscriptionKey):
                 raise RuntimeError("only HistDataSubscriptionKey is supported!")
-            if sub_key.data_type == Bar and sub_key.bar_type == BarType.Time and sub_key.bar_size == BarSize.D1:
+            if isinstance(sub_key.subscription_type, BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
                 inst = self.__ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.ID)
 
@@ -196,13 +196,13 @@ if __name__ == "__main__":
     # sub_key = HistDataSubscriptionKey(inst_id=3, provider_id=PandasMemoryDataFeed.ID, data_type=Bar, bar_size=BarSize.D1,
     #                                   from_date=datetime(2010, 1, 1), to_date=today)
 
-    sub_key0 = HistDataSubscriptionKey(inst_id=0, provider_id=PandasMemoryDataFeed.ID, data_type=Bar, bar_size=BarSize.D1,
+    sub_key0 = HistDataSubscriptionKey(inst_id=0, provider_id=PandasMemoryDataFeed.ID, subscription_type=BarSubscriptionType(data_type=Bar, bar_size=BarSize.D1),
                                       from_date=dates[0], to_date=dates[-1])
 
-    sub_key1 = HistDataSubscriptionKey(inst_id=1, provider_id=PandasMemoryDataFeed.ID, data_type=Bar, bar_size=BarSize.D1,
+    sub_key1 = HistDataSubscriptionKey(inst_id=1, provider_id=PandasMemoryDataFeed.ID, subscription_type=BarSubscriptionType(data_type=Bar, bar_size=BarSize.D1),
                                       from_date=dates[0], to_date=dates[-1])
 
-    sub_key2 = HistDataSubscriptionKey(inst_id=2, provider_id=PandasMemoryDataFeed.ID, data_type=Bar, bar_size=BarSize.D1,
+    sub_key2 = HistDataSubscriptionKey(inst_id=2, provider_id=PandasMemoryDataFeed.ID, subscription_type=BarSubscriptionType(data_type=Bar, bar_size=BarSize.D1),
                                       from_date=dates[0], to_date=dates[-1])
     feed.subscribe_all_mktdata([sub_key0, sub_key1, sub_key2])
 

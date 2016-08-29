@@ -21,8 +21,7 @@ class PairTradingWithOUSpread(Strategy):
     So now this class is used as testing purpose
     """
 
-    def __init__(self, stg_id, portfolio, instruments,
-                 ou_params, gamma, trading_config, ref_data_mgr=None):
+    def __init__(self, stg_id, ou_params, gamma, trading_config, ref_data_mgr=None):
         """
         :param stg_id:
         :param portfolio:
@@ -32,15 +31,14 @@ class PairTradingWithOUSpread(Strategy):
         :param trading_config:
         :return:
         """
-        super(PairTradingWithOUSpread, self).__init__(stg_id, portfolio,
-                                                      instruments, trading_config,
+        super(PairTradingWithOUSpread, self).__init__(stg_id=stg_id, trading_config=trading_config,
                                                       ref_data_mgr=ref_data_mgr)
         self.buy_order = None
         self.ou_params = ou_params
         self.gamma = gamma
-        self.bar_0 = inst_data_mgr.get_series("Bar.%s.Time.86400" % instruments[0])
-        self.bar_1 = inst_data_mgr.get_series("Bar.%s.Time.86400" % instruments[1])
-        self.instruments = instruments
+        self.bar_0 = inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[0])
+        self.bar_1 = inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[1])
+        self.instruments = trading_config.instrument_ids
         self.log_spot_0 = BehaviorSubject(0)
         self.log_spot_1 = BehaviorSubject(0)
         self.spread_stream = rx.Observable\

@@ -15,12 +15,12 @@ class MertonOptimalBaby(Strategy):
     So now this class is used as testing purpose
     """
 
-    def __init__(self, stg_id, portfolio, instrument, arate, vol, trading_config):
-        super(MertonOptimalBaby, self).__init__(stg_id, portfolio, instrument, trading_config)
+    def __init__(self, stg_id, arate, vol, trading_config):
+        super(MertonOptimalBaby, self).__init__(stg_id=stg_id, trading_config=trading_config)
         self.buy_order = None
         self.arate = arate
         self.vol = vol
-        self.bar = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
+        self.bar = inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[0])
         self.optimal_weight = arate / self.vol**2 # assume risk free rate is zero
 
     def on_bar(self, bar):

@@ -19,6 +19,7 @@ from algotrader.utils import clock
 import pandas as pd
 import numpy as np
 import math
+from algotrader.provider.subscription import BarSubscriptionType
 
 
 class BacktestRunner(object):
@@ -45,7 +46,7 @@ def main():
                                 "name" : ["New York Stock Exchange"]})
     mgr = MockRefDataManager(inst_df=inst_df,ccy_df=ccy_df,exch_df=exchange_df)
 
-    portfolio = Portfolio(cash=100000)
+    portfolio = Portfolio(portf_id='test', cash=100000)
 
     start_date = datetime(2000, 1, 1)
     num_days = 3000
@@ -83,15 +84,15 @@ def main():
 
     broker = Simulator()
 
-    config = BacktestingConfig(broker_id=Simulator.ID,
-                               feed_id=PandasMemoryDataFeed.ID,
-                               data_type=Bar,
-                               bar_type=BarType.Time,
-                               bar_size=BarSize.D1,
-                               from_date=dates[0], to_date=dates[-1])
-
-
     instrument = 0
+    config = BacktestingConfig(portfolio_id='test',
+                               instrument_ids=[instrument],
+                               subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                               from_date=dates[0], to_date=dates[-1],
+                               broker_id=Simulator.ID,
+                               feed_id=PandasMemoryDataFeed.ID)
+
+
     close = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
     mgr.get_insts([instrument])
     mgr.get_inst(instrument)
@@ -99,7 +100,7 @@ def main():
     # strategy = Down2PctStrategy("down2%", portfolio,
     #                             instrument=0, qty=1000,  trading_config=config, ref_data_mgr=mgr)
 
-    strategy = SMAStrategy("sma", portfolio, instrument=0, qty=1, trading_config=config)
+    strategy = SMAStrategy("sma", qty=1, trading_config=config)
 
     runner = BacktestRunner(strategy)
     runner.start()

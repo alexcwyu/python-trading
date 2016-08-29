@@ -6,13 +6,12 @@ from algotrader.utils import logger
 
 
 class Down2PctStrategy(Strategy):
-    def __init__(self, stg_id, portfolio, instrument, qty,
-                 trading_config, ref_data_mgr=None):
-        super(Down2PctStrategy, self).__init__(stg_id, portfolio, instrument, trading_config, ref_data_mgr)
+    def __init__(self, stg_id, qty, trading_config):
+        super(Down2PctStrategy, self).__init__(stg_id=stg_id, trading_config=trading_config)
         self.day_count = 0
         self.order = None
         self.qty = qty
-        self.close = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
+        self.close = inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[0])
         self.roc = ROC(self.close, 'close', 1)
 
     def on_bar(self, bar):

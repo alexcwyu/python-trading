@@ -19,6 +19,7 @@ import pandas as pd
 import numpy as np
 import math
 from algotrader.models.sde_sim import euler
+from algotrader.provider.subscription import BarSubscriptionType
 
 
 class BacktestRunner(object):
@@ -90,20 +91,20 @@ def main():
 
     feed = PandasMemoryDataFeed(dict_df, ref_data_mgr=mgr)
     broker = Simulator()
-    config = BacktestingConfig(broker_id=Simulator.ID,
-                               feed_id=PandasMemoryDataFeed.ID,
-                               data_type=Bar,
-                               bar_type=BarType.Time,
-                               bar_size=BarSize.D1,
-                               from_date=dates[0], to_date=dates[-1])
+
+    config = BacktestingConfig(portfolio_id='test',
+                               instrument_ids=[0, 1],
+                               subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                               from_date=dates[0], to_date=dates[-1],
+                               broker_id=Simulator.ID,
+                               feed_id=PandasMemoryDataFeed.ID)
 
     ou_params = {"k": ou_k,
                  "theta": ou_theta,
                  "eta": ou_eta}
 
 
-    strategy = PairTradingWithOUSpread("pairou", portfolio=portfolio,
-                                       instruments=[0, 1],
+    strategy = PairTradingWithOUSpread("pairou",
                                        ou_params=ou_params,
                                        gamma=1.0,
                                        trading_config=config,

@@ -15,7 +15,7 @@ class DataSeries(Persistable):
         'keys',
         'desc',
         'missing_value'
-        'subject',
+        #'subject',  ## not serializable
 
         '__data_list',
         '__time_list',
@@ -36,12 +36,13 @@ class DataSeries(Persistable):
         self.keys = self._get_key(keys, None)
         self.desc = desc if desc else name
         self.missing_value = missing_value
-        self.subject = Subject()
 
-        self.__data_list = list()
-        self.__time_list = list()
-        self.__data_time_dict = defaultdict(dict)
+        self.__data_list = []
+        self.__time_list = []
+        self.__data_time_dict = {}
         self.__use_col_np = use_col_np
+
+        self.subject = Subject()
 
         if data_list:
             for data in data_list:
@@ -66,6 +67,8 @@ class DataSeries(Persistable):
             enhanced_data = {}
             for key in self.keys:
                 value = data.get(key, self.missing_value)
+                if key not in self.__data_time_dict:
+                    self.__data_time_dict[key] = {}
                 self.__data_time_dict[key][time] = value
                 enhanced_data[key] = value
             self.__data_list.append(enhanced_data)
@@ -76,6 +79,8 @@ class DataSeries(Persistable):
             for key in self.keys:
                 if key in data:
                     value = data.get(key)
+                    if key not in self.__data_time_dict:
+                        self.__data_time_dict[key] = {}
                     self.__data_time_dict[key][time] = value
                     enhanced_data[key] = value
             self.__data_list.append(enhanced_data)
@@ -91,7 +96,8 @@ class DataSeries(Persistable):
         keys = self._get_key(keys, self.keys)
         result = {}
         for key in keys:
-            result[key] = self.__data_time_dict[key]
+            if key in self.__data_time_dict:
+                result[key] = self.__data_time_dict[key]
         return result if len(keys) > 1 else result[keys[0]]
 
     def get_data(self):
@@ -146,7 +152,8 @@ class DataSeries(Persistable):
         keys = self._get_key(keys, self.keys)
         result = {}
         for key in keys:
-            result[key] = self.__data_time_dict[key][time]
+            if key in self.__data_time_dict:
+                result[key] = self.__data_time_dict[key][time]
 
         return result if len(keys) > 1 else result[keys[0]]
 

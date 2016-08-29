@@ -5,6 +5,7 @@ from algotrader.event.market_data import  Bar, BarSize, BarType
 from algotrader.provider.provider import Feed, feed_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils.clock import Clock
+from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, TradeSubscriptionType
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 
@@ -46,7 +47,7 @@ class CSVDataFeed(Feed):
         for sub_key in sub_keys:
 
             ## TODO support different format, e.g. BAR, Quote, Trade csv files
-            if sub_key.data_type == Bar and sub_key.bar_type == BarType.Time and sub_key.bar_size == BarSize.D1:
+            if isinstance(sub_key.subscription_type, BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
                 inst = self.__ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.ID)
                 df = self.read_csv(symbol, '%s/%s.csv' % (self.__path, symbol.lower()))

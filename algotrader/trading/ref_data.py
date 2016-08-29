@@ -127,6 +127,12 @@ class Currency(ReferenceData):
     def id(self):
         return self.ccy_id
 
+
+class RefDataManagerType:
+    InMemory = "InMemory"
+    Mock = "Mock"
+
+
 class RefDataManager(object):
     __metaclass__ = abc.ABCMeta
 
@@ -160,6 +166,10 @@ class RefDataManager(object):
 
     @abc.abstractmethod
     def get_exch(self, exch_id):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def type(self):
         raise NotImplementedError()
 
 
@@ -287,8 +297,19 @@ class InMemoryRefDataManager(RefDataManager):
     def get_exch(self, exch_id):
         return self.__exch_dict.get(exch_id, None)
 
+    def type(self):
+        raise RefDataManagerType.InMemory
+
 
 inmemory_ref_data_mgr = InMemoryRefDataManager()
+
+
+
+
+def get_ref_data_mgr(mgr_type=RefDataManagerType.InMemory):
+    if mgr_type == RefDataManagerType.InMemory:
+        return inmemory_ref_data_mgr
+
 
 if __name__ == "__main__":
     mgr = InMemoryRefDataManager();

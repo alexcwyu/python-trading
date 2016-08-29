@@ -10,7 +10,7 @@ from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.provider import Broker, Feed
-from algotrader.provider.subscription import HistDataSubscriptionKey, MarketDepthSubscriptionKey
+from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, TradeSubscriptionType, MarketDepthSubscriptionType
 from algotrader.provider.provider import feed_mgr, broker_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
@@ -235,13 +235,13 @@ class IBBroker(IBSocket, Broker, Feed):
         return order_id
 
     def subscribe_mktdata(self, sub_key):
-        if isinstance(sub_key, MarketDepthSubscriptionKey):
-            req_func = self.__req_market_depth
-        elif isinstance(sub_key, HistDataSubscriptionKey):
+        if isinstance(sub_key, HistDataSubscriptionKey):
             req_func = self.__req_hist_data
-        elif sub_key.data_type == Bar:
+        elif isinstance(sub_key.subscription_type, MarketDepthSubscriptionType):
+            req_func = self.__req_market_depth
+        elif isinstance(sub_key.subscription_type, BarSubscriptionType):
             req_func = self.__req_real_time_bar
-        elif sub_key.data_type == Quote or sub_key.data_type == Trade:
+        elif isinstance(sub_key.subscription_type, (QuoteSubscriptionType, TradeSubscriptionType)):
             req_func = self.__req_mktdata
 
         if req_func and not self.__data_sub_reg.has_subscription(sub_key=sub_key):
@@ -253,13 +253,13 @@ class IBBroker(IBSocket, Broker, Feed):
 
     def unsubscribe_mktdata(self, sub_key):
 
-        if isinstance(sub_key, MarketDepthSubscriptionKey):
-            cancel_func = self.__cancel_market_depth
-        elif isinstance(sub_key, HistDataSubscriptionKey):
+        if isinstance(sub_key, HistDataSubscriptionKey):
             cancel_func = self.__cancel_hist_data
-        elif sub_key.data_type == Bar:
+        elif isinstance(sub_key.subscription_type, MarketDepthSubscriptionType):
+            req_func = self.__cancel_market_depth
+        elif isinstance(sub_key.subscription_type, BarSubscriptionType):
             cancel_func = self.__cancel_real_time_bar
-        elif sub_key.data_type == Quote or sub_key.data_type == Trade:
+        elif isinstance(sub_key.subscription_type, (QuoteSubscriptionType, TradeSubscriptionType)):
             cancel_func = self.__cancel_mktdata
 
         if cancel_func:
@@ -278,8 +278,8 @@ class IBBroker(IBSocket, Broker, Feed):
 
     def __req_real_time_bar(self, req_id, sub_key, contract):
         self.__tws.reqRealTimeBars(req_id, contract,
-                                   sub_key.bar_size,  # barSizeSetting,
-                                   self.__model_factory.convert_hist_data_type(sub_key.data_type),
+                                   sub_key.subscription_type.bar_size,  # barSizeSetting,
+                                   self.__model_factory.convert_hist_data_type(sub_key.subscription_type.data_type),
                                    0  # RTH Regular trading hour
                                    )
 
@@ -297,8 +297,8 @@ class IBBroker(IBSocket, Broker, Feed):
                                      self.__model_factory.convert_datetime(sub_key.to_date),  # endDateTime,
                                      self.__model_factory.convert_time_period(sub_key.from_date, sub_key.to_date),
                                      # durationStr,
-                                     self.__model_factory.convert_bar_size(sub_key.bar_size),  # barSizeSetting,
-                                     self.__model_factory.convert_hist_data_type(sub_key.data_type),  # whatToShow,
+                                     self.__model_factory.convert_bar_size(sub_key.subscription_type.bar_size),  # barSizeSetting,
+                                     self.__model_factory.convert_hist_data_type(sub_key.subscription_type.data_type),  # whatToShow,
                                      0,  # useRTH,
                                      1  # formatDate
                                      )

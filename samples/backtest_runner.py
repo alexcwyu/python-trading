@@ -11,7 +11,7 @@ from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio import Portfolio
 from algotrader.utils import clock
-
+from algotrader.provider.subscription import BarSubscriptionType
 
 class BacktestRunner(object):
     def __init__(self, stg):
@@ -27,22 +27,21 @@ class BacktestRunner(object):
 
 
 def main():
-    portfolio = Portfolio(cash=100000)
+    portfolio = Portfolio(portf_id='test', cash=100000)
 
     feed = CSVDataFeed()
     broker = Simulator()
 
-    config = BacktestingConfig(broker_id=Simulator.ID,
-                               feed_id=CSVDataFeed.ID,
-                               data_type=Bar,
-                               bar_type=BarType.Time,
-                               bar_size=BarSize.D1,
-                               from_date=date(2010, 1, 1), to_date=date.today())
+    config = BacktestingConfig(portfolio_id='test',
+                               instrument_ids=[4],
+                               subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                               from_date=date(2010, 1, 1), to_date=date.today(),
+                               broker_id=Simulator.ID,
+                               feed_id=CSVDataFeed.ID)
 
-    strategy = Down2PctStrategy("down2%", portfolio,
-                                instrument=4, qty=1000,  trading_config=config )
+    strategy = Down2PctStrategy("down2%", qty=1000, trading_config=config)
 
-    #strategy = SMAStrategy("sma", portfolio, instrument=4, qty=1000, trading_config=config)
+    #strategy = SMAStrategy("sma", qty=1000, trading_config=config)
 
     runner = BacktestRunner(strategy)
     runner.start()

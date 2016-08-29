@@ -6,11 +6,11 @@ from algotrader.utils import logger
 
 
 class SMAStrategy(Strategy):
-    def __init__(self, stg_id, portfolio, instrument, qty, trading_config):
-        super(SMAStrategy, self).__init__(stg_id, portfolio, instrument, trading_config)
+    def __init__(self, stg_id, qty, trading_config):
+        super(SMAStrategy, self).__init__(stg_id=stg_id, trading_config=trading_config)
         self.buy_order = None
         self.qty = qty
-        self.bar = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
+        self.bar = inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[0])
         self.sma_fast = SMA(self.bar, 'close', 10)
         self.sma_slow = SMA(self.bar, 'close', 25)
 

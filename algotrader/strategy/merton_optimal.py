@@ -25,6 +25,7 @@ class MertonOptimalBaby(Strategy):
 
     def on_bar(self, bar):
         # we have to rebalance on each bar
+        #print bar
         portfolio = self.get_portfolio()
         allocation = portfolio.total_equity * self.optimal_weight
         delta = allocation - portfolio.stock_value

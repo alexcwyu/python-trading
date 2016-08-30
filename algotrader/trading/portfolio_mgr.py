@@ -8,5 +8,10 @@ class PortfolioManager:
     def get_portfolio(self, portf_id):
         return self.__portf_dict.get(portf_id, None)
 
+    def clear(self):
+        for port in self.__portf_dict.itervalues():
+            port.stop()
+        self.__portf_dict.clear()
+
 
 portf_mgr = PortfolioManager()

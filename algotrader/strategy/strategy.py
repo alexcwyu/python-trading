@@ -10,6 +10,7 @@ from algotrader.trading.config import BacktestingConfig
 from algotrader.trading.position import PositionHolder
 from algotrader.trading.ref_data import inmemory_ref_data_mgr, get_ref_data_mgr
 from algotrader.trading.portfolio_mgr import portf_mgr
+from algotrader.utils.clock import get_clock
 
 
 class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable):
@@ -47,13 +48,19 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
             self.__instruments = self.__ref_data_mgr.get_insts(self.trading_config.instrument_ids)
             self.__started = True
             self.__portfolio.start()
+            self.__clock = get_clock(self.trading_config.clock_type)
 
             self.__broker = broker_mgr.get(self.trading_config.broker_id)
             self.__broker.start()
 
-            EventBus.data_subject.subscribe(self.on_next)
+            self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)
             self._subscribe_market_data(self.__instruments)
             self.__feed.start()
+
+    def stop(self):
+        if self.__started:
+            self.__event_subscription.dispose()
+
 
     def _subscribe_market_data(self, instruments):
         for instrument in instruments:
@@ -130,11 +137,11 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
                   inst_id=None, action=None, type=None,
                   qty=0, limit_price=0,
                   stop_price=0, tif=TIF.DAY, oca_tag=None, params=None):
-        req = NewOrderRequest(timestamp=self.__trading_config.clock.now(),
+        req = NewOrderRequest(timestamp=self.__clock.now(),
                               cl_id=self.stg_id,
                               cl_ord_id=self.__get_next_ord_id(),
                               portf_id=self.__portfolio.portf_id,
-                              broker_id=self.__trading_config.broker_id,
+                              broker_id=self.trading_config.broker_id,
                               inst_id=inst_id,
                               action=action,
                               type=type,
@@ -151,13 +158,13 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         return order
 
     def cancel_order(self, cl_ord_id=None):
-        req = OrderCancelRequest(timestamp=self.__trading_config.clock.now(),
+        req = OrderCancelRequest(timestamp=self.__clock.now(),
                                  cl_id=self.stg_id, cl_ord_id=cl_ord_id)
         order = self.__portfolio.cancel_order(req)
         return order
 
     def replace_order(self, cl_ord_id=None, type=None, qty=None, limit_price=None, stop_price=None, tif=None):
-        req = OrderReplaceRequest(timestamp=self.__trading_config.clock.now(),
+        req = OrderReplaceRequest(timestamp=self.__clock.now(),
                                   cl_id=self.stg_id, cl_ord_id=cl_ord_id, type=type, qty=qty, limit_price=limit_price,
                                   stop_price=stop_price, tif=tif)
         order = self.__portfolio.replace_order(req)

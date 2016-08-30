@@ -35,7 +35,11 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         if not self.started:
             self.started = True
             order_mgr.start()
-            EventBus.data_subject.subscribe(self.on_next)
+            self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)
+
+    def stop(self):
+        if self.started:
+            self.__event_subscription.dispose()
 
     def id(self):
         return self.portf_id

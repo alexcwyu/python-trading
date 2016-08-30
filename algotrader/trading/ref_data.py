@@ -53,7 +53,7 @@ class Instrument(ReferenceData):
     def __init__(self, inst_id=None, name=None, type=None, symbol=None, exch_id=None, ccy_id=None, alt_symbol=None, alt_exch_id=None,
                  sector=None, group=None,
                  put_call=None, expiry_date=None, und_inst_id=None, factor=1, strike=0.0, margin=0.0):
-        self.inst_id = int(inst_id) if inst_id else None
+        self.inst_id = int(inst_id) if inst_id is not None else None
         self.name = name
         self.type = type
         self.symbol = symbol

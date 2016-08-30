@@ -24,10 +24,12 @@ class Position(Persistable):
             raise RuntimeError("order[%s][%s] inst_id [%s] is not same as inst_id [%s] of position" % (
                 order.cl_id, order.cl_ord_id, order.inst_id, self.inst_id))
 
+        if order.cl_id not in self.orders:
+            self.orders[order.cl_id] = {}
+
         if order.cl_ord_id in self.orders[order.cl_id]:
             raise RuntimeError("order[%s][%s] already exist" % (order.cl_id, order.cl_ord_id))
 
-        self.orders[order.cl_id] = {}
         self.orders[order.cl_id][order.cl_ord_id] = order
 
     def add_position(self, cl_id, cl_ord_id, filled_qty):

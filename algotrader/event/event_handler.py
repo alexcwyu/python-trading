@@ -15,6 +15,13 @@ class EventHandler(Observer):
         logger.debug("[%s] Completed" % self.__class__.__name__)
 
 
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+
 class MarketDataEventHandler(EventHandler):
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))

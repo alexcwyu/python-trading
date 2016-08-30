@@ -86,7 +86,7 @@ class DataSeries(Persistable):
             self.__data_list.append(enhanced_data)
         else:
             raise AssertionError(
-                "Time for new Item %s cannot be earlier then previous item %s" % (time, self._prev_time))
+                "Time for new Item %s cannot be earlier then previous item %s" % (time, self.current_time()))
         self.subject.on_next(data)
 
     def current_time(self):

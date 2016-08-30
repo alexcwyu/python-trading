@@ -23,6 +23,7 @@ import pandas as pd
 import numpy as np
 import math
 from algotrader.provider.subscription import BarSubscriptionType
+from algotrader.trading.portfolio_mgr import portf_mgr
 
 
 class BacktestRunner(object):
@@ -37,8 +38,12 @@ class BacktestRunner(object):
 
         self.__stg.start()
 
-
 class TestCompareWithFunctionalBacktest(TestCase):
+    def tearDown(self):
+        clock.simluation_clock.reset()
+        inst_data_mgr.clear()
+        portf_mgr.clear()
+
     def test_with_sma(self):
         symbols = ['SPY', 'VXX', 'XLV', 'XIV']
 
@@ -52,7 +57,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
         mgr = MockRefDataManager(inst_df=inst_df,ccy_df=ccy_df,exch_df=exchange_df)
 
         init_cash = 1000000
-        portfolio = Portfolio(portf_id='test', cash=init_cash)
+        portfolio = Portfolio(portf_id='test2', cash=init_cash)
 
         start_date = datetime(2000, 1, 1)
         num_days = 3000
@@ -92,7 +97,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
 
         instrument = 0
 
-        config = BacktestingConfig(portfolio_id='test',
+        config = BacktestingConfig(portfolio_id='test2',
                                instrument_ids=[instrument],
                                subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                from_date=dates[0], to_date=dates[-1],

@@ -99,17 +99,20 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore):
 
     # TradeDataStore
     def save_account(self, account):
-        raise NotImplementedError()
+        id, packed = self._serialize(account)
+        self.accounts.update({'_id': id}, packed, upsert=True)
 
     def save_portfolio(self, portfolio):
-        raise NotImplementedError()
+        id, packed = self._serialize(portfolio)
+        self.portfolios.update({'_id': id}, packed, upsert=True)
 
     def save_order(self, order):
         id, packed = self._serialize(order)
         self.orders.update({'_id': id}, packed, upsert=True)
 
     def save_strategy(self, strategy):
-        raise NotImplementedError()
+        id, packed = self._serialize(strategy)
+        self.strategies.update({'_id': id}, packed, upsert=True)
 
     def save_account_event(self, account_event):
         raise NotImplementedError()

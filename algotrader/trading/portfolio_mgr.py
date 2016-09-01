@@ -1,6 +1,7 @@
 class PortfolioManager:
-    def __init__(self):
+    def __init__(self, store=None):
         self.__portf_dict = {}
+        self.store = store
 
     def add_portfolio(self, portfolio):
         self.__portf_dict[portfolio.portf_id] = portfolio
@@ -13,5 +14,32 @@ class PortfolioManager:
             port.stop()
         self.__portf_dict.clear()
 
+
+    def start(self):
+        if not self.started:
+            self.started = True
+            self.load()
+
+    def stop(self):
+        if self.started:
+            self.save()
+            self.clear()
+            self.started = False
+
+    def load(self):
+        if self.store:
+            self.__portf_dict = {}
+            portfolios = self.store.load_all('portfolios')
+            for portfolio in portfolios:
+                self.add_portfolio(portfolio)
+
+    def save(self):
+        if self.store:
+            for portfolio in self.all_portfolios():
+                self.store.save_portfolio(portfolio)
+
+
+    def all_portfolios(self):
+        return [port for port in self.__portf_dict.values()]
 
 portf_mgr = PortfolioManager()

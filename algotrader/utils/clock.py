@@ -118,7 +118,7 @@ class SimulationClock(Clock, MarketDataEventHandler):
 
     def update_time(self, timestamp):
         self.__current_timestamp_mills = timestamp
-        self.scheduler.advance_to(Clock.unixtimemillis_to_datetime(timestamp))
+        self.scheduler.advance_to(DateUtils.unixtimemillis_to_datetime(timestamp))
 
     def reset(self):
         self.__current_timestamp_mills = 0

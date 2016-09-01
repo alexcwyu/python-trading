@@ -38,15 +38,15 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         self.cash = cash
         self.stock_value = 0
         self.analyzers = analyzers if analyzers is not None else [Pnl(), DrawDown()]
+
+        for analyzer in self.analyzers:
+            analyzer.set_portfolio(self)
+
         self.started = False
         portf_mgr.add_portfolio(self)
 
     def start(self):
         if not self.started:
-
-            for analyzer in self.analyzers:
-                analyzer.set_portfolio(self)
-
             self.started = True
             order_mgr.start()
             self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)

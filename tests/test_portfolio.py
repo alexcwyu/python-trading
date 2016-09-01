@@ -24,17 +24,17 @@ class PortfolioTest(TestCase):
 
         self.assertEqual(0, len(self.portfolio.positions))
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertTrue(math.isnan(self.portfolio.performance_series.now("total_equity")))
+        self.assertEqual(0, (self.portfolio.performance_series.now("total_equity")))
 
         order1 = self.portfolio.send_order(ord_req1)
         self.check_order(self.portfolio, [order1], {1: (1000, 0)})
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertTrue(math.isnan(self.portfolio.performance_series.now("total_equity")))
+        self.assertEqual(0, (self.portfolio.performance_series.now("total_equity")))
 
         order2 = self.portfolio.send_order(ord_req2)
         self.check_order(self.portfolio, [order1, order2], {1: (2800, 0)})
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertTrue(math.isnan(self.portfolio.performance_series.now("total_equity")))
+        self.assertEqual(0, (self.portfolio.performance_series.now("total_equity")))
 
     def test_on_exec_report(self):
 

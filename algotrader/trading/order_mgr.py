@@ -25,7 +25,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
             self.subscriptions = []
             self.subscriptions.append(EventBus.data_subject.subscribe(self.on_next))
             self.subscriptions.append(EventBus.order_subject.subscribe(self.on_next))
-            self.subscriptions(EventBus.execution_subject.subscribe(self.on_next))
+            self.subscriptions.append(EventBus.execution_subject.subscribe(self.on_next))
 
     def stop(self):
         if self.started:

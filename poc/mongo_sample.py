@@ -10,7 +10,12 @@ from algotrader.provider.persistence.mongodb import MongoDBDataStore
 from algotrader.strategy.strategy_mgr import StrategyManager
 from algotrader.trading.order_mgr import OrderManager
 from algotrader.trading.portfolio_mgr import PortfolioManager
+from algotrader.trading.portfolio import Portfolio
 from algotrader.utils.ser_deser import JsonSerializer
+from algotrader.strategy.strategy import Strategy
+from algotrader.trading.order import Order
+from algotrader.trading.account import Account
+from algotrader.trading.account_mgr import AccountManager
 
 
 def test1():
@@ -73,7 +78,23 @@ def test_save_portfolio():
     config = MongoDBConfig()
     store = MongoDBDataStore(config)
 
-    portf_mgr = PortfolioManager()
+    portf_mgr = PortfolioManager(store)
+
+    store.start()
+    p1 = Portfolio(portf_id=1, cash=1000)
+    p2 = Portfolio(portf_id=2, cash=1000)
+
+    portf_mgr.add_portfolio(p1)
+    portf_mgr.add_portfolio(p2)
+
+    before = portf_mgr.all_portfolios()
+
+    portf_mgr.save()
+    portf_mgr.load()
+
+    after = portf_mgr.all_portfolios()
+    print before
+    print after
 
 
 def test_save_orders():
@@ -105,12 +126,57 @@ def test_save_strategies():
     config = MongoDBConfig()
     store = MongoDBDataStore(config)
 
-    stg_mgr = StrategyManager()
+    stg_mgr = StrategyManager(store)
+
+    store.start()
+    stg1 = Strategy(stg_id='st1', next_ord_id=0, trading_config=None, ref_data_mgr=None)
+    nos = NewOrderRequest(cl_id='test', cl_ord_id='1', inst_id='1', action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+                          limit_price=18.5)
+
+    order = Order(nos=nos)
+    stg1.ord_req[nos.cl_ord_id] = nos
+    stg1.order[order.cl_ord_id] = order
+    stg1.add_position(nos.inst_id, nos.cl_id, nos.cl_ord_id, nos.qty)
+    stg1.update_position_price(time=0, inst_id=nos.inst_id, price=100)
+
+
+    stg2 = Strategy(stg_id='st2', next_ord_id=0, trading_config=None, ref_data_mgr=None)
+    stg_mgr.add_strategy(stg1)
+    stg_mgr.add_strategy(stg2)
+
+    before = stg_mgr.all_strategies()
+
+    stg_mgr.save()
+    stg_mgr.load()
+
+    after = stg_mgr.all_strategies()
+
+    print before
+    print after
 
 
 def test_save_accounts():
     config = MongoDBConfig()
     store = MongoDBDataStore(config)
 
+    acct_mgr = AccountManager(store)
 
-test_save_orders()
+    store.start()
+    acct1 = Account(name="1")
+    acct2 = Account(name="2")
+
+    acct_mgr.add_account(acct1)
+    acct_mgr.add_account(acct2)
+
+    before = acct_mgr.all_accounts()
+
+    acct_mgr.save()
+    acct_mgr.load()
+
+    after = acct_mgr.all_accounts()
+
+    print before
+    print after
+
+
+test_save_accounts()

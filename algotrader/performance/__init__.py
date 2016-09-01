@@ -12,4 +12,4 @@ class PortfolioAnalyzer(Persistable):
         return None
 
     def set_portfolio(self, portfolio):
-        self._portfolio = portfolio
+        self.portfolio = portfolio

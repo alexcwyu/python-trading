@@ -4,19 +4,22 @@ from algotrader.provider.persistence.persist import DataStore
 
 
 class InfluxDataStore(DataStore):
-    def __init__(self, config):
-        self.config = config
-
-    def stop(self):
-        pass
+    def __init__(self, influx_config):
+        self.influx_config = influx_config
 
     def start(self):
-        host = 'pinheads-hueylewis-1.c.influxdb.com'
-        port = 8083
-        username = 'readonly'
-        password = '11111111'
-        dbname = 'hsi'
-        self.client = InfluxDBClient(host, port, username, password, dbname)
+        if not self.started:
+            self.client = InfluxDBClient(self.influx_config.host, self.influx_config.port, self.influx_config.username, self.influx_config.password,
+                                     self.influx_config.dbname)
+            self.started = True
+
+    def stop(self):
+        if self.started:
+            #TODO
+            self.started = False
+
+    def id(self):
+        return DataStore.Influx
 
     def query(self, query):
         pass

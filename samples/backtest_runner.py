@@ -1,17 +1,16 @@
 from datetime import date
 
 from algotrader.chart.plotter import StrategyPlotter
-from algotrader.event.market_data import Bar, BarSize, BarType
-from algotrader.provider.feed.csv_feed import CSVDataFeed
+from algotrader.config.trading import BacktestingConfig
+from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker.sim.simulator import Simulator
-from algotrader.strategy.sma_strategy import SMAStrategy
+from algotrader.provider.feed.csv_feed import CSVDataFeed
+from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
-from algotrader.trading.config import BacktestingConfig
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio import Portfolio
 from algotrader.utils import clock
-from algotrader.provider.subscription import BarSubscriptionType
 
 class BacktestRunner(object):
     def __init__(self, stg):
@@ -32,7 +31,7 @@ def main():
     feed = CSVDataFeed()
     broker = Simulator()
 
-    config = BacktestingConfig(portfolio_id='test',
+    config = BacktestingConfig(stg_id="down2%", portfolio_id='test',
                                instrument_ids=[4],
                                subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                from_date=date(2010, 1, 1), to_date=date.today(),

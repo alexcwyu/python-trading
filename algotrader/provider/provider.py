@@ -57,6 +57,8 @@ class BrokerManager(ProviderManager):
             super(BrokerManager, self).register(provider)
 
 
+
+
 broker_mgr = BrokerManager()
 
 

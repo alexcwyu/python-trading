@@ -13,6 +13,7 @@ from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscri
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
 from algotrader.utils.clock import Clock
+from algotrader.utils.date_utils import DateUtils
 
 
 class PandasMemoryDataFeed(Feed):
@@ -60,7 +61,7 @@ class PandasMemoryDataFeed(Feed):
     def process_row(self, index, row):
         inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
         return Bar(inst_id=inst.inst_id,
-                   timestamp=Clock.datetime_to_unixtimemillis(index),
+                   timestamp=DateUtils.datetime_to_unixtimemillis(index),
                    open=row['Open'],
                    high=row['High'],
                    low=row['Low'],

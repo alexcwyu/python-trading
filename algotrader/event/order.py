@@ -64,7 +64,7 @@ class NewOrderRequest(OrderEvent):
         'action',
         'type',
         'qty',
-        'limit_price'
+        'limit_price',
         'stop_price',
         'tif',
         'oca_tag',

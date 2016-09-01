@@ -3,11 +3,11 @@ Created on 4/16/16
 @author = 'jason'
 '''
 
+from algotrader.config.trading import LiveTradingConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
-from algotrader.trading.config import LiveTradingConfig
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio import Portfolio

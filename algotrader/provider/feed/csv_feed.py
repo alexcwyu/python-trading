@@ -6,6 +6,9 @@ from algotrader.provider.provider import Feed, feed_mgr
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils.clock import Clock
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, TradeSubscriptionType
+from algotrader.utils.date_utils import DateUtils
+
+
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 
@@ -60,7 +63,7 @@ class CSVDataFeed(Feed):
             inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
             self.__data_event_bus.on_next(
                 Bar(inst_id=inst.inst_id,
-                    timestamp=Clock.datetime_to_unixtimemillis(index),
+                    timestamp=DateUtils.datetime_to_unixtimemillis(index),
                     open=row['Open'],
                     high=row['High'],
                     low=row['Low'],

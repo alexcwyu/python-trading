@@ -1,29 +1,24 @@
-
-
-from unittest import TestCase
-from datetime import date
+import math
 from datetime import datetime
 from datetime import timedelta
+from unittest import TestCase
 
-from algotrader.chart.plotter import StrategyPlotter
-from algotrader.event.market_data import Bar, BarSize, BarType
-from algotrader.provider.feed.csv_feed import CSVDataFeed
-from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
+import numpy as np
+import pandas as pd
+
+from algotrader.config.trading import BacktestingConfig
+from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker.sim.simulator import Simulator
-from algotrader.strategy.sma_strategy import SMAStrategy
-from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
+from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
+from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.strategy.merton_optimal import MertonOptimalBaby
-from algotrader.trading.config import BacktestingConfig
+from algotrader.strategy.sma_strategy import SMAStrategy
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio import Portfolio
-from algotrader.utils import clock
-import pandas as pd
-import numpy as np
-import math
-from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.trading.portfolio_mgr import portf_mgr
+from algotrader.utils import clock
 
 
 class BacktestRunner(object):
@@ -97,7 +92,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
 
         instrument = 0
 
-        config = BacktestingConfig(portfolio_id='test2',
+        config = BacktestingConfig(stg_id='sma', portfolio_id='test2',
                                instrument_ids=[instrument],
                                subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                from_date=dates[0], to_date=dates[-1],
@@ -191,7 +186,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
         broker = Simulator()
 
         instrument = 0
-        config = BacktestingConfig(portfolio_id='test',
+        config = BacktestingConfig(stg_id='mtnb', portfolio_id='test',
                                instrument_ids=[instrument],
                                subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                from_date=dates[0], to_date=dates[-1],

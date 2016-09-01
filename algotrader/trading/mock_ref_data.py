@@ -2,7 +2,7 @@ import abc
 import csv
 import os
 import pandas as pd
-from algotrader.trading.ref_data import RefDataManager, Instrument, Currency, Exchange, RefDataManagerType
+from algotrader.trading.ref_data import RefDataManager, Instrument, Currency, Exchange, RefDataManager
 
 
 class MockRefDataManager(RefDataManager):
@@ -112,8 +112,8 @@ class MockRefDataManager(RefDataManager):
     def get_exch(self, exch_id):
         return self.__exch_dict.get(exch_id, None)
 
-    def type(self):
-        return RefDataManagerType.Mock
+    def id(self):
+        return RefDataManager.Mock
 
 
 

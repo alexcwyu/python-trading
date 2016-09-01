@@ -4,17 +4,23 @@ from algotrader.provider.persistence.persist import DataStore
 
 
 class CassandraDataStore(DataStore):
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, cass_config):
+        self.cass_config = cass_config
 
     def start(self):
-        self.cluster = Cluster()
-        self.session = self.cluster.connect()
-        self.stated = True
+        if not self.started:
+            #TODO authentication provider
+            self.cluster = Cluster(contact_points=self.cass_config.contact_points, port=self.cass_config.port)
+            self.session = self.cluster.connect()
+            self.started = True
 
     def stop(self):
         if self.started:
             self.cluster.shutdown()
+            self.started = False
+
+    def id(self):
+        return DataStore.Cassandra
 
     def query(self, query):
         pass

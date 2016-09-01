@@ -1,7 +1,7 @@
 import datetime
 
 from algotrader.event.event import Event
-
+from algotrader.utils.date_utils import DateUtils
 
 class MarketDataType(object):
     Bar = 'Bar'
@@ -145,7 +145,7 @@ class Bar(MarketDataEvent):
             return int(timestamp / (bar_size * 1000)) * bar_size * 1000
         else:
             dt = datetime.datetime.fromtimestamp(timestamp / 1000)
-            return Clock.datetime_to_unixtimemillis(datetime.datetime(year=dt.year, month=dt.month, day=dt.day))
+            return DateUtils.datetime_to_unixtimemillis(datetime.datetime(year=dt.year, month=dt.month, day=dt.day))
 
 
 class Trade(MarketDataEvent):

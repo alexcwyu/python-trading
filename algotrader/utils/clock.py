@@ -11,12 +11,16 @@ from rx.concurrency.newthreadscheduler import NewThreadScheduler
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
+from algotrader.utils.date_utils import DateUtils
 
 monkey.patch_time()
 monkey.patch_socket()
 
 
 class Clock:
+    Simulation = "Simulation"
+    RealTime = "RealTime"
+
     __metaclass__ = abc.ABCMeta
     epoch = datetime.datetime.fromtimestamp(0)
 
@@ -32,16 +36,14 @@ class Clock:
 
     def schedule_absolute(self, datetime, action, state=None):
         if isinstance(datetime, (long, int)):
-            datetime = Clock.unixtimemillis_to_datetime(datetime)
+            datetime = DateUtils.unixtimemillis_to_datetime(datetime)
         self.scheduler.schedule_absolute(datetime, action, state)
 
-    @staticmethod
-    def datetime_to_unixtimemillis(dt):
-        return int((dt - Clock.epoch).total_seconds() * 1000)
 
-    @staticmethod
-    def unixtimemillis_to_datetime(timestamp):
-        return datetime.datetime.fromtimestamp(timestamp / 1000.0)
+    @abc.abstractmethod
+    def id(self):
+        raise NotImplementedError()
+
 
 
 class RealTimeScheduler(NewThreadScheduler):
@@ -69,6 +71,9 @@ class RealTimeClock(Clock):
 
     def now(self):
         return int(time.time() * 1000)
+
+    def id(self):
+        return Clock.RealTime
 
 
 class SimulationScheduler(HistoricalScheduler):
@@ -121,6 +126,8 @@ class SimulationClock(Clock, MarketDataEventHandler):
             self.scheduler.stop()
         self.scheduler = SimulationScheduler(initial_clock=self.__current_timestamp_mills / 1000)
 
+    def id(self):
+        return Clock.Simulation
 
 realtime_clock = RealTimeClock()
 
@@ -129,12 +136,8 @@ simluation_clock = SimulationClock()
 default_clock = realtime_clock  # default setting
 
 
-class ClockType:
-    Simulation = "Simulation"
-    RealTime = "RealTime"
 
-
-def get_clock(clock_type=ClockType.RealTime):
-    if clock_type == ClockType.Simulation:
+def get_clock(clock_type=Clock.RealTime):
+    if clock_type == Clock.Simulation:
         return simluation_clock
     return realtime_clock

@@ -8,6 +8,12 @@ class Query():
 
 
 class DataStore(Provider):
+    Cassandra = "Cassandra"
+    KDB = "KDB"
+    Influx = "Influx"
+    Mongo = "Mongo"
+
+
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -20,6 +26,12 @@ class DataStore(Provider):
     @abc.abstractmethod
     def load_all(self, clazz):
         raise NotImplementedError()
+
+
+    @abc.abstractmethod
+    def id(self):
+        raise NotImplementedError()
+
 
 
 class RefDataStore(DataStore):

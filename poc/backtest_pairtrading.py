@@ -1,25 +1,22 @@
-
-from datetime import date
 from datetime import datetime
 from datetime import timedelta
 
+import numpy as np
+import pandas as pd
+
 from algotrader.chart.plotter import StrategyPlotter
-from algotrader.event.market_data import Bar, BarSize, BarType
-from algotrader.provider.feed.csv_feed import CSVDataFeed
-from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
+from algotrader.config.trading import BacktestingConfig
+from algotrader.event.market_data import BarSize, BarType
+from algotrader.models.sde_sim import euler
 from algotrader.provider.broker.sim.simulator import Simulator
+from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
+from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.strategy.pair_trading import PairTradingWithOUSpread
-from algotrader.trading.config import BacktestingConfig
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio import Portfolio
 from algotrader.utils import clock
-import pandas as pd
-import numpy as np
-import math
-from algotrader.models.sde_sim import euler
-from algotrader.provider.subscription import BarSubscriptionType
 
 
 class BacktestRunner(object):
@@ -92,7 +89,7 @@ def main():
     feed = PandasMemoryDataFeed(dict_df, ref_data_mgr=mgr)
     broker = Simulator()
 
-    config = BacktestingConfig(portfolio_id='test',
+    config = BacktestingConfig(stg_id="pairou", portfolio_id='test',
                                instrument_ids=[0, 1],
                                subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                from_date=dates[0], to_date=dates[-1],

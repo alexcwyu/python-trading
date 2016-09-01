@@ -4,16 +4,22 @@ from algotrader.provider.persistence.persist import DataStore
 
 
 class KDBDataStore(DataStore):
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, kdb_config):
+        self.kdb_config = kdb_config
 
     def start(self):
-        self.q = qconnection.QConnection(host='localhost', port=5000)
-        self.started = True
+        if not self.started:
+            self.q = qconnection.QConnection(host=self.kdb_config.host, port=self.kdb_config.port)
+            self.started = True
 
     def stop(self):
         if self.started:
             self.q.close()
+            self.started = False
+
+
+    def id(self):
+        return DataStore.KDB
 
     def query(self, query):
         pass

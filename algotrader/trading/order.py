@@ -15,7 +15,7 @@ class Order(OrderEventHandler, ExecutionEventHandler, Persistable):
         'action',
         'type',
         'qty',
-        'limit_price'
+        'limit_price',
         'stop_price',
         'tif',
         'oca_tag',
@@ -80,13 +80,13 @@ class Order(OrderEventHandler, ExecutionEventHandler, Persistable):
         if exec_report.cl_id != self.cl_id or exec_report.cl_ord_id != self.cl_ord_id:
             raise Exception(
                 "exec_report [%s] cl_id [%s] cl_ord_id [%s] is not same as current order cl_id [%s] cl_ord_id [%s]" % (
-                exec_report.er_id, exec_report.cl_id, exec_report.cl_ord_id, self.cl_id, self.cl_ord_id))
+                    exec_report.er_id, exec_report.cl_id, exec_report.cl_ord_id, self.cl_id, self.cl_ord_id))
 
         if not self.broker_ord_id:
             self.broker_ord_id = exec_report.ord_id
         elif self.broker_ord_id != exec_report.ord_id:
             raise Exception("exec_report [%s] ord_id [%s] is not same as current order ord_id [%s]" % (
-            exec_report.er_id, exec_report.ord_id, self.broker_ord_id))
+                exec_report.er_id, exec_report.ord_id, self.broker_ord_id))
 
         self.last_price = exec_report.last_price
         self.last_qty = exec_report.last_qty
@@ -119,7 +119,7 @@ class Order(OrderEventHandler, ExecutionEventHandler, Persistable):
         if ord_upd.cl_id != self.cl_id or ord_upd.cl_ord_id != self.cl_ord_id:
             raise Exception(
                 "ord_upd ord_id [%s] cl_id [%s] cl_ord_id [%s] is not same as current order cl_id [%s] cl_ord_id [%s]" % (
-                ord_upd.ord_id, ord_upd.cl_id, ord_upd.cl_ord_id, self.cl_id, self.cl_ord_id))
+                    ord_upd.ord_id, ord_upd.cl_id, ord_upd.cl_ord_id, self.cl_id, self.cl_ord_id))
 
         if not self.broker_ord_id:
             self.broker_ord_id = ord_upd.ord_id
@@ -150,8 +150,7 @@ class Order(OrderEventHandler, ExecutionEventHandler, Persistable):
         return self.action == OrdAction.BUY
 
     def is_sell(self):
-        return self.action == OrdAction.SELL  or self.action == OrdAction.SSHORT
-
+        return self.action == OrdAction.SELL or self.action == OrdAction.SSHORT
 
     def id(self):
-        return self.cl_id +"."+self.cl_ord_id
+        return "%s.%s" % (self.cl_id, self.cl_ord_id)

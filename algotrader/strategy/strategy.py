@@ -1,3 +1,4 @@
+from algotrader.config.trading import BacktestingConfig
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
 from algotrader.event.order import OrdAction, OrdType, TIF, NewOrderRequest, OrderReplaceRequest, \
@@ -6,10 +7,9 @@ from algotrader.provider.persistence.persist import Persistable
 from algotrader.provider.provider import broker_mgr, feed_mgr
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey
 from algotrader.strategy.strategy_mgr import stg_mgr
-from algotrader.trading.config import BacktestingConfig
-from algotrader.trading.position import PositionHolder
-from algotrader.trading.ref_data import inmemory_ref_data_mgr, get_ref_data_mgr
 from algotrader.trading.portfolio_mgr import portf_mgr
+from algotrader.trading.position import PositionHolder
+from algotrader.trading.ref_data import get_ref_data_mgr
 from algotrader.utils.clock import get_clock
 
 

@@ -51,7 +51,7 @@ class TradingConfig(Config):
 
 
 class LiveTradingConfig(TradingConfig):
-    def __init__(self, stg_id, portfolio_id, instrument_ids, subscription_types=None,
+    def __init__(self, stg_id=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
                  feed_id=IBBroker.ID, broker_id=IBBroker.ID,
                  ref_data_mgr_type=RefDataManager.InMemory, stg_configs=None):
         super(LiveTradingConfig, self).__init__(stg_id=stg_id, portfolio_id=portfolio_id, instrument_ids=instrument_ids,
@@ -67,7 +67,7 @@ class BacktestingConfig(TradingConfig):
         'to_date',
     )
 
-    def __init__(self, stg_id, portfolio_id, instrument_ids, subscription_types=None,
+    def __init__(self, stg_id=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
                  from_date=date(2010, 1, 1), to_date=date.today(),
                  feed_id=CSVDataFeed.ID, broker_id=Simulator.ID,
                  ref_data_mgr_type=RefDataManager.InMemory, stg_configs=None):

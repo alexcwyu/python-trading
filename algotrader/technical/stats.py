@@ -4,7 +4,7 @@ from algotrader.technical import Indicator
 
 
 class MAX(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 
@@ -25,7 +25,7 @@ class MAX(Indicator):
 
 
 class MIN(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 
@@ -46,7 +46,7 @@ class MIN(Indicator):
 
 
 class STD(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 
@@ -67,7 +67,7 @@ class STD(Indicator):
 
 
 class VAR(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 

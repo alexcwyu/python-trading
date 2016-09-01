@@ -4,8 +4,8 @@ from algotrader.utils.time_series import DataSeries
 
 class Indicator(DataSeries):
     VALUE = 'value'
-    _slots__ = (
-        'input',
+    __slots__ = (
+        'input_name',
         'input_keys',
         'calculate',
     )
@@ -28,8 +28,8 @@ class Indicator(DataSeries):
             return "'%s'" % input.name
         return "'%s'" % input
 
-    def __init__(self, name, input, input_keys, desc=None):
-        super(Indicator, self).__init__(name=name, desc=desc)
+    def __init__(self, name, input, input_keys, desc=None, **kwargs):
+        super(Indicator, self).__init__(name=name, desc=desc, **kwargs)
 
         self.input_keys = self._get_key(input_keys, None)
         inst_data_mgr.add_series(self)
@@ -37,8 +37,10 @@ class Indicator(DataSeries):
 
         if input:
             if isinstance(input, DataSeries):
+                self.input_name = input.name
                 self.input = input
             else:
+                self.input_name = input
                 self.input = inst_data_mgr.get_series(input)
 
             self.input.subject.subscribe(self.on_update)

@@ -1,7 +1,5 @@
 import datetime
 
-from rx.subjects import Subject
-
 from algotrader.utils import msgpack_numpy as m
 
 m.patch()
@@ -13,12 +11,11 @@ from itertools import chain
 from algotrader.utils.date_utils import DateUtils
 
 
-
 class Serializable(object):
-
     def __eq__(self, other):
         return (isinstance(other, self.__class__)
-                and MapSerializer.extract_slot(self) == MapSerializer.extract_slot(other) and self.__dict__ == other.__dict__)
+                and MapSerializer.extract_slot(self) == MapSerializer.extract_slot(
+            other) and self.__dict__ == other.__dict__)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -45,11 +42,15 @@ class Serializer(object):
 class MapSerializer(Serializer):
     @staticmethod
     def serialize(obj, include_slots=True, include_dict=False):
+        if not hasattr(obj, '__module__'):
+            return MapSerializer._deep_serialize(obj)
+
         map = {}
         map['@p'] = obj.__module__
         map['@t'] = obj.__class__.__name__
         if include_slots:
-            map['__slots__'] = MapSerializer._deep_serialize(MapSerializer.extract_slot(obj), include_slots, include_dict)
+            map['__slots__'] = MapSerializer._deep_serialize(MapSerializer.extract_slot(obj), include_slots,
+                                                             include_dict)
         if include_dict:
             map['__dict__'] = MapSerializer._deep_serialize(obj.__dict__, include_slots, include_dict)
         return map
@@ -72,7 +73,7 @@ class MapSerializer(Serializer):
         elif isinstance(item, list):
             return [MapSerializer._deep_serialize(i) for i in item]
         elif isinstance(item, dict):
-            return {k: MapSerializer._deep_serialize(v) for k, v in item.iteritems()}
+            return {MapSerializer.deserialize(k): MapSerializer._deep_serialize(v) for k, v in item.iteritems()}
         elif isinstance(item, tuple):
             return tuple([MapSerializer._deep_serialize(i) for i in item])
         elif isinstance(item, set):
@@ -87,22 +88,26 @@ class MapSerializer(Serializer):
     @staticmethod
     def deserialize(data):
         if isinstance(data, dict):
-            if b'__datetime__' in data:
+            if b'__datetime__' in data :
                 return DateUtils.timestamp_to_datetime(data["__datetime__"])
             elif b'__date__' in data:
                 return DateUtils.timestamp_to_date(data["__date__"])
-            elif b'@t' in data:
+            elif b'@t' in data :
                 data = data
                 module = data[b'@p']
                 cls = data[b'@t']
                 if (module, cls) not in Serializer.cls_cache:
                     m = importlib.import_module(module)
+                    if not hasattr(m, cls):
+                        print data
                     c = getattr(m, cls)
                     Serializer.cls_cache[(module, cls)] = c
                 c = Serializer.cls_cache[(module, cls)]
                 obj = c()
                 MapSerializer._deserialize_obj(obj, data)
                 return obj
+            else:
+                return {MapSerializer.deserialize(k): MapSerializer.deserialize(v) for k, v in data.iteritems()}
         elif isinstance(data, list):
             return [MapSerializer.deserialize(i) for i in data]
         elif isinstance(data, tuple):
@@ -130,6 +135,7 @@ class MsgPackSerializer(Serializer):
     @staticmethod
     def serialize(obj):
         return msgpack.packb(obj, default=MapSerializer.serialize)
+
     @staticmethod
     def deserialize(data):
         return msgpack.unpackb(data, object_hook=MapSerializer.deserialize)

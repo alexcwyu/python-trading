@@ -9,7 +9,7 @@ class BB(Indicator):
     UPPER = 'uppper'
     LOWER = 'lower'
 
-    _slots__ = (
+    __slots__ = (
         'length',
         'num_std'
         '__sma',

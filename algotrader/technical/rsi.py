@@ -48,7 +48,7 @@ def rsi(values, input_key, length):
 
 
 class RSI(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length',
         '__prev_gain',
         '__prev_loss'

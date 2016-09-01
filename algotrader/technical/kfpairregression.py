@@ -17,7 +17,7 @@ class KalmanFilteringPairRegression(Indicator):
     SLOPE = 'slope'
     INTERCEPT = 'intercept'
 
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 

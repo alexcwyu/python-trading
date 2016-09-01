@@ -10,7 +10,7 @@ def roc(prev_value, curr_value):
 
 
 class ROC(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 

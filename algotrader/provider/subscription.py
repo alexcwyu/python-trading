@@ -29,7 +29,7 @@ class BarSubscriptionType(DataSubscriptionType):
         self.bar_size = bar_size
 
     def get_type(self):
-        raise MarketDataType.Bar
+        return MarketDataType.Bar
 
     def __eq__(self, other):
         if not other:
@@ -41,12 +41,12 @@ class BarSubscriptionType(DataSubscriptionType):
 
 class QuoteSubscriptionType(DataSubscriptionType):
     def get_type(self):
-        raise MarketDataType.Quote
+        return MarketDataType.Quote
 
 
 class TradeSubscriptionType(DataSubscriptionType):
     def get_type(self):
-        raise MarketDataType.Trade
+        return MarketDataType.Trade
 
 
 class MarketDepthSubscriptionType(DataSubscriptionType):

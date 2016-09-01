@@ -14,7 +14,16 @@ from algotrader.trading.position import Position
 from algotrader.trading.ref_data import Instrument, Exchange, Currency
 from algotrader.utils.ser_deser import MsgPackSerializer, JsonSerializer, MapSerializer
 from algotrader.utils.time_series import DataSeries
-
+import numpy as np
+from algotrader.trading.instrument_data import inst_data_mgr
+from algotrader.strategy.strategy import Strategy
+from algotrader.trading.portfolio import Portfolio
+from algotrader.config.trading import BacktestingConfig
+from algotrader.config.trading import BacktestingConfig
+from algotrader.event.market_data import BarSize, BarType
+from algotrader.provider.broker.sim.simulator import Simulator
+from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
+from algotrader.provider.subscription import BarSubscriptionType
 params = [
     param('MsgPackSerializer',MsgPackSerializer),
     param('JsonSerializer',JsonSerializer),
@@ -139,37 +148,74 @@ class SerializerTest(TestCase):
 
         SerializerTest.ser_deser(name, serializer, item)
 
-    #TODO
-    # @parameterized.expand(params)
-    # def test_portfolio(self, serializer):
-    #     item = Portfolio(portf_id="", cash=1000)
-    #     SerializerTest.ser_deser(serializer, item)
-    #
 
-    #TODO
-    # @parameterized.expand(params)
-    # def test_strategy(self, serializer):
-    #     item = Strategy("ST1", portfolio=None, instruments=[1, 12],
-    #                     trading_config=None, ref_data_mgr=None, next_ord_id=0)
-    #     SerializerTest.ser_deser(serializer, item)
-
-    #TODO
     @parameterized.expand(params)
     def test_data_series(self, name, serializer):
-        item = DataSeries()
+        item = DataSeries("close", missing_value=0)
+
+        t = datetime.datetime(2000, 1, 1, 11, 34, 59)
+
+        values = [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
+              45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
+        for idx, value in enumerate(values):
+            item.add({"timestamp": t, "v1": value, "v2": value})
+            t = t + datetime.timedelta(0, 3)
+
         SerializerTest.ser_deser(name, serializer, item)
 
-    #TODO
     @parameterized.expand(params)
     def test_indicator(self, name, serializer):
-        item = SMA()
-        SerializerTest.ser_deser(name, serializer, item)
+        inst_data_mgr.clear()
+        bar = inst_data_mgr.get_series("bar")
+        sma = SMA(bar.name, 'close', 1, missing_value = 0)
+        t1 = datetime.datetime.now()
+        t2 = t1 + datetime.timedelta(0, 3)
+        t3 = t2 + datetime.timedelta(0, 3)
 
-    #TODO
+        bar.add({"timestamp": t1, "close": 2.0, "open": 0})
+        bar.add({"timestamp": t2, "close": 2.4, "open": 1.4})
+
+        bar.add({"timestamp": t3, "close": 2.8, "open": 1.8})
+
+        SerializerTest.ser_deser(name, serializer, sma)
+
+    @parameterized.expand(params)
+    def test_trading_config(self, name, serializer):
+        instrument = 0
+
+
+        dates = [datetime.datetime(2000, 1, 1), datetime.datetime(2015, 1, 1)]
+
+        config = BacktestingConfig(stg_id="sma", portfolio_id='test',
+                                   instrument_ids=[instrument],
+                                   subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                                   from_date=dates[0], to_date=dates[-1],
+                                   broker_id=Simulator.ID,
+                                   feed_id=PandasMemoryDataFeed.ID)
+        SerializerTest.ser_deser(name, serializer, config)
+
+    # # TODO fix error
     # @parameterized.expand(params)
-    # def test_trading_config(self, serializer):
-    #     item = BacktestingConfig()
-    #     SerializerTest.ser_deser(serializer, item)
+    # def test_portfolio(self, name, serializer):
+    #     item = Portfolio(portf_id="", cash=1000)
+    #     SerializerTest.ser_deser(name, serializer, item)
+    #
+    #
+    # # TODO fix json error
+    # @parameterized.expand(params)
+    # def test_strategy(self, name, serializer):
+    #     stg = Strategy(stg_id='st1', next_ord_id=0, trading_config=None, ref_data_mgr=None)
+    #     nos = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+    #                     limit_price=18.5)
+    #
+    #     order = Order(nos=nos)
+    #
+    #     stg.ord_req[nos.cl_ord_id] = nos
+    #     stg.order[order.cl_ord_id] = order
+    #     stg.add_position(nos.inst_id, nos.cl_id, nos.cl_ord_id, nos.qty)
+    #     stg.update_position_price(time=0, inst_id=nos.inst_id, price=100)
+    #
+    #     SerializerTest.ser_deser(name, serializer, stg)
 
 
 
@@ -178,6 +224,9 @@ class SerializerTest(TestCase):
         packed = serializer.serialize(item)
         unpacked = serializer.deserialize(packed)
         print "===== %s" % name
+        print packed
         print item
         print unpacked
+        print MapSerializer.extract_slot(item)
+        print MapSerializer.extract_slot(unpacked)
         assert MapSerializer.extract_slot(item) == MapSerializer.extract_slot(unpacked)

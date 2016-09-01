@@ -1,4 +1,7 @@
-class PortfolioAnalyzer(object):
+
+from algotrader.provider.persistence.persist import Persistable
+
+class PortfolioAnalyzer(Persistable):
     def update(self, time):
         pass
 
@@ -9,4 +12,4 @@ class PortfolioAnalyzer(object):
         return None
 
     def set_portfolio(self, portfolio):
-        self.portfolio = portfolio
+        self._portfolio = portfolio

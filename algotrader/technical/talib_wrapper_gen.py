@@ -8,7 +8,7 @@ from jinja2 import Template
 
 indicatorTmp = Template("""
 class {{IndicatorClass}}(Indicator):
-    _slots__ = (
+    __slots__ = (
         {% for i in params %}'{{i}}'{% if not loop.last %},{% endif %}{% endfor %}
     )
 

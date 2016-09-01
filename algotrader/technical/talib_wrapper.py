@@ -54,7 +54,7 @@ def call_talib_with_hlcv(ds, count, talib_func, *args, **kwargs):
     return talib_func(high, low, close, volume, *args, **kwargs)
 
 class SMA(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 
@@ -79,7 +79,7 @@ class SMA(Indicator):
         self.add(result)
 
 class EMA(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 

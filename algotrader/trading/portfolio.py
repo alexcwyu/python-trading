@@ -14,25 +14,39 @@ from algotrader.utils.time_series import DataSeries
 from algotrader.provider.persistence.persist import Persistable
 
 class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler, Persistable):
+    __slots__ = (
+        'portf_id',
+        'ord_reqs',
+        'orders',
+        'performance_series',
+        'total_equity',
+        'cash',
+        'stock_value',
+        'analyzers',
+        'started',
+    )
+
+
     def __init__(self, portf_id="test", cash=1000000, analyzers=None):
         super(Portfolio, self).__init__()
         self.portf_id = portf_id
-        self.ord_reqs = defaultdict(dict)
-        self.orders = defaultdict(dict)
+        self.ord_reqs = {}
+        self.orders = {}
 
-        self.performance_series = DataSeries()
+        self.performance_series = DataSeries("%s.Performance" %self.portf_id, missing_value=0)
         self.total_equity = 0
         self.cash = cash
         self.stock_value = 0
-
         self.analyzers = analyzers if analyzers is not None else [Pnl(), DrawDown()]
-        for analyzer in self.analyzers:
-            analyzer.set_portfolio(self)
         self.started = False
         portf_mgr.add_portfolio(self)
 
     def start(self):
         if not self.started:
+
+            for analyzer in self.analyzers:
+                analyzer.set_portfolio(self)
+
             self.started = True
             order_mgr.start()
             self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)
@@ -48,6 +62,8 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         return [order for cl_orders in self.orders.values() for order in cl_orders.values()]
 
     def get_order(self, cl_id, cl_ord_id):
+        if cl_id not in self.orders:
+            return None
         return self.orders[cl_id].get(cl_ord_id, None)
 
     def on_bar(self, bar):
@@ -65,11 +81,18 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
     def send_order(self, new_ord_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))
 
+        if new_ord_req.cl_id not in self.ord_reqs:
+            self.ord_reqs[new_ord_req.cl_id] = {}
+
         if new_ord_req.cl_ord_id in self.ord_reqs[new_ord_req.cl_id]:
             raise RuntimeError("ord_reqs[%s][%s] already exist" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
         self.ord_reqs[new_ord_req.cl_id][new_ord_req.cl_ord_id] = new_ord_req
 
         order = order_mgr.send_order(new_ord_req)
+
+        if order.cl_id not in self.orders:
+            self.orders[order.cl_id] = {}
+
         self.orders[order.cl_id][order.cl_ord_id] = order
         self.get_position(order.inst_id).add_order(order)
         return order
@@ -103,7 +126,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
     def on_exec_report(self, exec_report):
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
 
-        if exec_report.cl_ord_id not in self.ord_reqs[exec_report.cl_id]:
+        if exec_report.cl_id not in self.ord_reqs and exec_report.cl_ord_id not in self.ord_reqs[exec_report.cl_id]:
             raise Exception("Order not found, ord_reqs[%s][%s]" % (exec_report.cl_id, exec_report.cl_ord_id))
 
         new_ord_req = self.ord_reqs[exec_report.cl_id][exec_report.cl_ord_id]

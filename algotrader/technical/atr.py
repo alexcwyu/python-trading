@@ -3,7 +3,7 @@ from algotrader.technical.ma import SMA
 
 
 class ATR(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length',
         '__prev_close',
         '__value',

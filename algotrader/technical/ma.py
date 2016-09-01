@@ -4,13 +4,13 @@ from algotrader.technical import Indicator
 
 
 class SMA(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 
-    def __init__(self, input=None, input_key=None, length=0, desc="Simple Moving Average"):
+    def __init__(self, input=None, input_key=None, length=0, desc="Simple Moving Average", **kwargs):
         self.length = int(length)
-        super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc)
+        super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc, **kwargs)
 
     def on_update(self, data):
         result = {}

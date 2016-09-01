@@ -5,7 +5,7 @@ from algotrader.technical import Indicator
 
 
 class HistoricalVolatility(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
         'ann_factor'
     )

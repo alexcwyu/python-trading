@@ -8,8 +8,8 @@ class Rank(PipeLine):
     )
 
     def __init__(self, inputs, input_key='close', desc="Rank"):
-        super(Rank, self).__init__(PipeLine.get_name(Rank.__name__, input),
-                                   input, input_key, desc)
+        super(Rank, self).__init__(PipeLine.get_name(Rank.__name__, inputs, input_key),
+                                   inputs, input_key, length=1, desc=desc)
         super(Rank, self).update_all()
 
     def on_update(self, data):

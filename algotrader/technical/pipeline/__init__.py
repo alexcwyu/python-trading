@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 
-class PipeLine(Indicator):
+class PipeLine(DataSeries):
     VALUE = 'value'
     _slots__ = (
         'input',
@@ -17,7 +17,7 @@ class PipeLine(Indicator):
     @staticmethod
     def get_name(indicator_name, inputs, input_key, *args):
         parts = []
-        parts.extend(PipeLine.get_input_name(inputs))
+        parts.extend(DataSeries.convert_to_list(PipeLine.get_input_name(inputs)))
 
         if input_key:
             parts.extend(DataSeries.convert_to_list(input_key))
@@ -37,7 +37,7 @@ class PipeLine(Indicator):
         return ",".join(str(part) for part in parts)
 
     def __init__(self, name, inputs, input_keys, length=None, desc=None):
-        super(PipeLine, self).__init__(name=name, desc=desc)
+        super(PipeLine, self).__init__(name=name, keys=input_keys, desc=desc)
         f = lambda i: i \
             if isinstance(i, DataSeries) or isinstance(i, Indicator) \
             else inst_data_mgr.get_series(i)
@@ -62,7 +62,7 @@ class PipeLine(Indicator):
                                         range(len(input_names))))
 
         self.input_keys = self._get_key(input_keys, None)
-        self.input.subject.subscribe(self.on_update)
+        [input.subject.subscribe(self.on_update) for input in self.inputs]
         inst_data_mgr.add_series(self)
         self.calculate = True
         self.__curr_timestamp = None
@@ -73,14 +73,15 @@ class PipeLine(Indicator):
 
 
     def update_all(self):
-        data_list = self.input.get_data()
-        for data in data_list:
-            if self.input_keys:
-                filtered_data = {key: data[key] for key in self.input_keys}
-                filtered_data['timestamp'] = data['timestamp']
-                self.on_update(filtered_data)
-            else:
-                self.on_update(data)
+        for input in self.inputs:
+            data_list = input.get_data()
+            for data in data_list:
+                if self.input_keys:
+                    filtered_data = {key: data[key] for key in self.input_keys}
+                    filtered_data['timestamp'] = data['timestamp']
+                    self.on_update(filtered_data)
+                else:
+                    self.on_update(data)
 
     def all_filled(self):
         check_df = self.df.isnull()*1

@@ -32,3 +32,12 @@ class Startable(object):
 
 class Managable(Startable):
     __metaclass__ = abc.ABCMeta
+
+    def __init__(self):
+        self.item_dict = {}
+
+    def get(self, id):
+        return self.item_dict.get(id, None)
+
+    def add(self, item):
+        self.item_dict[item.id()] = item

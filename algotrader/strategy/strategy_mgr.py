@@ -18,4 +18,8 @@ class StrategyManager(SimpleManager):
                 self.store.save_strategy(stg)
 
 
+    def _start(self):
+        self.app_config.persistence_configs
+        ## TODO foreach config: init strategy with config
+
 stg_mgr = StrategyManager()

@@ -24,12 +24,12 @@ class ApplicationContext(Startable):
         self.datastore_mgr = self.add_startable(DataStoreManager(self))
         self.feed_mgr = self.add_startable(FeedManager(self))
         self.broker_mgr = self.add_startable(BrokerManager(self))
+        self.seq_mgr = self.add_startable(SequenceManager(self))
 
         self.order_mgr = self.add_startable(OrderManager(self))
         self.acct_mgr = self.add_startable(AccountManager(self))
-        self.seq_mgr = self.add_startable(SequenceManager(self))
-        self.stg_mgr = self.add_startable(StrategyManager(self))
         self.portf_mgr = self.add_startable(PortfolioManager(self))
+        self.stg_mgr = self.add_startable(StrategyManager(self))
 
         self.inst_data_mgr = self.add_startable(InstrumentDataManager(self))
         self.ref_data_mgr = self.add_startable(self.get_ref_data_mgr())

@@ -39,6 +39,9 @@ class FeedManager(ProviderManager):
         if provider and isinstance(provider, Feed):
             super(FeedManager, self).add(provider)
 
+    def _start(self):
+        self.app_config.feed_configs
+        ## TODO foreach config: init feed with config
 
 feed_mgr = FeedManager()
 
@@ -52,6 +55,9 @@ class BrokerManager(ProviderManager):
         if provider and isinstance(provider, Broker):
             super(BrokerManager, self).add(provider)
 
+    def _start(self):
+        self.app_config.broker_configs
+        ## TODO foreach config: init broker with config
 
 broker_mgr = BrokerManager()
 
@@ -77,6 +83,7 @@ class Feed(Provider):
     @abc.abstractmethod
     def unsubscribe_mktdata(self, sub_key):
         raise NotImplementedError()
+
 
 
 class Broker(Provider, OrderEventHandler):

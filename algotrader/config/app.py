@@ -11,8 +11,10 @@ class ApplicationConfig(Config):
         'trade_datastore_id',
         'time_series_datastore_id',
         'seq_datastore_id',
+
         'ref_data_mgr_type',
         'clock_type',
+
         'trading_configs'
         'broker_configs'
         'persistence_configs'
@@ -23,6 +25,7 @@ class ApplicationConfig(Config):
                  ref_datastore_id,
                  trade_datastore_id,
                  time_series_datastore_id,
+                 seq_datastore_id,
                  ref_data_mgr_type,
                  clock_type,
                  *configs):
@@ -30,6 +33,7 @@ class ApplicationConfig(Config):
         self.ref_datastore_id = ref_datastore_id
         self.time_series_datastore_id = time_series_datastore_id
         self.trade_datastore_id = trade_datastore_id
+        self.seq_datastore_id = seq_datastore_id
 
         self.ref_data_mgr_type = ref_data_mgr_type
         self.clock_type = clock_type

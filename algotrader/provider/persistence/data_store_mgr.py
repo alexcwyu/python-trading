@@ -10,3 +10,8 @@ class DataStoreManager(ProviderManager):
     def add(self, datastore):
         if datastore and isinstance(datastore, DataStore):
             super(DataStoreManager, self).add(datastore)
+
+
+    def _start(self):
+        self.app_config.persistence_configs
+        ## TODO foreach config: init and start

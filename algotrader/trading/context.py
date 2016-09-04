@@ -26,13 +26,13 @@ class ApplicationContext(Startable):
         self.broker_mgr = self.add_startable(BrokerManager(self))
         self.seq_mgr = self.add_startable(SequenceManager(self))
 
+        self.inst_data_mgr = self.add_startable(InstrumentDataManager(self))
+        self.ref_data_mgr = self.add_startable(self.get_ref_data_mgr())
+
         self.order_mgr = self.add_startable(OrderManager(self))
         self.acct_mgr = self.add_startable(AccountManager(self))
         self.portf_mgr = self.add_startable(PortfolioManager(self))
         self.stg_mgr = self.add_startable(StrategyManager(self))
-
-        self.inst_data_mgr = self.add_startable(InstrumentDataManager(self))
-        self.ref_data_mgr = self.add_startable(self.get_ref_data_mgr())
 
     def add_startable(self, startable):
         self.startables.append(startable)

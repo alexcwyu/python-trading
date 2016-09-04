@@ -17,7 +17,6 @@ class KDBDataStore(DataStore):
             self.q.close()
             self.started = False
 
-
     def id(self):
         return DataStore.KDB
 

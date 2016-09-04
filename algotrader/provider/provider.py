@@ -1,5 +1,6 @@
 import abc
 
+from algotrader import SimpleManager
 from algotrader.event.event_handler import OrderEventHandler
 
 
@@ -22,41 +23,34 @@ class Provider(object):
         raise NotImplementedError()
 
 
-class ProviderManager(object):
+class ProviderManager(SimpleManager):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self):
-        self.__mapping = {}
-
-    def get(self, id):
-        return self.__mapping.get(id, None)
-
-    def register(self, provider):
-        self.__mapping[provider.id()] = provider
+        super(ProviderManager, self).__init__()
 
 
 class FeedManager(ProviderManager):
-    def __init__(self):
+    def __init__(self, app_context):
         super(FeedManager, self).__init__()
+        self.app_context = app_context
 
-    def register(self, provider):
+    def add(self, provider):
         if provider and isinstance(provider, Feed):
-            super(FeedManager, self).register(provider)
+            super(FeedManager, self).add(provider)
 
 
 feed_mgr = FeedManager()
 
 
 class BrokerManager(ProviderManager):
-    def __init__(self):
+    def __init__(self, app_context):
         super(BrokerManager, self).__init__()
-        pass
+        self.app_context = app_context
 
-    def register(self, provider):
+    def add(self, provider):
         if provider and isinstance(provider, Broker):
-            super(BrokerManager, self).register(provider)
-
-
+            super(BrokerManager, self).add(provider)
 
 
 broker_mgr = BrokerManager()

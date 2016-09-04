@@ -1,7 +1,6 @@
 from algotrader.event.order import OrdAction
 from algotrader.strategy.strategy import Strategy
 from algotrader.trading.instrument_data import inst_data_mgr
-from algotrader.utils import logger
 
 
 class MertonOptimalBaby(Strategy):
@@ -21,19 +20,17 @@ class MertonOptimalBaby(Strategy):
         self.arate = arate
         self.vol = vol
         self.bar = inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[0])
-        self.optimal_weight = arate / self.vol**2 # assume risk free rate is zero
+        self.optimal_weight = arate / self.vol ** 2  # assume risk free rate is zero
 
     def on_bar(self, bar):
         # we have to rebalance on each bar
-        #print bar
+        # print bar
         portfolio = self.get_portfolio()
         allocation = portfolio.total_equity * self.optimal_weight
         delta = allocation - portfolio.stock_value
-        if delta > 0 :
-            qty = delta / bar.close # assume no lot size here
+        if delta > 0:
+            qty = delta / bar.close  # assume no lot size here
             self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=qty)
         else:
-            qty = -delta / bar.close # assume no lot size here
+            qty = -delta / bar.close  # assume no lot size here
             self.market_order(inst_id=bar.inst_id, action=OrdAction.SELL, qty=qty)
-
-

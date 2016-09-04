@@ -1,8 +1,12 @@
+from gevent import monkey
+
+monkey.patch_time()
+monkey.patch_socket()
+
 import abc
 import datetime
 import time
 
-from gevent import monkey
 from rx.concurrency.eventloopscheduler import EventLoopScheduler
 from rx.concurrency.historicalscheduler import HistoricalScheduler
 from rx.concurrency.mainloopscheduler import GEventScheduler
@@ -12,12 +16,10 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
-
-monkey.patch_time()
-monkey.patch_socket()
+from algotrader import Startable
 
 
-class Clock:
+class Clock(Startable):
     Simulation = "Simulation"
     RealTime = "RealTime"
 
@@ -39,11 +41,9 @@ class Clock:
             datetime = DateUtils.unixtimemillis_to_datetime(datetime)
         self.scheduler.schedule_absolute(datetime, action, state)
 
-
     @abc.abstractmethod
     def id(self):
         raise NotImplementedError()
-
 
 
 class RealTimeScheduler(NewThreadScheduler):
@@ -66,7 +66,8 @@ class RealTimeScheduler(NewThreadScheduler):
 
 
 class RealTimeClock(Clock):
-    def __init__(self, scheduler=None):
+    def __init__(self, scheduler=None, app_context=None):
+        self.app_context = app_context
         super(RealTimeClock, self).__init__(scheduler=scheduler if scheduler else GEventScheduler())
 
     def now(self):
@@ -74,6 +75,12 @@ class RealTimeClock(Clock):
 
     def id(self):
         return Clock.RealTime
+
+    def _start(self):
+        pass
+
+    def _stop(self):
+        pass
 
 
 class SimulationScheduler(HistoricalScheduler):
@@ -93,13 +100,18 @@ class SimulationScheduler(HistoricalScheduler):
 
 
 class SimulationClock(Clock, MarketDataEventHandler):
-    def __init__(self, current_timestamp_mills=None, scheduler=None):
+    def __init__(self, current_timestamp_mills=None, scheduler=None, app_context=None):
+        self.app_context = app_context
         self.__current_timestamp_mills = current_timestamp_mills if current_timestamp_mills else 0
         super(SimulationClock, self).__init__(scheduler=scheduler if scheduler else SimulationScheduler(
             initial_clock=self.__current_timestamp_mills / 1000))
 
-    def start(self):
-        EventBus.data_subject.subscribe(self.on_next)
+    def _start(self):
+        self.subscription = EventBus.data_subject.subscribe(self.on_next)
+
+    def _stop(self):
+        if self.subscription:
+            self.subscription.dispose()
 
     def now(self):
         return self.__current_timestamp_mills
@@ -129,12 +141,12 @@ class SimulationClock(Clock, MarketDataEventHandler):
     def id(self):
         return Clock.Simulation
 
+
 realtime_clock = RealTimeClock()
 
 simluation_clock = SimulationClock()
 
 default_clock = realtime_clock  # default setting
-
 
 
 def get_clock(clock_type=Clock.RealTime):

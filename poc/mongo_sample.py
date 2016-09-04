@@ -7,15 +7,15 @@ from algotrader.config.persistence import MongoDBConfig
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
 from algotrader.provider.persistence.mongodb import MongoDBDataStore
-from algotrader.strategy.strategy_mgr import StrategyManager
-from algotrader.trading.order_mgr import OrderManager
-from algotrader.trading.portfolio_mgr import PortfolioManager
-from algotrader.trading.portfolio import Portfolio
-from algotrader.utils.ser_deser import JsonSerializer
 from algotrader.strategy.strategy import Strategy
-from algotrader.trading.order import Order
+from algotrader.strategy.strategy_mgr import StrategyManager
 from algotrader.trading.account import Account
 from algotrader.trading.account_mgr import AccountManager
+from algotrader.trading.order import Order
+from algotrader.trading.order_mgr import OrderManager
+from algotrader.trading.portfolio import Portfolio
+from algotrader.trading.portfolio_mgr import PortfolioManager
+from algotrader.utils.ser_deser import JsonSerializer
 
 
 def test1():
@@ -139,17 +139,16 @@ def test_save_strategies():
     stg1.add_position(nos.inst_id, nos.cl_id, nos.cl_ord_id, nos.qty)
     stg1.update_position_price(time=0, inst_id=nos.inst_id, price=100)
 
-
     stg2 = Strategy(stg_id='st2', next_ord_id=0, trading_config=None, ref_data_mgr=None)
-    stg_mgr.add_strategy(stg1)
-    stg_mgr.add_strategy(stg2)
+    stg_mgr.add(stg1)
+    stg_mgr.add(stg2)
 
-    before = stg_mgr.all_strategies()
+    before = stg_mgr.all_items()
 
     stg_mgr.save()
     stg_mgr.load()
 
-    after = stg_mgr.all_strategies()
+    after = stg_mgr.all_items()
 
     print before
     print after

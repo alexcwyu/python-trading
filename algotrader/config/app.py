@@ -1,5 +1,5 @@
-from algotrader.config.config import Config
 from algotrader.config.broker import BrokerConfig
+from algotrader.config.config import Config
 from algotrader.config.feed import FeedConfig
 from algotrader.config.persistence import PersistenceConfig
 from algotrader.config.trading import TradingConfig
@@ -8,8 +8,9 @@ from algotrader.config.trading import TradingConfig
 class ApplicationConfig(Config):
     __slots__ = (
         'ref_datastore_id',
-        'trading_datastore_id',
+        'trade_datastore_id',
         'time_series_datastore_id',
+        'seq_datastore_id',
         'ref_data_mgr_type',
         'clock_type',
         'trading_configs'
@@ -18,10 +19,17 @@ class ApplicationConfig(Config):
         'feed_configs'
     )
 
-    def __init__(self, ref_datastore_id, trading_datastore_id, time_series_datastore_id, ref_data_mgr_type, clock_type, *configs):
+    def __init__(self, id,
+                 ref_datastore_id,
+                 trade_datastore_id,
+                 time_series_datastore_id,
+                 ref_data_mgr_type,
+                 clock_type,
+                 *configs):
+        super(ApplicationConfig, self).__init__(id)
         self.ref_datastore_id = ref_datastore_id
         self.time_series_datastore_id = time_series_datastore_id
-        self.trading_datastore_id = trading_datastore_id
+        self.trade_datastore_id = trade_datastore_id
 
         self.ref_data_mgr_type = ref_data_mgr_type
         self.clock_type = clock_type

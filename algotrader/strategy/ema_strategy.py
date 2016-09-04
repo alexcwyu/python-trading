@@ -18,9 +18,10 @@ class EMAStrategy(Strategy):
         if self.buy_order is None and self.ema_fast.now('value') > self.ema_slow.now('value'):
             self.buy_order = self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=self.qty)
             logger.info("%s,B,%s,%s,%.2f,%.2f,%.2f" % (
-                bar.timestamp, self.buy_order.cl_id, self.buy_order.cl_ord_id, bar.close, self.ema_fast.now('value'), self.ema_slow.now('value')))
+                bar.timestamp, self.buy_order.cl_id, self.buy_order.cl_ord_id, bar.close, self.ema_fast.now('value'),
+                self.ema_slow.now('value')))
         elif self.buy_order is not None and self.ema_fast.now('value') < self.ema_slow.now('value'):
             sell_order = self.market_order(inst_id=bar.inst_id, action=OrdAction.SELL, qty=self.qty)
             logger.info("%s,S,%s,%s,%.2f,%.2f,%.2f" % (
-                bar.timestamp, sell_order.cl_id, sell_order.cl_ord_id, bar.close, self.ema_fast.now('value'), self.ema_slow.now('value')))
-
+                bar.timestamp, sell_order.cl_id, sell_order.cl_ord_id, bar.close, self.ema_fast.now('value'),
+                self.ema_slow.now('value')))

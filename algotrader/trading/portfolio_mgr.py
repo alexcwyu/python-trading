@@ -1,45 +1,25 @@
-class PortfolioManager:
-    def __init__(self, store=None):
-        self.__portf_dict = {}
-        self.store = store
-
-    def add_portfolio(self, portfolio):
-        self.__portf_dict[portfolio.portf_id] = portfolio
-
-    def get_portfolio(self, portf_id):
-        return self.__portf_dict.get(portf_id, None)
-
-    def clear(self):
-        for port in self.__portf_dict.itervalues():
-            port.stop()
-        self.__portf_dict.clear()
+from algotrader import SimpleManager
 
 
-    def start(self):
-        if not self.started:
-            self.started = True
-            self.load()
+class PortfolioManager(SimpleManager):
+    def __init__(self, app_context=None):
+        super(SimpleManager, self).__init__()
+        self.app_context = app_context
 
-    def stop(self):
-        if self.started:
-            self.save()
-            self.clear()
-            self.started = False
+    def _start(self):
+        self.store = self.app_context.get_trade_data_store()
+        self._load_all()
 
-    def load(self):
+    def _load_all(self):
         if self.store:
-            self.__portf_dict = {}
             portfolios = self.store.load_all('portfolios')
             for portfolio in portfolios:
-                self.add_portfolio(portfolio)
+                self.add(portfolio)
 
-    def save(self):
+    def _save_all(self):
         if self.store:
             for portfolio in self.all_portfolios():
                 self.store.save_portfolio(portfolio)
 
-
-    def all_portfolios(self):
-        return [port for port in self.__portf_dict.values()]
 
 portf_mgr = PortfolioManager()

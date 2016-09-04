@@ -3,31 +3,29 @@ from unittest import TestCase
 
 from nose_parameterized import parameterized, param
 
+from algotrader.config.trading import BacktestingConfig
 from algotrader.event.account import AccountUpdate, PortfolioUpdate
 from algotrader.event.market_data import Bar, Trade, Quote, MarketDepth, MDOperation, MDSide
-from algotrader.event.order import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, ExecutionReport, TIF, \
+from algotrader.event.market_data import BarSize, BarType
+from algotrader.event.order import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
+    ExecutionReport, TIF, \
     OrdStatus, OrdAction, OrdType
+from algotrader.provider.broker.sim.simulator import Simulator
+from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
+from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.technical.ma import SMA
 from algotrader.trading.account import Account
+from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order import Order
 from algotrader.trading.position import Position
 from algotrader.trading.ref_data import Instrument, Exchange, Currency
 from algotrader.utils.ser_deser import MsgPackSerializer, JsonSerializer, MapSerializer
 from algotrader.utils.time_series import DataSeries
-import numpy as np
-from algotrader.trading.instrument_data import inst_data_mgr
-from algotrader.strategy.strategy import Strategy
-from algotrader.trading.portfolio import Portfolio
-from algotrader.config.trading import BacktestingConfig
-from algotrader.config.trading import BacktestingConfig
-from algotrader.event.market_data import BarSize, BarType
-from algotrader.provider.broker.sim.simulator import Simulator
-from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
-from algotrader.provider.subscription import BarSubscriptionType
+
 params = [
-    param('MsgPackSerializer',MsgPackSerializer),
-    param('JsonSerializer',JsonSerializer),
-    param('MapSerializer',MapSerializer)
+    param('MsgPackSerializer', MsgPackSerializer),
+    param('JsonSerializer', JsonSerializer),
+    param('MapSerializer', MapSerializer)
 ]
 
 
@@ -148,7 +146,6 @@ class SerializerTest(TestCase):
 
         SerializerTest.ser_deser(name, serializer, item)
 
-
     @parameterized.expand(params)
     def test_data_series(self, name, serializer):
         item = DataSeries("close", missing_value=0)
@@ -156,7 +153,7 @@ class SerializerTest(TestCase):
         t = datetime.datetime(2000, 1, 1, 11, 34, 59)
 
         values = [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
-              45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
+                  45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
         for idx, value in enumerate(values):
             item.add({"timestamp": t, "v1": value, "v2": value})
             t = t + datetime.timedelta(0, 3)
@@ -167,7 +164,7 @@ class SerializerTest(TestCase):
     def test_indicator(self, name, serializer):
         inst_data_mgr.clear()
         bar = inst_data_mgr.get_series("bar")
-        sma = SMA(bar.name, 'close', 1, missing_value = 0)
+        sma = SMA(bar.name, 'close', 1, missing_value=0)
         t1 = datetime.datetime.now()
         t2 = t1 + datetime.timedelta(0, 3)
         t3 = t2 + datetime.timedelta(0, 3)
@@ -183,12 +180,11 @@ class SerializerTest(TestCase):
     def test_trading_config(self, name, serializer):
         instrument = 0
 
-
         dates = [datetime.datetime(2000, 1, 1), datetime.datetime(2015, 1, 1)]
 
         config = BacktestingConfig(stg_id="sma", portfolio_id='test',
                                    instrument_ids=[instrument],
-                                   subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                                   subscription_types=[BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                    from_date=dates[0], to_date=dates[-1],
                                    broker_id=Simulator.ID,
                                    feed_id=PandasMemoryDataFeed.ID)

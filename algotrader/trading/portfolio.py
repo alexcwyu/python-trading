@@ -1,19 +1,19 @@
-from collections import defaultdict
-
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import AccountEventHandler, MarketDataEventHandler, OrderEventHandler, \
     ExecutionEventHandler
 from algotrader.event.order import OrdAction
 from algotrader.performance.drawdown import DrawDown
 from algotrader.performance.returns import Pnl
+from algotrader.provider.persistence.persist import Persistable
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio_mgr import portf_mgr
 from algotrader.trading.position import PositionHolder
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
-from algotrader.provider.persistence.persist import Persistable
 
-class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler, Persistable):
+
+class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler,
+                Persistable):
     __slots__ = (
         'portf_id',
         'ord_reqs',
@@ -26,14 +26,13 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         'started',
     )
 
-
     def __init__(self, portf_id="test", cash=1000000, analyzers=None):
         super(Portfolio, self).__init__()
         self.portf_id = portf_id
         self.ord_reqs = {}
         self.orders = {}
 
-        self.performance_series = DataSeries("%s.Performance" %self.portf_id, missing_value=0)
+        self.performance_series = DataSeries("%s.Performance" % self.portf_id, missing_value=0)
         self.total_equity = 0
         self.cash = cash
         self.stock_value = 0
@@ -134,7 +133,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         if exec_report.last_qty > 0:
             self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
             self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id,
-                             direction * exec_report.last_qty)
+                              direction * exec_report.last_qty)
             self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
     def update_position_price(self, timestamp, inst_id, price):

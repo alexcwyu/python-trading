@@ -2,7 +2,6 @@ import datetime
 from unittest import TestCase
 
 from algotrader.event.market_data import Bar, BarSize
-from algotrader.utils.clock import Clock
 from algotrader.utils.date_utils import DateUtils
 
 

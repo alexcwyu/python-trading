@@ -1,5 +1,5 @@
-
 from algotrader.provider.persistence.persist import Persistable
+
 
 class PortfolioAnalyzer(Persistable):
     def update(self, time):

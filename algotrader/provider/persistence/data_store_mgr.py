@@ -3,10 +3,10 @@ from algotrader.provider.provider import ProviderManager
 
 
 class DataStoreManager(ProviderManager):
-    def __init__(self):
+    def __init__(self, app_context):
         super(DataStoreManager, self).__init__()
-        pass
+        self.app_context = app_context
 
-    def register(self, datastore):
+    def add(self, datastore):
         if datastore and isinstance(datastore, DataStore):
-            super(DataStoreManager, self).register(datastore)
+            super(DataStoreManager, self).add(datastore)

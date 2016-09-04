@@ -1,11 +1,11 @@
 import datetime
 import time
 from unittest import TestCase
-import pytz
+
 import gevent
 
 from algotrader.event.market_data import Bar, Quote, Trade
-from algotrader.utils.clock import simluation_clock, realtime_clock, Clock
+from algotrader.utils.clock import simluation_clock, realtime_clock
 from algotrader.utils.date_utils import DateUtils
 
 
@@ -20,7 +20,6 @@ class ClockTest(TestCase):
     @staticmethod
     def realtime_action(*arg):
         ClockTest.endtime.append(realtime_clock.now())
-
 
     @classmethod
     def tearDownClass(cls):
@@ -114,7 +113,6 @@ class ClockTest(TestCase):
         dt4 = DateUtils.unixtimemillis_to_datetime(ts2)
         self.assertEquals(0, ts2)
         self.assertEquals(dt3, dt4)
-
 
     def test_real_time_clock_now(self):
         ts = DateUtils.datetime_to_unixtimemillis(datetime.datetime.now())

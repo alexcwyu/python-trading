@@ -16,7 +16,9 @@ class CassandraConfig(PersistenceConfig):
         'keyspace'
     )
 
-    def __init__(self, contact_points=["127.0.0.1"], port=9042, username=None, password=None, keyspace='algotrader'):
+    def __init__(self, id='Cassandra', contact_points=["127.0.0.1"], port=9042, username=None, password=None,
+                 keyspace='algotrader'):
+        super(CassandraConfig, self).__init__(id)
         self.contact_points = contact_points
         self.port = port
         self.username = username
@@ -33,7 +35,8 @@ class InfluxDBConfig(PersistenceConfig):
         'dbname'
     )
 
-    def __init__(self, host='localhost', port=8086, username='root', password='root', dbname='algotrader'):
+    def __init__(self, id='Influx', host='localhost', port=8086, username='root', password='root', dbname='algotrader'):
+        super(InfluxDBConfig, self).__init__(id)
         self.host = host
         self.port = port
         self.username = username
@@ -50,7 +53,8 @@ class MongoDBConfig(PersistenceConfig):
         'dbname'
     )
 
-    def __init__(self, host='localhost', port=27017, username=None, password=None, dbname='algotrader'):
+    def __init__(self, id='Mongo', host='localhost', port=27017, username=None, password=None, dbname='algotrader'):
+        super(MongoDBConfig, self).__init__(id)
         self.host = host
         self.port = port
         self.username = username
@@ -66,7 +70,8 @@ class KDBConfig(PersistenceConfig):
         'password'
     )
 
-    def __init__(self, host='localhost', port=5000, username=None, password=None):
+    def __init__(self, id='KDB', host='localhost', port=5000, username=None, password=None):
+        super(KDBConfig, self).__init__(id)
         self.host = host
         self.port = port
         self.username = username

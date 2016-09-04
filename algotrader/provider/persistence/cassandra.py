@@ -9,7 +9,7 @@ class CassandraDataStore(DataStore):
 
     def start(self):
         if not self.started:
-            #TODO authentication provider
+            # TODO authentication provider
             self.cluster = Cluster(contact_points=self.cass_config.contact_points, port=self.cass_config.port)
             self.session = self.cluster.connect()
             self.started = True

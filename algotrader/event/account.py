@@ -51,19 +51,3 @@ class PortfolioUpdate(AccountEvent):
 
     def on(self, handler):
         handler.on_portf_upd(self)
-
-#
-# class AccountValue:
-#     __slots__ = (
-#         'key',
-#         'value'
-#     )
-#
-#     def __init__(self, key, value):
-#         self.key = key
-#         self.value = value
-#
-#     def __repr__(self):
-#         return '%s = %s' % (self.key, self.value)
-
-

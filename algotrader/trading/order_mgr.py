@@ -1,5 +1,4 @@
-from collections import defaultdict
-
+from algotrader import SimpleManager
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
 from algotrader.provider.provider import broker_mgr
@@ -9,55 +8,42 @@ from algotrader.trading.portfolio_mgr import portf_mgr
 from algotrader.utils import logger
 
 
-class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
-    def __init__(self, store=None):
-        self.__next_ord_id = 0
-        self.__orders = defaultdict(dict)
+class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, SimpleManager):
+    def __init__(self, app_context=None):
+        super(OrderManager, self).__init__()
+        self.app_context = app_context
         self.started = False
-        self.store = store
 
-    def start(self):
-        if not self.started:
-            self.started = True
+    def _start(self):
+        self.store = self.app_context.get_trade_data_store()
+        # todo get from Seq Manager
+        self.__next_ord_id = 0
+        self._load_all()
+        self.subscriptions = []
+        self.subscriptions.append(EventBus.data_subject.subscribe(self.on_next))
+        self.subscriptions.append(EventBus.order_subject.subscribe(self.on_next))
+        self.subscriptions.append(EventBus.execution_subject.subscribe(self.on_next))
 
-            self.load()
+    def _stop(self):
+        if self.subscriptions:
+            for subscription in self.subscriptions:
+                try:
+                    subscription.dispose()
+                except:
+                    pass
+        self.save()
+        self.reset()
 
-            self.subscriptions = []
-            self.subscriptions.append(EventBus.data_subject.subscribe(self.on_next))
-            self.subscriptions.append(EventBus.order_subject.subscribe(self.on_next))
-            self.subscriptions.append(EventBus.execution_subject.subscribe(self.on_next))
-
-    def stop(self):
-        if self.started:
-            if self.subscriptions:
-                for subscription in self.subscriptions:
-                    try:
-                        subscription.dispose()
-                    except:
-                        pass
-
-            self.save()
-
-            self.started = False
-
-    def load(self):
+    def _load_all(self):
         if self.store:
-            self.__orders = defaultdict(dict)
             orders = self.store.load_all('orders')
             for order in orders:
-                self.__orders[order.cl_id][order.cl_ord_id] = order
+                self.add(order)
 
-    def save(self):
+    def _save_all(self):
         if self.store:
-            for order in self.all_orders():
+            for order in self.all_items():
                 self.store.save_order(order)
-
-    def all_orders(self):
-        orders = []
-        for cl_orders in self.__orders.values():
-            for order in cl_orders.values():
-                orders.append(order)
-        return orders
 
     def next_ord_id(self):
         next_ord_id = self.__next_ord_id
@@ -80,7 +66,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
         super(OrderManager, self).on_ord_upd(ord_upd)
 
         # update order
-        order = self.__orders[ord_upd.cl_id][ord_upd.cl_ord_id]
+        order = self.get(ord_upd.id())
         order.on_ord_upd(ord_upd)
 
         # enrich the cl_id and cl_ord_id
@@ -93,10 +79,10 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
             portfolio.on_ord_upd(ord_upd)
         else:
             logger.warn("portfolio [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
-            order.portf_id, order.cl_id, order.cl_ord_id))
+                order.portf_id, order.cl_id, order.cl_ord_id))
 
         # notify stg
-        stg = stg_mgr.get_strategy(order.cl_id)
+        stg = stg_mgr.get(order.cl_id)
         if stg:
             stg.oon_ord_upd(ord_upd)
         else:
@@ -107,7 +93,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
         super(OrderManager, self).on_exec_report(exec_report)
 
         # update order
-        order = self.__orders[exec_report.cl_id][exec_report.cl_ord_id]
+        order = self.get(exec_report.id())
         order.on_exec_report(exec_report)
 
         # enrich the cl_id and cl_ord_id
@@ -120,10 +106,10 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
             portfolio.on_exec_report(exec_report)
         else:
             logger.warn("portfolio [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
-            order.portf_id, order.cl_id, order.cl_ord_id))
+                order.portf_id, order.cl_id, order.cl_ord_id))
 
         # notify stg
-        stg = stg_mgr.get_strategy(order.cl_id)
+        stg = stg_mgr.get(order.cl_id)
         if stg:
             stg.on_exec_report(exec_report)
         else:
@@ -131,12 +117,12 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
                 "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.cl_id, order.cl_id, order.cl_ord_id))
 
     def send_order(self, new_ord_req):
-        if new_ord_req.cl_ord_id in self.__orders[new_ord_req.cl_id]:
+        if not self.has_item(new_ord_req.id()):
             raise Exception(
                 "ClientOrderId has been used!! cl_id = %s, cl_ord_id = %s" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
 
         order = Order(new_ord_req)
-        self.__orders[order.cl_id][order.cl_ord_id] = order
+        self.add(order)
 
         if order.broker_id:
             broker = broker_mgr.get(order.broker_id)
@@ -144,34 +130,34 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
                 broker.on_new_ord_req(new_ord_req)
             else:
                 logger.warn("broker [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
-                order.broker_id, order.cl_id, order.cl_ord_id))
+                    order.broker_id, order.cl_id, order.cl_ord_id))
         return order
 
     def cancel_order(self, ord_cancel_req):
-        if ord_cancel_req.cl_ord_id not in self.__orders[ord_cancel_req.cl_id]:
+        if not self.has_item(ord_cancel_req.id()):
             raise Exception("ClientOrderId not found!! cl_id = %s, cl_ord_id = %s" % (
                 ord_cancel_req.cl_id, ord_cancel_req.cl_ord_id))
 
-        order = self.__orders[ord_cancel_req.cl_id][ord_cancel_req.cl_ord_id]
+        order = self.get[ord_cancel_req.id()]
 
         order.on_ord_cancel_req(ord_cancel_req)
         broker_mgr.get(order.broker_id).on_ord_cancel_req(ord_cancel_req)
         return order
 
     def replace_order(self, ord_replace_req):
-        if ord_replace_req.cl_ord_id not in self.__orders[ord_replace_req.cl_id]:
+        if not self.has_item(ord_replace_req.id()):
             raise Exception("ClientOrderId not found!! cl_id = %s, cl_ord_id = %s" % (
                 ord_replace_req.cl_id, ord_replace_req.cl_ord_id))
 
-        order = self.__orders[ord_replace_req.cl_id][ord_replace_req.cl_ord_id]
+        order = self.get[ord_replace_req.id()]
 
         order.on_ord_replace_req(ord_replace_req)
         broker_mgr.get(order.broker_id).on_ord_replace_req(ord_replace_req)
         return order
 
     def reset(self):
+        super(OrderManager, self).reset()
         self.__next_ord_id = 0
-        self.__orders = defaultdict(dict)
 
 
 order_mgr = OrderManager()

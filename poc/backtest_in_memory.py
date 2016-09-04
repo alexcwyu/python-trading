@@ -36,12 +36,12 @@ def main():
     symbols = ['SPY', 'VXX', 'XLV', 'XIV']
 
     inst_df = build_inst_dataframe_from_list(symbols)
-    ccy_df = pd.DataFrame({ "ccy_id" : ["USD" , "HKD" ],
-                            "name" : ["US Dollar", "HK Dollar"] })
+    ccy_df = pd.DataFrame({"ccy_id": ["USD", "HKD"],
+                           "name": ["US Dollar", "HK Dollar"]})
 
-    exchange_df = pd.DataFrame({"exch_id" : ["NYSE"],
-                                "name" : ["New York Stock Exchange"]})
-    mgr = MockRefDataManager(inst_df=inst_df,ccy_df=ccy_df,exch_df=exchange_df)
+    exchange_df = pd.DataFrame({"exch_id": ["NYSE"],
+                                "name": ["New York Stock Exchange"]})
+    mgr = MockRefDataManager(inst_df=inst_df, ccy_df=ccy_df, exch_df=exchange_df)
 
     portfolio = Portfolio(portf_id='test', cash=100000)
 
@@ -51,31 +51,30 @@ def main():
     dates = [start_date + timedelta(days=i) for i in range(num_days)]
     sigma = 0.3
     x0 = 100
-    dt = 1./252
+    dt = 1. / 252
 
-    dW = np.random.normal(0,math.sqrt(dt), num_days)
+    dW = np.random.normal(0, math.sqrt(dt), num_days)
 
     asset = []
     asset.append(x0)
     for i in xrange(1, num_days):
         xprev = asset[-1]
-        x = xprev + xprev*0.02*dt + sigma*xprev*dW[i]
+        x = xprev + xprev * 0.02 * dt + sigma * xprev * dW[i]
         asset.append(x)
 
-    df = pd.DataFrame({"dates" : dates,
-                       "Open" : asset,
-                       "High" : asset,
-                       "Low" : asset,
-                       "Close" : asset,
-                       "Volume" : 10000*np.ones(num_days)})
+    df = pd.DataFrame({"dates": dates,
+                       "Open": asset,
+                       "High": asset,
+                       "Low": asset,
+                       "Close": asset,
+                       "Volume": 10000 * np.ones(num_days)})
 
     df = df.set_index(keys="dates")
 
-    dict_df = { 'SPY' : df,
-                'VXX' : df,
-                'XLV' : df,
-                'XIV' : df}
-
+    dict_df = {'SPY': df,
+               'VXX': df,
+               'XLV': df,
+               'XIV': df}
 
     feed = PandasMemoryDataFeed(dict_df, ref_data_mgr=mgr)
 
@@ -84,11 +83,10 @@ def main():
     instrument = 0
     config = BacktestingConfig(stg_id="sma", portfolio_id='test',
                                instrument_ids=[instrument],
-                               subscription_types = [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                               subscription_types=[BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                from_date=dates[0], to_date=dates[-1],
                                broker_id=Simulator.ID,
                                feed_id=PandasMemoryDataFeed.ID)
-
 
     close = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
     mgr.get_insts([instrument])
@@ -113,18 +111,19 @@ def main():
     plotter = StrategyPlotter(strategy)
     plotter.plot(instrument=0)
 
-    #import matplotlib.pyplot as plt
-    #plt.show()
+    # import matplotlib.pyplot as plt
+    # plt.show()
 
     import talib
     sma10 = talib.SMA(df.Close.values, 10)
     sma25 = talib.SMA(df.Close.values, 25)
 
-#    signal = pd.Series(1*(sma10 > sma25),index=df.index.tz_localize("UTC"))
-    signal = pd.Series(1*(sma10 > sma25),index=df.index)
-    target_rets = df["Close"].pct_change()*signal.shift(1)
+    #    signal = pd.Series(1*(sma10 > sma25),index=df.index.tz_localize("UTC"))
+    signal = pd.Series(1 * (sma10 > sma25), index=df.index)
+    target_rets = df["Close"].pct_change() * signal.shift(1)
     target_rets.index = target_rets.index.tz_localize("UTC")
     print target_rets.values[1:] - rets.values
+
 
 if __name__ == "__main__":
     main()

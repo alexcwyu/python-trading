@@ -1,11 +1,13 @@
 import datetime
-from collections import defaultdict
-from algotrader.provider.persistence.persist import Persistable
+
 import numpy as np
 import pandas as pd
 from rx.subjects import Subject
 
+from algotrader.provider.persistence.persist import Persistable
+
 timestamp_key = "timestamp"
+
 
 class DataSeries(Persistable):
     TIMESTAMP = 'timestamp'
@@ -46,11 +48,8 @@ class DataSeries(Persistable):
             for data in data_list:
                 self.add(data)
 
-    #
-    # def deserialize(self, map):
-    #     super(DataSeries, self).deserialize(map)
-    #     self.subject = Subject()
-
+    def id(self):
+        self.name
 
     def add(self, data):
         time = data.get(timestamp_key)

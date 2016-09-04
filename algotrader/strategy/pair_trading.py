@@ -1,13 +1,11 @@
 import math
+
 import rx
-from rx import Observable, Observer
-from rx.subjects import Subject
 from rx.subjects import BehaviorSubject
-from rx.observable import Observable
+
 from algotrader.event.order import OrdAction
 from algotrader.strategy.strategy import Strategy
 from algotrader.trading.instrument_data import inst_data_mgr
-from algotrader.utils import logger
 
 
 class PairTradingWithOUSpread(Strategy):
@@ -41,10 +39,9 @@ class PairTradingWithOUSpread(Strategy):
         self.instruments = trading_config.instrument_ids
         self.log_spot_0 = BehaviorSubject(0)
         self.log_spot_1 = BehaviorSubject(0)
-        self.spread_stream = rx.Observable\
-            .zip(self.log_spot_0, self.log_spot_1, lambda x, y: [x, y, x-y])\
+        self.spread_stream = rx.Observable \
+            .zip(self.log_spot_0, self.log_spot_1, lambda x, y: [x, y, x - y]) \
             .subscribe(self.rebalance)
-
 
     def on_bar(self, bar):
         # logger.info("%s,%s,%.2f" % (bar.inst_id, bar.timestamp, bar.close))
@@ -62,7 +59,7 @@ class PairTradingWithOUSpread(Strategy):
         theta = self.ou_params['theta']
         spread = spread_triple[2]
 
-        weight = k*(spread-theta)/ eta**2
+        weight = k * (spread - theta) / eta ** 2
         portfolio = self.get_portfolio()
         allocation_0 = -portfolio.total_equity * weight
         allocation_1 = portfolio.total_equity * weight
@@ -74,15 +71,14 @@ class PairTradingWithOUSpread(Strategy):
         if self.instruments[1] in portfolio.positions.keys():
             delta_1 = allocation_1 - portfolio.positions[self.instruments[1]].current_value()
 
-        qty = abs(delta_0) / spread_triple[0] # assume no lot size here
+        qty = abs(delta_0) / spread_triple[0]  # assume no lot size here
         if delta_0 > 0:
             self.market_order(inst_id=self.instruments[0], action=OrdAction.BUY, qty=qty)
         else:
             self.market_order(inst_id=self.instruments[0], action=OrdAction.SELL, qty=qty)
 
-        qty = abs(delta_1) / spread_triple[1] # assume no lot size here
+        qty = abs(delta_1) / spread_triple[1]  # assume no lot size here
         if delta_1 > 0:
             self.market_order(inst_id=self.instruments[1], action=OrdAction.BUY, qty=qty)
         else:
             self.market_order(inst_id=self.instruments[1], action=OrdAction.SELL, qty=qty)
-

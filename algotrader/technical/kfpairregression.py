@@ -4,13 +4,10 @@ Author = jchan
 """
 __author__ = 'jchan'
 
-import datetime
-
 import numpy as np
+from pykalman import KalmanFilter
 
 from algotrader.technical import Indicator
-from algotrader.utils.time_series import DataSeries
-from pykalman import KalmanFilter
 
 
 class KalmanFilteringPairRegression(Indicator):
@@ -26,7 +23,7 @@ class KalmanFilteringPairRegression(Indicator):
         return "KalmanFilteringPairRegression(%s,%s)" % (Indicator.get_input_name(input), length)
 
     def __init__(self, input, length, description="Kalman Filter Regression"):
-        super(KalmanFilteringPairRegression, self)\
+        super(KalmanFilteringPairRegression, self) \
             .__init__(KalmanFilteringPairRegression.get_name(input, length),
                       input=input,
                       keys=['slope', 'intercept'],
@@ -67,6 +64,3 @@ class KalmanFilteringPairRegression(Indicator):
             result[KalmanFilteringPairRegression.SLOPE] = np.nan
             result[KalmanFilteringPairRegression.SLOPE] = np.nan
             self.add(result)
-
-
-

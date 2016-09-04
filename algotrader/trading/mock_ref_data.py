@@ -1,8 +1,6 @@
-import abc
-import csv
-import os
 import pandas as pd
-from algotrader.trading.ref_data import RefDataManager, Instrument, Currency, Exchange, RefDataManager
+
+from algotrader.trading.ref_data import Instrument, Currency, Exchange, RefDataManager
 
 
 class MockRefDataManager(RefDataManager):
@@ -10,7 +8,8 @@ class MockRefDataManager(RefDataManager):
     Usually it will be used as mock object in unit test
     TODO: should we move this class to tests folder?
     """
-    def __init__(self, inst_df, ccy_df, exch_df ):
+
+    def __init__(self, inst_df, ccy_df, exch_df):
         self.inst_df = inst_df
         self.ccy_df = ccy_df
         self.exch_df = exch_df
@@ -39,7 +38,6 @@ class MockRefDataManager(RefDataManager):
         for index, row in self.exch_df.iterrows():
             exch = Exchange(exch_id=row['exch_id'], name=row['name'])
             self.add_exch(exch)
-
 
     def stop(self):
         # No implememtation
@@ -116,7 +114,6 @@ class MockRefDataManager(RefDataManager):
         return RefDataManager.Mock
 
 
-
 def build_inst_dataframe_from_list(symbols, type='ETF', exch_id='NYSE', ccy_id='USD'):
     inst_df = pd.DataFrame({'name': symbols})
     inst_df['type'] = type
@@ -137,18 +134,16 @@ def build_inst_dataframe_from_list(symbols, type='ETF', exch_id='NYSE', ccy_id='
     return inst_df
 
 
-
 if __name__ == "__main__":
-
     symbols = ['SPY', 'VXX', 'XLV', 'XIV']
     inst_df = build_inst_dataframe_from_list(symbols)
 
-#    ccy_id,name
-    ccy_df = pd.DataFrame({ "ccy_id" : ["USD" , "HKD" ],
-                            "name" : ["US Dollar", "HK Dollar"] })
+    #    ccy_id,name
+    ccy_df = pd.DataFrame({"ccy_id": ["USD", "HKD"],
+                           "name": ["US Dollar", "HK Dollar"]})
 
-    exchange_df = pd.DataFrame({"exch_id" : ["NYSE"],
-                               "name" : ["New York Stock Exchange"]})
+    exchange_df = pd.DataFrame({"exch_id": ["NYSE"],
+                                "name": ["New York Stock Exchange"]})
 
     mgr = MockRefDataManager(inst_df, ccy_df, exchange_df)
     print mgr.get_inst(symbol='VXX', exch_id='NYSE')

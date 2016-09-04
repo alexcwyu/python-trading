@@ -8,18 +8,16 @@ class BrokerConfig(Config):
 
 
 class IBConfig(BrokerConfig):
-    __metaclass__ = abc.ABCMeta
-
     __slots__ = (
         'host',
         'port',
         'client_id'
     )
 
-    def __init__(self, host,
-                 port,
-                 client_id):
+    def __init__(self, id='IB', host='localhost',
+                 port=4001,
+                 client_id=0):
+        super(IBConfig, self).__init__(id)
         self.host = host
-
         self.port = port
         self.client_id = client_id

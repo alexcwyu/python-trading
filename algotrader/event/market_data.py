@@ -3,6 +3,7 @@ import datetime
 from algotrader.event.event import Event
 from algotrader.utils.date_utils import DateUtils
 
+
 class MarketDataType(object):
     Bar = 'Bar'
     Quote = 'Quote'
@@ -68,9 +69,6 @@ class MarketDataEvent(Event):
         return "%s-%s" % (self.series_id(), self.timestamp)
 
 
-from algotrader.utils.clock import Clock
-
-
 class Bar(MarketDataEvent):
     __slots__ = (
         'type',
@@ -101,18 +99,10 @@ class Bar(MarketDataEvent):
     def series_id(self):
         return "Bar.%s.%s.%s" % (self.inst_id, BarType.name(self.type), self.size)
 
-    # def __str__(self):
-    #     return "Bar(inst_id = %s, begin_time = %s, timestamp = %s,type = %s, size = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
-    #            % (
-    #                self.inst_id, self.begin_time, self.timestamp, self.type, self.size, self.open, self.high, self.low,
-    #                self.close, self.vol,
-    #                self.adj_close)
-
     def on(self, handler):
         handler.on_bar(self)
 
     def close_or_adj_close(self):
-        # return self.adj_close if self.adj_close > 0 else self.close
         return self.close
 
     def to_dict(self, all_data=False):
@@ -162,10 +152,6 @@ class Trade(MarketDataEvent):
     def series_id(self):
         return "Trade.%s" % (self.inst_id)
 
-    # def __str__(self):
-    #     return "Trade(inst_id = %s, timestamp = %s,price = %s, size = %s)" \
-    #            % (self.inst_id, self.timestamp, self.price, self.size)
-
     def on(self, handler):
         handler.on_trade(self)
 
@@ -198,11 +184,6 @@ class Quote(MarketDataEvent):
 
     def series_id(self):
         return "Quote.%s" % (self.inst_id)
-
-    #
-    # def __str__(self):
-    #     return "Quote(inst_id = %s, timestamp = %s,bid = %s, bid_size = %s, ask = %s, ask_size = %s)" \
-    #            % (self.inst_id, self.timestamp, self.bid, self.bid_size, self.ask, self.ask_size)
 
     def on(self, handler):
         handler.on_quote(self)
@@ -245,15 +226,8 @@ class MarketDepth(MarketDataEvent):
         self.price = price
         self.size = size
 
-    def id(self):
+    def series_id(self):
         return "MarketDepth.%s" % (self.inst_id)
-
-    #
-    # def __str__(self):
-    #     return "MarketDepth(inst_id = %s, timestamp = %s, provider_id = %s, position = %s, operation = %s, side = %s, price = %s, size = %s)" \
-    #            % (
-    #                self.inst_id, self.timestamp, self.provider_id, self.position, self.operation, self.side, self.price,
-    #                self.size)
 
     def on(self, handler):
         handler.on_market_depth(self)

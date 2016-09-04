@@ -2,7 +2,7 @@ import abc
 import csv
 import os
 
-from algotrader.utils.ser_deser import Serializable
+from algotrader import Manager
 from algotrader.provider.persistence.persist import Persistable
 
 
@@ -36,11 +36,8 @@ class Instrument(ReferenceData):
         'ccy_id',
         'alt_symbol',
         'alt_exch_id',
-
         'sector',
         'group',
-
-        ## option / derivatives
         'und_inst_id',
         'expiry_date',
         'factor',
@@ -50,7 +47,8 @@ class Instrument(ReferenceData):
 
     )
 
-    def __init__(self, inst_id=None, name=None, type=None, symbol=None, exch_id=None, ccy_id=None, alt_symbol=None, alt_exch_id=None,
+    def __init__(self, inst_id=None, name=None, type=None, symbol=None, exch_id=None, ccy_id=None, alt_symbol=None,
+                 alt_exch_id=None,
                  sector=None, group=None,
                  put_call=None, expiry_date=None, und_inst_id=None, factor=1, strike=0.0, margin=0.0):
         self.inst_id = int(inst_id) if inst_id is not None else None
@@ -71,13 +69,6 @@ class Instrument(ReferenceData):
         self.factor = float(factor) if factor else 1
         self.strike = float(strike) if strike else 0.0
         self.margin = float(margin) if margin else 0.0
-
-    # def __repr__(self):
-    #     return self.__str__()
-    #
-    # def __str__(self):
-    #     return "Instrument(inst_id = %s, name = %s, type = %s, symbol = %s, exch_id = %s, ccy_id = %s)" \
-    #            % (self.inst_id, self.name, self.type, self.symbol, self.exch_id, self.ccy_id)
 
     def id(self):
         return self.symbol + "@" + self.exch_id
@@ -102,13 +93,10 @@ class Exchange(ReferenceData):
     def __init__(self, exch_id=None, name=None):
         self.exch_id = exch_id
         self.name = name
-    #
-    # def __str__(self):
-    #     return "Exchange(exch_id = %s, name = %s)" \
-    #            % (self.exch_id, self.name)
 
     def id(self):
         return self.exch_id
+
 
 class Currency(ReferenceData):
     __slots__ = (
@@ -119,115 +107,25 @@ class Currency(ReferenceData):
     def __init__(self, ccy_id=None, name=None):
         self.ccy_id = ccy_id
         self.name = name
-    #
-    # def __str__(self):
-    #     return "Currency(ccy_id = %s, name = %s)" \
-    #            % (self.ccy_id, self.name)
 
     def id(self):
         return self.ccy_id
 
 
-
-class RefDataManager(object):
+class RefDataManager(Manager):
     InMemory = "InMemory"
+    DB = "DB"
     Mock = "Mock"
 
     __metaclass__ = abc.ABCMeta
 
-    @abc.abstractmethod
-    def start(self):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def stop(self):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def add_inst(self, inst):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def add_ccy(self, ccy):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def add_exch(self, exch):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def get_inst(self, inst_id=None, symbol=None, exch_id=None):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def get_ccy(self, ccy_id):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def get_exch(self, exch_id):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def id(self):
-        raise NotImplementedError()
-
-
-class InMemoryRefDataManager(RefDataManager):
     def __init__(self):
-        self.inst_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/instrument.csv'))
-        self.ccy_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/ccy.csv'))
-        self.exch_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/exch.csv'))
-
-        # self.inst_file = 'instrument.csv'
-        # self.ccy_file = 'ccy.csv'
-        # self.exch_file = 'exch.csv'
+        super(RefDataManager, self).__init__()
 
         self.__inst_dict = {}
         self.__inst_symbol_dict = {}
         self.__ccy_dict = {}
         self.__exch_dict = {}
-
-        self.start()
-
-    def start(self):
-        with open(self.inst_file) as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                alt_symbol = {}
-                if row['alt_symbol']:
-                    for item in row['alt_symbol'].split(";"):
-                        kv = item.split("=")
-                        alt_symbol[kv[0]] = kv[1]
-
-                alt_exch_id = {}
-                if row['alt_exch_id']:
-                    for item in row['alt_exch_id'].split(";"):
-                        kv = item.split("=")
-                        alt_exch_id[kv[0]] = kv[1]
-
-                inst = Instrument(inst_id=row['inst_id'], name=row['name'], type=row['type'], symbol=row['symbol'],
-                                  exch_id=row['exch_id'], ccy_id=row['ccy_id'], alt_symbol=alt_symbol,
-                                  alt_exch_id=alt_exch_id, sector=row['sector'], group=row['group'],
-                                  put_call=row['put_call'], expiry_date=row['expiry_date'],
-                                  und_inst_id=row['und_inst_id'],
-                                  factor=row['factor'], strike=row['strike'], margin=row['margin'])
-                self.add_inst(inst)
-
-        with open(self.ccy_file) as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                ccy = Currency(ccy_id=row['ccy_id'], name=row['name'])
-                self.add_ccy(ccy)
-
-        with open(self.exch_file) as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                exch = Exchange(exch_id=row['exch_id'], name=row['name'])
-                self.add_exch(exch)
-
-    def stop(self):
-        # TODO save to csv
-        pass
 
     def add_inst(self, inst):
         if inst.inst_id in self.__inst_dict:
@@ -296,13 +194,120 @@ class InMemoryRefDataManager(RefDataManager):
     def get_exch(self, exch_id):
         return self.__exch_dict.get(exch_id, None)
 
+    @abc.abstractmethod
+    def id(self):
+        raise NotImplementedError()
+
+
+class DBRefDataManager(RefDataManager):
+    def __init__(self, app_context):
+        super(DBRefDataManager, self).__init__()
+        self.app_context = app_context
+
+    def _start(self):
+        self.store = self.app_context.get_ref_data_store()
+        self._load_all()
+
+    def _stop(self):
+        self._save_all()
+        self.reset()
+
+    def _load_all(self):
+        if self.store:
+            for inst in self.store.load_all('instruments'):
+                self.__inst_symbol_dict[inst.id()] = inst
+                self.__inst_dict[inst.inst_id] = inst
+            for ccy in self.store.load_all('currencies'):
+                self.__ccy_dict[ccy.ccy_id] = ccy
+            for exch in self.store.load_all('exchanges'):
+                self.__exch_dict[exch.exch_id] = exch
+
+    def _save_all(self):
+        if self.store:
+            for inst in self.__inst_dict.values():
+                self.store.save_instrument(inst)
+            for ccy in self.__ccy_dict.values():
+                self.store.save_exchange(ccy)
+            for exch in self.__exch_dict.values():
+                self.store.save_currency(exch)
+
+    def reset(self):
+        self.__inst_dict = {}
+        self.__inst_symbol_dict = {}
+        self.__ccy_dict = {}
+        self.__exch_dict = {}
+
+    def add_inst(self, inst):
+        super(DBRefDataManager, self).add_inst(inst)
+        if self.store:
+            self.store.save_instrument(inst)
+
+    def add_ccy(self, ccy):
+        super(DBRefDataManager, self).add_ccy(ccy)
+        if self.store:
+            self.store.save_exchange(ccy)
+
+    def add_exch(self, exch):
+        super(DBRefDataManager, self).add_exch(exch)
+        if self.store:
+            self.store.save_currency(exch)
+
+    def id(self):
+        raise RefDataManager.DB
+
+
+class InMemoryRefDataManager(RefDataManager):
+    def __init__(self, app_context):
+        super(InMemoryRefDataManager, self).__init__()
+        self.app_context = app_context
+        self.inst_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/instrument.csv'))
+        self.ccy_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/ccy.csv'))
+        self.exch_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/exch.csv'))
+
+    def _load_all(self):
+        with open(self.inst_file) as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                alt_symbol = {}
+                if row['alt_symbol']:
+                    for item in row['alt_symbol'].split(";"):
+                        kv = item.split("=")
+                        alt_symbol[kv[0]] = kv[1]
+
+                alt_exch_id = {}
+                if row['alt_exch_id']:
+                    for item in row['alt_exch_id'].split(";"):
+                        kv = item.split("=")
+                        alt_exch_id[kv[0]] = kv[1]
+
+                inst = Instrument(inst_id=row['inst_id'], name=row['name'], type=row['type'], symbol=row['symbol'],
+                                  exch_id=row['exch_id'], ccy_id=row['ccy_id'], alt_symbol=alt_symbol,
+                                  alt_exch_id=alt_exch_id, sector=row['sector'], group=row['group'],
+                                  put_call=row['put_call'], expiry_date=row['expiry_date'],
+                                  und_inst_id=row['und_inst_id'],
+                                  factor=row['factor'], strike=row['strike'], margin=row['margin'])
+                self.add_inst(inst)
+
+        with open(self.ccy_file) as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                ccy = Currency(ccy_id=row['ccy_id'], name=row['name'])
+                self.add_ccy(ccy)
+
+        with open(self.exch_file) as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                exch = Exchange(exch_id=row['exch_id'], name=row['name'])
+                self.add_exch(exch)
+
+    def _save_all(self):
+        pass
+
     def id(self):
         raise RefDataManager.InMemory
 
 
 inmemory_ref_data_mgr = InMemoryRefDataManager()
-
-
 
 
 def get_ref_data_mgr(mgr_type=RefDataManager.InMemory):

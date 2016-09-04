@@ -1,21 +1,22 @@
 import threading
 import time
-from datetime import datetime
+from collections import defaultdict
 
 import swigibpy
 
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import Bar, Quote, Trade, MarketDepth
-from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus, NewOrderRequest, OrderCancelRequest, OrderReplaceRequest
+from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.provider import Broker, Feed
-from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, TradeSubscriptionType, MarketDepthSubscriptionType
 from algotrader.provider.provider import feed_mgr, broker_mgr
+from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, \
+    TradeSubscriptionType, MarketDepthSubscriptionType
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
-from collections import defaultdict
-from algotrader.utils.clock import realtime_clock, Clock
+from algotrader.utils.clock import realtime_clock
+
 
 class DataRecord(object):
     __slots__ = (
@@ -116,7 +117,6 @@ class OrderReqRegistry(object):
         self.__clordid_ordreq_dict[new_ord_req.cl_id][new_ord_req.cl_ord_id] = new_ord_req
         self.__ordid_ordreq_dict[ord_id] = new_ord_req
         self.__clordid_ordid_dict[new_ord_req.cl_id][new_ord_req.cl_ord_id] = ord_id
-
 
     def remove_ord_req(self, ord_id, new_ord_req):
         if new_ord_req.cl_id in self.__clordid_ordreq_dict:
@@ -297,8 +297,10 @@ class IBBroker(IBSocket, Broker, Feed):
                                      self.__model_factory.convert_datetime(sub_key.to_date),  # endDateTime,
                                      self.__model_factory.convert_time_period(sub_key.from_date, sub_key.to_date),
                                      # durationStr,
-                                     self.__model_factory.convert_bar_size(sub_key.subscription_type.bar_size),  # barSizeSetting,
-                                     self.__model_factory.convert_hist_data_type(sub_key.subscription_type.data_type),  # whatToShow,
+                                     self.__model_factory.convert_bar_size(sub_key.subscription_type.bar_size),
+                                     # barSizeSetting,
+                                     self.__model_factory.convert_hist_data_type(sub_key.subscription_type.data_type),
+                                     # whatToShow,
                                      0,  # useRTH,
                                      1  # formatDate
                                      )
@@ -328,7 +330,8 @@ class IBBroker(IBSocket, Broker, Feed):
     def on_ord_replace_req(self, ord_replace_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_replace_req))
 
-        existing_ord_req = self.__ord_req_reg.get_ord_req(cl_id=ord_replace_req.cl_id, cl_ord_id=ord_replace_req.cl_ord_id)
+        existing_ord_req = self.__ord_req_reg.get_ord_req(cl_id=ord_replace_req.cl_id,
+                                                          cl_ord_id=ord_replace_req.cl_ord_id)
         if existing_ord_req:
 
             ord_id = self.__ord_req_reg.get_ord_id(cl_id=ord_replace_req.cl_id, cl_ord_id=ord_replace_req.cl_ord_id)
@@ -351,7 +354,8 @@ class IBBroker(IBSocket, Broker, Feed):
         if ord_id:
             self.__tws.cancelOrder(ord_id)
         else:
-            logger.error("cannot find old order, cl_id = %s, cl_ord_id = %s" % (ord_cancel_req.cl_id, ord_cancel_req.cl_ord_id))
+            logger.error(
+                "cannot find old order, cl_id = %s, cl_ord_id = %s" % (ord_cancel_req.cl_id, ord_cancel_req.cl_ord_id))
 
     def __req_open_orders(self):
         self.__tws.reqOpenOrders()
@@ -513,7 +517,7 @@ class IBBroker(IBSocket, Broker, Feed):
             ord_status = self.__model_factory.convert_ib_ord_status(status)
             create_er = False
 
-            if ord_status == OrdStatus.NEW or ord_status == OrdStatus.PENDING_CANCEL or ord_status == OrdStatus.CANCELLED or ord_status == OrdStatus.REJECTED :
+            if ord_status == OrdStatus.NEW or ord_status == OrdStatus.PENDING_CANCEL or ord_status == OrdStatus.CANCELLED or ord_status == OrdStatus.REJECTED:
                 create_er = True
 
             if create_er:

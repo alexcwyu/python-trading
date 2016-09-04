@@ -6,15 +6,15 @@ from algotrader.trading.position import PositionHolder
 
 class Account(AccountEventHandler, PositionHolder, Persistable):
     __slots__ = (
-        'name',
+        'id',
         'values',
         # 'positions',
         # 'open_orders'
     )
 
-    def __init__(self, name=None):
+    def __init__(self, id=None):
         super(Account, self).__init__()
-        self.name = name
+        self.id = id
         self.values = {}
         # self.positions = {}
         # self.open_orders = []
@@ -27,6 +27,5 @@ class Account(AccountEventHandler, PositionHolder, Persistable):
     def on_portf_upd(self, portf_upd):
         pass
 
-
     def id(self):
-        return self.name
+        return self.id

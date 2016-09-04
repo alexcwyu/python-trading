@@ -1,9 +1,11 @@
+import datetime
 import math
-import talib
 from datetime import datetime
 from unittest import TestCase
+
 import numpy as np
-import datetime
+import talib
+
 from algotrader.technical.talib_wrapper import SMA
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.utils.time_series import DataSeries
@@ -34,17 +36,17 @@ class TALibSMATest(TestCase):
         t3 = t2 + datetime.timedelta(0, 3)
 
         bar.add({"timestamp": t1, "close": 2.0, "open": 0})
-        self.assertEquals([{"timestamp": t1, 'value':np.nan}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan}],
                           sma.get_data())
 
         bar.add({"timestamp": t2, "close": 2.4, "open": 1.4})
-        self.assertEquals([{"timestamp": t1, 'value':np.nan},
-                           {"timestamp": t2, 'value':np.nan}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan},
+                           {"timestamp": t2, 'value': np.nan}],
                           sma.get_data())
 
         bar.add({"timestamp": t3, "close": 2.8, "open": 1.8})
-        self.assertEquals([{"timestamp": t1, 'value':np.nan},
-                           {"timestamp": t2, 'value':np.nan},
+        self.assertEquals([{"timestamp": t1, 'value': np.nan},
+                           {"timestamp": t2, 'value': np.nan},
                            {"timestamp": t3, 'value': 2.4}],
                           sma.get_data())
 
@@ -125,7 +127,3 @@ class TALibSMATest(TestCase):
             np.testing.assert_almost_equal(target, result, 5)
         except AssertionError as e:
             self.fail(e.message)
-
-
-
-

@@ -27,11 +27,12 @@ class TradingConfig(Config):
 
     )
 
-    def __init__(self, stg_id, portfolio_id,
+    def __init__(self, id, stg_id, portfolio_id,
                  subscription_types,
                  instrument_ids,
                  feed_id, broker_id,
                  ref_data_mgr_type, clock_type, stg_configs):
+        super(TradingConfig, self).__init__(id=id if id else stg_id)
         self.stg_id = stg_id
         self.portfolio_id = portfolio_id
 
@@ -39,7 +40,8 @@ class TradingConfig(Config):
         if not isinstance(self.instrument_ids, (list, tuple)):
             self.instrument_ids = [self.instrument_ids]
 
-        self.subscription_types = subscription_types if subscription_types else [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)]
+        self.subscription_types = subscription_types if subscription_types else [
+            BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)]
         if not isinstance(self.subscription_types, (list, tuple)):
             self.subscription_types = [self.subscription_types]
 
@@ -51,10 +53,11 @@ class TradingConfig(Config):
 
 
 class LiveTradingConfig(TradingConfig):
-    def __init__(self, stg_id=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
+    def __init__(self, id=None, stg_id=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
                  feed_id=IBBroker.ID, broker_id=IBBroker.ID,
                  ref_data_mgr_type=RefDataManager.InMemory, stg_configs=None):
-        super(LiveTradingConfig, self).__init__(stg_id=stg_id, portfolio_id=portfolio_id, instrument_ids=instrument_ids,
+        super(LiveTradingConfig, self).__init__(id=id, stg_id=stg_id, portfolio_id=portfolio_id,
+                                                instrument_ids=instrument_ids,
                                                 subscription_types=subscription_types,
                                                 feed_id=feed_id, broker_id=broker_id,
                                                 ref_data_mgr_type=ref_data_mgr_type, clock_type=Clock.RealTime,
@@ -67,11 +70,12 @@ class BacktestingConfig(TradingConfig):
         'to_date',
     )
 
-    def __init__(self, stg_id=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
+    def __init__(self, id=None, stg_id=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
                  from_date=date(2010, 1, 1), to_date=date.today(),
                  feed_id=CSVDataFeed.ID, broker_id=Simulator.ID,
                  ref_data_mgr_type=RefDataManager.InMemory, stg_configs=None):
-        super(BacktestingConfig, self).__init__(stg_id=stg_id, portfolio_id=portfolio_id, instrument_ids=instrument_ids,
+        super(BacktestingConfig, self).__init__(id=id, stg_id=stg_id, portfolio_id=portfolio_id,
+                                                instrument_ids=instrument_ids,
                                                 subscription_types=subscription_types,
                                                 feed_id=feed_id, broker_id=broker_id,
                                                 ref_data_mgr_type=ref_data_mgr_type, clock_type=Clock.Simulation,

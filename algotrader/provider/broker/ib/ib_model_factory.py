@@ -1,11 +1,12 @@
-import swigibpy
 from datetime import datetime
+
+import swigibpy
 from dateutil.relativedelta import relativedelta
 
 from algotrader.event.market_data import Bar, Quote, Trade, BarSize, MDOperation, MDSide
 from algotrader.event.order import OrdAction, OrdType, TIF, OrdStatus
-from algotrader.utils.clock import Clock
 from algotrader.utils.date_utils import DateUtils
+
 
 class IBModelFactory:
     IB_DATETIME_FORMAT = "%Y%m%d %H:%M:%S %Z"

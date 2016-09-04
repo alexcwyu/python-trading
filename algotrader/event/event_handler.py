@@ -14,7 +14,6 @@ class EventHandler(Observer):
     def on_completed(self):
         logger.debug("[%s] Completed" % self.__class__.__name__)
 
-
     def start(self):
         pass
 
@@ -79,7 +78,6 @@ class AccountEventHandler(EventHandler):
 
     def on_portf_upd(self, portf_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, portf_upd))
-
 
 
 class EventLogger(ExecutionEventHandler, MarketDataEventHandler):

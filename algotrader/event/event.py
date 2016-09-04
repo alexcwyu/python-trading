@@ -1,11 +1,10 @@
-from algotrader.utils.clock import realtime_clock
-from algotrader.utils.ser_deser import Serializable
-
 from algotrader.provider.persistence.persist import Persistable
+from algotrader.utils.clock import realtime_clock
+
 
 class Event(Persistable):
     __slots__ = (
-        'timestamp'   # timestamp in unix timestamp millis sec
+        'timestamp'  # timestamp in unix timestamp millis sec
     )
 
     def __init__(self, timestamp=None):
@@ -13,4 +12,3 @@ class Event(Persistable):
 
     def on(self, handler):
         pass
-

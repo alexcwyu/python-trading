@@ -30,9 +30,10 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         self.ord_req = {}
         self.order = {}
 
-        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else get_ref_data_mgr(self.trading_config.ref_data_mgr_type) if self.trading_config else None
+        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else get_ref_data_mgr(
+            self.trading_config.ref_data_mgr_type) if self.trading_config else None
         self.__started = False
-        stg_mgr.add_strategy(self)
+        stg_mgr.add(self)
 
     def __get_next_ord_id(self):
         next_ord_id = self.next_ord_id
@@ -41,8 +42,8 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
 
     def start(self):
         if not self.__started:
-
-            self.__ref_data_mgr = self.__ref_data_mgr if self.__ref_data_mgr else get_ref_data_mgr(self.trading_config.ref_data_mgr_type)
+            self.__ref_data_mgr = self.__ref_data_mgr if self.__ref_data_mgr else get_ref_data_mgr(
+                self.trading_config.ref_data_mgr_type)
             self.__portfolio = portf_mgr.get_portfolio(self.trading_config.portfolio_id)
             self.__feed = feed_mgr.get(self.trading_config.feed_id) if self.trading_config else None
             self.__instruments = self.__ref_data_mgr.get_insts(self.trading_config.instrument_ids)
@@ -61,7 +62,6 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         if self.__started:
             self.__event_subscription.dispose()
 
-
     def _subscribe_market_data(self, instruments):
         for instrument in instruments:
             for subscription_type in self.trading_config.subscription_types:
@@ -78,7 +78,6 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
                                               provider_id=self.trading_config.feed_id,
                                               subscription_type=subscription_type)
                 self.__feed.subscribe_mktdata(sub_key)
-
 
     def id(self):
         return self.stg_id

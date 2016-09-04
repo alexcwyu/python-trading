@@ -20,7 +20,7 @@ class Simulator(Broker, MarketDataEventHandler):
         super(Simulator, self).__init__()
         self.__next_ord_id = next_ord_id
         self.__next_exec_id = next_exec_id
-        self.__ord_req_map = defaultdict(lambda : defaultdict(dict))
+        self.__ord_req_map = defaultdict(lambda: defaultdict(dict))
         self.__ord_req_fill_status = defaultdict(dict)
         self.__clordid_ordid_map = defaultdict(dict)
         self.__quote_map = {}
@@ -103,14 +103,14 @@ class Simulator(Broker, MarketDataEventHandler):
 
         if qty < leave_qty:
             total_filled_qty += qty
-            self.__ord_req_fill_status[new_ord_req.cl_id][new_ord_req.cl_ord_id]=total_filled_qty
+            self.__ord_req_fill_status[new_ord_req.cl_id][new_ord_req.cl_ord_id] = total_filled_qty
 
             self.__send_exec_report(new_ord_req, price, qty, OrdStatus.PARTIALLY_FILLED)
             return False
         else:
             qty = leave_qty
             total_filled_qty += qty
-            self.__ord_req_fill_status[new_ord_req.cl_id][new_ord_req.cl_ord_id]=total_filled_qty
+            self.__ord_req_fill_status[new_ord_req.cl_id][new_ord_req.cl_ord_id] = total_filled_qty
 
             self.__send_exec_report(new_ord_req, price, qty, OrdStatus.FILLED)
             self.__remove_order(new_ord_req)

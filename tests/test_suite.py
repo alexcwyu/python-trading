@@ -1,8 +1,11 @@
 # add comment here
 import unittest
+
+from test_bar_aggregator import BarAggregatorTest
 from test_broker import SimulatorTest
 from test_broker_mgr import BrokerManagerTest
 from test_clock import ClockTest
+from test_cmp_functional_backtest import TestCompareWithFunctionalBacktest
 from test_data_series import DataSeriesTest
 from test_indicator import IndicatorTest
 from test_instrument_data import InstrumentDataTest
@@ -14,8 +17,7 @@ from test_portfolio import PortfolioTest
 from test_position import PositionTest
 from test_ser_deser import SerializerTest
 from test_talib_wrapper import TALibSMATest
-from test_cmp_functional_backtest import TestCompareWithFunctionalBacktest
-from test_bar_aggregator import BarAggregatorTest
+
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -37,11 +39,10 @@ def suite():
     test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
     return test_suite
 
-mySuit = suite()
 
+mySuit = suite()
 
 runner = unittest.TextTestRunner()
 runner.run(mySuit)
 # creating a new test suite
 newSuite = unittest.TestSuite()
-

@@ -1,23 +1,41 @@
-from collections import defaultdict
-
 import numpy as np
 
+from algotrader import Manager
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
 
 
-class InstrumentDataManager(MarketDataEventHandler):
-    def __init__(self):
+class InstrumentDataManager(MarketDataEventHandler, Manager):
+    def __init__(self, app_context):
+        super(InstrumentDataManager, self).__init__()
+        self.app_context = app_context
         self.__bar_dict = {}
         self.__quote_dict = {}
         self.__trade_dict = {}
-
         self.__series_dict = {}
 
-    def start(self):
-        EventBus.data_subject.subscribe(self.on_next)
+    def _start(self):
+        self.store = self.app_context.get_timeseries_data_store()
+        self._load_all()
+        self.subscription = EventBus.data_subject.subscribe(self.on_next)
+
+    def _stop(self):
+        self.subscription.dispose()
+        self._save_all()
+        self.reset()
+
+    def _load_all(self):
+        if self.store:
+            series_list = self.store.load_all('series')
+            for series in series_list:
+                self.__series_dict[series.id()] = series
+
+    def _save_all(self):
+        if self.store:
+            for series in self.__series_dict.values():
+                self.store.save_time_series(series)
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
@@ -80,11 +98,11 @@ class InstrumentDataManager(MarketDataEventHandler):
     def has_series(self, name):
         return name in self.__series_dict
 
-    def clear(self):
+    def reset(self):
         self.__bar_dict = {}
         self.__quote_dict = {}
         self.__trade_dict = {}
-        self.__series_dict = defaultdict(DataSeries)
+        self.__series_dict = {}
 
 
 inst_data_mgr = InstrumentDataManager()

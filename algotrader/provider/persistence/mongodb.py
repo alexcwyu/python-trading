@@ -1,12 +1,10 @@
 from pymongo import MongoClient
 
 from algotrader.provider.persistence.persist import RefDataStore, TradeDataStore, TimeSeriesDataStore, DataStore
-from algotrader.utils.ser_deser import JsonSerializer, MsgPackSerializer, MapSerializer
+from algotrader.utils.ser_deser import MapSerializer
 
 
 class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore):
-
-
     def __init__(self, mongo_config):
         self.mongo_config = mongo_config
         self.started = False
@@ -62,7 +60,7 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore):
 
     def _serialize(self, serializable):
         return serializable.id(), self.serializer.serialize(serializable)
-        #return serializable.id(), serializable.serialize()
+        # return serializable.id(), serializable.serialize()
 
     # RefDataStore
     def save_instrument(self, instrument):

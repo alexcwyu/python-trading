@@ -65,3 +65,6 @@ class DrawDown(PortfolioAnalyzer):
 
     def get_series(self):
         return self.drawdown_series.get_series([self.DrawDown, self.DrawDownPct])
+
+    def id(self):
+        return '%s.%s' % (self.portfolio.id(), DrawDown.DrawDown)

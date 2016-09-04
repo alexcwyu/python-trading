@@ -1,6 +1,6 @@
 import abc
 
-from algotrader.event.market_data import Bar, BarType, BarSize, MarketDataType
+from algotrader.event.market_data import BarType, BarSize, MarketDataType
 
 
 class DataSubscriptionType(object):
@@ -57,7 +57,6 @@ class MarketDepthSubscriptionType(DataSubscriptionType):
     def __init__(self, num_rows=1):
         self.num_rows = num_rows
 
-
     def get_type(self):
         raise MarketDataType.MarketDepth
 
@@ -79,7 +78,8 @@ class SubscriptionKey(object):
     def __init__(self, inst_id, provider_id='IB', subscription_type=None):
         self.provider_id = provider_id
         self.inst_id = inst_id
-        self.subscription_type = subscription_type if subscription_type else BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)
+        self.subscription_type = subscription_type if subscription_type else BarSubscriptionType(bar_type=BarType.Time,
+                                                                                                 bar_size=BarSize.D1)
 
     def __eq__(self, other):
         if not other:
@@ -99,7 +99,8 @@ class HistDataSubscriptionKey(SubscriptionKey):
 
     def __init__(self, inst_id, provider_id='IB', subscription_type=None,
                  from_date=None, to_date=None):
-        super(HistDataSubscriptionKey, self).__init__(inst_id=inst_id, provider_id=provider_id, subscription_type=subscription_type)
+        super(HistDataSubscriptionKey, self).__init__(inst_id=inst_id, provider_id=provider_id,
+                                                      subscription_type=subscription_type)
         self.from_date = from_date
         self.to_date = to_date
 
@@ -113,4 +114,3 @@ class HistDataSubscriptionKey(SubscriptionKey):
                  self.from_date, self.to_date) ==
                 (other.provider_id, other.inst_id, other.subscription_type,
                  other.from_date, other.to_date))
-

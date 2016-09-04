@@ -34,17 +34,6 @@ class Order(OrderEventHandler, ExecutionEventHandler, Persistable):
         if nos:
             self.on_new_ord_req(nos)
 
-    # def __repr__(self):
-    #     return "Order(timestamp = %s, cl_id = %s, cl_ord_id = %s, portf_id = %s, broker_id = %s, broker_ord_id = %s, inst_id = %s, action = %s, type = %s" \
-    #            ", qty = %s, limit_price = %s, stop_price = %s, tif = %s, oca_tag = %s, params = %s" \
-    #            ", status = %s, filled_qty = %s, avg_price = %s, last_qty = %s, last_price = %s ,stop_price = %s" \
-    #            ", stop_limit_ready = %s , trailing_stop_exec_price = %s , ord_events = %s , exec_events = %s)" \
-    #            % (self.timestamp, self.cl_id, self.cl_ord_id, self.portf_id, self.broker_id, self.broker_ord_id,
-    #               self.inst_id, self.action, self.type,
-    #               self.qty, self.limit_price, self.stop_price, self.tif, self.oca_tag, self.params,
-    #               self.status, self.filled_qty, self.avg_price, self.last_qty, self.last_price, self.stop_price,
-    #               self.stop_limit_ready, self.trailing_stop_exec_price, self.ord_events, self.exec_events)
-
     def on_new_ord_req(self, nos):
         self.timestamp = nos.timestamp
         self.cl_id = nos.cl_id

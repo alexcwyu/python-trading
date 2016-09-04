@@ -5,7 +5,6 @@ from algotrader.utils.time_series import DataSeries
 class Pnl(PortfolioAnalyzer):
     Pnl = "Pnl"
 
-
     __slots__ = (
         'pnl_series',
         'pnl'
@@ -27,3 +26,6 @@ class Pnl(PortfolioAnalyzer):
 
     def get_series(self):
         return {Pnl.Pnl: self.pnl_series.get_series(Pnl.Pnl)}
+
+    def id(self):
+        return '%s.%s' % (self.portfolio.id(), Pnl.Pnl)

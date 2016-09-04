@@ -9,13 +9,14 @@ class InfluxDataStore(DataStore):
 
     def start(self):
         if not self.started:
-            self.client = InfluxDBClient(self.influx_config.host, self.influx_config.port, self.influx_config.username, self.influx_config.password,
-                                     self.influx_config.dbname)
+            self.client = InfluxDBClient(self.influx_config.host, self.influx_config.port, self.influx_config.username,
+                                         self.influx_config.password,
+                                         self.influx_config.dbname)
             self.started = True
 
     def stop(self):
         if self.started:
-            #TODO
+            # TODO
             self.started = False
 
     def id(self):

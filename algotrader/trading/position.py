@@ -1,8 +1,7 @@
-from algotrader.event.order import OrdAction
 from algotrader.event.event_handler import MarketDataEventHandler
-from collections import defaultdict
-
+from algotrader.event.order import OrdAction
 from algotrader.provider.persistence.persist import Persistable
+
 
 class Position(Persistable):
     __slots__ = (
@@ -11,7 +10,6 @@ class Position(Persistable):
         'filled_qty_dict',
         'last_price'
     )
-
 
     def __init__(self, inst_id=None):
         self.inst_id = inst_id
@@ -58,18 +56,15 @@ class Position(Persistable):
 
     def all_orders(self):
         return [order for cl_orders in self.orders.values() for order in cl_orders.values()]
-    #
-    # def __repr__(self):
-    #     return "Position(inst_id=%s, orders=%s, filled_qty_dict=%s, last_price=%s)" % (
-    #         self.inst_id, self.orders, self.filled_qty_dict, self.last_price
-    #     )
+
+    def id(self):
+        return self.inst_id
 
 
 class PositionHolder(MarketDataEventHandler):
     __slots__ = (
         'positions'
     )
-
 
     def __init__(self):
         self.positions = {}

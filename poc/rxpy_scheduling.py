@@ -1,18 +1,12 @@
-from rx.subjects import Subject
-from algotrader.utils.time_series import DataSeries
-from datetime import datetime, time, timedelta
-from rx.concurrency.historicalscheduler import HistoricalScheduler
-from rx.concurrency.mainloopscheduler.geventscheduler import GEventScheduler
-from rx.concurrency.mainloopscheduler.ioloopscheduler import IOLoopScheduler
-from rx.concurrency.mainloopscheduler.asyncioscheduler import AsyncIOScheduler
-from rx.concurrency.currentthreadscheduler import  CurrentThreadScheduler
-from rx.concurrency.newthreadscheduler import  NewThreadScheduler
-from rx.concurrency.scheduler import Scheduler
+from datetime import datetime, timedelta
+
 import gevent
-from rx import Observable
+from rx.concurrency.historicalscheduler import HistoricalScheduler
+
 from algotrader.event.market_data import Bar, BarSize
-from algotrader.utils.clock import Clock, realtime_clock
+from algotrader.utils.clock import realtime_clock
 from algotrader.utils.date_utils import DateUtils
+
 
 class HistoricalScheduler2(HistoricalScheduler):
     def __init__(self, initial_clock=None, comparer=None):
@@ -42,11 +36,14 @@ class HistoricalScheduler2(HistoricalScheduler):
     def to_relative(self, timespan):
         return timespan
 
+
 starttime = datetime.now()
 scheduler1 = HistoricalScheduler2(initial_clock=starttime)
 from algotrader.utils.clock import RealTimeScheduler
+
 scheduler2 = RealTimeScheduler()
 endtime = [None]
+
 
 def action(*arg):
     print DateUtils.unixtimemillis_to_datetime(realtime_clock.now())
@@ -54,11 +51,13 @@ def action(*arg):
 
 from rx import Observable
 import time
+
 print "starting....", starttime
 
 from gevent.greenlet import Greenlet
-class MyNoopGreenlet(Greenlet):
 
+
+class MyNoopGreenlet(Greenlet):
     def __init__(self, seconds):
         Greenlet.__init__(self)
         self.seconds = seconds
@@ -69,12 +68,13 @@ class MyNoopGreenlet(Greenlet):
     def __str__(self):
         return 'MyNoopGreenlet(%s)' % self.seconds
 
+
 current_ts = DateUtils.datetime_to_unixtimemillis(starttime)
 next_ts = Bar.get_next_bar_start_time(current_ts, BarSize.S5)
 diff = next_ts - current_ts
-#Observable.timer(int(diff), BarSize.S5 * 1000, scheduler2).subscribe(action)
-#scheduler1.advance_to(starttime)
-#scheduler2.schedule_absolute(datetime.utcnow() + timedelta(seconds=3), action, scheduler2.now)
+# Observable.timer(int(diff), BarSize.S5 * 1000, scheduler2).subscribe(action)
+# scheduler1.advance_to(starttime)
+# scheduler2.schedule_absolute(datetime.utcnow() + timedelta(seconds=3), action, scheduler2.now)
 # print "1", scheduler1.now()
 # scheduler1.advance_to(starttime + timedelta(seconds=1))
 # print "2", scheduler1.now()
@@ -90,6 +90,6 @@ current_ts = DateUtils.datetime_to_unixtimemillis(starttime)
 next_ts = Bar.get_next_bar_start_time(current_ts, BarSize.S5)
 diff = next_ts - current_ts
 
-Observable.timer(int(diff),  1000, realtime_clock.scheduler).subscribe(on_next=action)
+Observable.timer(int(diff), 1000, realtime_clock.scheduler).subscribe(on_next=action)
 
 time.sleep(10000)

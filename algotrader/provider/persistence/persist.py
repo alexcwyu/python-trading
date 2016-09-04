@@ -3,6 +3,7 @@ import abc
 from algotrader.provider.provider import Provider
 from algotrader.utils.ser_deser import Serializable
 
+
 class Query():
     __metaclass__ = abc.ABCMeta
 
@@ -12,7 +13,6 @@ class DataStore(Provider):
     KDB = "KDB"
     Influx = "Influx"
     Mongo = "Mongo"
-
 
     __metaclass__ = abc.ABCMeta
 
@@ -27,11 +27,9 @@ class DataStore(Provider):
     def load_all(self, clazz):
         raise NotImplementedError()
 
-
     @abc.abstractmethod
     def id(self):
         raise NotImplementedError()
-
 
 
 class RefDataStore(DataStore):

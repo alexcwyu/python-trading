@@ -25,7 +25,6 @@ class BarAggregatorTest(TestCase):
         self.time = 9000000000
         simluation_clock.update_time(self.time)
 
-
     @classmethod
     def tearDownClass(cls):
         simluation_clock.reset()
@@ -130,7 +129,6 @@ class BarAggregatorTest(TestCase):
             Bar(inst_id=1, begin_time=9000060000, timestamp=9000119999, type=1, size=60, open=70, high=70, low=20,
                 close=20, vol=400, adj_close=0), items[0])
 
-
     def test_time_bar_from_bidask(self):
         agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
                             input_type=BarInputType.BidAsk)
@@ -159,7 +157,6 @@ class BarAggregatorTest(TestCase):
             Bar(inst_id=1, begin_time=9000000000, timestamp=9000059999, type=1, size=60, open=30, high=80, low=20,
                 close=80, vol=260, adj_close=0), items[0])
 
-
     def test_time_bar_from_mid(self):
         agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
                             input_type=BarInputType.Middle)
@@ -176,9 +173,9 @@ class BarAggregatorTest(TestCase):
             Bar(inst_id=1, begin_time=9000000000, timestamp=9000059999, type=1, size=60, open=24, high=24, low=24,
                 close=24, vol=150, adj_close=0), items[0])
 
-
     def test_tick_bar_from_trade(self):
-        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input, output_bar_type=BarType.Tick, output_size=3)
+        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+                            output_bar_type=BarType.Tick, output_size=3)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
 
@@ -202,12 +199,13 @@ class BarAggregatorTest(TestCase):
         self.assertEqual(1, len(items))
         self.assertEqual(0, agg.count())
         self.assertEqual(
-            Bar(inst_id=1, begin_time=9000060000, timestamp=9000180000, type=BarType.Tick, size=3, open=20, high=80, low=10,
+            Bar(inst_id=1, begin_time=9000060000, timestamp=9000180000, type=BarType.Tick, size=3, open=20, high=80,
+                low=10,
                 close=10, vol=500, adj_close=0), items[0])
 
-
     def test_vol_bar_from_trade(self):
-        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input, output_bar_type=BarType.Volume, output_size=1000)
+        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+                            output_bar_type=BarType.Volume, output_size=1000)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
 
@@ -231,7 +229,8 @@ class BarAggregatorTest(TestCase):
         self.assertEqual(1, len(items))
         self.assertEqual(1, agg.count())
         self.assertEqual(
-            Bar(inst_id=1, begin_time=9000060000, timestamp=9000180000, type=BarType.Volume, size=1000, open=20, high=80, low=10,
+            Bar(inst_id=1, begin_time=9000060000, timestamp=9000180000, type=BarType.Volume, size=1000, open=20,
+                high=80, low=10,
                 close=10, vol=1000, adj_close=0), items[0])
 
         self.event_bus.reset()
@@ -244,15 +243,17 @@ class BarAggregatorTest(TestCase):
         self.assertEqual(3, len(items))
         self.assertEqual(1, agg.count())
         self.assertEqual(
-            Bar(inst_id=1, begin_time=9000180000, timestamp=9000240000, type=BarType.Volume, size=1000, open=10, high=50, low=10,
+            Bar(inst_id=1, begin_time=9000180000, timestamp=9000240000, type=BarType.Volume, size=1000, open=10,
+                high=50, low=10,
                 close=50, vol=1000, adj_close=0), items[0])
         self.assertEqual(
-            Bar(inst_id=1, begin_time=9000240000, timestamp=9000240000, type=BarType.Volume, size=1000, open=50, high=50, low=50,
+            Bar(inst_id=1, begin_time=9000240000, timestamp=9000240000, type=BarType.Volume, size=1000, open=50,
+                high=50, low=50,
                 close=50, vol=1000, adj_close=0), items[1])
         self.assertEqual(
-            Bar(inst_id=1, begin_time=9000240000, timestamp=9000240000, type=BarType.Volume, size=1000, open=50, high=50, low=50,
+            Bar(inst_id=1, begin_time=9000240000, timestamp=9000240000, type=BarType.Volume, size=1000, open=50,
+                high=50, low=50,
                 close=50, vol=1000, adj_close=0), items[2])
-
 
         self.event_bus.reset()
 
@@ -264,5 +265,6 @@ class BarAggregatorTest(TestCase):
         self.assertEqual(1, len(items))
         self.assertEqual(0, agg.count())
         self.assertEqual(
-            Bar(inst_id=1, begin_time=9000240000, timestamp=9000300000, type=BarType.Volume, size=1000, open=50, high=50, low=20,
+            Bar(inst_id=1, begin_time=9000240000, timestamp=9000300000, type=BarType.Volume, size=1000, open=50,
+                high=50, low=20,
                 close=20, vol=1000, adj_close=0), items[0])

@@ -1,6 +1,6 @@
 from cassandra.cluster import Cluster
 
-from algotrader.provider.persistence.persist import DataStore
+from algotrader.provider.persistence import DataStore
 
 
 class CassandraDataStore(DataStore):

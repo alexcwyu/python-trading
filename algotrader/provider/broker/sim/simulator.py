@@ -6,14 +6,14 @@ from algotrader.event.order import OrdStatus, OrderStatusUpdate, \
     ExecutionReport
 from algotrader.provider.broker.sim.commission import NoCommission
 from algotrader.provider.broker.sim.fill_strategy import DefaultFillStrategy
-from algotrader.provider.provider import broker_mgr, Broker
+from algotrader.provider.broker.broker_mgr import broker_mgr
+from algotrader.provider.broker import Broker
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.utils import clock
 from algotrader.utils import logger
 
 
 class Simulator(Broker, MarketDataEventHandler):
-    ID = "Simulator"
 
     def __init__(self, exec_handler=order_mgr, commission=None, fill_strategy=None, next_ord_id=0, next_exec_id=0):
 
@@ -37,7 +37,7 @@ class Simulator(Broker, MarketDataEventHandler):
         pass
 
     def id(self):
-        return Simulator.ID
+        return Broker.Simulator
 
     def next_ord_id(self):
         __next_ord_id = self.__next_ord_id

@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from rx.subjects import Subject
 
-from algotrader.provider.persistence.persist import Persistable
+from algotrader.provider.persistence import Persistable
 
 timestamp_key = "timestamp"
 

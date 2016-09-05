@@ -1,6 +1,6 @@
 from influxdb import InfluxDBClient
 
-from algotrader.provider.persistence.persist import DataStore
+from algotrader.provider.persistence import DataStore
 
 
 class InfluxDataStore(DataStore):

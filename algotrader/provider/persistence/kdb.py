@@ -1,6 +1,6 @@
 from qpython import qconnection
 
-from algotrader.provider.persistence.persist import DataStore
+from algotrader.provider.persistence import DataStore
 
 
 class KDBDataStore(DataStore):

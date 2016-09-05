@@ -4,7 +4,7 @@ from algotrader.event.event_handler import AccountEventHandler, MarketDataEventH
 from algotrader.event.order import OrdAction
 from algotrader.performance.drawdown import DrawDown
 from algotrader.performance.returns import Pnl
-from algotrader.provider.persistence.persist import Persistable
+from algotrader.provider.persistence import Persistable
 from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio_mgr import portf_mgr
 from algotrader.trading.position import PositionHolder

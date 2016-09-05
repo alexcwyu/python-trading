@@ -1,6 +1,6 @@
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.event.order import OrdAction
-from algotrader.provider.persistence.persist import Persistable
+from algotrader.provider.persistence import Persistable
 
 
 class Position(Persistable):

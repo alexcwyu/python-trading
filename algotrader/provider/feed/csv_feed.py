@@ -2,7 +2,8 @@ import pandas as pd
 
 from algotrader.event.event_bus import EventBus
 from algotrader.event.market_data import Bar, BarSize, BarType
-from algotrader.provider.provider import Feed, feed_mgr
+from algotrader.provider.feed.feed_mgr import feed_mgr
+from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils.date_utils import DateUtils
@@ -11,7 +12,6 @@ dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 
 class CSVDataFeed(Feed):
-    ID = "CSV"
 
     def __init__(self, path='../data/tradedata', ref_data_mgr=None, data_event_bus=None):
         self.__path = path
@@ -27,7 +27,7 @@ class CSVDataFeed(Feed):
         pass
 
     def id(self):
-        return CSVDataFeed.ID
+        return Feed.CSV
 
     @staticmethod
     def read_csv(symbol, file):

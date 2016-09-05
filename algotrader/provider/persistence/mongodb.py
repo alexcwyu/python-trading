@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 
-from algotrader.provider.persistence.persist import RefDataStore, TradeDataStore, TimeSeriesDataStore, DataStore
+from algotrader.provider.persistence import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore
 from algotrader.utils.ser_deser import MapSerializer
 
 

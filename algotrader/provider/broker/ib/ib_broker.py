@@ -9,8 +9,10 @@ from algotrader.event.market_data import Bar, Quote, Trade, MarketDepth
 from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
-from algotrader.provider.provider import Broker, Feed
-from algotrader.provider.provider import feed_mgr, broker_mgr
+from algotrader.provider.broker import Broker
+from algotrader.provider.feed import Feed
+from algotrader.provider.broker.broker_mgr import broker_mgr
+from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, \
     TradeSubscriptionType, MarketDepthSubscriptionType
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
@@ -166,7 +168,6 @@ class TWSPoller(threading.Thread):
 
 
 class IBBroker(IBSocket, Broker, Feed):
-    ID = "IB"
 
     def __init__(self, port=4001, client_id=1, account=None, ref_data_mgr=None, data_event_bus=None,
                  execution_event_bus=None, daemon=False):
@@ -221,7 +222,7 @@ class IBBroker(IBSocket, Broker, Feed):
         self.stop()
 
     def id(self):
-        return IBBroker.ID
+        return Broker.IB
 
     def next_request_id(self):
         req_id = self.__next_request_id

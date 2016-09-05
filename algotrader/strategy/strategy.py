@@ -3,8 +3,9 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
 from algotrader.event.order import OrdAction, OrdType, TIF, NewOrderRequest, OrderReplaceRequest, \
     OrderCancelRequest
-from algotrader.provider.persistence.persist import Persistable
-from algotrader.provider.provider import broker_mgr, feed_mgr
+from algotrader.provider.persistence import Persistable
+from algotrader.provider.broker.broker_mgr import broker_mgr
+from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey
 from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.trading.portfolio_mgr import portf_mgr

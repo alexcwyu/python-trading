@@ -9,7 +9,8 @@ import pandas.io.data as web
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
-from algotrader.provider.provider import Feed, feed_mgr
+from algotrader.provider.feed.feed_mgr import feed_mgr
+from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
@@ -69,16 +70,18 @@ class PandasWebDataFeed(Feed):
     def unsubscribe_mktdata(self, sub_key):
         pass
 
+    def id(self):
+        return Feed.PandasWeb
+
 
 class YahooDataFeed(PandasWebDataFeed):
-    ID = "Yahoo"
     URL = 'http://real-chart.finance.yahoo.com/table.csv?s=%s&d=%s&e=%s&f=%s&g=d&a=%s&b=%s&c=%s&ignore=.csv'
 
     def __init__(self, ref_data_mgr=None, data_event_bus=None):
         super(YahooDataFeed, self).__init__(system='yahoo', ref_data_mgr=ref_data_mgr, data_event_bus=data_event_bus)
 
     def id(self):
-        return YahooDataFeed.ID
+        return Feed.Yahoo
 
     def process_row(self, index, row):
         inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
@@ -94,13 +97,12 @@ class YahooDataFeed(PandasWebDataFeed):
 
 
 class GoogleDataFeed(PandasWebDataFeed):
-    ID = "Google"
 
     def __init__(self, ref_data_mgr=None, data_event_bus=None):
         super(GoogleDataFeed, self).__init__(system='google', ref_data_mgr=ref_data_mgr, data_event_bus=data_event_bus)
 
     def id(self):
-        return GoogleDataFeed.ID
+        return Feed.Google
 
     def process_row(self, index, row):
         inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])

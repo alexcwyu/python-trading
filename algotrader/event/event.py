@@ -1,4 +1,4 @@
-from algotrader.provider.persistence.persist import Persistable
+from algotrader.provider.persistence import Persistable
 from algotrader.utils.clock import realtime_clock
 
 

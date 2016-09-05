@@ -6,7 +6,8 @@ import pandas as pd
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
-from algotrader.provider.provider import Feed, feed_mgr
+from algotrader.provider.feed.feed_mgr import feed_mgr
+from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
@@ -17,7 +18,6 @@ class PandasMemoryDataFeed(Feed):
     """
     This is a class to make a data feed from dataframe we already have in memory
     """
-    ID = "PandasMemory"
 
     def __init__(self, dict_of_df, ref_data_mgr=None, data_event_bus=None):
         """
@@ -44,7 +44,7 @@ class PandasMemoryDataFeed(Feed):
         pass
 
     def id(self):
-        return PandasMemoryDataFeed.ID
+        return Feed.PandasMemory
 
     def subscribe_all_mktdata(self, sub_keys):
         if isinstance(sub_keys, list):

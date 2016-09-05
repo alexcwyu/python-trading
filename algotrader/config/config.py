@@ -1,6 +1,6 @@
 import abc
 
-from algotrader.provider.persistence.persist import Persistable
+from algotrader.provider.persistence import Persistable
 
 
 class Config(Persistable):

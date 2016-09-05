@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from algotrader.provider.broker.sim.simulator import Simulator
-from algotrader.provider.provider import BrokerManager
+from algotrader.provider.broker.broker_mgr import BrokerManager
 
 
 class BrokerManagerTest(TestCase):

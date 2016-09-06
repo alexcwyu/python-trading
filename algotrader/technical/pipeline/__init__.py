@@ -8,10 +8,14 @@ import pandas as pd
 class PipeLine(DataSeries):
     VALUE = 'value'
     _slots__ = (
-        'input',
+        'numPipes',
+        'length',
+        'input_keys',
+        'df',
+        'input_names_pos',
         'input_keys',
         'calculate',
-        'input_names_pos'
+        '__curr_timestamp'
     )
 
     @staticmethod
@@ -55,6 +59,7 @@ class PipeLine(DataSeries):
             else:
                 input_names.append(i)
 
+        self.numPipes = len(input_names)
         self.length = length if length is not None else 1
         self.input_names = input_names
         self.df = pd.DataFrame(index=range(self.length), columns=input_names)
@@ -70,7 +75,6 @@ class PipeLine(DataSeries):
 
     def _flush_and_create(self):
         self.df = pd.DataFrame(index=range(self.length), columns=self.input_names)
-
 
     def update_all(self):
         for input in self.inputs:
@@ -98,6 +102,12 @@ class PipeLine(DataSeries):
             self.df[data_name] = self.inputs[j].get_by_idx(
                 keys=self.input_keys,
                 idx=slice(-self.length, None, None))
+
+    def numPipes(self):
+        return self.numPipes
+
+    def shape(self):
+        raise NotImplementedError()
 
 
 

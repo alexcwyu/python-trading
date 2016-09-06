@@ -17,9 +17,16 @@ class Corr(PipeLine):
             if self.all_filled():
                 result[PipeLine.VALUE] = self.df.corr()
             else:
-                # TODO: Shall we make the output as the same dimension as proper one?
-                result[PipeLine.VALUE] = np.nan
+                result[PipeLine.VALUE] = self._default_output()
         else:
-            # TODO: Shall we make the output as the same dimension as proper one?
-            result[PipeLine.VALUE] = np.nan
+            result[PipeLine.VALUE] = self._default_output()
         self.add(result)
+
+    def _default_output(self):
+        na_array = np.empty(shape=self.shape())
+        na_array[:] = np.nan
+        return na_array
+
+    def shape(self):
+        return np.array([self.numPipes, self.numPipes])
+

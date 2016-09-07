@@ -1,20 +1,16 @@
+from algotrader import Startable, HasId
 from algotrader.config.trading import BacktestingConfig
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
 from algotrader.event.order import OrdAction, OrdType, TIF, NewOrderRequest, OrderReplaceRequest, \
     OrderCancelRequest
 from algotrader.provider.persistence import Persistable
-from algotrader.provider.broker.broker_mgr import broker_mgr
-from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey
-from algotrader.strategy.strategy_mgr import stg_mgr
-from algotrader.trading.portfolio_mgr import portf_mgr
 from algotrader.trading.position import PositionHolder
-from algotrader.trading.ref_data import get_ref_data_mgr
-from algotrader.utils.clock import get_clock
-from algotrader import Startable
+import abc
 
-class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable, Startable):
+class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable, Startable, HasId):
+
     __slots__ = (
         'stg_id',
         'trading_config',
@@ -23,45 +19,35 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         'order',
     )
 
-    def __init__(self, stg_id=None, next_ord_id=0, trading_config=None, ref_data_mgr=None):
+    def __init__(self, stg_id=None, app_context=None, trading_config=None):
         super(Strategy, self).__init__()
         self.stg_id = stg_id
+        self.app_context = app_context
         self.trading_config = trading_config
-        self.next_ord_id = next_ord_id
         self.ord_req = {}
         self.order = {}
 
-        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else get_ref_data_mgr(
-            self.trading_config.ref_data_mgr_type) if self.trading_config else None
-        self.__started = False
-        stg_mgr.add(self)
-
     def __get_next_ord_id(self):
-        next_ord_id = self.next_ord_id
-        self.next_ord_id += 1
-        return next_ord_id
+        return self.app_context.seq_mgr.get_next_sequence(self.id())
 
-    def start(self):
-        if not self.__started:
-            self.__ref_data_mgr = self.__ref_data_mgr if self.__ref_data_mgr else get_ref_data_mgr(
-                self.trading_config.ref_data_mgr_type)
-            self.__portfolio = portf_mgr.get_portfolio(self.trading_config.portfolio_id)
-            self.__feed = feed_mgr.get(self.trading_config.feed_id) if self.trading_config else None
-            self.__instruments = self.__ref_data_mgr.get_insts(self.trading_config.instrument_ids)
-            self.__started = True
-            self.__portfolio.start()
-            self.__clock = get_clock(self.trading_config.clock_type)
+    def _start(self):
+        self.ref_data_mgr = self.app_context.ref_data_mgr
+        self.portfolio = self.app_context.portf_mgr.get_portfolio(self.trading_config.portfolio_id)
+        self.feed = self.app_context.feed_mgr.get(self.trading_config.feed_id) if self.trading_config else None
+        self.broker = self.app_context.broker_mgr.get(self.trading_config.broker_id)
 
-            self.__broker = broker_mgr.get(self.trading_config.broker_id)
-            self.__broker.start()
+        self.instruments = self.ref_data_mgr.get_insts(self.trading_config.instrument_ids)
+        self.clock = self.app_context.get_clock(self.trading_config.clock_type)
+        self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
+        self._subscribe_market_data(self.instruments)
 
-            self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)
-            self._subscribe_market_data(self.__instruments)
-            self.__feed.start()
+        self.portfolio.start()
+        self.broker.start()
+        self.feed.start()
 
-    def stop(self):
-        if self.__started:
-            self.__event_subscription.dispose()
+    def _stop(self):
+        if self.event_subscription:
+            self.event_subscription.dispose()
 
     def _subscribe_market_data(self, instruments):
         for instrument in instruments:
@@ -78,7 +64,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
                     sub_key = SubscriptionKey(inst_id=instrument.inst_id,
                                               provider_id=self.trading_config.feed_id,
                                               subscription_type=subscription_type)
-                self.__feed.subscribe_mktdata(sub_key)
+                self.feed.subscribe_mktdata(sub_key)
 
     def id(self):
         return self.stg_id
@@ -137,10 +123,10 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
                   inst_id=None, action=None, type=None,
                   qty=0, limit_price=0,
                   stop_price=0, tif=TIF.DAY, oca_tag=None, params=None):
-        req = NewOrderRequest(timestamp=self.__clock.now(),
+        req = NewOrderRequest(timestamp=self.clock.now(),
                               cl_id=self.stg_id,
                               cl_ord_id=self.__get_next_ord_id(),
-                              portf_id=self.__portfolio.portf_id,
+                              portf_id=self.portfolio.portf_id,
                               broker_id=self.trading_config.broker_id,
                               inst_id=inst_id,
                               action=action,
@@ -152,23 +138,23 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
                               oca_tag=oca_tag,
                               params=params)
         self.ord_req[req.cl_ord_id] = req
-        order = self.__portfolio.send_order(req)
+        order = self.portfolio.send_order(req)
         self.order[order.cl_ord_id] = order
         self.get_position(order.inst_id).add_order(order)
         return order
 
     def cancel_order(self, cl_ord_id=None):
-        req = OrderCancelRequest(timestamp=self.__clock.now(),
+        req = OrderCancelRequest(timestamp=self.clock.now(),
                                  cl_id=self.stg_id, cl_ord_id=cl_ord_id)
-        order = self.__portfolio.cancel_order(req)
+        order = self.portfolio.cancel_order(req)
         return order
 
     def replace_order(self, cl_ord_id=None, type=None, qty=None, limit_price=None, stop_price=None, tif=None):
-        req = OrderReplaceRequest(timestamp=self.__clock.now(),
+        req = OrderReplaceRequest(timestamp=self.clock.now(),
                                   cl_id=self.stg_id, cl_ord_id=cl_ord_id, type=type, qty=qty, limit_price=limit_price,
                                   stop_price=stop_price, tif=tif)
-        order = self.__portfolio.replace_order(req)
+        order = self.portfolio.replace_order(req)
         return order
 
     def get_portfolio(self):
-        return self.__portfolio
+        return self.portfolio

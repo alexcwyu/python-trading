@@ -41,7 +41,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
                 self.store.save_order(order)
 
     def next_ord_id(self):
-        return self.app_context.seq_mgr.get_next_sequence(SequenceManager.Order)
+        return self.app_context.seq_mgr.get_next_sequence(self.id())
 
     def on_bar(self, bar):
         super(OrderManager, self).on_bar(bar)
@@ -147,3 +147,6 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
         order.on_ord_replace_req(ord_replace_req)
         self.app_context.provider_mgr.get(order.broker_id).on_ord_replace_req(ord_replace_req)
         return order
+
+    def id(self):
+        return "OrderManager"

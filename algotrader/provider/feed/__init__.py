@@ -9,7 +9,6 @@ class Feed(Provider):
     Yahoo = "Yahoo"
     Google = "Google"
 
-
     __metaclass__ = abc.ABCMeta
 
     def __init__(self):

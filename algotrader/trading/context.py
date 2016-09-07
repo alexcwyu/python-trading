@@ -1,4 +1,5 @@
 from algotrader import Startable
+from algotrader.event.event_bus import EventBus
 from algotrader.provider.provider_mgr import ProviderManager
 from algotrader.strategy.strategy_mgr import StrategyManager
 from algotrader.trading.account_mgr import AccountManager
@@ -8,7 +9,6 @@ from algotrader.trading.portfolio_mgr import PortfolioManager
 from algotrader.trading.ref_data import InMemoryRefDataManager, RefDataManager, DBRefDataManager
 from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
-from algotrader.event.event_bus import EventBus
 
 
 class ApplicationContext(Startable):
@@ -34,10 +34,6 @@ class ApplicationContext(Startable):
 
         self.event_bus = EventBus()
 
-        #TODO
-        # data_event_bus
-        # execution_event_bus
-
     def add_startable(self, startable):
         self.startables.append(startable)
         return startable
@@ -61,13 +57,16 @@ class ApplicationContext(Startable):
             startable.stop()
 
     def get_trade_data_store(self):
-        return self.datastore_mgr.get(self.app_config.trade_datastore_id)
+        return self.provider_mgr.get(self.app_config.trade_datastore_id)
 
     def get_ref_data_store(self):
-        return self.datastore_mgr.get(self.app_config.ref_datastore_id)
+        return self.provider_mgr.get(self.app_config.ref_datastore_id)
 
     def get_timeseries_data_store(self):
-        return self.datastore_mgr.get(self.app_config.time_series_datastore_id)
+        return self.provider_mgr.get(self.app_config.time_series_datastore_id)
 
     def get_seq_data_store(self):
-        return self.datastore_mgr.get(self.app_config.seq_datastore_id)
+        return self.provider_mgr.get(self.app_config.seq_datastore_id)
+
+    def id(self):
+        return "ApplicationContext"

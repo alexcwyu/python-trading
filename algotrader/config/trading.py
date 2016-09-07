@@ -3,6 +3,8 @@ from datetime import date
 
 from algotrader.config.config import Config
 from algotrader.event.market_data import BarType, BarSize
+from algotrader.provider.broker import Broker
+from algotrader.provider.feed import Feed
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.csv_feed import CSVDataFeed
@@ -51,10 +53,15 @@ class TradingConfig(Config):
         self.clock_type = clock_type
         self.stg_configs = stg_configs
 
+    def get_stg_configs_val(self, key, default_value=None):
+        if self.stg_configs:
+            return self.stg_configs.get(key, default_value)
+        return default_value
+
 
 class LiveTradingConfig(TradingConfig):
     def __init__(self, id=None, stg_id=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
-                 feed_id=IBBroker.ID, broker_id=IBBroker.ID,
+                 feed_id=Broker.IB, broker_id=Broker.IB,
                  ref_data_mgr_type=RefDataManager.InMemory, stg_configs=None):
         super(LiveTradingConfig, self).__init__(id=id, stg_id=stg_id, portfolio_id=portfolio_id,
                                                 instrument_ids=instrument_ids,
@@ -72,7 +79,7 @@ class BacktestingConfig(TradingConfig):
 
     def __init__(self, id=None, stg_id=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
                  from_date=date(2010, 1, 1), to_date=date.today(),
-                 feed_id=CSVDataFeed.ID, broker_id=Simulator.ID,
+                 feed_id=Feed.CSV, broker_id=Broker.Simulator,
                  ref_data_mgr_type=RefDataManager.InMemory, stg_configs=None):
         super(BacktestingConfig, self).__init__(id=id, stg_id=stg_id, portfolio_id=portfolio_id,
                                                 instrument_ids=instrument_ids,

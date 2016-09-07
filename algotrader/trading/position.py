@@ -1,7 +1,7 @@
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.event.order import OrdAction
 from algotrader.provider.persistence import Persistable
-
+import abc
 
 class Position(Persistable):
     __slots__ = (
@@ -62,6 +62,7 @@ class Position(Persistable):
 
 
 class PositionHolder(MarketDataEventHandler):
+    __metaclass__ = abc.ABCMeta
     __slots__ = (
         'positions'
     )

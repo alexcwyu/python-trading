@@ -5,7 +5,6 @@ from rx.subjects import BehaviorSubject
 
 from algotrader.event.order import OrdAction
 from algotrader.strategy.strategy import Strategy
-from algotrader.trading.instrument_data import inst_data_mgr
 
 
 class PairTradingWithOUSpread(Strategy):
@@ -19,7 +18,7 @@ class PairTradingWithOUSpread(Strategy):
     So now this class is used as testing purpose
     """
 
-    def __init__(self, stg_id, ou_params, gamma, trading_config, ref_data_mgr=None):
+    def __init__(self, stg_id, ou_params, gamma, app_context, trading_config):
         """
         :param stg_id:
         :param portfolio:
@@ -29,13 +28,12 @@ class PairTradingWithOUSpread(Strategy):
         :param trading_config:
         :return:
         """
-        super(PairTradingWithOUSpread, self).__init__(stg_id=stg_id, trading_config=trading_config,
-                                                      ref_data_mgr=ref_data_mgr)
+        super(PairTradingWithOUSpread, self).__init__(stg_id=stg_id, app_context=app_context, trading_config=trading_config)
         self.buy_order = None
         self.ou_params = ou_params
         self.gamma = gamma
-        self.bar_0 = inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[0])
-        self.bar_1 = inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[1])
+        self.bar_0 = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[0])
+        self.bar_1 = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[1])
         self.instruments = trading_config.instrument_ids
         self.log_spot_0 = BehaviorSubject(0)
         self.log_spot_1 = BehaviorSubject(0)

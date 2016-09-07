@@ -3,19 +3,31 @@ import time
 
 from pymongo import MongoClient
 
+from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import MongoDBConfig
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
+from algotrader.provider.persistence import DataStore
 from algotrader.provider.persistence.mongodb import MongoDBDataStore
 from algotrader.strategy.strategy import Strategy
 from algotrader.strategy.strategy_mgr import StrategyManager
 from algotrader.trading.account import Account
 from algotrader.trading.account_mgr import AccountManager
+from algotrader.trading.context import ApplicationContext
 from algotrader.trading.order import Order
 from algotrader.trading.order_mgr import OrderManager
 from algotrader.trading.portfolio import Portfolio
 from algotrader.trading.portfolio_mgr import PortfolioManager
+from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils.ser_deser import JsonSerializer
+
+
+def get_default_app_context():
+    config = MongoDBConfig()
+    app_config = ApplicationConfig(None, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo, None, None,
+                                   config)
+    return ApplicationContext(app_config=app_config)
+
 
 
 def test1():
@@ -178,4 +190,21 @@ def test_save_accounts():
     print after
 
 
-test_save_accounts()
+def test_save_sequences():
+    context = get_default_app_context()
+    store = context.provider_mgr.get(DataStore.Mongo)
+    store.start()
+
+    seq_mgr = SequenceManager(context)
+    seq_mgr.start()
+
+    print seq_mgr.get_next_sequence("order")
+    print seq_mgr.get_next_sequence("order")
+
+    print seq_mgr.get_next_sequence("trade")
+    print seq_mgr.get_next_sequence("trade")
+
+    seq_mgr.stop()
+
+
+test_save_sequences()

@@ -1,8 +1,8 @@
 import abc
 
+from algotrader import HasId
 from algotrader.provider import Provider
 from algotrader.utils.ser_deser import Serializable
-
 
 
 class DataStore(Provider):
@@ -18,10 +18,6 @@ class DataStore(Provider):
 
     @abc.abstractmethod
     def load_all(self, clazz):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def id(self):
         raise NotImplementedError()
 
 
@@ -65,7 +61,7 @@ class TimeSeriesDataStore(DataStore):
         raise NotImplementedError()
 
 
-class TradeDataStore(TimeSeriesDataStore):
+class TradeDataStore(DataStore):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -97,12 +93,19 @@ class TradeDataStore(TimeSeriesDataStore):
         raise NotImplementedError()
 
 
-class Persistable(Serializable):
+class SequenceDataStore(DataStore):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def save_sequence(self, key, seq):
+        raise NotImplementedError()
+
+
+class Persistable(Serializable, HasId):
+    __metaclass__ = abc.ABCMeta
+
     def save(self, data_store):
         pass
 
     def load(self):
         pass
-
-    def id(self):
-        return None

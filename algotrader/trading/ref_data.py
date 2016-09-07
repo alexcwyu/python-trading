@@ -194,9 +194,6 @@ class RefDataManager(Manager):
     def get_exch(self, exch_id):
         return self.__exch_dict.get(exch_id, None)
 
-    @abc.abstractmethod
-    def id(self):
-        raise NotImplementedError()
 
 
 class DBRefDataManager(RefDataManager):

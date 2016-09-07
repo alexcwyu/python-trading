@@ -9,7 +9,6 @@ import pandas.io.data as web
 from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
 from algotrader.provider.feed import Feed
-from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
@@ -19,15 +18,13 @@ class PandasWebDataFeed(Feed):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, system, app_context=None):
+        super(PandasWebDataFeed, self).__init__()
         self.app_context = app_context
         self.system = system
-        self.ref_data_mgr = app_context.ref_data_mgr
-        self.data_event_bus = app_context.event_bus.data_subject
-
-        feed_mgr.register(self)
 
     def _start(self):
-        pass
+        self.ref_data_mgr = self.app_context.ref_data_mgr
+        self.data_event_bus = self.app_context.event_bus.data_subject
 
     def _stop(self):
         pass

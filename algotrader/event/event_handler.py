@@ -2,9 +2,11 @@ from rx import Observer
 
 from algotrader.event.event_bus import EventBus
 from algotrader.utils import logger
-
+import abc
 
 class EventHandler(Observer):
+    __metaclass__ = abc.ABCMeta
+
     def on_next(self, event):
         event.on(self)
 
@@ -22,6 +24,7 @@ class EventHandler(Observer):
 
 
 class MarketDataEventHandler(EventHandler):
+    __metaclass__ = abc.ABCMeta
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
 
@@ -36,6 +39,7 @@ class MarketDataEventHandler(EventHandler):
 
 
 class OrderEventHandler(EventHandler):
+    __metaclass__ = abc.ABCMeta
     # Sync interface, return Order
     def send_order(self, new_ord_req):
         raise NotImplementedError()
@@ -65,6 +69,7 @@ class OrderEventHandler(EventHandler):
 
 
 class ExecutionEventHandler(EventHandler):
+    __metaclass__ = abc.ABCMeta
     def on_ord_upd(self, ord_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
 
@@ -73,6 +78,7 @@ class ExecutionEventHandler(EventHandler):
 
 
 class AccountEventHandler(EventHandler):
+    __metaclass__ = abc.ABCMeta
     def on_acc_upd(self, acc_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, acc_upd))
 

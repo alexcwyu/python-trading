@@ -1,12 +1,13 @@
 from pymongo import MongoClient
 
 from algotrader.config.persistence import MongoDBConfig
-from algotrader.provider.persistence import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore
+from algotrader.provider.persistence import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, SequenceDataStore
 from algotrader.utils.ser_deser import MapSerializer
 
 
-class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore):
+class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
     def __init__(self, app_context):
+        super(MongoDBDataStore, self).__init__()
         self.app_context = app_context
         self.mongo_config = app_context.app_config.get_config(MongoDBConfig)
 
@@ -34,11 +35,12 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore):
         self.acct_events = self.db['acct_events']
         self.execution_events = self.db['execution_events']
         self.strategies = self.db['strategies']
+        self.sequences = self.db['sequences']
         self.serializer = MapSerializer
 
     def _stop(self):
-        # TODO
-        pass
+        if self.client:
+            self.client.close()
 
     def id(self):
         return DataStore.Mongo
@@ -53,8 +55,8 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore):
         return result
 
     def _serialize(self, serializable):
-        return serializable.id(), self.serializer.serialize(serializable)
         # return serializable.id(), serializable.serialize()
+        return serializable.id(), self.serializer.serialize(serializable)
 
     # RefDataStore
     def save_instrument(self, instrument):
@@ -87,7 +89,8 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore):
         self.market_depths.update({'_id': id}, packed, upsert=True)
 
     def save_time_series(self, timeseries):
-        raise NotImplementedError()
+        id, packed = self._serialize(timeseries)
+        self.time_series.update({'_id': id}, packed, upsert=True)
 
     # TradeDataStore
     def save_account(self, account):
@@ -107,10 +110,17 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore):
         self.strategies.update({'_id': id}, packed, upsert=True)
 
     def save_account_event(self, account_event):
-        raise NotImplementedError()
+        id, packed = self._serialize(account_event)
+        self.acct_events.update({'_id': id}, packed, upsert=True)
 
     def save_order_event(self, order_event):
-        raise NotImplementedError()
+        id, packed = self._serialize(order_event)
+        self.order_events.update({'_id': id}, packed, upsert=True)
 
     def save_execution_event(self, execution_event):
-        raise NotImplementedError()
+        id, packed = self._serialize(execution_event)
+        self.execution_events.update({'_id': id}, packed, upsert=True)
+
+    # SequenceDataStore
+    def save_sequence(self, key, seq):
+        self.sequences.update({'_id': key}, {'seq': seq}, upsert=True)

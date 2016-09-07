@@ -8,7 +8,6 @@ from algotrader.event.order import OrdStatus, OrderStatusUpdate, \
 from algotrader.provider.broker import Broker
 from algotrader.provider.broker.sim.commission import NoCommission
 from algotrader.provider.broker.sim.fill_strategy import DefaultFillStrategy
-from algotrader.utils import clock
 from algotrader.utils import logger
 
 
@@ -18,19 +17,28 @@ class Simulator(Broker, MarketDataEventHandler):
         super(Simulator, self).__init__()
         self.app_context = app_context
         self.sim_config = app_context.app_config.get_config(SimulatorConfig)
-
+        self.clock = app_context.get_clock()
         self.next_ord_id = self.sim_config.next_ord_id
         self.next_exec_id = self.sim_config.next_exec_id
-        self.fill_strategy = self.sim_config.fill_strategy if self.sim_config.fill_strategy is not None else DefaultFillStrategy()
-        self.commission = self.sim_config.commission if self.sim_config.commission is not None else NoCommission()
+        self.fill_strategy = self.get_fill_strategy(self.sim_config.fill_strategy_id)
+        self.commission = self.get_commission(self.sim_config.commission_id)
 
         self.ord_req_map = defaultdict(lambda: defaultdict(dict))
         self.ord_req_fill_status = defaultdict(dict)
         self.clordid_ordid_map = defaultdict(dict)
         self.quote_map = {}
-        self.exec_handler = app_context.order_mgr
+
+
+    def get_fill_strategy(self, fill_strategy_id):
+        return DefaultFillStrategy(self.app_context)
+
+
+    def get_commission(self, commission_id):
+        return NoCommission()
+
 
     def _start(self):
+        self.exec_handler = self.app_context.order_mgr
         self.subscription = EventBus.data_subject.subscribe(self.on_next)
 
     def _stop(self):
@@ -124,7 +132,7 @@ class Simulator(Broker, MarketDataEventHandler):
                                        cl_id=new_ord_req.cl_id,
                                        cl_ord_id=new_ord_req.cl_ord_id,
                                        inst_id=new_ord_req.inst_id,
-                                       timestamp=clock.default_clock.now(),
+                                       timestamp=self.clock.now(),
                                        status=ord_status)
         self.exec_handler.on_ord_upd(ord_update)
 
@@ -136,7 +144,7 @@ class Simulator(Broker, MarketDataEventHandler):
                                       cl_id=new_ord_req.cl_id,
                                       cl_ord_id=new_ord_req.cl_ord_id,
                                       inst_id=new_ord_req.inst_id,
-                                      timestamp=clock.default_clock.now(),
+                                      timestamp=self.clock.now(),
                                       er_id=self.next_exec_id(),
                                       last_qty=last_qty,
                                       last_price=last_price,

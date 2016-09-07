@@ -1,18 +1,22 @@
 import abc
 
 
-class Startable(object):
+class HasId(object):
     __metaclass__ = abc.ABCMeta
 
-    __slots__ = (
-        'started'
-    )
+    @abc.abstractmethod
+    def id(self):
+        raise NotImplementedError()
+
+
+class Startable(HasId):
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self):
         self.started = False
 
     def start(self):
-        if not self.started:
+        if not hasattr(self, "started") or not self.started:
             self._start()
             self.started = True
 

@@ -8,11 +8,9 @@ from algotrader.config.broker import IBConfig
 from algotrader.event.market_data import Bar, Quote, Trade, MarketDepth
 from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus
 from algotrader.provider.broker import Broker
-from algotrader.provider.broker.broker_mgr import broker_mgr
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.feed import Feed
-from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, \
     TradeSubscriptionType, MarketDepthSubscriptionType
 from algotrader.utils import logger
@@ -178,19 +176,18 @@ class IBBroker(IBSocket, Broker, Feed):
         self.client_id = self.ib_config.client_id
         self.account = self.ib_config.account
 
-        self.ref_data_mgr = app_context.ref_data_mgr
-        self.data_event_bus = app_context.event_bus.data_subject
-        self.execution_event_bus = app_context.event_bus.execution_subject
-        self.model_factory = IBModelFactory(app_context.ref_data_mgr)
         self.data_sub_reg = SubscriptionRegistry()
         self.ord_req_reg = OrderReqRegistry()
         self.next_request_id = self.ib_config.next_request_id
         self.next_order_id = self.ib_config.next_order_id
 
-        # feed_mgr.register(self)
-        # broker_mgr.register(self)
-
     def _start(self):
+
+        self.ref_data_mgr = self.app_context.ref_data_mgr
+        self.data_event_bus = self.app_context.event_bus.data_subject
+        self.execution_event_bus = self.app_context.event_bus.execution_subject
+        self.model_factory = IBModelFactory(self.app_context.ref_data_mgr)
+
         if not self.tws.eConnect("", self.port, self.client_id, poll_auto=False):
             raise RuntimeError('Failed to connect TWS')
         self.poller.start()

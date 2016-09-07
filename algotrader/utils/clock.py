@@ -41,10 +41,6 @@ class Clock(Startable):
             datetime = DateUtils.unixtimemillis_to_datetime(datetime)
         self.scheduler.schedule_absolute(datetime, action, state)
 
-    @abc.abstractmethod
-    def id(self):
-        raise NotImplementedError()
-
 
 class RealTimeScheduler(NewThreadScheduler):
     def __init__(self, thread_factory=None):
@@ -143,13 +139,3 @@ class SimulationClock(Clock, MarketDataEventHandler):
 
 
 realtime_clock = RealTimeClock()
-
-simluation_clock = SimulationClock()
-
-default_clock = realtime_clock  # default setting
-
-
-def get_clock(clock_type=Clock.RealTime):
-    if clock_type == Clock.Simulation:
-        return simluation_clock
-    return realtime_clock

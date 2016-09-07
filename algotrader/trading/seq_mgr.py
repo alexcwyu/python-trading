@@ -2,10 +2,9 @@ from algotrader import SimpleManager
 
 
 class SequenceManager(SimpleManager):
-    Order = 'order'
 
     def __init__(self, app_context=None):
-        super(SimpleManager, self).__init__()
+        super(SequenceManager, self).__init__()
         self.app_context = app_context
 
     def _start(self):
@@ -14,14 +13,14 @@ class SequenceManager(SimpleManager):
 
     def _load_all(self):
         if self.store:
-            sequences = self.store.load_all('sequences')
-            for sequence in sequences:
-                self.add(sequence)
+            items = self.store.load_all('sequences')
+            for item in items:
+                self.add(item['_id'], item['seq'])
 
     def _save_all(self):
         if self.store:
-            for sequence in self.all_items():
-                self.store.save_sequence(sequence)
+            for key, value in self.item_dict.iteritems():
+                self.store.save_sequence(key, value)
 
     def get(self, id):
         return self.item_dict.get(id, None)
@@ -37,7 +36,10 @@ class SequenceManager(SimpleManager):
         self.item_dict[id] = initial
 
     def all_items(self):
-        return [item for item in self.item_dict.values()]
+        return self.item_dict
 
     def has_item(self, id):
         return id in self.item_dict
+
+    def id(self):
+        return "SequenceManager"

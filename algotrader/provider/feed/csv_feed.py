@@ -3,7 +3,6 @@ import pandas as pd
 from algotrader.config.feed import CSVFeedConfig
 from algotrader.event.market_data import Bar, BarSize, BarType
 from algotrader.provider.feed import Feed
-from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.utils.date_utils import DateUtils
 
@@ -12,16 +11,14 @@ dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 class CSVDataFeed(Feed):
     def __init__(self, app_context=None):
-        self.app_context = app_context
+        super(CSVDataFeed, self).__init__()
         self.csv_config = app_context.app_config.get_config(CSVFeedConfig)
         self.path = self.csv_config.path
-        self.ref_data_mgr = app_context.ref_data_mgr
-        self.data_event_bus = app_context.event_bus.data_subject
-
-        feed_mgr.register(self)
 
     def _start(self):
-        pass
+        self.ref_data_mgr = self.app_context.ref_data_mgr
+        self.data_event_bus = self.app_context.event_bus.data_subject
+
 
     def _stop(self):
         pass

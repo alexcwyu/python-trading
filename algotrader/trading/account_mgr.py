@@ -20,3 +20,6 @@ class AccountManager(SimpleManager):
         if self.store:
             for account in self.all_items():
                 self.store.save_account(account)
+
+    def id(self):
+        return "AccountManager"

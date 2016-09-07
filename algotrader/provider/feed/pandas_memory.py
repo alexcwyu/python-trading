@@ -3,13 +3,10 @@ from datetime import date
 
 import pandas as pd
 
-from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
 from algotrader.provider.feed import Feed
-from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
-from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
 
@@ -19,22 +16,21 @@ class PandasMemoryDataFeed(Feed):
     This is a class to make a data feed from dataframe we already have in memory
     """
 
-    def __init__(self, dict_of_df, app_context=None):
+    def __init__(self, app_context=None, dict_of_df=None):
         """
         :param dict_of_df: dictionary of pandas DataFrame with symbol as key
         :param ref_data_mgr:
         :param data_event_bus:
         :return:
         """
+        super(PandasMemoryDataFeed, self).__init__()
         self.dict_of_df = dict_of_df
         self.app_context = app_context
-        self.ref_data_mgr = app_context.ref_data_mgr
-        self.data_event_bus = app_context.event_bus.data_subject
         self.sub_keys = []
 
-        feed_mgr.register(self)
-
     def _start(self):
+        self.ref_data_mgr = self.app_context.ref_data_mgr
+        self.data_event_bus = self.app_context.event_bus.data_subject
         self.__load_data(self.sub_keys)
         for index, row in self.df.iterrows():
             ## TODO support bar filtering // from date, to date

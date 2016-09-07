@@ -41,7 +41,7 @@ class PipeLine(DataSeries):
         return ",".join(str(part) for part in parts)
 
     def __init__(self, name, inputs, input_keys, length=None, desc=None):
-        super(PipeLine, self).__init__(name=name, keys=input_keys, desc=desc)
+        super(PipeLine, self).__init__(name=name, keys=None, desc=desc)
         f = lambda i: i \
             if isinstance(i, DataSeries) or isinstance(i, Indicator) \
             else inst_data_mgr.get_series(i)

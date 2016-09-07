@@ -62,7 +62,10 @@ class PipelineTest(TestCase):
         bar2.add({"timestamp": t1, "close": 102.0, "open": 0})
         bar3.add({"timestamp": t1, "close": 105.0, "open": 0})
 
-        self.assertEquals([{"timestamp": t1, 'value': np.arange(4)/3.0}],
+        print rank.get_data()
+        self.assertEquals([{"timestamp": t1,
+                            "name": "'Rank('bar0','bar1','bar2','bar3',close)'",
+                            "value": np.arange(4)/3.0}],
                           rank.get_data())
 
 

@@ -24,7 +24,7 @@ class DataSeries(object):
     )
 
     @staticmethod
-    def get_name(ds):
+    def get_name(input):
         if isinstance(input, DataSeries):
             return "'%s'" % input.name
         return "'%s'" % input
@@ -54,6 +54,7 @@ class DataSeries(object):
                 self.add(data)
 
     def add(self, data):
+        data["name"] = DataSeries.get_name(self)
         time = data.get(timestamp_key)
         if not self.keys:
             self.keys = data.keys()

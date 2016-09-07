@@ -1,11 +1,16 @@
 
 import math
+
 import talib
 from datetime import datetime
 from unittest import TestCase
 import numpy as np
 import datetime
+from algotrader.technical import Indicator
+from algotrader.technical.pipeline import PipeLine
 from algotrader.technical.pipeline.rank import Rank
+from algotrader.technical.pipeline.cross_sessional_apply import Average
+from algotrader.technical.pipeline.cross_sessional_apply import Sum as GSSum
 from algotrader.technical.talib_wrapper import SMA
 from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.utils.time_series import DataSeries
@@ -47,7 +52,8 @@ class PipelineTest(TestCase):
             self.fail(e.message)
 
 
-    def test_nan_before_size(self):
+    # def test_nan_before_size(self):
+    def test_with_multiple_bar(self):
         inst_data_mgr.clear()
         bar0 = inst_data_mgr.get_series("bar0")
         bar1 = inst_data_mgr.get_series("bar1")
@@ -55,6 +61,8 @@ class PipelineTest(TestCase):
         bar3 = inst_data_mgr.get_series("bar3")
 
         rank = Rank([bar0, bar1, bar2, bar3], input_key='close')
+        avg = Average([bar0, bar1, bar2, bar3], input_key='close')
+        gssum = GSSum([bar0, bar1, bar2, bar3], input_key='close')
 
         t1 = datetime.datetime.now()
         bar0.add({"timestamp": t1, "close": 80.0, "open": 0})
@@ -67,11 +75,45 @@ class PipelineTest(TestCase):
         #                     "value": np.arange(4)/3.0}],
         #                   rank.get_data())
 
-        target = np.arange(4)/3.0
-        target = target.reshape((1,4))
+        rank_target = np.arange(4)/3.0
+        rank_target = rank_target.reshape((1,4))
+        avg_target = np.array([[95.5]])
+        sum_target = np.array([[382.0]])
+
         try:
-            np.testing.assert_almost_equal(target, rank.get_data()[0]["value"], 5)
+            np.testing.assert_almost_equal(rank_target, rank.get_data()[0]["value"], 5)
+            np.testing.assert_almost_equal(avg_target, avg.get_data()[0]["value"], 5)
+            np.testing.assert_almost_equal(sum_target, gssum.get_data()[0]["value"], 5)
         except AssertionError as e:
             self.fail(e.message)
 
+    def test_with_multi_bar_multi_indicator(self):
+        inst_data_mgr.clear()
+        bar0 = inst_data_mgr.get_series("bar0")
+        bar1 = inst_data_mgr.get_series("bar1")
 
+        sma_2_bar0 = SMA(bar0, "close", 2)
+        sma_4_bar0 = SMA(bar0, "close", 4)
+        sma_3_bar1 = SMA(bar1, "close", 3)
+
+        rank = Rank([sma_2_bar0, sma_3_bar1, sma_4_bar0], input_key=Indicator.VALUE)
+
+        t = datetime.datetime.now()
+        bar0.add({"timestamp": t, "close": 80.0, "open": 0})
+        bar1.add({"timestamp": t, "close": 95.0, "open": 0})
+        print rank.now(keys=PipeLine.VALUE)
+
+        t = t + datetime.timedelta(0, 3)
+        bar0.add({"timestamp": t, "close": 85.0, "open": 0})
+        bar1.add({"timestamp": t, "close": 93.0, "open": 0})
+        print rank.now(keys=PipeLine.VALUE)
+
+        t = t + datetime.timedelta(0, 3)
+        bar0.add({"timestamp": t, "close": 86.0, "open": 0})
+        bar1.add({"timestamp": t, "close": 91.0, "open": 0})
+        print rank.now(keys=PipeLine.VALUE)
+
+        t = t + datetime.timedelta(0, 3)
+        bar0.add({"timestamp": t, "close": 90.0, "open": 0})
+        bar1.add({"timestamp": t, "close": 95.0, "open": 0})
+        print rank.now(keys=PipeLine.VALUE)

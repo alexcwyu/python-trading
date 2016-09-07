@@ -36,38 +36,20 @@ class Startable(object):
 class Manager(Startable):
     __metaclass__ = abc.ABCMeta
 
-    __slots__ = (
-        'item_dict'
-    )
-
     def __init__(self):
         super(Manager, self).__init__()
-        self.item_dict = {}
-
-    @abc.abstractmethod
-    def _load_all(self):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def _save_all(self):
-        raise NotImplementedError()
-
-    def _start(self):
-        self._load_all()
-
-    def _stop(self):
-        self._save_all()
-        self.reset()
-
-    def reset(self):
-        self.item_dict.clear()
 
 
 class SimpleManager(Manager):
     __metaclass__ = abc.ABCMeta
 
+    __slots__ = (
+        'item_dict'
+    )
+
     def __init__(self):
         super(SimpleManager, self).__init__()
+        self.item_dict = {}
 
     def get(self, id):
         return self.item_dict.get(id, None)
@@ -80,3 +62,24 @@ class SimpleManager(Manager):
 
     def has_item(self, id):
         return id in self.item_dict
+
+    def _load_all(self):
+        pass
+
+    def _save_all(self):
+        pass
+
+    def _start(self):
+        self._load_all()
+
+    def _stop(self):
+        self._save_all()
+
+        for item in self.item_dict.values():
+            if isinstance(item, Startable):
+                item.stop()
+
+        self.reset()
+
+    def reset(self):
+        self.item_dict.clear()

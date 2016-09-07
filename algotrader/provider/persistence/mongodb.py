@@ -1,53 +1,47 @@
 from pymongo import MongoClient
 
+from algotrader.config.persistence import MongoDBConfig
 from algotrader.provider.persistence import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore
 from algotrader.utils.ser_deser import MapSerializer
 
 
 class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore):
-    def __init__(self, mongo_config):
-        self.mongo_config = mongo_config
-        self.started = False
+    def __init__(self, app_context):
+        self.app_context = app_context
+        self.mongo_config = app_context.app_config.get_config(MongoDBConfig)
 
-    def start(self):
-        if not self.started:
-            self.client = MongoClient(host=self.mongo_config.host, port=self.mongo_config.port)
-            self.db = self.client[self.mongo_config.dbname]
+    def _start(self):
+        self.client = MongoClient(host=self.mongo_config.host, port=self.mongo_config.port)
+        self.db = self.client[self.mongo_config.dbname]
 
-            self.bars = self.db['bars']
-            self.trades = self.db['trades']
-            self.quotes = self.db['quotes']
-            self.trades = self.db['trades']
-            self.market_depths = self.db['market_depths']
-            self.time_series = self.db['time_series']
+        self.bars = self.db['bars']
+        self.trades = self.db['trades']
+        self.quotes = self.db['quotes']
+        self.trades = self.db['trades']
+        self.market_depths = self.db['market_depths']
+        self.time_series = self.db['time_series']
 
-            self.instruments = self.db['instruments']
-            self.currencies = self.db['currencies']
-            self.exchanges = self.db['exchanges']
+        self.instruments = self.db['instruments']
+        self.currencies = self.db['currencies']
+        self.exchanges = self.db['exchanges']
 
-            self.accounts = self.db['accounts']
-            self.portfolios = self.db['portfolios']
-            self.orders = self.db['orders']
-            self.strategies = self.db['strategies']
+        self.accounts = self.db['accounts']
+        self.portfolios = self.db['portfolios']
+        self.orders = self.db['orders']
+        self.strategies = self.db['strategies']
 
-            self.order_events = self.db['order_events']
-            self.acct_events = self.db['acct_events']
-            self.execution_events = self.db['execution_events']
-            self.strategies = self.db['strategies']
-            self.serializer = MapSerializer
+        self.order_events = self.db['order_events']
+        self.acct_events = self.db['acct_events']
+        self.execution_events = self.db['execution_events']
+        self.strategies = self.db['strategies']
+        self.serializer = MapSerializer
 
-            self.started = True
-
-    def stop(self):
-        if self.started:
-            # TODO
-            self.started = False
+    def _stop(self):
+        # TODO
+        pass
 
     def id(self):
         return DataStore.Mongo
-
-    def query(self, query):
-        pass
 
     def load_all(self, clazz):
         result = []

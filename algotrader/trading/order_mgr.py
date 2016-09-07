@@ -1,10 +1,8 @@
 from algotrader import SimpleManager
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
-from algotrader.provider.broker.broker_mgr import broker_mgr
-from algotrader.strategy.strategy_mgr import stg_mgr
 from algotrader.trading.order import Order
-from algotrader.trading.portfolio_mgr import portf_mgr
+from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils import logger
 
 
@@ -12,12 +10,9 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
     def __init__(self, app_context=None):
         super(OrderManager, self).__init__()
         self.app_context = app_context
-        self.started = False
 
     def _start(self):
         self.store = self.app_context.get_trade_data_store()
-        # todo get from Seq Manager
-        self.__next_ord_id = 0
         self._load_all()
         self.subscriptions = []
         self.subscriptions.append(EventBus.data_subject.subscribe(self.on_next))
@@ -31,7 +26,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
                     subscription.dispose()
                 except:
                     pass
-        self.save()
+        self._save_all()
         self.reset()
 
     def _load_all(self):
@@ -46,9 +41,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
                 self.store.save_order(order)
 
     def next_ord_id(self):
-        next_ord_id = self.__next_ord_id
-        self.__next_ord_id += 1
-        return next_ord_id
+        return self.app_context.seq_mgr.get_next_sequence(SequenceManager.Order)
 
     def on_bar(self, bar):
         super(OrderManager, self).on_bar(bar)
@@ -74,7 +67,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
         ord_upd.cl_ord_id = order.cl_ord_id
 
         # notify portfolio
-        portfolio = portf_mgr.get_portfolio(order.portf_id)
+        portfolio = self.app_context.portf_mgr.get_portfolio(order.portf_id)
         if portfolio:
             portfolio.on_ord_upd(ord_upd)
         else:
@@ -82,7 +75,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
                 order.portf_id, order.cl_id, order.cl_ord_id))
 
         # notify stg
-        stg = stg_mgr.get(order.cl_id)
+        stg = self.app_context.stg_mgr.get(order.cl_id)
         if stg:
             stg.oon_ord_upd(ord_upd)
         else:
@@ -101,7 +94,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
         exec_report.cl_ord_id = order.cl_ord_id
 
         # notify portfolio
-        portfolio = portf_mgr.get_portfolio(order.portf_id)
+        portfolio = self.app_context.portf_mgr.get_portfolio(order.portf_id)
         if portfolio:
             portfolio.on_exec_report(exec_report)
         else:
@@ -109,7 +102,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
                 order.portf_id, order.cl_id, order.cl_ord_id))
 
         # notify stg
-        stg = stg_mgr.get(order.cl_id)
+        stg = self.app_context.stg_mgr.get(order.cl_id)
         if stg:
             stg.on_exec_report(exec_report)
         else:
@@ -125,7 +118,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
         self.add(order)
 
         if order.broker_id:
-            broker = broker_mgr.get(order.broker_id)
+            broker = self.app_context.provider_mgr.get(order.broker_id)
             if broker:
                 broker.on_new_ord_req(new_ord_req)
             else:
@@ -141,7 +134,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
         order = self.get[ord_cancel_req.id()]
 
         order.on_ord_cancel_req(ord_cancel_req)
-        broker_mgr.get(order.broker_id).on_ord_cancel_req(ord_cancel_req)
+        self.app_context.provider_mgr.get(order.broker_id).on_ord_cancel_req(ord_cancel_req)
         return order
 
     def replace_order(self, ord_replace_req):
@@ -152,12 +145,5 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
         order = self.get[ord_replace_req.id()]
 
         order.on_ord_replace_req(ord_replace_req)
-        broker_mgr.get(order.broker_id).on_ord_replace_req(ord_replace_req)
+        self.app_context.provider_mgr.get(order.broker_id).on_ord_replace_req(ord_replace_req)
         return order
-
-    def reset(self):
-        super(OrderManager, self).reset()
-        self.__next_ord_id = 0
-
-
-order_mgr = OrderManager()

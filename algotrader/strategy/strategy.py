@@ -12,9 +12,9 @@ from algotrader.trading.portfolio_mgr import portf_mgr
 from algotrader.trading.position import PositionHolder
 from algotrader.trading.ref_data import get_ref_data_mgr
 from algotrader.utils.clock import get_clock
+from algotrader import Startable
 
-
-class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable):
+class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable, Startable):
     __slots__ = (
         'stg_id',
         'trading_config',

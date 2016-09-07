@@ -10,10 +10,11 @@ from algotrader.trading.portfolio_mgr import portf_mgr
 from algotrader.trading.position import PositionHolder
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
+from algotrader import Startable
 
 
 class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler,
-                Persistable):
+                Persistable, Startable):
     __slots__ = (
         'portf_id',
         'ord_reqs',

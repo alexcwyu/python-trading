@@ -1,15 +1,14 @@
 from algotrader import Startable
-from algotrader.provider.persistence.data_store_mgr import DataStoreManager
-from algotrader.provider.broker.broker_mgr import BrokerManager
-from algotrader.provider.feed.feed_mgr import FeedManager
+from algotrader.provider.provider_mgr import ProviderManager
 from algotrader.strategy.strategy_mgr import StrategyManager
 from algotrader.trading.account_mgr import AccountManager
 from algotrader.trading.instrument_data import InstrumentDataManager
 from algotrader.trading.order_mgr import OrderManager
 from algotrader.trading.portfolio_mgr import PortfolioManager
 from algotrader.trading.ref_data import InMemoryRefDataManager, RefDataManager, DBRefDataManager
-from algotrader.trading.seq import SequenceManager
+from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
+from algotrader.event.event_bus import EventBus
 
 
 class ApplicationContext(Startable):
@@ -21,9 +20,8 @@ class ApplicationContext(Startable):
         self.app_config = app_config
 
         self.clock = self.add_startable(self.get_clock())
-        self.datastore_mgr = self.add_startable(DataStoreManager(self))
-        self.feed_mgr = self.add_startable(FeedManager(self))
-        self.broker_mgr = self.add_startable(BrokerManager(self))
+        self.provider_mgr = self.add_startable(ProviderManager(self))
+
         self.seq_mgr = self.add_startable(SequenceManager(self))
 
         self.inst_data_mgr = self.add_startable(InstrumentDataManager(self))
@@ -33,6 +31,12 @@ class ApplicationContext(Startable):
         self.acct_mgr = self.add_startable(AccountManager(self))
         self.portf_mgr = self.add_startable(PortfolioManager(self))
         self.stg_mgr = self.add_startable(StrategyManager(self))
+
+        self.event_bus = EventBus()
+
+        #TODO
+        # data_event_bus
+        # execution_event_bus
 
     def add_startable(self, startable):
         self.startables.append(startable)

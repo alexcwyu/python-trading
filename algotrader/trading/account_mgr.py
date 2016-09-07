@@ -6,6 +6,10 @@ class AccountManager(SimpleManager):
         super(AccountManager, self).__init__()
         self.store = app_context
 
+    def _start(self):
+        self.store = self.app_context.get_trade_data_store()
+        self._load_all()
+
     def _load_all(self):
         if self.store:
             accounts = self.store.load_all('accounts')
@@ -16,6 +20,3 @@ class AccountManager(SimpleManager):
         if self.store:
             for account in self.all_items():
                 self.store.save_account(account)
-
-
-acct_mgr = AccountManager()

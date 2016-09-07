@@ -1,29 +1,24 @@
 from cassandra.cluster import Cluster
 
+from algotrader.config.persistence import CassandraConfig
 from algotrader.provider.persistence import DataStore
 
 
 class CassandraDataStore(DataStore):
-    def __init__(self, cass_config):
-        self.cass_config = cass_config
+    def __init__(self, app_context):
+        self.app_context = app_context
+        self.cass_config = app_context.app_config.get_config(CassandraConfig)
 
-    def start(self):
-        if not self.started:
-            # TODO authentication provider
-            self.cluster = Cluster(contact_points=self.cass_config.contact_points, port=self.cass_config.port)
-            self.session = self.cluster.connect()
-            self.started = True
+    def _start(self):
+        # TODO authentication provider
+        self.cluster = Cluster(contact_points=self.cass_config.contact_points, port=self.cass_config.port)
+        self.session = self.cluster.connect()
 
-    def stop(self):
-        if self.started:
-            self.cluster.shutdown()
-            self.started = False
+    def _stop(self):
+        self.cluster.shutdown()
 
     def id(self):
         return DataStore.Cassandra
-
-    def query(self, query):
-        pass
 
     def save_bar(self, bar):
         pass

@@ -1,29 +1,25 @@
 from influxdb import InfluxDBClient
 
 from algotrader.provider.persistence import DataStore
+from algotrader.config.persistence import InfluxDBConfig
 
 
 class InfluxDataStore(DataStore):
-    def __init__(self, influx_config):
-        self.influx_config = influx_config
+    def __init__(self, app_context):
+        self.app_context = app_context
+        self.influx_config = app_context.app_config.get_config(InfluxDBConfig)
 
-    def start(self):
-        if not self.started:
-            self.client = InfluxDBClient(self.influx_config.host, self.influx_config.port, self.influx_config.username,
-                                         self.influx_config.password,
-                                         self.influx_config.dbname)
-            self.started = True
+    def _start(self):
+        self.client = InfluxDBClient(self.influx_config.host, self.influx_config.port, self.influx_config.username,
+                                     self.influx_config.password,
+                                     self.influx_config.dbname)
 
-    def stop(self):
-        if self.started:
-            # TODO
-            self.started = False
+    def _stop(self):
+        # TODO
+        pass
 
     def id(self):
         return DataStore.Influx
-
-    def query(self, query):
-        pass
 
     def save_bar(self, bar):
         pass

@@ -307,14 +307,6 @@ class InMemoryRefDataManager(RefDataManager):
         raise RefDataManager.InMemory
 
 
-inmemory_ref_data_mgr = InMemoryRefDataManager()
-
-
-def get_ref_data_mgr(mgr_type=RefDataManager.InMemory):
-    if mgr_type == RefDataManager.InMemory:
-        return inmemory_ref_data_mgr
-
-
 if __name__ == "__main__":
     mgr = InMemoryRefDataManager();
     print mgr.get_inst(symbol='EURUSD', exch_id='IDEALPRO')

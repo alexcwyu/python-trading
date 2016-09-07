@@ -2,6 +2,8 @@ from algotrader import SimpleManager
 
 
 class SequenceManager(SimpleManager):
+    Order = 'order'
+
     def __init__(self, app_context=None):
         super(SimpleManager, self).__init__()
         self.app_context = app_context

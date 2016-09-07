@@ -103,6 +103,3 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__quote_dict = {}
         self.__trade_dict = {}
         self.__series_dict = {}
-
-
-inst_data_mgr = InstrumentDataManager()

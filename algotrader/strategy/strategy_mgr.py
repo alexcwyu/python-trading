@@ -6,6 +6,10 @@ class StrategyManager(SimpleManager):
         super(StrategyManager, self).__init__()
         self.app_context = app_context
 
+    def _start(self):
+        self.store = self.app_context.get_trade_data_store()
+        self._load_all()
+
     def _load_all(self):
         if self.store:
             strategies = self.store.load_all('strategies')
@@ -16,10 +20,3 @@ class StrategyManager(SimpleManager):
         if self.store:
             for stg in self.all_items():
                 self.store.save_strategy(stg)
-
-
-    def _start(self):
-        self.app_config.persistence_configs
-        ## TODO foreach config: init strategy with config
-
-stg_mgr = StrategyManager()

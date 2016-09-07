@@ -1,29 +1,29 @@
 import pandas as pd
 
-from algotrader.event.event_bus import EventBus
+from algotrader.config.feed import CSVFeedConfig
 from algotrader.event.market_data import Bar, BarSize, BarType
-from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.feed import Feed
+from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import BarSubscriptionType
-from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils.date_utils import DateUtils
 
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 
 class CSVDataFeed(Feed):
-
-    def __init__(self, path='../data/tradedata', ref_data_mgr=None, data_event_bus=None):
-        self.__path = path
-        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
-        self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject
+    def __init__(self, app_context=None):
+        self.app_context = app_context
+        self.csv_config = app_context.app_config.get_config(CSVFeedConfig)
+        self.path = self.csv_config.path
+        self.ref_data_mgr = app_context.ref_data_mgr
+        self.data_event_bus = app_context.event_bus.data_subject
 
         feed_mgr.register(self)
 
-    def start(self):
+    def _start(self):
         pass
 
-    def stop(self):
+    def _stop(self):
         pass
 
     def id(self):
@@ -50,17 +50,17 @@ class CSVDataFeed(Feed):
             ## TODO support different format, e.g. BAR, Quote, Trade csv files
             if isinstance(sub_key.subscription_type,
                           BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
-                inst = self.__ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
+                inst = self.ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.ID)
-                df = self.read_csv(symbol, '%s/%s.csv' % (self.__path, symbol.lower()))
+                df = self.read_csv(symbol, '%s/%s.csv' % (self.path, symbol.lower()))
                 self.dfs.append(df)
 
         self.df = pd.concat(self.dfs).sort_index(0, ascending=True)
 
         for index, row in self.df.iterrows():
             ## TODO support bar filtering // from date, to date
-            inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
-            self.__data_event_bus.on_next(
+            inst = self.ref_data_mgr.get_inst(symbol=row['Symbol'])
+            self.data_event_bus.on_next(
                 Bar(inst_id=inst.inst_id,
                     timestamp=DateUtils.datetime_to_unixtimemillis(index),
                     open=row['Open'],

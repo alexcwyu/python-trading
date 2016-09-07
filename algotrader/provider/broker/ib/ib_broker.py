@@ -4,18 +4,17 @@ from collections import defaultdict
 
 import swigibpy
 
-from algotrader.event.event_bus import EventBus
+from algotrader.config.broker import IBConfig
 from algotrader.event.market_data import Bar, Quote, Trade, MarketDepth
 from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus
+from algotrader.provider.broker import Broker
+from algotrader.provider.broker.broker_mgr import broker_mgr
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
-from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
-from algotrader.provider.broker.broker_mgr import broker_mgr
 from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, \
     TradeSubscriptionType, MarketDepthSubscriptionType
-from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
 from algotrader.utils.clock import realtime_clock
 
@@ -168,55 +167,53 @@ class TWSPoller(threading.Thread):
 
 
 class IBBroker(IBSocket, Broker, Feed):
-
-    def __init__(self, port=4001, client_id=1, account=None, ref_data_mgr=None, data_event_bus=None,
-                 execution_event_bus=None, daemon=False):
+    def __init__(self, app_context=None):
         super(IBBroker, self).__init__()
+        self.app_context = app_context
+        self.ib_config = app_context.app_config.get_config(IBConfig)
 
-        self.__tws = swigibpy.EPosixClientSocket(self)
-        self.__poller = TWSPoller(self.__tws, daemon=daemon)
-        self.__port = port
-        self.__client_id = client_id
-        self.__account = account
-        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
-        self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject
-        self.__execution_event_bus = execution_event_bus if execution_event_bus else EventBus.execution_subject
-        self.__model_factory = IBModelFactory(self.__ref_data_mgr)
-        self.__data_sub_reg = SubscriptionRegistry()
-        self.__ord_req_reg = OrderReqRegistry()
-        self.__next_request_id = 1
-        self.__next_order_id = None
-        self.__started = False
+        self.tws = swigibpy.EPosixClientSocket(self)
+        self.poller = TWSPoller(self.tws, daemon=self.ib_config.daemon)
+        self.port = self.ib_config.port
+        self.client_id = self.ib_config.client_id
+        self.account = self.ib_config.account
 
-        feed_mgr.register(self)
-        broker_mgr.register(self)
+        self.ref_data_mgr = app_context.ref_data_mgr
+        self.data_event_bus = app_context.event_bus.data_subject
+        self.execution_event_bus = app_context.event_bus.execution_subject
+        self.model_factory = IBModelFactory(app_context.ref_data_mgr)
+        self.data_sub_reg = SubscriptionRegistry()
+        self.ord_req_reg = OrderReqRegistry()
+        self.next_request_id = self.ib_config.next_request_id
+        self.next_order_id = self.ib_config.next_order_id
 
-    def start(self):
-        if not self.__started:
-            self.__started = True
-            if not self.__tws.eConnect("", self.__port, self.__client_id, poll_auto=False):
-                raise RuntimeError('Failed to connect TWS')
-            self.__poller.start()
+        # feed_mgr.register(self)
+        # broker_mgr.register(self)
 
-            logger.info("Server version, %s", self.__tws.serverVersion())
+    def _start(self):
+        if not self.tws.eConnect("", self.port, self.client_id, poll_auto=False):
+            raise RuntimeError('Failed to connect TWS')
+        self.poller.start()
 
-            if self.__account:
-                self.__req_acct_update()
-            else:
-                self.__tws.reqManagedAccts()
+        logger.info("Server version, %s", self.tws.serverVersion())
 
-            self.__tws.reqAllOpenOrders()
-            self.__tws.reqOpenOrders()
+        if self.account:
+            self.__req_acct_update()
+        else:
+            self.tws.reqManagedAccts()
 
-            # wait until we get the next_order_id
-            while (not self.__next_order_id):
-                time.sleep(1)
+        self.tws.reqAllOpenOrders()
+        self.tws.reqOpenOrders()
 
-    def stop(self):
-        self.__tws.eDisconnect()
-        self.__started = False
-        ## todo unsubscribe market data
-        ## cancel order !?
+        # wait until we get the next_order_id
+        while (not self.next_order_id):
+            time.sleep(1)
+
+    def _stop(self):
+        self.tws.eDisconnect()
+        # todo
+        # unsubscribe market data
+        # cancel order !?
 
     def __del__(self):
         self.stop()
@@ -225,14 +222,14 @@ class IBBroker(IBSocket, Broker, Feed):
         return Broker.IB
 
     def next_request_id(self):
-        req_id = self.__next_request_id
-        self.__next_request_id += 1
+        req_id = self.next_request_id
+        self.next_request_id += 1
         return req_id
 
     def next_order_id(self):
         """get from next_order_id, increment and set the value back to next_order_id, """
-        order_id = self.__next_order_id
-        self.__next_order_id += 1
+        order_id = self.next_order_id
+        self.next_order_id += 1
         return order_id
 
     def subscribe_mktdata(self, sub_key):
@@ -245,10 +242,10 @@ class IBBroker(IBSocket, Broker, Feed):
         elif isinstance(sub_key.subscription_type, (QuoteSubscriptionType, TradeSubscriptionType)):
             req_func = self.__req_mktdata
 
-        if req_func and not self.__data_sub_reg.has_subscription(sub_key=sub_key):
+        if req_func and not self.data_sub_reg.has_subscription(sub_key=sub_key):
             req_id = self.next_request_id()
-            self.__data_sub_reg.add_subscription(req_id, sub_key)
-            contract = self.__model_factory.create_ib_contract(sub_key.inst_id)
+            self.data_sub_reg.add_subscription(req_id, sub_key)
+            contract = self.model_factory.create_ib_contract(sub_key.inst_id)
 
             req_func(req_id, sub_key, contract)
 
@@ -264,102 +261,102 @@ class IBBroker(IBSocket, Broker, Feed):
             cancel_func = self.__cancel_mktdata
 
         if cancel_func:
-            req_id = self.__data_sub_reg.get_subsciption_id(sub_key)
-            if req_id and self.__data_sub_reg.remove_subscription(req_id):
+            req_id = self.data_sub_reg.get_subsciption_id(sub_key)
+            if req_id and self.data_sub_reg.remove_subscription(req_id):
                 cancel_func(req_id)
 
     def __req_mktdata(self, req_id, sub_key, contract):
-        self.__tws.reqMktData(req_id, contract,
-                              '',  # genericTicks
-                              False  # snapshot
-                              )
+        self.tws.reqMktData(req_id, contract,
+                            '',  # genericTicks
+                            False  # snapshot
+                            )
 
     def __cancel_mktdata(self, req_id):
-        self.__tws.cancelMktData(req_id)
+        self.tws.cancelMktData(req_id)
 
     def __req_real_time_bar(self, req_id, sub_key, contract):
-        self.__tws.reqRealTimeBars(req_id, contract,
-                                   sub_key.subscription_type.bar_size,  # barSizeSetting,
-                                   self.__model_factory.convert_hist_data_type(sub_key.subscription_type.data_type),
-                                   0  # RTH Regular trading hour
-                                   )
+        self.tws.reqRealTimeBars(req_id, contract,
+                                 sub_key.subscription_type.bar_size,  # barSizeSetting,
+                                 self.model_factory.convert_hist_data_type(sub_key.subscription_type.data_type),
+                                 0  # RTH Regular trading hour
+                                 )
 
     def __cancel_real_time_bar(self, req_id):
-        self.__tws.cancelRealTimeBars(req_id)
+        self.tws.cancelRealTimeBars(req_id)
 
     def __req_market_depth(self, req_id, sub_key, contract):
-        self.__tws.reqMktDepth(req_id, contract, sub_key.num_rows)
+        self.tws.reqMktDepth(req_id, contract, sub_key.num_rows)
 
     def __cancel_market_depth(self, req_id):
-        self.__tws.cancelMktDepth(req_id)
+        self.tws.cancelMktDepth(req_id)
 
     def __req_hist_data(self, req_id, sub_key, contract):
-        self.__tws.reqHistoricalData(req_id, contract,
-                                     self.__model_factory.convert_datetime(sub_key.to_date),  # endDateTime,
-                                     self.__model_factory.convert_time_period(sub_key.from_date, sub_key.to_date),
-                                     # durationStr,
-                                     self.__model_factory.convert_bar_size(sub_key.subscription_type.bar_size),
-                                     # barSizeSetting,
-                                     self.__model_factory.convert_hist_data_type(sub_key.subscription_type.data_type),
-                                     # whatToShow,
-                                     0,  # useRTH,
-                                     1  # formatDate
-                                     )
+        self.tws.reqHistoricalData(req_id, contract,
+                                   self.model_factory.convert_datetime(sub_key.to_date),  # endDateTime,
+                                   self.model_factory.convert_time_period(sub_key.from_date, sub_key.to_date),
+                                   # durationStr,
+                                   self.model_factory.convert_bar_size(sub_key.subscription_type.bar_size),
+                                   # barSizeSetting,
+                                   self.model_factory.convert_hist_data_type(sub_key.subscription_type.data_type),
+                                   # whatToShow,
+                                   0,  # useRTH,
+                                   1  # formatDate
+                                   )
 
     def __cancel_hist_data(self, req_id):
-        self.__tws.cancelHistoricalData(req_id)
+        self.tws.cancelHistoricalData(req_id)
 
     def __request_fa(self):
-        self.__tws.requestFA(1)  # groups
-        self.__tws.requestFA(2)  # profile
-        self.__tws.requestFA(3)  # account_aliases
+        self.tws.requestFA(1)  # groups
+        self.tws.requestFA(2)  # profile
+        self.tws.requestFA(3)  # account_aliases
 
     def __req_acct_update(self):
-        self.__tws.reqAccountUpdates(True, self.__account)
+        self.tws.reqAccountUpdates(True, self.account)
 
     def on_new_ord_req(self, new_ord_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))
 
         ord_id = self.next_order_id()
-        self.__ord_req_reg.add_ord_req(ord_id, new_ord_req)
+        self.ord_req_reg.add_ord_req(ord_id, new_ord_req)
 
-        ib_order = self.__model_factory.create_ib_order(new_ord_req)
-        contract = self.__model_factory.create_ib_contract(new_ord_req.inst_id)
+        ib_order = self.model_factory.create_ib_order(new_ord_req)
+        contract = self.model_factory.create_ib_contract(new_ord_req.inst_id)
 
-        self.__tws.placeOrder(ord_id, contract, ib_order)
+        self.tws.placeOrder(ord_id, contract, ib_order)
 
     def on_ord_replace_req(self, ord_replace_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_replace_req))
 
-        existing_ord_req = self.__ord_req_reg.get_ord_req(cl_id=ord_replace_req.cl_id,
-                                                          cl_ord_id=ord_replace_req.cl_ord_id)
+        existing_ord_req = self.ord_req_reg.get_ord_req(cl_id=ord_replace_req.cl_id,
+                                                        cl_ord_id=ord_replace_req.cl_ord_id)
         if existing_ord_req:
 
-            ord_id = self.__ord_req_reg.get_ord_id(cl_id=ord_replace_req.cl_id, cl_ord_id=ord_replace_req.cl_ord_id)
+            ord_id = self.ord_req_reg.get_ord_id(cl_id=ord_replace_req.cl_id, cl_ord_id=ord_replace_req.cl_ord_id)
 
             updated_ord_req = existing_ord_req.update_ord_request(ord_replace_req)
 
-            self.__ord_req_reg.add_ord_req(ord_id, updated_ord_req)
+            self.ord_req_reg.add_ord_req(ord_id, updated_ord_req)
 
-            ib_order = self.__model_factory.create_ib_order(updated_ord_req)
-            contract = self.__model_factory.create_ib_contract(updated_ord_req.inst_id)
-            self.__tws.placeOrder(ord_id, contract, ib_order)
+            ib_order = self.model_factory.create_ib_order(updated_ord_req)
+            contract = self.model_factory.create_ib_contract(updated_ord_req.inst_id)
+            self.tws.placeOrder(ord_id, contract, ib_order)
         else:
             logger.error("cannot find old order, cl_ord_id = %s" % ord_replace_req.cl_ord_id)
 
     def on_ord_cancel_req(self, ord_cancel_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_cancel_req))
 
-        ord_id = self.__ord_req_reg.get_ord_id(cl_id=ord_cancel_req.cl_id, cl_ord_id=ord_cancel_req.cl_ord_id)
+        ord_id = self.ord_req_reg.get_ord_id(cl_id=ord_cancel_req.cl_id, cl_ord_id=ord_cancel_req.cl_ord_id)
 
         if ord_id:
-            self.__tws.cancelOrder(ord_id)
+            self.tws.cancelOrder(ord_id)
         else:
             logger.error(
                 "cannot find old order, cl_id = %s, cl_ord_id = %s" % (ord_cancel_req.cl_id, ord_cancel_req.cl_ord_id))
 
     def __req_open_orders(self):
-        self.__tws.reqOpenOrders()
+        self.tws.reqOpenOrders()
 
     ### EWrapper
 
@@ -367,14 +364,14 @@ class IBBroker(IBSocket, Broker, Feed):
         """
         OrderId orderId
         """
-        if not self.__next_order_id or orderId > self.__next_order_id:
-            self.__next_order_id = orderId
+        if not self.next_order_id or orderId > self.next_order_id:
+            self.next_order_id = orderId
 
     def tickPrice(self, tickerId, field, price, canAutoExecute):
         """
         TickerId tickerId, TickType field, double price, int canAutoExecute
         """
-        record = self.__data_sub_reg.get_data_record(tickerId)
+        record = self.data_sub_reg.get_data_record(tickerId)
         if record:
             prev = price
             if field == swigibpy.BID:
@@ -400,7 +397,7 @@ class IBBroker(IBSocket, Broker, Feed):
                 self.__emit_market_data(field, record)
 
     def tickSize(self, tickerId, field, size):
-        record = self.__data_sub_reg.get_data_record(tickerId)
+        record = self.data_sub_reg.get_data_record(tickerId)
 
         if record:
             prev = size
@@ -424,14 +421,14 @@ class IBBroker(IBSocket, Broker, Feed):
     def __emit_market_data(self, field, record):
         if record.quote_req and (
                                 field == swigibpy.BID or field == swigibpy.BID_SIZE or field == swigibpy.ASK or field == swigibpy.ASK_SIZE) and record.bid > 0 and record.ask > 0:
-            self.__data_event_bus.on_next(Quote(inst_id=record.inst_id, timestamp=realtime_clock.now(),
-                                                bid=record.bid,
-                                                bid_size=record.bid_size,
-                                                ask=record.ask,
-                                                ask_size=record.ask_size))
+            self.data_event_bus.on_next(Quote(inst_id=record.inst_id, timestamp=realtime_clock.now(),
+                                              bid=record.bid,
+                                              bid_size=record.bid_size,
+                                              ask=record.ask,
+                                              ask_size=record.ask_size))
 
         if record.trade_req and (field == swigibpy.LAST or field == swigibpy.LAST_SIZE) and record.last > 0:
-            self.__data_event_bus.on_next(
+            self.data_event_bus.on_next(
                 Trade(inst_id=record.inst_id, timestamp=realtime_clock.now(), price=record.last,
                       size=record.last_size))
 
@@ -440,12 +437,12 @@ class IBBroker(IBSocket, Broker, Feed):
         TickerId id, int position, int operation, int side, double price, int size
         """
         # TODO fix provider_id
-        sub_key = self.__data_sub_reg.get_subscription_key(id)
-        self.__data_event_bus.on_next(
+        sub_key = self.data_sub_reg.get_subscription_key(id)
+        self.data_event_bus.on_next(
             MarketDepth(inst_id=sub_key.inst_id, timestamp=realtime_clock.now(), provider_id=self.ID,
                         position=position,
-                        operation=self.__model_factory.convert_ib_md_operation(operation),
-                        side=self.__model_factory.convert_ib_md_side(side),
+                        operation=self.model_factory.convert_ib_md_operation(operation),
+                        side=self.model_factory.convert_ib_md_side(side),
                         price=price, size=size))
 
     def updateMktDepthL2(self, id, position, marketMaker, operation, side, price, size):
@@ -454,12 +451,12 @@ class IBBroker(IBSocket, Broker, Feed):
         int size
         """
         # TODO fix provider_id
-        sub_key = self.__data_sub_reg.get_subscription_key(id)
-        self.__data_event_bus.on_next(
+        sub_key = self.data_sub_reg.get_subscription_key(id)
+        self.data_event_bus.on_next(
             MarketDepth(inst_id=sub_key.inst_id, timestamp=realtime_clock.now(), provider_id=self.ID,
                         position=position,
-                        operation=self.__model_factory.convert_ib_md_operation(operation),
-                        side=self.__model_factory.convert_ib_md_side(side),
+                        operation=self.model_factory.convert_ib_md_operation(operation),
+                        side=self.model_factory.convert_ib_md_side(side),
                         price=price, size=size))
 
     def historicalData(self, reqId, date, open, high,
@@ -472,8 +469,8 @@ class IBBroker(IBSocket, Broker, Feed):
         if barCount < 0:
             return
 
-        sub_key = self.__data_sub_reg.get_subscription_key(reqId)
-        record = self.__data_sub_reg.get_data_record(reqId)
+        sub_key = self.data_sub_reg.get_subscription_key(reqId)
+        record = self.data_sub_reg.get_data_record(reqId)
 
         if record:
             record.open = open
@@ -481,8 +478,8 @@ class IBBroker(IBSocket, Broker, Feed):
             record.low = low
             record.close = close
             record.vol = volume
-            timestamp = self.__model_factory.convert_ib_date(date)
-            self.__data_event_bus.on_next(
+            timestamp = self.model_factory.convert_ib_date(date)
+            self.data_event_bus.on_next(
                 Bar(inst_id=record.inst_id, timestamp=timestamp, open=open, high=high, low=low,
                     close=close, vol=volume, size=sub_key.bar_size))
 
@@ -492,8 +489,8 @@ class IBBroker(IBSocket, Broker, Feed):
         double wap, int count
         """
 
-        sub_key = self.__data_sub_reg.get_subscription_key(reqId)
-        record = self.__data_sub_reg.get_data_record(reqId)
+        sub_key = self.data_sub_reg.get_subscription_key(reqId)
+        record = self.data_sub_reg.get_data_record(reqId)
 
         if record:
             record.open = open
@@ -502,8 +499,8 @@ class IBBroker(IBSocket, Broker, Feed):
             record.close = close
             record.vol = volume
 
-            timestamp = self.__model_factory.convert_ib_time(time)
-            self.__data_event_bus.on_next(
+            timestamp = self.model_factory.convert_ib_time(time)
+            self.data_event_bus.on_next(
                 Bar(inst_id=record.inst_id, timestamp=timestamp, open=open, high=high, low=low, close=close,
                     vol=volume, size=sub_key.bar_size))
 
@@ -513,16 +510,16 @@ class IBBroker(IBSocket, Broker, Feed):
         OrderId orderId, IBString const & status, int filled, int remaining, double avgFillPrice,
         int permId, int parentId, double lastFillPrice, int clientId, IBString const & whyHeld
         """
-        new_ord_req = self.__ord_req_reg.get_ord_req(ord_id=id)
+        new_ord_req = self.ord_req_reg.get_ord_req(ord_id=id)
         if new_ord_req:
-            ord_status = self.__model_factory.convert_ib_ord_status(status)
+            ord_status = self.model_factory.convert_ib_ord_status(status)
             create_er = False
 
             if ord_status == OrdStatus.NEW or ord_status == OrdStatus.PENDING_CANCEL or ord_status == OrdStatus.CANCELLED or ord_status == OrdStatus.REJECTED:
                 create_er = True
 
             if create_er:
-                self.__execution_event_bus.on_next(OrderStatusUpdate(
+                self.execution_event_bus.on_next(OrderStatusUpdate(
                     broker_id=self.ID,
                     ord_id=id,
                     cl_id=new_ord_req.cl_id,
@@ -538,15 +535,15 @@ class IBBroker(IBSocket, Broker, Feed):
         """
         int reqId, Contract contract, Execution execution
         """
-        new_ord_req = self.__ord_req_reg.get_ord_req(ord_id=execution.orderId)
+        new_ord_req = self.ord_req_reg.get_ord_req(ord_id=execution.orderId)
         if new_ord_req:
-            self.__execution_event_bus.on_next(ExecutionReport(
+            self.execution_event_bus.on_next(ExecutionReport(
                 broker_id=self.ID,
                 ord_id=execution.orderId,
                 cl_id=new_ord_req.cl_id,
                 cl_ord_id=new_ord_req.cl_ord_id,
                 er_id=execution.execId,
-                timestamp=self.__model_factory.convert_ib_datetime(execution.time),
+                timestamp=self.model_factory.convert_ib_datetime(execution.time),
                 inst_id=new_ord_req.inst_id,
                 last_qty=execution.shares,
                 last_price=execution.price,
@@ -585,7 +582,7 @@ class IBBroker(IBSocket, Broker, Feed):
         """
         # TODO
 
-        self.__account = accountsList.split(",")[0]
+        self.account = accountsList.split(",")[0]
         self.__req_acct_update()
 
     def connectionClosed(self):

@@ -1,27 +1,22 @@
 from qpython import qconnection
 
 from algotrader.provider.persistence import DataStore
+from algotrader.config.persistence import KDBConfig
 
 
 class KDBDataStore(DataStore):
-    def __init__(self, kdb_config):
-        self.kdb_config = kdb_config
+    def __init__(self, app_context):
+        self.app_context = app_context
+        self.kdb_config = app_context.app_config.get_config(KDBConfig)
 
-    def start(self):
-        if not self.started:
-            self.q = qconnection.QConnection(host=self.kdb_config.host, port=self.kdb_config.port)
-            self.started = True
+    def _start(self):
+        self.q = qconnection.QConnection(host=self.kdb_config.host, port=self.kdb_config.port)
 
-    def stop(self):
-        if self.started:
-            self.q.close()
-            self.started = False
+    def _stop(self):
+        self.q.close()
 
     def id(self):
         return DataStore.KDB
-
-    def query(self, query):
-        pass
 
     def save_bar(self, bar):
         pass

@@ -4,9 +4,6 @@ from algotrader.provider import Provider
 from algotrader.utils.ser_deser import Serializable
 
 
-class Query():
-    __metaclass__ = abc.ABCMeta
-
 
 class DataStore(Provider):
     Cassandra = "Cassandra"
@@ -15,10 +12,6 @@ class DataStore(Provider):
     Mongo = "Mongo"
 
     __metaclass__ = abc.ABCMeta
-
-    @abc.abstractmethod
-    def query(self, query):
-        raise NotImplementedError()
 
     def save(self, persistable):
         persistable.save(self)

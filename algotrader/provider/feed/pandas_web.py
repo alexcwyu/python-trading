@@ -6,13 +6,11 @@ from datetime import datetime
 import pandas as pd
 import pandas.io.data as web
 
-from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
-from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.feed import Feed
+from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
-from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
 
@@ -20,17 +18,18 @@ from algotrader.utils.date_utils import DateUtils
 class PandasWebDataFeed(Feed):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, system, ref_data_mgr=None, data_event_bus=None):
+    def __init__(self, system, app_context=None):
+        self.app_context = app_context
         self.system = system
-        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
-        self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject
+        self.ref_data_mgr = app_context.ref_data_mgr
+        self.data_event_bus = app_context.event_bus.data_subject
 
         feed_mgr.register(self)
 
-    def start(self):
+    def _start(self):
         pass
 
-    def stop(self):
+    def _stop(self):
         pass
 
     def subscribe_all_mktdata(self, sub_keys):
@@ -77,8 +76,8 @@ class PandasWebDataFeed(Feed):
 class YahooDataFeed(PandasWebDataFeed):
     URL = 'http://real-chart.finance.yahoo.com/table.csv?s=%s&d=%s&e=%s&f=%s&g=d&a=%s&b=%s&c=%s&ignore=.csv'
 
-    def __init__(self, ref_data_mgr=None, data_event_bus=None):
-        super(YahooDataFeed, self).__init__(system='yahoo', ref_data_mgr=ref_data_mgr, data_event_bus=data_event_bus)
+    def __init__(self, app_context=None):
+        super(YahooDataFeed, self).__init__(system='yahoo', app_context=app_context)
 
     def id(self):
         return Feed.Yahoo
@@ -97,9 +96,8 @@ class YahooDataFeed(PandasWebDataFeed):
 
 
 class GoogleDataFeed(PandasWebDataFeed):
-
-    def __init__(self, ref_data_mgr=None, data_event_bus=None):
-        super(GoogleDataFeed, self).__init__(system='google', ref_data_mgr=ref_data_mgr, data_event_bus=data_event_bus)
+    def __init__(self, app_context=None):
+        super(GoogleDataFeed, self).__init__(system='google', app_context=app_context)
 
     def id(self):
         return Feed.Google

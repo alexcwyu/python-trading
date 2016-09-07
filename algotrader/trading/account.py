@@ -2,9 +2,10 @@ from algotrader.event.event_handler import AccountEventHandler
 
 from algotrader.provider.persistence import Persistable
 from algotrader.trading.position import PositionHolder
+from algotrader import Startable
 
 
-class Account(AccountEventHandler, PositionHolder, Persistable):
+class Account(AccountEventHandler, PositionHolder, Persistable, Startable):
     __slots__ = (
         'id',
         'values',

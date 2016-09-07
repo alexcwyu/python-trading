@@ -6,8 +6,8 @@ import pandas as pd
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
-from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.feed import Feed
+from algotrader.provider.feed.feed_mgr import feed_mgr
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
 from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
@@ -19,7 +19,7 @@ class PandasMemoryDataFeed(Feed):
     This is a class to make a data feed from dataframe we already have in memory
     """
 
-    def __init__(self, dict_of_df, ref_data_mgr=None, data_event_bus=None):
+    def __init__(self, dict_of_df, app_context=None):
         """
         :param dict_of_df: dictionary of pandas DataFrame with symbol as key
         :param ref_data_mgr:
@@ -27,20 +27,21 @@ class PandasMemoryDataFeed(Feed):
         :return:
         """
         self.dict_of_df = dict_of_df
-        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
-        self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject
-        self.__sub_keys = []
+        self.app_context = app_context
+        self.ref_data_mgr = app_context.ref_data_mgr
+        self.data_event_bus = app_context.event_bus.data_subject
+        self.sub_keys = []
 
         feed_mgr.register(self)
 
-    def start(self):
-        self.__load_data(self.__sub_keys)
+    def _start(self):
+        self.__load_data(self.sub_keys)
         for index, row in self.df.iterrows():
             ## TODO support bar filtering // from date, to date
             bar = self.process_row(index, row)
-            self.__data_event_bus.on_next(bar)
+            self.data_event_bus.on_next(bar)
 
-    def stop(self):
+    def _stop(self):
         pass
 
     def id(self):
@@ -48,15 +49,15 @@ class PandasMemoryDataFeed(Feed):
 
     def subscribe_all_mktdata(self, sub_keys):
         if isinstance(sub_keys, list):
-            self.__sub_keys = self.__sub_keys + sub_keys
+            self.sub_keys = self.sub_keys + sub_keys
         else:
-            self.__sub_keys.append(sub_keys)
+            self.sub_keys.append(sub_keys)
 
     def subscribe_mktdata(self, sub_key):
-        self.__sub_keys.append(sub_key)
+        self.sub_keys.append(sub_key)
 
     def process_row(self, index, row):
-        inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
+        inst = self.ref_data_mgr.get_inst(symbol=row['Symbol'])
         return Bar(inst_id=inst.inst_id,
                    timestamp=DateUtils.datetime_to_unixtimemillis(index),
                    open=row['Open'],
@@ -74,7 +75,7 @@ class PandasMemoryDataFeed(Feed):
                 raise RuntimeError("only HistDataSubscriptionKey is supported!")
             if isinstance(sub_key.subscription_type,
                           BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
-                inst = self.__ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
+                inst = self.ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.ID)
 
                 # df = web.DataReader("F", self.system, sub_key.from_date, sub_key.to_date)

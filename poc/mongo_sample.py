@@ -87,51 +87,64 @@ def test_bar():
 
 
 def test_save_portfolio():
-    config = MongoDBConfig()
-    store = MongoDBDataStore(config)
-
-    portf_mgr = PortfolioManager(store)
-
+    context = get_default_app_context()
+    store = context.provider_mgr.get(DataStore.Mongo)
     store.start()
+
+    portf_mgr = context.provider_mgr
+    portf_mgr.start()
+
     p1 = Portfolio(portf_id=1, cash=1000)
-    p2 = Portfolio(portf_id=2, cash=1000)
+    #p2 = Portfolio(portf_id=2, cash=1000)
 
-    portf_mgr.add_portfolio(p1)
-    portf_mgr.add_portfolio(p2)
+    portf_mgr.add(p1)
+    #portf_mgr.add(p2)
 
-    before = portf_mgr.all_portfolios()
+    before = portf_mgr.get(1)
 
-    portf_mgr.save()
-    portf_mgr.load()
+    portf_mgr.stop()
+    portf_mgr.start()
 
-    after = portf_mgr.all_portfolios()
+    after = portf_mgr.get(1)
     print before
     print after
 
 
 def test_save_orders():
-    config = MongoDBConfig()
-    store = MongoDBDataStore(config)
 
-    ord_mrg = OrderManager(store)
-
+    context = get_default_app_context()
+    store = context.provider_mgr.get(DataStore.Mongo)
     store.start()
+
+    ord_mrg = context.order_mgr
+
+    ord_mrg.start()
+    ord_mrg.reset()
+
     order = ord_mrg.send_order(
-        NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+        NewOrderRequest(cl_id='test_stg', cl_ord_id=1, inst_id=1, portf_id='test_porf', action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
                         limit_price=18.5))
     order = ord_mrg.send_order(
-        NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+        NewOrderRequest(cl_id='test_stg', cl_ord_id=2, inst_id=1, portf_id='test_porf', action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
                         limit_price=18.5))
 
-    before = ord_mrg.all_orders()
+    before = ord_mrg.all_items()
 
-    ord_mrg.save()
-    ord_mrg.load()
+    ord_mrg.stop()
+    ord_mrg.start()
 
-    after = ord_mrg.all_orders()
+    after = ord_mrg.all_items()
 
     print before
     print after
+
+
+    p1 = Portfolio(portf_id='test_porf', cash=1000, app_context=context)
+    p1.start()
+
+    print "all"
+    print p1.all_orders()
+
 
 
 def test_save_strategies():
@@ -207,4 +220,4 @@ def test_save_sequences():
     seq_mgr.stop()
 
 
-test_save_sequences()
+test_save_orders()

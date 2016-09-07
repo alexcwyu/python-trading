@@ -2,6 +2,10 @@ from algotrader.provider.persistence import Persistable
 
 
 class PortfolioAnalyzer(Persistable):
+
+    def __init__(self):
+        self.portfolio = None
+
     def update(self, time):
         pass
 

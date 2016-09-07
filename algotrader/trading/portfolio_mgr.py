@@ -3,7 +3,7 @@ from algotrader import SimpleManager
 
 class PortfolioManager(SimpleManager):
     def __init__(self, app_context=None):
-        super(SimpleManager, self).__init__()
+        super(PortfolioManager, self).__init__()
         self.app_context = app_context
 
     def _start(self):
@@ -18,7 +18,7 @@ class PortfolioManager(SimpleManager):
 
     def _save_all(self):
         if self.store:
-            for portfolio in self.all_portfolios():
+            for portfolio in self.all_items():
                 self.store.save_portfolio(portfolio)
 
     def id(self):

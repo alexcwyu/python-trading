@@ -10,6 +10,7 @@ class MockRefDataManager(RefDataManager):
     """
 
     def __init__(self, inst_df, ccy_df, exch_df):
+        super(MockRefDataManager, self).__init__()
         self.inst_df = inst_df
         self.ccy_df = ccy_df
         self.exch_df = exch_df

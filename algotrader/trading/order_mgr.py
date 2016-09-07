@@ -2,11 +2,10 @@ from algotrader import SimpleManager
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
 from algotrader.trading.order import Order
-from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils import logger
 
 
-class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, SimpleManager):
+class OrderManager(SimpleManager, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
     def __init__(self, app_context=None):
         super(OrderManager, self).__init__()
         self.app_context = app_context
@@ -110,7 +109,7 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
                 "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.cl_id, order.cl_id, order.cl_ord_id))
 
     def send_order(self, new_ord_req):
-        if not self.has_item(new_ord_req.id()):
+        if self.has_item(new_ord_req.id()):
             raise Exception(
                 "ClientOrderId has been used!! cl_id = %s, cl_ord_id = %s" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
 
@@ -150,3 +149,9 @@ class OrderManager(OrderEventHandler, ExecutionEventHandler, MarketDataEventHand
 
     def id(self):
         return "OrderManager"
+
+    def get_portf_orders(self, portf_id):
+        return [order for order in self.all_items() if order.portf_id == portf_id]
+
+    def get_strategy_orders(self, stg_id):
+        return [order for order in self.all_items() if order.cl_id == stg_id]

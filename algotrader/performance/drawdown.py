@@ -21,6 +21,8 @@ class DrawDown(PortfolioAnalyzer):
     )
 
     def __init__(self):
+        super(DrawDown, self).__init__()
+
         self.drawdown_series = DataSeries(name='DrawDown', missing_value=0)
         self.drawdown = 0
         self.drawdown_pct = 0

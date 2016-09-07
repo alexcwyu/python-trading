@@ -27,6 +27,7 @@ class Clock(Startable):
     epoch = datetime.datetime.fromtimestamp(0)
 
     def __init__(self, scheduler):
+        super(Clock, self).__init__()
         self.scheduler = scheduler
 
     @abc.abstractmethod

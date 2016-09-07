@@ -3,8 +3,9 @@ from rx import Observer
 from algotrader.event.event_bus import EventBus
 from algotrader.utils import logger
 import abc
+from algotrader import Startable
 
-class EventHandler(Observer):
+class EventHandler(Observer, Startable):
     __metaclass__ = abc.ABCMeta
 
     def on_next(self, event):
@@ -16,10 +17,10 @@ class EventHandler(Observer):
     def on_completed(self):
         logger.debug("[%s] Completed" % self.__class__.__name__)
 
-    def start(self):
+    def _start(self):
         pass
 
-    def stop(self):
+    def _stop(self):
         pass
 
 

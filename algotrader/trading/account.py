@@ -30,3 +30,9 @@ class Account(AccountEventHandler, PositionHolder, Persistable, Startable):
 
     def id(self):
         return self.id
+
+    def _start(self):
+        pass
+
+    def _stop(self):
+        pass

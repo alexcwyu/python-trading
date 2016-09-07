@@ -1,3 +1,4 @@
+from algotrader import Startable
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import AccountEventHandler, MarketDataEventHandler, OrderEventHandler, \
     ExecutionEventHandler
@@ -8,50 +9,44 @@ from algotrader.provider.persistence import Persistable
 from algotrader.trading.position import PositionHolder
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
-from algotrader import Startable, HasId
 
 
 class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler,
                 Persistable, Startable):
     __slots__ = (
         'portf_id',
-        'ord_reqs',
-        'orders',
+        # 'ord_reqs',
+        # 'orders',
         'performance_series',
         'total_equity',
         'cash',
         'stock_value',
-        'analyzers',
-        'started',
+        'analyzers'
     )
 
-    def __init__(self, portf_id="test", cash=1000000, analyzers=None):
+    def __init__(self, portf_id="test", cash=1000000, analyzers=None, app_context=None):
         super(Portfolio, self).__init__()
         self.portf_id = portf_id
         self.ord_reqs = {}
         self.orders = {}
 
+        self.app_context = app_context
         self.performance_series = DataSeries("%s.Performance" % self.portf_id, missing_value=0)
         self.total_equity = 0
         self.cash = cash
         self.stock_value = 0
         self.analyzers = analyzers if analyzers is not None else [Pnl(), DrawDown()]
 
+    def _start(self):
         for analyzer in self.analyzers:
             analyzer.set_portfolio(self)
+        for order in self.app_context.order_mgr.get_portf_orders(self.id()):
+            self._add_order(order)
 
-        self.started = False
-        portf_mgr.add_portfolio(self)
+        self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
-    def start(self):
-        if not self.started:
-            self.started = True
-            order_mgr.start()
-            self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)
-
-    def stop(self):
-        if self.started:
-            self.__event_subscription.dispose()
+    def _stop(self):
+        self.__event_subscription.dispose()
 
     def id(self):
         return self.portf_id
@@ -76,6 +71,11 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         super(Portfolio, self).on_trade(trade)
         self.__update_equity(trade.timestamp, trade.inst_id, trade.price)
 
+    def _add_order(self, order):
+        if order.cl_id not in self.orders:
+            self.orders[order.cl_id] = {}
+        self.orders[order.cl_id][order.cl_ord_id] = order
+
     def send_order(self, new_ord_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))
 
@@ -86,23 +86,20 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
             raise RuntimeError("ord_reqs[%s][%s] already exist" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
         self.ord_reqs[new_ord_req.cl_id][new_ord_req.cl_ord_id] = new_ord_req
 
-        order = order_mgr.send_order(new_ord_req)
+        order = self.app_context.order_mgr.send_order(new_ord_req)
 
-        if order.cl_id not in self.orders:
-            self.orders[order.cl_id] = {}
-
-        self.orders[order.cl_id][order.cl_ord_id] = order
+        self._add_order(order)
         self.get_position(order.inst_id).add_order(order)
         return order
 
     def cancel_order(self, ord_cancel_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_cancel_req))
-        order = order_mgr.cancel_order(ord_cancel_req)
+        order = self.app_context.order_mgr.cancel_order(ord_cancel_req)
         return order
 
     def replace_order(self, ord_replace_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_replace_req))
-        order = order_mgr.replace_order(ord_replace_req)
+        order = self.app_context.order_mgr.replace_order(ord_replace_req)
         return order
 
     def on_new_ord_req(self, new_ord_req):

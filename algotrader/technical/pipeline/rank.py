@@ -5,11 +5,13 @@ import numpy as np
 
 class Rank(PipeLine):
     _slots__ = (
+        'ascending'
     )
 
-    def __init__(self, inputs, input_key='close', desc="Rank"):
+    def __init__(self, inputs, ascending=True, input_key='close', desc="Rank"):
         super(Rank, self).__init__(PipeLine.get_name(Rank.__name__, inputs, input_key),
                                    inputs, input_key, length=1, desc=desc)
+        self.ascending = ascending
         super(Rank, self).update_all()
 
     def on_update(self, data):
@@ -17,9 +19,8 @@ class Rank(PipeLine):
         result = {}
         result['timestamp'] = data['timestamp']
         if self.all_filled():
-            result[PipeLine.VALUE] = ((self.df.rank(axis=1, ascending=True) - 1)/(self.df.shape[1]-1)).head(1).values[0]
+            result[PipeLine.VALUE] = ((self.df.rank(axis=1, ascending=self.ascending) - 1)/(self.df.shape[1]-1)).head(1).values
         else:
-            # TODO: Shall we make the output as the same dimension as proper one?
             result[PipeLine.VALUE] = self._default_output()
 
         self.add(result)

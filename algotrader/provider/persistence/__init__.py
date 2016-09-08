@@ -101,7 +101,7 @@ class SequenceDataStore(DataStore):
         raise NotImplementedError()
 
 
-class Persistable(Serializable, HasId):
+class Persistable(Serializable):
     __metaclass__ = abc.ABCMeta
 
     def save(self, data_store):

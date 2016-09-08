@@ -1,4 +1,5 @@
 from algotrader.config.config import Config
+from algotrader.config.trading import TradingConfig
 
 
 class ApplicationConfig(Config):
@@ -11,7 +12,7 @@ class ApplicationConfig(Config):
         'ref_data_mgr_type',
         'clock_type',
 
-        # 'trading_configs',
+        'trading_configs',
         # 'broker_configs',
         # 'persistence_configs',
         # 'feed_configs',
@@ -42,9 +43,11 @@ class ApplicationConfig(Config):
         self.configs = {}
 
         for config in configs:
-            self.configs[config.__class__] = config
-            # if isinstance(config, TradingConfig):
-            #     self.trading_configs[config.__class__.__name__] = config
+            if isinstance(config, TradingConfig):
+                self.trading_configs[config.stg_id] = config
+            else:
+                self.configs[config.__class__] = config
+
             # elif isinstance(config, BrokerConfig):
             #     self.broker_configs[config.__class__.__name__] = config
             # elif isinstance(config, PersistenceConfig):
@@ -66,6 +69,9 @@ class ApplicationConfig(Config):
 
     def get_config(self, cls, create=True):
         return self._get_or_create_config(self.configs, cls, create)
+
+    def get_trading_config(self, stg_id, default = None):
+        return self.trading_configs.get(stg_id, default)
 
     def _get_or_create_config(self, dict, cls, create=True):
         result = dict.get(cls, None)

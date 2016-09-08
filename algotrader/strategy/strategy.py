@@ -7,16 +7,28 @@ from algotrader.event.order import OrdAction, OrdType, TIF, NewOrderRequest, Ord
 from algotrader.provider.persistence import Persistable
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey
 from algotrader.trading.position import PositionHolder
-import abc
+
 
 class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable, Startable, HasId):
 
     __slots__ = (
         'stg_id',
         'trading_config',
-        'next_ord_id',
-        'ord_req',
-        'order',
+        'ord_reqs',
+        'orders'
+    )
+
+    __transient__ = (
+        'app_context',
+        'ord_reqs',
+        'orders',
+        'ref_data_mgr',
+        'portfolio',
+        'feed',
+        'broker',
+        'clock',
+        'event_subscription',
+        'instruments'
     )
 
     def __init__(self, stg_id=None, app_context=None, trading_config=None):
@@ -24,8 +36,8 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         self.stg_id = stg_id
         self.app_context = app_context
         self.trading_config = trading_config
-        self.ord_req = {}
-        self.order = {}
+        self.ord_reqs = {}
+        self.orders = {}
 
     def __get_next_ord_id(self):
         return self.app_context.seq_mgr.get_next_sequence(self.id())
@@ -39,6 +51,14 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         self.instruments = self.ref_data_mgr.get_insts(self.trading_config.instrument_ids)
         self.clock = self.app_context.get_clock(self.trading_config.clock_type)
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
+
+
+        for order in self.app_context.order_mgr.get_strategy_orders(self.id()):
+            self.orders[order.cl_ord_id] = order
+
+        for order_req in self.app_context.order_mgr.get_strategy_order_reqs(self.id()):
+            self.ord_reqs[order_req.cl_ord_id] = order_req
+
         self._subscribe_market_data(self.instruments)
 
         self.portfolio.start()
@@ -88,7 +108,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
     def on_exec_report(self, exec_report):
         if exec_report.cl_id == self.stg_id:
             super(Strategy, self).on_exec_report(exec_report)
-            ord_req = self.ord_req[exec_report.cl_ord_id]
+            ord_req = self.ord_reqs[exec_report.cl_ord_id]
             direction = 1 if ord_req.action == OrdAction.BUY else -1
             if exec_report.last_qty > 0:
                 self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id,
@@ -137,9 +157,9 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
                               tif=tif,
                               oca_tag=oca_tag,
                               params=params)
-        self.ord_req[req.cl_ord_id] = req
+        self.ord_reqs[req.cl_ord_id] = req
         order = self.portfolio.send_order(req)
-        self.order[order.cl_ord_id] = order
+        self.orders[order.cl_ord_id] = order
         self.get_position(order.inst_id).add_order(order)
         return order
 

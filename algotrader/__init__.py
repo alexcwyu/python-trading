@@ -15,9 +15,9 @@ class Startable(HasId):
     def __init__(self):
         self.started = False
 
-    def start(self):
+    def start(self, *args):
         if not hasattr(self, "started") or not self.started:
-            self._start()
+            self._start(*args)
             self.started = True
 
     def stop(self):
@@ -29,12 +29,11 @@ class Startable(HasId):
         pass
 
     @abc.abstractmethod
-    def _start(self):
+    def _start(self, *args):
         raise NotImplementedError()
 
-    @abc.abstractmethod
     def _stop(self):
-        raise NotImplementedError()
+        pass
 
 
 class Manager(Startable):

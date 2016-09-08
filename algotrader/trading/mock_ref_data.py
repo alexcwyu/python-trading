@@ -22,7 +22,7 @@ class MockRefDataManager(RefDataManager):
 
         self.start()
 
-    def start(self):
+    def _start(self):
         for index, row in self.inst_df.iterrows():
             inst = Instrument(inst_id=row['inst_id'], name=row['name'], type=row['type'], symbol=row['symbol'],
                               exch_id=row['exch_id'], ccy_id=row['ccy_id'], alt_symbol=row['alt_symbol'],
@@ -40,7 +40,7 @@ class MockRefDataManager(RefDataManager):
             exch = Exchange(exch_id=row['exch_id'], name=row['name'])
             self.add_exch(exch)
 
-    def stop(self):
+    def _stop(self):
         # No implememtation
         pass
 

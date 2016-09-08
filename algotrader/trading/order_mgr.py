@@ -155,3 +155,11 @@ class OrderManager(SimpleManager, OrderEventHandler, ExecutionEventHandler, Mark
 
     def get_strategy_orders(self, stg_id):
         return [order for order in self.all_items() if order.cl_id == stg_id]
+
+    def get_portf_order_reqs(self, portf_id):
+        # TODO
+        return []
+
+    def get_strategy_order_reqs(self, stg_id):
+        # TODO
+        return []

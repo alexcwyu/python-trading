@@ -15,7 +15,6 @@ class Pnl(PortfolioAnalyzer):
 
         self.pnl_series = DataSeries(name=Pnl.Pnl, missing_value=0)
         self.pnl = 0
-        self
 
     def update(self, time):
         if self.portfolio.performance_series.size() >= 2:

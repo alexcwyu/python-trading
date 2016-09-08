@@ -15,16 +15,23 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
                 Persistable, Startable):
     __slots__ = (
         'portf_id',
-        # 'ord_reqs',
-        # 'orders',
+        'ord_reqs',
+        'orders',
+        'app_context',
         'performance_series',
         'total_equity',
         'cash',
         'stock_value',
-        'analyzers'
+        'analyzers',
+    )
+
+    __transient__ = (
+        'ord_reqs',
+        'orders',
     )
 
     def __init__(self, portf_id="test", cash=1000000, analyzers=None, app_context=None):
+
         super(Portfolio, self).__init__()
         self.portf_id = portf_id
         self.ord_reqs = {}
@@ -42,6 +49,9 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
             analyzer.set_portfolio(self)
         for order in self.app_context.order_mgr.get_portf_orders(self.id()):
             self._add_order(order)
+
+        for order_req in self.app_context.order_mgr.get_strategy_order_reqs(self.id()):
+            self._add_order_req(order_req)
 
         self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
@@ -76,15 +86,18 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
             self.orders[order.cl_id] = {}
         self.orders[order.cl_id][order.cl_ord_id] = order
 
+    def _add_order_req(self, order_req):
+        if order_req.cl_id not in self.ord_reqs:
+            self.ord_reqs[order_req.cl_id] = {}
+        self.ord_reqs[order_req.cl_id][order_req.cl_ord_id] = order_req
+
     def send_order(self, new_ord_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))
 
-        if new_ord_req.cl_id not in self.ord_reqs:
-            self.ord_reqs[new_ord_req.cl_id] = {}
-
-        if new_ord_req.cl_ord_id in self.ord_reqs[new_ord_req.cl_id]:
+        if new_ord_req.cl_id in self.ord_reqs and new_ord_req.cl_ord_id in self.ord_reqs[new_ord_req.cl_id]:
             raise RuntimeError("ord_reqs[%s][%s] already exist" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
-        self.ord_reqs[new_ord_req.cl_id][new_ord_req.cl_ord_id] = new_ord_req
+
+        self._add_order_req(new_ord_req)
 
         order = self.app_context.order_mgr.send_order(new_ord_req)
 

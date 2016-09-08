@@ -95,6 +95,12 @@ def test_save_portfolio():
     portf_mgr.start()
 
     p1 = Portfolio(portf_id=1, cash=1000)
+
+
+    from algotrader.utils.ser_deser import MapSerializer
+
+    v = MapSerializer.serialize(p1)
+    print v
     #p2 = Portfolio(portf_id=2, cash=1000)
 
     portf_mgr.add(p1)
@@ -159,8 +165,8 @@ def test_save_strategies():
                           limit_price=18.5)
 
     order = Order(nos=nos)
-    stg1.ord_req[nos.cl_ord_id] = nos
-    stg1.order[order.cl_ord_id] = order
+    stg1.ord_reqs[nos.cl_ord_id] = nos
+    stg1.orders[order.cl_ord_id] = order
     stg1.add_position(nos.inst_id, nos.cl_id, nos.cl_ord_id, nos.qty)
     stg1.update_position_price(time=0, inst_id=nos.inst_id, price=100)
 
@@ -220,4 +226,7 @@ def test_save_sequences():
     seq_mgr.stop()
 
 
-test_save_orders()
+#test_save_orders()
+
+
+test_save_portfolio()

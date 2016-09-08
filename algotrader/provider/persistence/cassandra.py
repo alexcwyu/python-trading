@@ -60,13 +60,25 @@ class CassandraDataStore(DataStore):
     def save_strategy(self, strategy):
         raise NotImplementedError()
 
-    def save_account_event(self, account_event):
+    def save_account_update(self, account_update):
         raise NotImplementedError()
 
-    def save_order_event(self, order_event):
+    def save_portfolio_update(self, portfolio_update):
         raise NotImplementedError()
 
-    def save_execution_event(self, execution_event):
+    def save_new_order_req(self, new_order_req):
+        raise NotImplementedError()
+
+    def save_ord_cancel_req(self, ord_cancel_req):
+        raise NotImplementedError()
+
+    def save_ord_replace_req(self, ord_replace_req):
+        raise NotImplementedError()
+
+    def save_exec_report(self, exec_report):
+        raise NotImplementedError()
+
+    def save_ord_status_upd(self, ord_status_upd):
         raise NotImplementedError()
 
     # SequenceDataStore

@@ -1,14 +1,22 @@
-from algotrader import SimpleManager
+from algotrader import Manager
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
 from algotrader.trading.order import Order
 from algotrader.utils import logger
 
 
-class OrderManager(SimpleManager, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
+class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
+    __slots__ = (
+        'app_context',
+        'order_dict',
+        'ord_reqs_dict',
+    )
+
     def __init__(self, app_context=None):
         super(OrderManager, self).__init__()
         self.app_context = app_context
+        self.order_dict = {}
+        self.ord_reqs_dict = {}
 
     def _start(self):
         self.store = self.app_context.get_trade_data_store()
@@ -32,12 +40,23 @@ class OrderManager(SimpleManager, OrderEventHandler, ExecutionEventHandler, Mark
         if self.store:
             orders = self.store.load_all('orders')
             for order in orders:
-                self.add(order)
+                self.order_dict[order.id()] = order
+
+            new_order_reqs = self.store.load_all('new_order_reqs')
+            for new_order_req in new_order_reqs:
+                self.ord_reqs_dict[new_order_req.id()] = new_order_req
 
     def _save_all(self):
         if self.store:
-            for order in self.all_items():
+            for order in self.order_dict.itervalues():
                 self.store.save_order(order)
+
+            for new_order_req in self.ord_reqs_dict.itervalues():
+                self.store.save_new_order_req(new_order_req)
+
+    def reset(self):
+        self.order_dict = {}
+        self.ord_reqs_dict = {}
 
     def next_ord_id(self):
         return self.app_context.seq_mgr.get_next_sequence(self.id())
@@ -57,8 +76,11 @@ class OrderManager(SimpleManager, OrderEventHandler, ExecutionEventHandler, Mark
     def on_ord_upd(self, ord_upd):
         super(OrderManager, self).on_ord_upd(ord_upd)
 
+        # persist
+        self.store.save_ord_status_upd(ord_upd)
+
         # update order
-        order = self.get(ord_upd.id())
+        order = self.order_dict[ord_upd.id()]
         order.on_ord_upd(ord_upd)
 
         # enrich the cl_id and cl_ord_id
@@ -81,11 +103,17 @@ class OrderManager(SimpleManager, OrderEventHandler, ExecutionEventHandler, Mark
             logger.warn(
                 "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.cl_id, order.cl_id, order.cl_ord_id))
 
+        # persist
+        self.store.save_order(order)
+
     def on_exec_report(self, exec_report):
         super(OrderManager, self).on_exec_report(exec_report)
 
+        # persist
+        self.store.save_exec_report(exec_report)
+
         # update order
-        order = self.get(exec_report.id())
+        order = self.order_dict[exec_report.id()]
         order.on_exec_report(exec_report)
 
         # enrich the cl_id and cl_ord_id
@@ -108,10 +136,16 @@ class OrderManager(SimpleManager, OrderEventHandler, ExecutionEventHandler, Mark
             logger.warn(
                 "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.cl_id, order.cl_id, order.cl_ord_id))
 
+        # persist
+        self.store.save_order(order)
+
     def send_order(self, new_ord_req):
-        if self.has_item(new_ord_req.id()):
+        if new_ord_req.id() in self.order_dict:
             raise Exception(
                 "ClientOrderId has been used!! cl_id = %s, cl_ord_id = %s" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
+
+        # persist
+        self.store.save_new_order_req(new_ord_req)
 
         order = Order(new_ord_req)
         self.add(order)
@@ -123,43 +157,59 @@ class OrderManager(SimpleManager, OrderEventHandler, ExecutionEventHandler, Mark
             else:
                 logger.warn("broker [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
                     order.broker_id, order.cl_id, order.cl_ord_id))
+
+        # persist
+        self.store.save_order(order)
+
         return order
 
     def cancel_order(self, ord_cancel_req):
-        if not self.has_item(ord_cancel_req.id()):
+        if not ord_cancel_req.id() in self.order_dict:
             raise Exception("ClientOrderId not found!! cl_id = %s, cl_ord_id = %s" % (
                 ord_cancel_req.cl_id, ord_cancel_req.cl_ord_id))
 
-        order = self.get[ord_cancel_req.id()]
+        # persist
+        self.store.save_ord_cancel_req(ord_cancel_req)
+
+        order = self.order_dict[ord_cancel_req.id()]
 
         order.on_ord_cancel_req(ord_cancel_req)
         self.app_context.provider_mgr.get(order.broker_id).on_ord_cancel_req(ord_cancel_req)
+
+        # persist
+        self.store.save_order(order)
+
         return order
 
     def replace_order(self, ord_replace_req):
-        if not self.has_item(ord_replace_req.id()):
+        if not ord_replace_req.id() in self.order_dict:
             raise Exception("ClientOrderId not found!! cl_id = %s, cl_ord_id = %s" % (
                 ord_replace_req.cl_id, ord_replace_req.cl_ord_id))
 
-        order = self.get[ord_replace_req.id()]
+        # persist
+        self.store.save_ord_replace_req(ord_replace_req)
+
+        order = self.order_dict[ord_replace_req.id()]
 
         order.on_ord_replace_req(ord_replace_req)
         self.app_context.provider_mgr.get(order.broker_id).on_ord_replace_req(ord_replace_req)
+
+        # persist
+        self.store.save_order(order)
+
         return order
 
     def id(self):
         return "OrderManager"
 
     def get_portf_orders(self, portf_id):
-        return [order for order in self.all_items() if order.portf_id == portf_id]
+        return [order for order in self.order_dict.itervalues() if order.portf_id == portf_id]
 
     def get_strategy_orders(self, stg_id):
-        return [order for order in self.all_items() if order.cl_id == stg_id]
+        return [order for order in self.order_dict.itervalues() if order.cl_id == stg_id]
 
     def get_portf_order_reqs(self, portf_id):
-        # TODO
-        return []
+        return [new_ord_req for new_ord_req in self.ord_reqs_dict.itervalues() if new_ord_req.portf_id == portf_id]
 
     def get_strategy_order_reqs(self, stg_id):
-        # TODO
-        return []
+        return [new_ord_req for new_ord_req in self.ord_reqs_dict.itervalues() if new_ord_req.cl_id == stg_id]

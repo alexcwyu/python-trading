@@ -31,9 +31,16 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         self.orders = self.db['orders']
         self.strategies = self.db['strategies']
 
-        self.order_events = self.db['order_events']
-        self.acct_events = self.db['acct_events']
-        self.execution_events = self.db['execution_events']
+        self.account_updates = self.db['account_updates']
+        self.portfolio_updates = self.db['portfolio_updates']
+
+        self.new_order_reqs = self.db['new_order_reqs']
+        self.ord_cancel_reqs = self.db['ord_cancel_reqs']
+        self.ord_replace_reqs = self.db['ord_replace_reqs']
+
+        self.exec_reports = self.db['exec_reports']
+        self.ord_status_upds = self.db['ord_status_upds']
+
         self.strategies = self.db['strategies']
         self.sequences = self.db['sequences']
         self.serializer = MapSerializer
@@ -109,17 +116,33 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         id, packed = self._serialize(strategy)
         self.strategies.update({'_id': id}, packed, upsert=True)
 
-    def save_account_event(self, account_event):
-        id, packed = self._serialize(account_event)
-        self.acct_events.update({'_id': id}, packed, upsert=True)
+    def save_account_update(self, account_update):
+        id, packed = self._serialize(account_update)
+        self.account_updates.update({'_id': id}, packed, upsert=True)
 
-    def save_order_event(self, order_event):
-        id, packed = self._serialize(order_event)
-        self.order_events.update({'_id': id}, packed, upsert=True)
+    def save_portfolio_update(self, portfolio_update):
+        id, packed = self._serialize(portfolio_update)
+        self.portfolio_updates.update({'_id': id}, packed, upsert=True)
 
-    def save_execution_event(self, execution_event):
-        id, packed = self._serialize(execution_event)
-        self.execution_events.update({'_id': id}, packed, upsert=True)
+    def save_new_order_req(self, new_order_req):
+        id, packed = self._serialize(new_order_req)
+        self.new_order_reqs.update({'_id': id}, packed, upsert=True)
+
+    def save_ord_cancel_req(self, ord_cancel_req):
+        id, packed = self._serialize(ord_cancel_req)
+        self.ord_cancel_reqs.update({'_id': id}, packed, upsert=True)
+
+    def save_ord_replace_req(self, ord_replace_req):
+        id, packed = self._serialize(ord_replace_req)
+        self.ord_replace_reqs.update({'_id': id}, packed, upsert=True)
+
+    def save_exec_report(self, exec_report):
+        id, packed = self._serialize(exec_report)
+        self.exec_reports.update({'_id': id}, packed, upsert=True)
+
+    def save_ord_status_upd(self, ord_status_upd):
+        id, packed = self._serialize(ord_status_upd)
+        self.ord_status_upds.update({'_id': id}, packed, upsert=True)
 
     # SequenceDataStore
     def save_sequence(self, key, seq):

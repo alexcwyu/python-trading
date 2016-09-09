@@ -45,9 +45,8 @@ class CrossSessionalApplyScala(PipeLine):
         'np_func'
     )
 
-    def __init__(self, inputs, np_func, input_key='close', length=30, desc="Cross Sessional Apply"):
-        super(CrossSessionalApplyScala, self).__init__(PipeLine.get_name(CrossSessionalApplyScala.__name__, inputs, input_key),
-                                                       inputs, input_key, length=1, desc=desc)
+    def __init__(self, inputs, np_func, name, input_key='close', length=30, desc="Cross Sessional Apply"):
+        super(CrossSessionalApplyScala, self).__init__(name, inputs, input_key, length=1, desc=desc)
         self.np_func = np_func
         super(CrossSessionalApplyScala, self).update_all()
 
@@ -55,7 +54,7 @@ class CrossSessionalApplyScala(PipeLine):
         super(CrossSessionalApplyScala, self).on_update(data)
         result = {}
         result['timestamp'] = data['timestamp']
-        if self.inputs[0].size() > self.length:
+        if self.inputs[0].size() >= self.length:
             if self.all_filled():
                 result[PipeLine.VALUE] = self.np_func(self.df.values)
             else:
@@ -75,13 +74,17 @@ class CrossSessionalApplyScala(PipeLine):
 
 class Average(CrossSessionalApplyScala):
     def __init__(self, inputs, input_key='close', desc="Cross Sessional Average"):
-        super(Average, self).__init__(inputs=inputs, np_func=np.average, input_key=input_key, length=1, desc=desc)
+        super(Average, self).__init__(inputs=inputs, np_func=np.average,
+                                      name=PipeLine.get_name(Average.__name__, inputs, input_key),
+                                      input_key=input_key, length=1, desc=desc)
 
 
 
 class Sum(CrossSessionalApplyScala):
     def __init__(self, inputs, input_key='close', desc="Cross Sessional Sum"):
-        super(Sum, self).__init__(inputs=inputs, np_func=np.sum, input_key=input_key, length=1, desc=desc)
+        super(Sum, self).__init__(inputs=inputs, np_func=np.sum,
+                                  name=PipeLine.get_name(Sum.__name__, inputs, input_key),
+                                  input_key=input_key, length=1, desc=desc)
 
 
 #TODO: Add Count , Abs, Sum,

@@ -28,6 +28,17 @@ class PipelineTest(TestCase):
         self.assertEquals("Rank(SMA('bar',close,3),SMA('bar',close,20),SMA('bar',close,50),close)",
             rank.name)
 
+        bar0 = inst_data_mgr.get_series("bar0")
+        bar1 = inst_data_mgr.get_series("bar1")
+        bar2 = inst_data_mgr.get_series("bar2")
+        bar3 = inst_data_mgr.get_series("bar3")
+
+        avg = Average([bar0, bar1, bar2, bar3], input_key='close')
+        gssum = GSSum([bar0, bar1, bar2, bar3], input_key='close')
+        self.assertEquals("Average('bar0','bar1','bar2','bar3',close)", avg.name)
+        self.assertEquals("Sum('bar0','bar1','bar2','bar3',close)", gssum.name)
+
+
     def test_empty_at_initialize(self):
         inst_data_mgr.clear()
         close = inst_data_mgr.get_series("bar")

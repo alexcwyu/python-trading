@@ -21,7 +21,6 @@ class KDBDataStore(DataStore):
     def load_all(self, clazz):
         raise NotImplementedError()
 
-
     # RefDataStore
     def save_instrument(self, instrument):
         raise NotImplementedError()
@@ -81,6 +80,7 @@ class KDBDataStore(DataStore):
 
     def save_ord_status_upd(self, ord_status_upd):
         raise NotImplementedError()
+
     # SequenceDataStore
     def save_sequence(self, key, seq):
         raise NotImplementedError()

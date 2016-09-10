@@ -1,8 +1,7 @@
+from algotrader import Startable
 from algotrader.event.event_handler import AccountEventHandler
-
 from algotrader.provider.persistence import Persistable
 from algotrader.trading.position import PositionHolder
-from algotrader import Startable, HasId
 
 
 class Account(AccountEventHandler, PositionHolder, Persistable, Startable):

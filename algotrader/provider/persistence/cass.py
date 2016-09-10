@@ -8,7 +8,6 @@ class CassandraDataStore(DataStore):
     def __init__(self):
         super(CassandraDataStore, self).__init__()
 
-
     def _start(self, app_context, **kwargs):
         self.cass_config = app_context.app_config.get_config(CassandraConfig)
         self.cluster = Cluster(contact_points=self.cass_config.contact_points, port=self.cass_config.port)

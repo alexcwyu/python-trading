@@ -1,7 +1,9 @@
+import abc
+
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.event.order import OrdAction
 from algotrader.provider.persistence import Persistable
-import abc
+
 
 class Position(Persistable):
     __slots__ = (

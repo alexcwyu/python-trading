@@ -26,10 +26,10 @@ class IBConfig(BrokerConfig):
     def __init__(self, host='localhost',
                  port=4001,
                  client_id=0,
-                 account = None,
+                 account=None,
                  daemon=False,
-                 next_request_id =1,
-                 next_order_id = None):
+                 next_request_id=1,
+                 next_order_id=None):
         super(IBConfig, self).__init__(BrokerConfig.IBConfig)
         self.host = host
         self.port = port
@@ -48,7 +48,8 @@ class SimulatorConfig(BrokerConfig):
         'next_exec_id'
     )
 
-    def __init__(self, commission_id=Commission.Default, fill_strategy_id=FillStrategy.Default, next_ord_id=0, next_exec_id=0):
+    def __init__(self, commission_id=Commission.Default, fill_strategy_id=FillStrategy.Default, next_ord_id=0,
+                 next_exec_id=0):
         super(SimulatorConfig, self).__init__(BrokerConfig.SimulatorConfig)
         self.commission_id = commission_id
         self.fill_strategy_id = fill_strategy_id

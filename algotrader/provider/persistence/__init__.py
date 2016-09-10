@@ -1,6 +1,5 @@
 import abc
 
-from algotrader import HasId
 from algotrader.provider import Provider
 from algotrader.utils.ser_deser import Serializable
 
@@ -71,7 +70,6 @@ class TradeDataStore(DataStore):
     @abc.abstractmethod
     def save_portfolio(self, portfolio):
         raise NotImplementedError()
-
 
     @abc.abstractmethod
     def save_order(self, order):

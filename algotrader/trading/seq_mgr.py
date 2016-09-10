@@ -2,7 +2,6 @@ from algotrader import SimpleManager
 
 
 class SequenceManager(SimpleManager):
-
     def __init__(self):
         super(SequenceManager, self).__init__()
 

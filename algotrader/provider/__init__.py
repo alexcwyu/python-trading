@@ -1,6 +1,6 @@
 import abc
 
-from algotrader import Startable, HasId
+from algotrader import Startable
 
 
 class Provider(Startable):

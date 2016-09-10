@@ -1,9 +1,10 @@
+import abc
+
 from rx import Observer
 
+from algotrader import Startable
 from algotrader.event.event_bus import EventBus
 from algotrader.utils import logger
-import abc
-from algotrader import Startable
 
 
 class EventHandler(Observer, Startable):

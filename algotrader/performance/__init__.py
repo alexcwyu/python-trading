@@ -2,8 +2,6 @@ from algotrader.provider.persistence import Persistable
 
 
 class PortfolioAnalyzer(Persistable):
-
-
     __slots__ = (
         'portfolio'
     )
@@ -11,7 +9,6 @@ class PortfolioAnalyzer(Persistable):
     __transient__ = (
         'portfolio',
     )
-
 
     def __init__(self):
         self.portfolio = None

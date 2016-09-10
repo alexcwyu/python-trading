@@ -48,12 +48,12 @@ class ApplicationConfig(Config):
             else:
                 self.configs[config.__class__] = config
 
-            # elif isinstance(config, BrokerConfig):
-            #     self.broker_configs[config.__class__.__name__] = config
-            # elif isinstance(config, PersistenceConfig):
-            #     self.persistence_configs[config.__class__.__name__] = config
-            # elif isinstance(config, FeedConfig):
-            #     self.feed_configs[config.__class__.__name__] = config
+                # elif isinstance(config, BrokerConfig):
+                #     self.broker_configs[config.__class__.__name__] = config
+                # elif isinstance(config, PersistenceConfig):
+                #     self.persistence_configs[config.__class__.__name__] = config
+                # elif isinstance(config, FeedConfig):
+                #     self.feed_configs[config.__class__.__name__] = config
 
     # def get_trading_config(self, cls, create=True):
     #     return self._get_or_create_config(self.trading_configs, cls, create)
@@ -70,7 +70,7 @@ class ApplicationConfig(Config):
     def get_config(self, cls, create=True):
         return self._get_or_create_config(self.configs, cls, create)
 
-    def get_trading_config(self, stg_id, default = None):
+    def get_trading_config(self, stg_id, default=None):
         return self.trading_configs.get(stg_id, default)
 
     def _get_or_create_config(self, dict, cls, create=True):

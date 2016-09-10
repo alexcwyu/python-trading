@@ -8,7 +8,6 @@ class InfluxDataStore(DataStore):
     def __init__(self):
         super(InfluxDataStore, self).__init__()
 
-
     def _start(self, app_context, **kwargs):
         self.influx_config = app_context.app_config.get_config(InfluxDBConfig)
         self.client = InfluxDBClient(self.influx_config.host, self.influx_config.port, self.influx_config.username,
@@ -87,4 +86,3 @@ class InfluxDataStore(DataStore):
     # SequenceDataStore
     def save_sequence(self, key, seq):
         raise NotImplementedError()
-

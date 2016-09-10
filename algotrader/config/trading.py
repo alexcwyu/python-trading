@@ -15,6 +15,7 @@ class TradingConfig(Config):
 
     __slots__ = (
         'stg_id',
+        'stg_cls',
         'portfolio_id',
         'instrument_ids',
         'subscription_types',
@@ -26,13 +27,14 @@ class TradingConfig(Config):
 
     )
 
-    def __init__(self, id, stg_id, portfolio_id,
+    def __init__(self, id, stg_id, stg_cls, portfolio_id,
                  subscription_types,
                  instrument_ids,
                  feed_id, broker_id,
                  ref_data_mgr_type, clock_type, stg_configs):
         super(TradingConfig, self).__init__(id=id if id else stg_id)
         self.stg_id = stg_id
+        self.stg_cls = stg_cls
         self.portfolio_id = portfolio_id
 
         self.instrument_ids = instrument_ids
@@ -57,10 +59,10 @@ class TradingConfig(Config):
 
 
 class LiveTradingConfig(TradingConfig):
-    def __init__(self, id=None, stg_id=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
+    def __init__(self, id=None, stg_id=None, stg_cls=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
                  feed_id=Broker.IB, broker_id=Broker.IB,
                  ref_data_mgr_type=RefDataManager.InMemory, stg_configs=None):
-        super(LiveTradingConfig, self).__init__(id=id, stg_id=stg_id, portfolio_id=portfolio_id,
+        super(LiveTradingConfig, self).__init__(id=id, stg_id=stg_id, stg_cls=stg_cls, portfolio_id=portfolio_id,
                                                 instrument_ids=instrument_ids,
                                                 subscription_types=subscription_types,
                                                 feed_id=feed_id, broker_id=broker_id,
@@ -74,11 +76,11 @@ class BacktestingConfig(TradingConfig):
         'to_date',
     )
 
-    def __init__(self, id=None, stg_id=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
+    def __init__(self, id=None, stg_id=None, stg_cls=None, portfolio_id=None, instrument_ids=None, subscription_types=None,
                  from_date=date(2010, 1, 1), to_date=date.today(),
                  feed_id=Feed.CSV, broker_id=Broker.Simulator,
                  ref_data_mgr_type=RefDataManager.InMemory, stg_configs=None):
-        super(BacktestingConfig, self).__init__(id=id, stg_id=stg_id, portfolio_id=portfolio_id,
+        super(BacktestingConfig, self).__init__(id=id, stg_id=stg_id, stg_cls=stg_cls, portfolio_id=portfolio_id,
                                                 instrument_ids=instrument_ids,
                                                 subscription_types=subscription_types,
                                                 feed_id=feed_id, broker_id=broker_id,

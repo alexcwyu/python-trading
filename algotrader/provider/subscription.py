@@ -1,9 +1,9 @@
 import abc
 
 from algotrader.event.market_data import BarType, BarSize, MarketDataType
+from algotrader.utils.ser_deser import Serializable
 
-
-class DataSubscriptionType(object):
+class DataSubscriptionType(Serializable):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
@@ -38,15 +38,24 @@ class BarSubscriptionType(DataSubscriptionType):
             return False
         return (self.get_type(), self.bar_type, self.bar_size) == (other.get_type(), other.bar_type, other.bar_size)
 
+    def id(self):
+        return "%s.%s.%s" % (self.get_type(), self.bar_type, self.bar_size)
+
 
 class QuoteSubscriptionType(DataSubscriptionType):
     def get_type(self):
         return MarketDataType.Quote
 
+    def id(self):
+        return "%s" % (self.get_type())
+
 
 class TradeSubscriptionType(DataSubscriptionType):
     def get_type(self):
         return MarketDataType.Trade
+
+    def id(self):
+        return "%s" % (self.get_type())
 
 
 class MarketDepthSubscriptionType(DataSubscriptionType):
@@ -67,6 +76,8 @@ class MarketDepthSubscriptionType(DataSubscriptionType):
             return False
         return (self.get_type(), self.num_rows) == (other.get_type(), other.num_rows)
 
+    def id(self):
+        return "%s.%s" % (self.get_type(), self.num_rows)
 
 class SubscriptionKey(object):
     __slots__ = (

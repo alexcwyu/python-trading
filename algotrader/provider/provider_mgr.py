@@ -11,7 +11,7 @@ from algotrader.provider.persistence.mongodb import MongoDBDataStore
 
 
 class ProviderManager(SimpleManager):
-    def __init__(self, ):
+    def __init__(self):
         super(ProviderManager, self).__init__()
 
         self.add(Simulator())

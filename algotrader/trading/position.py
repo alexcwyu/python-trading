@@ -73,14 +73,16 @@ class PositionHolder(MarketDataEventHandler):
         self.positions = {}
 
     def get_position(self, inst_id):
-        if inst_id not in self.positions:
-            self.positions[inst_id] = Position(inst_id=inst_id)
-        position = self.positions[inst_id]
+        inst_id_str = str(inst_id)
+        if inst_id_str not in self.positions:
+            self.positions[inst_id_str] = Position(inst_id=inst_id)
+        position = self.positions[inst_id_str]
         return position
 
     def update_position_price(self, time, inst_id, price):
-        if inst_id in self.positions:
-            position = self.positions[inst_id]
+        inst_id_str = str(inst_id)
+        if inst_id_str in self.positions:
+            position = self.positions[inst_id_str]
             position.last_price = price
 
     def add_position(self, inst_id, cl_id, cl_ord_id, qty):

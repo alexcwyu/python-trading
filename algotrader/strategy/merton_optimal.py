@@ -13,15 +13,18 @@ class MertonOptimalBaby(Strategy):
     So now this class is used as testing purpose
     """
 
-    def __init__(self, stg_id, arate, vol, trading_config):
+    def __init__(self, stg_id=None, trading_config=None):
         super(MertonOptimalBaby, self).__init__(stg_id=stg_id, trading_config=trading_config)
         self.buy_order = None
-        self.arate = arate
-        self.vol = vol
 
     def _start(self, app_context, **kwargs):
+        self.arate = self.get_config_value("arate", 1)
+        self.vol = self.get_config_value("vol", 1)
+
         self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
         self.optimal_weight = self.arate / self.vol ** 2  # assume risk free rate is zero
+
+        super(MertonOptimalBaby, self)._start(app_context, **kwargs)
 
     def on_bar(self, bar):
         # we have to rebalance on each bar

@@ -4,6 +4,7 @@ import time
 from pymongo import MongoClient
 
 from algotrader.config.app import ApplicationConfig
+from algotrader.config.trading import BacktestingConfig
 from algotrader.config.persistence import MongoDBConfig
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
@@ -15,11 +16,9 @@ from algotrader.trading.account import Account
 from algotrader.trading.account_mgr import AccountManager
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.order import Order
-from algotrader.trading.order_mgr import OrderManager
 from algotrader.trading.portfolio import Portfolio
-from algotrader.trading.portfolio_mgr import PortfolioManager
 from algotrader.trading.seq_mgr import SequenceManager
-from algotrader.utils.ser_deser import JsonSerializer
+from algotrader.utils.ser_deser import JsonSerializer, MapSerializer
 
 
 def get_default_app_context():
@@ -27,7 +26,6 @@ def get_default_app_context():
     app_config = ApplicationConfig(None, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo, None, None,
                                    config)
     return ApplicationContext(app_config=app_config)
-
 
 
 def test1():
@@ -86,52 +84,22 @@ def test_bar():
         time.sleep(1)
 
 
-def test_save_portfolio():
-    context = get_default_app_context()
-    store = context.provider_mgr.get(DataStore.Mongo)
-    store.start()
-
-    portf_mgr = context.provider_mgr
-    portf_mgr.start()
-
-    p1 = Portfolio(portf_id=1, cash=1000)
-
-
-    from algotrader.utils.ser_deser import MapSerializer
-
-    v = MapSerializer.serialize(p1)
-    print v
-    #p2 = Portfolio(portf_id=2, cash=1000)
-
-    portf_mgr.add(p1)
-    #portf_mgr.add(p2)
-
-    before = portf_mgr.get(1)
-
-    portf_mgr.stop()
-    portf_mgr.start()
-
-    after = portf_mgr.get(1)
-    print before
-    print after
-
-
 def test_save_orders():
-
     context = get_default_app_context()
+
     store = context.provider_mgr.get(DataStore.Mongo)
     store.start()
 
     ord_mrg = context.order_mgr
-
     ord_mrg.start()
-    ord_mrg.reset()
 
     order = ord_mrg.send_order(
-        NewOrderRequest(cl_id='test_stg', cl_ord_id=1, inst_id=1, portf_id='test_porf', action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+        NewOrderRequest(cl_id='test_stg', cl_ord_id=1, inst_id=1, portf_id='test_porf', action=OrdAction.BUY,
+                        type=OrdType.LIMIT, qty=1000,
                         limit_price=18.5))
     order = ord_mrg.send_order(
-        NewOrderRequest(cl_id='test_stg', cl_ord_id=2, inst_id=1, portf_id='test_porf', action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+        NewOrderRequest(cl_id='test_stg', cl_ord_id=2, inst_id=1, portf_id='test_porf', action=OrdAction.BUY,
+                        type=OrdType.LIMIT, qty=1000,
                         limit_price=18.5))
 
     before = ord_mrg.all_items()
@@ -144,7 +112,6 @@ def test_save_orders():
     print before
     print after
 
-
     p1 = Portfolio(portf_id='test_porf', cash=1000, app_context=context)
     p1.start()
 
@@ -152,51 +119,84 @@ def test_save_orders():
     print p1.all_orders()
 
 
+def test_save_portfolio():
+    print "test_save_portfolio"
+    context = get_default_app_context()
+
+    store = context.provider_mgr.get(DataStore.Mongo)
+    store.start(app_context= context)
+
+    portf_mgr = context.provider_mgr
+    portf_mgr.start(app_context= context)
+
+    p1 = portf_mgr.new_portfolio(portf_id=1, cash=1000)
+    p2 = portf_mgr.new_portfolio(portf_id=2, cash=1000)
+
+    before = portf_mgr.get(1)
+
+    portf_mgr.stop()
+    portf_mgr.start()
+
+    after = portf_mgr.get(1)
+    print "before %s" % before
+    print "after %s" % after
+
 
 def test_save_strategies():
-    config = MongoDBConfig()
-    store = MongoDBDataStore(config)
+    print "test_save_strategies"
+    context = get_default_app_context()
 
-    stg_mgr = StrategyManager(store)
+    store = context.provider_mgr.get(DataStore.Mongo)
+    store.start(app_context= context)
 
-    store.start()
-    stg1 = Strategy(stg_id='st1', next_ord_id=0, trading_config=None, ref_data_mgr=None)
-    nos = NewOrderRequest(cl_id='test', cl_ord_id='1', inst_id='1', action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
-                          limit_price=18.5)
 
-    order = Order(nos=nos)
+    stg_mgr = context.stg_mgr
+    stg_mgr.start(app_context= context)
+    stg_mgr.reset()
+
+    stg1 = stg_mgr.new_stg(trading_config=BacktestingConfig(id='1', stg_id='test1', stg_cls='algotrader.strategy.ema_strategy.EMAStrategy'))
+
+
+    ord_mrg = context.order_mgr
+    ord_mrg.start(app_context= context)
+
+    nos = NewOrderRequest(cl_id='test1', cl_ord_id='1', inst_id=1, portf_id='test_porf', action=OrdAction.BUY,
+                    type=OrdType.LIMIT, qty=1000,
+                    limit_price=18.5)
+    order = ord_mrg.send_order(nos)
+
     stg1.ord_reqs[nos.cl_ord_id] = nos
     stg1.orders[order.cl_ord_id] = order
     stg1.add_position(nos.inst_id, nos.cl_id, nos.cl_ord_id, nos.qty)
     stg1.update_position_price(time=0, inst_id=nos.inst_id, price=100)
 
-    stg2 = Strategy(stg_id='st2', next_ord_id=0, trading_config=None, ref_data_mgr=None)
-    stg_mgr.add(stg1)
-    stg_mgr.add(stg2)
+    stg2 = stg_mgr.new_stg(trading_config=BacktestingConfig(id='2', stg_id='test2', stg_cls='algotrader.strategy.ema_strategy.EMAStrategy'))
 
-    before = stg_mgr.all_items()
+    before = stg_mgr.get('test1')
 
-    stg_mgr.save()
-    stg_mgr.load()
+    stg_mgr.stop()
 
-    after = stg_mgr.all_items()
+    stg_mgr.start(app_context= context)
+    after = stg_mgr.get('test1')
+    after.start(app_context= context)
 
-    print before
-    print after
+    print "before %s" % MapSerializer.serialize(before)
+    print "after %s" % MapSerializer.serialize(after)
 
 
 def test_save_accounts():
-    config = MongoDBConfig()
-    store = MongoDBDataStore(config)
+    context = get_default_app_context()
+    store = context.provider_mgr.get(DataStore.Mongo)
+    store.start(app_context= context)
 
     acct_mgr = AccountManager(store)
+    acct_mgr.start(app_context= context)
 
-    store.start()
-    acct1 = Account(name="1")
-    acct2 = Account(name="2")
+    store.start(app_context= context)
 
-    acct_mgr.add_account(acct1)
-    acct_mgr.add_account(acct2)
+    acct1 = acct_mgr.new_account(name="1")
+    acct2 = acct_mgr.new_account(name="2")
+
 
     before = acct_mgr.all_accounts()
 
@@ -212,10 +212,10 @@ def test_save_accounts():
 def test_save_sequences():
     context = get_default_app_context()
     store = context.provider_mgr.get(DataStore.Mongo)
-    store.start()
+    store.start(app_context= context)
 
     seq_mgr = SequenceManager(context)
-    seq_mgr.start()
+    seq_mgr.start(app_context= context)
 
     print seq_mgr.get_next_sequence("order")
     print seq_mgr.get_next_sequence("order")
@@ -226,7 +226,9 @@ def test_save_sequences():
     seq_mgr.stop()
 
 
-#test_save_orders()
+# test_save_orders()
 
 
-test_save_portfolio()
+#test_save_portfolio()
+
+test_save_strategies()

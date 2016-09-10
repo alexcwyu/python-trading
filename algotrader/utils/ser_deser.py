@@ -116,9 +116,13 @@ class MapSerializer(Serializer):
     def deserialize(data):
         if isinstance(data, dict):
             if b'__datetime__' in data:
-                return DateUtils.timestamp_to_datetime(data["__datetime__"])
+                return DateUtils.timestamp_to_datetime(data[b'__datetime__'])
             elif b'__date__' in data:
-                return DateUtils.timestamp_to_date(data["__date__"])
+                return DateUtils.timestamp_to_date(data[b'__date__'])
+            # elif '__datetime__' in data:
+            #     return DateUtils.timestamp_to_datetime(data["__datetime__"])
+            # elif '__date__' in data:
+            #     return DateUtils.timestamp_to_date(data["__date__"])
             elif b'@t' in data:
                 data = data
                 module = data[b'@p']

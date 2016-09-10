@@ -1,4 +1,3 @@
-from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.utils.time_series import DataSeries
 
 

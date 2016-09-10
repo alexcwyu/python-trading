@@ -170,12 +170,12 @@ class IBBroker(IBSocket, Broker, Feed):
 
         self.data_sub_reg = SubscriptionRegistry()
         self.ord_req_reg = OrderReqRegistry()
-        self.next_request_id = self.ib_config.next_request_id
-        self.next_order_id = self.ib_config.next_order_id
 
     def _start(self, app_context, **kwargs):
         self.ib_config = app_context.app_config.get_config(IBConfig)
 
+        self.next_request_id = self.ib_config.next_request_id
+        self.next_order_id = self.ib_config.next_order_id
         self.tws = swigibpy.EPosixClientSocket(self)
         self.poller = TWSPoller(self.tws, daemon=self.ib_config.daemon)
         self.port = self.ib_config.port

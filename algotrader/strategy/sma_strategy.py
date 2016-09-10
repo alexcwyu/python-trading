@@ -5,15 +5,16 @@ from algotrader.utils import logger
 
 
 class SMAStrategy(Strategy):
-    def __init__(self, stg_id, qty, trading_config):
+    def __init__(self, stg_id=None, trading_config=None):
         super(SMAStrategy, self).__init__(stg_id=stg_id, trading_config=trading_config)
         self.buy_order = None
-        self.qty = qty
 
     def _start(self, app_context, **kwargs):
+        self.qty = self.get_config_value("qty", 1)
         self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
         self.sma_fast = SMA(self.bar, 'close', 10)
         self.sma_slow = SMA(self.bar, 'close', 25)
+        super(SMAStrategy, self)._start(app_context, **kwargs)
 
     def on_bar(self, bar):
         if self.buy_order is None and self.sma_fast.now('value') > self.sma_slow.now('value'):

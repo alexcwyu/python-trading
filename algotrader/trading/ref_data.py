@@ -151,20 +151,22 @@ class RefDataManager(Manager):
 
     def get_insts(self, instruments):
         insts = []
-        if isinstance(instruments, (list, tuple, set)):
-            for instrument in instruments:
-                if isinstance(instrument, (int, long)) or isinstance(instrument, str):
-                    insts.append(self.search_inst(inst=instrument))
-                elif isinstance(instrument, Instrument):
-                    insts.append(instrument)
-                else:
-                    raise "Unknown instrument %s" % instrument
-        elif isinstance(instruments, (int, long)) or isinstance(instruments, str):
-            insts.append(self.search_inst(inst=instruments))
-        elif isinstance(instruments, Instrument):
-            insts.append(instruments)
-        else:
-            raise "Unknown instrument %s" % instruments
+        if instruments:
+            if isinstance(instruments, (list, tuple, set)):
+                for instrument in instruments:
+                    if instrument:
+                        if isinstance(instrument, (int, long)) or isinstance(instrument, str):
+                            insts.append(self.search_inst(inst=instrument))
+                        elif isinstance(instrument, Instrument):
+                            insts.append(instrument)
+                        else:
+                            raise "Unknown instrument %s" % instrument
+            elif isinstance(instruments, (int, long)) or isinstance(instruments, str):
+                insts.append(self.search_inst(inst=instruments))
+            elif isinstance(instruments, Instrument):
+                insts.append(instruments)
+            else:
+                raise "Unknown instrument %s" % instruments
 
         return insts
 
@@ -201,13 +203,13 @@ class DBRefDataManager(RefDataManager):
 
     def _start(self, app_context, **kwargs):
         self.store = self.app_context.get_ref_data_store()
-        self._load_all()
+        self.load_all()
 
     def _stop(self):
-        self._save_all()
+        self.save_all()
         self.reset()
 
-    def _load_all(self):
+    def load_all(self):
         if self.store:
             for inst in self.store.load_all('instruments'):
                 self.__inst_symbol_dict[inst.id()] = inst
@@ -217,7 +219,7 @@ class DBRefDataManager(RefDataManager):
             for exch in self.store.load_all('exchanges'):
                 self.__exch_dict[exch.exch_id] = exch
 
-    def _save_all(self):
+    def save_all(self):
         if self.store:
             for inst in self.__inst_dict.values():
                 self.store.save_instrument(inst)
@@ -258,7 +260,7 @@ class InMemoryRefDataManager(RefDataManager):
         self.ccy_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/ccy.csv'))
         self.exch_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/exch.csv'))
 
-    def _load_all(self):
+    def load_all(self):
         with open(self.inst_file) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
@@ -294,7 +296,7 @@ class InMemoryRefDataManager(RefDataManager):
                 exch = Exchange(exch_id=row['exch_id'], name=row['name'])
                 self.add_exch(exch)
 
-    def _save_all(self):
+    def save_all(self):
         pass
 
     def id(self):

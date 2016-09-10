@@ -8,15 +8,15 @@ from algotrader.utils import logger
 
 
 class VixVxvRatio(Strategy):
-    def __init__(self, stg_id, qty, threshold, trading_config):
+    def __init__(self, stg_id=None, trading_config=None):
         super(VixVxvRatio, self).__init__(stg_id=stg_id, trading_config=trading_config)
-
-        self.threshold = threshold
         self.day_count = 0
         self.order = None
-        self.qty = qty
 
     def _start(self, app_context, **kwargs):
+        self.qty = self.get_config_value("qty", 1)
+        self.threshold = self.get_config_value("threshold", 1)
+
         self.xiv = app_context.ref_data_mgr.get_inst('XIV', 'SMART')
         self.vxx = app_context.ref_data_mgr.get_inst('VXX', 'SMART')
         self.vxv = app_context.ref_data_mgr.get_inst('VXV', 'SMART')
@@ -32,6 +32,8 @@ class VixVxvRatio(Strategy):
         self.ratio_strm = rx.Observable \
             .zip(self.vix_strm, self.vxv_strm, lambda x, y: x / y) \
             .subscribe(self.on_ratio)
+
+        super(VixVxvRatio, self)._start(app_context, **kwargs)
 
     def on_bar(self, bar):
         if bar.inst_id == self.vix.id():
@@ -56,15 +58,16 @@ class VixVxvRatio(Strategy):
 
 
 class VxvVxmtRatio(Strategy):
-    def __init__(self, stg_id, qty, threshold,
-                 trading_config):
+    def __init__(self, stg_id=None, trading_config=None):
         super(VxvVxmtRatio, self).__init__(stg_id=stg_id, trading_config=trading_config)
-        self.threshold = threshold
         self.day_count = 0
         self.order = None
-        self.qty = qty
 
     def _start(self, app_context, **kwargs):
+
+        self.qty = self.get_config_value("qty", 1)
+        self.threshold = self.get_config_value("threshold", 1)
+
         self.xiv = app_context.ref_data_mgr.get_inst('XIV', 'SMART')
         self.vxx = app_context.ref_data_mgr.get_inst('VXX', 'SMART')
         self.vxv = app_context.ref_data_mgr.get_inst('VXV', 'SMART')
@@ -76,6 +79,8 @@ class VxvVxmtRatio(Strategy):
         self.vxmt_close = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.vxmt.get_symbol())
         self.ema_60 = EMA()
         self.sma_fast = SMA(self.bar, 'close', 10)
+
+        super(VxvVxmtRatio, self)._start(app_context, **kwargs)
 
     def on_bar(self, bar):
         ratio = self.vix_close.now('value') / self.vxv_close.now('close')

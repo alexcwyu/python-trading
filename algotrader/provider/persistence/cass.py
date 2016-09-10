@@ -19,6 +19,10 @@ class CassandraDataStore(DataStore):
     def id(self):
         return DataStore.Cassandra
 
+
+    def load_all(self, clazz):
+        pass
+
     # RefDataStore
     def save_instrument(self, instrument):
         raise NotImplementedError()

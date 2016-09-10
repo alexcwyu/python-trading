@@ -49,14 +49,18 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
     def __get_next_ord_id(self):
         return self.app_context.seq_mgr.get_next_sequence(self.id())
 
+
+    def get_config_value(self, key, default_value=None):
+        self.trading_config.get_stg_configs_val(key=key, default_value=default_value)
+
     def _start(self, app_context, **kwargs):
         self.ref_data_mgr = self.app_context.ref_data_mgr
-        self.portfolio = self.app_context.portf_mgr.get_portfolio(self.trading_config.portfolio_id)
-        self.feed = self.app_context.feed_mgr.get(self.trading_config.feed_id) if self.trading_config else None
-        self.broker = self.app_context.broker_mgr.get(self.trading_config.broker_id)
+        self.portfolio = self.app_context.portf_mgr.get(self.trading_config.portfolio_id)
+        self.feed = self.app_context.provider_mgr.get(self.trading_config.feed_id) if self.trading_config else None
+        self.broker = self.app_context.provider_mgr.get(self.trading_config.broker_id)
 
         self.instruments = self.ref_data_mgr.get_insts(self.trading_config.instrument_ids)
-        self.clock = self.app_context.get_clock(self.trading_config.clock_type)
+        self.clock = self.app_context.get_clock()
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
         for order in self.app_context.order_mgr.get_strategy_orders(self.id()):
@@ -67,9 +71,14 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
 
         self._subscribe_market_data(self.instruments)
 
-        self.portfolio.start()
-        self.broker.start()
-        self.feed.start()
+        if self.portfolio:
+            self.portfolio.start(app_context)
+
+        if self.broker:
+            self.broker.start(app_context)
+
+        if self.feed:
+            self.feed.start(app_context)
 
     def _stop(self):
         if self.event_subscription:

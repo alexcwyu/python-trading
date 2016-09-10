@@ -18,7 +18,7 @@ class PairTradingWithOUSpread(Strategy):
     So now this class is used as testing purpose
     """
 
-    def __init__(self, stg_id, ou_params, gamma, trading_config):
+    def __init__(self, stg_id=None, trading_config=None):
         """
         :param stg_id:
         :param portfolio:
@@ -30,10 +30,11 @@ class PairTradingWithOUSpread(Strategy):
         """
         super(PairTradingWithOUSpread, self).__init__(stg_id=stg_id, trading_config=trading_config)
         self.buy_order = None
-        self.ou_params = ou_params
-        self.gamma = gamma
 
     def _start(self, app_context, **kwargs):
+        self.ou_params = self.get_config_value("ou_params", 1)
+        self.gamma = self.get_config_value("gamma", 1)
+
         self.bar_0 = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
         self.bar_1 = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[1])
         self.instruments = self.trading_config.instrument_ids
@@ -42,6 +43,8 @@ class PairTradingWithOUSpread(Strategy):
         self.spread_stream = rx.Observable \
             .zip(self.log_spot_0, self.log_spot_1, lambda x, y: [x, y, x - y]) \
             .subscribe(self.rebalance)
+
+        super(PairTradingWithOUSpread, self)._start(app_context, **kwargs)
 
     def on_bar(self, bar):
         # logger.info("%s,%s,%.2f" % (bar.inst_id, bar.timestamp, bar.close))

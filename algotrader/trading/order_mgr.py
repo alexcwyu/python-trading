@@ -19,7 +19,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
 
     def _start(self, app_context, **kwargs):
         self.store = self.app_context.get_trade_data_store()
-        self._load_all()
+        self.load_all()
         self.subscriptions = []
         self.subscriptions.append(EventBus.data_subject.subscribe(self.on_next))
         self.subscriptions.append(EventBus.order_subject.subscribe(self.on_next))
@@ -32,10 +32,10 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                     subscription.dispose()
                 except:
                     pass
-        self._save_all()
+        self.save_all()
         self.reset()
 
-    def _load_all(self):
+    def load_all(self):
         if self.store:
             orders = self.store.load_all('orders')
             for order in orders:
@@ -45,7 +45,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
             for new_order_req in new_order_reqs:
                 self.ord_reqs_dict[new_order_req.id()] = new_order_req
 
-    def _save_all(self):
+    def save_all(self):
         if self.store:
             for order in self.order_dict.itervalues():
                 self.store.save_order(order)
@@ -147,7 +147,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         self.store.save_new_order_req(new_ord_req)
 
         order = Order(new_ord_req)
-        self.add(order)
+        self.order_dict[order.id()] = order
 
         if order.broker_id:
             broker = self.app_context.provider_mgr.get(order.broker_id)

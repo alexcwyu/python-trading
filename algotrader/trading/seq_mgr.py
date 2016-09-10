@@ -8,15 +8,15 @@ class SequenceManager(SimpleManager):
     def _start(self, app_context, **kwargs):
         self.app_context = app_context
         self.store = self.app_context.get_seq_data_store()
-        self._load_all()
+        self.load_all()
 
-    def _load_all(self):
+    def load_all(self):
         if self.store:
             items = self.store.load_all('sequences')
             for item in items:
                 self.add(item['_id'], item['seq'])
 
-    def _save_all(self):
+    def save_all(self):
         if self.store:
             for key, value in self.item_dict.iteritems():
                 self.store.save_sequence(key, value)

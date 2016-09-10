@@ -20,17 +20,17 @@ class ApplicationContext(Startable):
         self.app_config = app_config
 
         self.clock = self.add_startable(self.get_clock())
-        self.provider_mgr = self.add_startable(ProviderManager(self))
+        self.provider_mgr = self.add_startable(ProviderManager())
 
-        self.seq_mgr = self.add_startable(SequenceManager(self))
+        self.seq_mgr = self.add_startable(SequenceManager())
 
-        self.inst_data_mgr = self.add_startable(InstrumentDataManager(self))
+        self.inst_data_mgr = self.add_startable(InstrumentDataManager())
         self.ref_data_mgr = self.add_startable(self.get_ref_data_mgr())
 
-        self.order_mgr = self.add_startable(OrderManager(self))
-        self.acct_mgr = self.add_startable(AccountManager(self))
-        self.portf_mgr = self.add_startable(PortfolioManager(self))
-        self.stg_mgr = self.add_startable(StrategyManager(self))
+        self.order_mgr = self.add_startable(OrderManager())
+        self.acct_mgr = self.add_startable(AccountManager())
+        self.portf_mgr = self.add_startable(PortfolioManager())
+        self.stg_mgr = self.add_startable(StrategyManager())
 
         self.event_bus = EventBus()
 
@@ -40,34 +40,34 @@ class ApplicationContext(Startable):
 
     def get_clock(self):
         if self.app_config.clock_type == Clock.Simulation:
-            return SimulationClock(self)
-        return RealTimeClock(self)
+            return SimulationClock()
+        return RealTimeClock()
 
     def get_ref_data_mgr(self):
         if self.app_config.ref_data_mgr_type == RefDataManager.InMemory:
-            return InMemoryRefDataManager(self)
-        return DBRefDataManager(self)
+            return InMemoryRefDataManager()
+        return DBRefDataManager()
 
-    def start(self):
-        if not hasattr(self, "started") or not self.started:
-            for startable in self.startables:
-                startable.start(app_context=self)
-            self.started = True
-
-    def stop(self):
-        if self.started:
-            for startable in self.startables:
-                startable.stop()
-            self.started = False
-
+    # def start(self):
+    #     if not hasattr(self, "started") or not self.started:
+    #         for startable in self.startables:
+    #             startable.start(app_context=self)
+    #         self.started = True
     #
-    # def _start(self, app_context, **kwargs):
-    #     for startable in self.startables:
-    #         startable.start()
-    #
-    # def _stop(self):
-    #     for startable in self.startables:
-    #         startable.stop()
+    # def stop(self):
+    #     if self.started:
+    #         for startable in self.startables:
+    #             startable.stop()
+    #         self.started = False
+
+
+    def _start(self, app_context, **kwargs):
+        for startable in self.startables:
+            startable.start(self)
+
+    def _stop(self):
+        for startable in self.startables:
+            startable.stop()
 
     def get_trade_data_store(self):
         return self.provider_mgr.get(self.app_config.trade_datastore_id)

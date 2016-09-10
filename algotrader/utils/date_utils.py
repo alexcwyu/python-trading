@@ -26,4 +26,4 @@ class DateUtils:
 
     @staticmethod
     def timestamp_to_date(timestamp):
-        dt = datetime.datetime.fromtimestamp(timestamp)
+        return datetime.datetime.fromtimestamp(timestamp).date()

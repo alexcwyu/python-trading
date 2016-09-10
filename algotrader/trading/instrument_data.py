@@ -18,22 +18,22 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
     def _start(self, app_context, **kwargs):
         self.store = self.app_context.get_timeseries_data_store()
-        self._load_all()
+        self.load_all()
         self.subscription = EventBus.data_subject.subscribe(self.on_next)
 
     def _stop(self):
         if self.subscription:
             self.subscription.dispose()
-        self._save_all()
+        self.save_all()
         self.reset()
 
-    def _load_all(self):
+    def load_all(self):
         if self.store:
             series_list = self.store.load_all('series')
             for series in series_list:
                 self.__series_dict[series.id()] = series
 
-    def _save_all(self):
+    def save_all(self):
         if self.store:
             for series in self.__series_dict.values():
                 self.store.save_time_series(series)

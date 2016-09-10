@@ -12,10 +12,10 @@ class Account(AccountEventHandler, PositionHolder, Persistable, Startable):
         # 'open_orders'
     )
 
-    def __init__(self, id=None):
+    def __init__(self, id=None, values = None):
         super(Account, self).__init__()
         self.id = id
-        self.values = {}
+        self.values = values if values else {}
         # self.positions = {}
         # self.open_orders = []
 

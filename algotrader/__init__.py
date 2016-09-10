@@ -19,12 +19,12 @@ class Startable(HasId):
         if not hasattr(self, "started") or not self.started:
             self.app_context = app_context
             self._start(app_context=app_context, **kwargs)
-            self.started = True
+        self.started = True
 
     def stop(self):
-        if self.started:
+        if hasattr(self, "started") and self.started:
             self._stop()
-            self.started = False
+        self.started = False
 
     def reset(self):
         pass
@@ -67,17 +67,17 @@ class SimpleManager(Manager):
     def has_item(self, id):
         return id in self.item_dict
 
-    def _load_all(self):
+    def load_all(self):
         pass
 
-    def _save_all(self):
+    def save_all(self):
         pass
 
     def _start(self, app_context, **kwargs):
-        self._load_all()
+        self.load_all()
 
     def _stop(self):
-        self._save_all()
+        self.save_all()
 
         for item in self.item_dict.values():
             if isinstance(item, Startable):

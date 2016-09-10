@@ -31,7 +31,7 @@ class Account(AccountEventHandler, PositionHolder, Persistable, Startable):
     def id(self):
         return self.id
 
-    def _start(self):
+    def _start(self, app_context=None):
         pass
 
     def _stop(self):

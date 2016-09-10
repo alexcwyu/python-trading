@@ -11,7 +11,7 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         self.app_context = app_context
         self.mongo_config = app_context.app_config.get_config(MongoDBConfig)
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.client = MongoClient(host=self.mongo_config.host, port=self.mongo_config.port)
         self.db = self.client[self.mongo_config.dbname]
 

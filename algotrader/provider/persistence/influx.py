@@ -10,7 +10,7 @@ class InfluxDataStore(DataStore):
         self.app_context = app_context
         self.influx_config = app_context.app_config.get_config(InfluxDBConfig)
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.client = InfluxDBClient(self.influx_config.host, self.influx_config.port, self.influx_config.username,
                                      self.influx_config.password,
                                      self.influx_config.dbname)

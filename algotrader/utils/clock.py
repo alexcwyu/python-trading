@@ -63,8 +63,7 @@ class RealTimeScheduler(NewThreadScheduler):
 
 
 class RealTimeClock(Clock):
-    def __init__(self, scheduler=None, app_context=None):
-        self.app_context = app_context
+    def __init__(self, scheduler=None):
         super(RealTimeClock, self).__init__(scheduler=scheduler if scheduler else GEventScheduler())
 
     def now(self):
@@ -73,7 +72,8 @@ class RealTimeClock(Clock):
     def id(self):
         return Clock.RealTime
 
-    def _start(self):
+    def _start(self, app_context=None):
+        self.app_context = app_context
         pass
 
     def _stop(self):
@@ -97,13 +97,13 @@ class SimulationScheduler(HistoricalScheduler):
 
 
 class SimulationClock(Clock, MarketDataEventHandler):
-    def __init__(self, current_timestamp_mills=None, scheduler=None, app_context=None):
-        self.app_context = app_context
+    def __init__(self, current_timestamp_mills=None, scheduler=None):
         self.__current_timestamp_mills = current_timestamp_mills if current_timestamp_mills else 0
         super(SimulationClock, self).__init__(scheduler=scheduler if scheduler else SimulationScheduler(
             initial_clock=self.__current_timestamp_mills / 1000))
 
-    def _start(self):
+    def _start(self, app_context=None):
+        self.app_context = app_context
         self.subscription = EventBus.data_subject.subscribe(self.on_next)
 
     def _stop(self):

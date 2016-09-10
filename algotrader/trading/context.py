@@ -48,7 +48,7 @@ class ApplicationContext(Startable):
             return InMemoryRefDataManager(self)
         return DBRefDataManager(self)
 
-    def _start(self):
+    def _start(self, app_context=None):
         for startable in self.startables:
             startable.start()
 

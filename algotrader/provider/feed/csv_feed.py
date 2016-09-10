@@ -15,10 +15,9 @@ class CSVDataFeed(Feed):
         self.csv_config = app_context.app_config.get_config(CSVFeedConfig)
         self.path = self.csv_config.path
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
-
 
     def _stop(self):
         pass

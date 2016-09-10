@@ -181,7 +181,7 @@ class IBBroker(IBSocket, Broker, Feed):
         self.next_request_id = self.ib_config.next_request_id
         self.next_order_id = self.ib_config.next_order_id
 
-    def _start(self):
+    def _start(self, app_context=None):
 
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject

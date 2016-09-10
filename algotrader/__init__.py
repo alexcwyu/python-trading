@@ -15,9 +15,10 @@ class Startable(HasId):
     def __init__(self):
         self.started = False
 
-    def start(self, *args):
+    def start(self, app_context=None):
         if not hasattr(self, "started") or not self.started:
-            self._start(*args)
+            self.app_context=app_context
+            self._start(app_context)
             self.started = True
 
     def stop(self):
@@ -29,7 +30,7 @@ class Startable(HasId):
         pass
 
     @abc.abstractmethod
-    def _start(self, *args):
+    def _start(self, app_context=None):
         raise NotImplementedError()
 
     def _stop(self):
@@ -72,7 +73,7 @@ class SimpleManager(Manager):
     def _save_all(self):
         pass
 
-    def _start(self):
+    def _start(self, app_context=None):
         self._load_all()
 
     def _stop(self):

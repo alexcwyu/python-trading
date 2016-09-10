@@ -22,7 +22,7 @@ class PandasWebDataFeed(Feed):
         self.app_context = app_context
         self.system = system
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
 

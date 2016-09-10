@@ -44,7 +44,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         self.stock_value = 0
         self.analyzers = analyzers if analyzers is not None else [Pnl(), DrawDown()]
 
-    def _start(self):
+    def _start(self, app_context=None):
         for analyzer in self.analyzers:
             analyzer.set_portfolio(self)
         for order in self.app_context.order_mgr.get_portf_orders(self.id()):

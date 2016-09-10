@@ -5,6 +5,7 @@ from algotrader.utils import logger
 import abc
 from algotrader import Startable
 
+
 class EventHandler(Observer, Startable):
     __metaclass__ = abc.ABCMeta
 
@@ -17,7 +18,7 @@ class EventHandler(Observer, Startable):
     def on_completed(self):
         logger.debug("[%s] Completed" % self.__class__.__name__)
 
-    def _start(self):
+    def _start(self, app_context=None):
         pass
 
     def _stop(self):
@@ -26,6 +27,7 @@ class EventHandler(Observer, Startable):
 
 class MarketDataEventHandler(EventHandler):
     __metaclass__ = abc.ABCMeta
+
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
 
@@ -41,6 +43,7 @@ class MarketDataEventHandler(EventHandler):
 
 class OrderEventHandler(EventHandler):
     __metaclass__ = abc.ABCMeta
+
     # Sync interface, return Order
     def send_order(self, new_ord_req):
         raise NotImplementedError()
@@ -71,6 +74,7 @@ class OrderEventHandler(EventHandler):
 
 class ExecutionEventHandler(EventHandler):
     __metaclass__ = abc.ABCMeta
+
     def on_ord_upd(self, ord_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
 
@@ -80,6 +84,7 @@ class ExecutionEventHandler(EventHandler):
 
 class AccountEventHandler(EventHandler):
     __metaclass__ = abc.ABCMeta
+
     def on_acc_upd(self, acc_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, acc_upd))
 

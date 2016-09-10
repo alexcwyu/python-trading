@@ -10,7 +10,7 @@ class KDBDataStore(DataStore):
         self.app_context = app_context
         self.kdb_config = app_context.app_config.get_config(KDBConfig)
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.q = qconnection.QConnection(host=self.kdb_config.host, port=self.kdb_config.port)
 
     def _stop(self):

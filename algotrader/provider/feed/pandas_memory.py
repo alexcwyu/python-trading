@@ -28,7 +28,7 @@ class PandasMemoryDataFeed(Feed):
         self.app_context = app_context
         self.sub_keys = []
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
         self.__load_data(self.sub_keys)

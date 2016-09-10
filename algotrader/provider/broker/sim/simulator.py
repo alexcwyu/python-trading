@@ -28,16 +28,13 @@ class Simulator(Broker, MarketDataEventHandler):
         self.clordid_ordid_map = defaultdict(dict)
         self.quote_map = {}
 
-
-    def get_fill_strategy(self, fill_strategy_id):
+    def get_fill_strategy(self, fill_strategy_id=None):
         return DefaultFillStrategy(self.app_context)
 
-
-    def get_commission(self, commission_id):
+    def get_commission(self, commission_id=None):
         return NoCommission()
 
-
-    def _start(self):
+    def _start(self, app_context=None):
         self.exec_handler = self.app_context.order_mgr
         self.subscription = EventBus.data_subject.subscribe(self.on_next)
 

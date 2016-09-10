@@ -195,13 +195,12 @@ class RefDataManager(Manager):
         return self.__exch_dict.get(exch_id, None)
 
 
-
 class DBRefDataManager(RefDataManager):
     def __init__(self, app_context):
         super(DBRefDataManager, self).__init__()
         self.app_context = app_context
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.store = self.app_context.get_ref_data_store()
         self._load_all()
 

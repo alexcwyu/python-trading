@@ -22,7 +22,7 @@ class MockRefDataManager(RefDataManager):
 
         self.start()
 
-    def _start(self):
+    def _start(self, app_context=None):
         for index, row in self.inst_df.iterrows():
             inst = Instrument(inst_id=row['inst_id'], name=row['name'], type=row['type'], symbol=row['symbol'],
                               exch_id=row['exch_id'], ccy_id=row['ccy_id'], alt_symbol=row['alt_symbol'],

@@ -10,12 +10,20 @@ from algotrader.trading.position import PositionHolder
 
 
 class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable, Startable, HasId):
-
     __slots__ = (
         'stg_id',
         'trading_config',
+
+        'app_context',
         'ord_reqs',
-        'orders'
+        'orders',
+        'ref_data_mgr',
+        'portfolio',
+        'feed',
+        'broker',
+        'clock',
+        'event_subscription',
+        'instruments'
     )
 
     __transient__ = (
@@ -42,7 +50,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
     def __get_next_ord_id(self):
         return self.app_context.seq_mgr.get_next_sequence(self.id())
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.portfolio = self.app_context.portf_mgr.get_portfolio(self.trading_config.portfolio_id)
         self.feed = self.app_context.feed_mgr.get(self.trading_config.feed_id) if self.trading_config else None
@@ -51,7 +59,6 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         self.instruments = self.ref_data_mgr.get_insts(self.trading_config.instrument_ids)
         self.clock = self.app_context.get_clock(self.trading_config.clock_type)
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
-
 
         for order in self.app_context.order_mgr.get_strategy_orders(self.id()):
             self.orders[order.cl_ord_id] = order

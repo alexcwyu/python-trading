@@ -6,7 +6,7 @@ class PortfolioManager(SimpleManager):
         super(PortfolioManager, self).__init__()
         self.app_context = app_context
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.store = self.app_context.get_trade_data_store()
         self._load_all()
 

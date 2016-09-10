@@ -3,11 +3,11 @@ from algotrader import SimpleManager
 
 class SequenceManager(SimpleManager):
 
-    def __init__(self, app_context=None):
+    def __init__(self):
         super(SequenceManager, self).__init__()
-        self.app_context = app_context
 
-    def _start(self):
+    def _start(self, app_context=None):
+        self.app_context = app_context
         self.store = self.app_context.get_seq_data_store()
         self._load_all()
 

@@ -18,7 +18,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         self.order_dict = {}
         self.ord_reqs_dict = {}
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.store = self.app_context.get_trade_data_store()
         self._load_all()
         self.subscriptions = []

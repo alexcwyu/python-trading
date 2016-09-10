@@ -16,7 +16,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__trade_dict = {}
         self.__series_dict = {}
 
-    def _start(self):
+    def _start(self, app_context=None):
         self.store = self.app_context.get_timeseries_data_store()
         self._load_all()
         self.subscription = EventBus.data_subject.subscribe(self.on_next)

@@ -21,6 +21,11 @@ class PortfolioManager(SimpleManager):
             for portfolio in self.all_items():
                 self.store.save_portfolio(portfolio)
 
+    def add(self, portfolio):
+        super(PortfolioManager, self).add(portfolio)
+        if self.store:
+            self.store.save_portfolio(portfolio)
+
     def id(self):
         return "PortfolioManager"
 

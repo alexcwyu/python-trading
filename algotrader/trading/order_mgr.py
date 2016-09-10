@@ -35,6 +35,9 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         self.save_all()
         self.reset()
 
+    def all_orders(self):
+        return [order for order in self.order_dict.itervalues()]
+
     def load_all(self):
         if self.store:
             orders = self.store.load_all('orders')
@@ -47,7 +50,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
 
     def save_all(self):
         if self.store:
-            for order in self.order_dict.itervalues():
+            for order in self.all_orders():
                 self.store.save_order(order)
 
             for new_order_req in self.ord_reqs_dict.itervalues():

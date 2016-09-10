@@ -4,18 +4,14 @@ import time
 from pymongo import MongoClient
 
 from algotrader.config.app import ApplicationConfig
-from algotrader.config.trading import BacktestingConfig
 from algotrader.config.persistence import MongoDBConfig
+from algotrader.config.trading import BacktestingConfig
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
 from algotrader.provider.persistence import DataStore
 from algotrader.provider.persistence.mongodb import MongoDBDataStore
-from algotrader.strategy.strategy import Strategy
-from algotrader.strategy.strategy_mgr import StrategyManager
-from algotrader.trading.account import Account
 from algotrader.trading.account_mgr import AccountManager
 from algotrader.trading.context import ApplicationContext
-from algotrader.trading.order import Order
 from algotrader.trading.portfolio import Portfolio
 from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils.ser_deser import JsonSerializer, MapSerializer
@@ -124,10 +120,10 @@ def test_save_portfolio():
     context = get_default_app_context()
 
     store = context.provider_mgr.get(DataStore.Mongo)
-    store.start(app_context= context)
+    store.start(app_context=context)
 
     portf_mgr = context.provider_mgr
-    portf_mgr.start(app_context= context)
+    portf_mgr.start(app_context=context)
 
     p1 = portf_mgr.new_portfolio(portf_id=1, cash=1000)
     p2 = portf_mgr.new_portfolio(portf_id=2, cash=1000)
@@ -147,22 +143,21 @@ def test_save_strategies():
     context = get_default_app_context()
 
     store = context.provider_mgr.get(DataStore.Mongo)
-    store.start(app_context= context)
-
+    store.start(app_context=context)
 
     stg_mgr = context.stg_mgr
-    stg_mgr.start(app_context= context)
+    stg_mgr.start(app_context=context)
     stg_mgr.reset()
 
-    stg1 = stg_mgr.new_stg(trading_config=BacktestingConfig(id='1', stg_id='test1', stg_cls='algotrader.strategy.ema_strategy.EMAStrategy'))
-
+    stg1 = stg_mgr.new_stg(trading_config=BacktestingConfig(id='1', stg_id='test1',
+                                                            stg_cls='algotrader.strategy.ema_strategy.EMAStrategy'))
 
     ord_mrg = context.order_mgr
-    ord_mrg.start(app_context= context)
+    ord_mrg.start(app_context=context)
 
     nos = NewOrderRequest(cl_id='test1', cl_ord_id='1', inst_id=1, portf_id='test_porf', action=OrdAction.BUY,
-                    type=OrdType.LIMIT, qty=1000,
-                    limit_price=18.5)
+                          type=OrdType.LIMIT, qty=1000,
+                          limit_price=18.5)
     order = ord_mrg.send_order(nos)
 
     stg1.ord_reqs[nos.cl_ord_id] = nos
@@ -170,33 +165,116 @@ def test_save_strategies():
     stg1.add_position(nos.inst_id, nos.cl_id, nos.cl_ord_id, nos.qty)
     stg1.update_position_price(time=0, inst_id=nos.inst_id, price=100)
 
-    stg2 = stg_mgr.new_stg(trading_config=BacktestingConfig(id='2', stg_id='test2', stg_cls='algotrader.strategy.ema_strategy.EMAStrategy'))
+    stg2 = stg_mgr.new_stg(trading_config=BacktestingConfig(id='2', stg_id='test2',
+                                                            stg_cls='algotrader.strategy.ema_strategy.EMAStrategy'))
 
     before = stg_mgr.get('test1')
 
     stg_mgr.stop()
 
-    stg_mgr.start(app_context= context)
+    stg_mgr.start(app_context=context)
     after = stg_mgr.get('test1')
-    after.start(app_context= context)
+    after.start(app_context=context)
 
     print "before %s" % MapSerializer.serialize(before)
     print "after %s" % MapSerializer.serialize(after)
 
 
+def test_save():
+    context = get_default_app_context()
+
+    store = context.provider_mgr.get(DataStore.Mongo)
+    store.start(app_context=context)
+
+    stg_mgr = context.stg_mgr
+    stg_mgr.start(app_context=context)
+
+    portf_mgr = context.portf_mgr
+    portf_mgr.start(app_context=context)
+
+    ord_mrg = context.order_mgr
+    ord_mrg.start(app_context=context)
+
+    p1 = portf_mgr.new_portfolio(portf_id=1, cash=1000)
+    p2 = portf_mgr.new_portfolio(portf_id=2, cash=1000)
+    p1.start(app_context=context)
+    p2.start(app_context=context)
+
+
+    stg1 = stg_mgr.new_stg(trading_config=BacktestingConfig(id='1', stg_id='test1',
+                                                            stg_cls='algotrader.strategy.ema_strategy.EMAStrategy'))
+    stg2 = stg_mgr.new_stg(trading_config=BacktestingConfig(id='2', stg_id='test2',
+                                                            stg_cls='algotrader.strategy.ema_strategy.EMAStrategy'))
+    stg1.start(app_context=context)
+    stg2.start(app_context=context)
+
+    nos = NewOrderRequest(cl_id='test1', cl_ord_id='1', inst_id=1, portf_id='test_porf', action=OrdAction.BUY,
+                          type=OrdType.LIMIT, qty=1000,
+                          limit_price=18.5)
+    order = ord_mrg.send_order(nos)
+
+    stg1.ord_reqs[nos.cl_ord_id] = nos
+    stg1.orders[order.cl_ord_id] = order
+    stg1.add_position(nos.inst_id, nos.cl_id, nos.cl_ord_id, nos.qty)
+    stg1.update_position_price(time=0, inst_id=nos.inst_id, price=100)
+
+    print portf_mgr.get(1)
+    print portf_mgr.get(2)
+
+
+    print stg_mgr.get('test1')
+    print stg_mgr.get('test2')
+
+    print ord_mrg.all_orders()
+
+
+def test_load():
+    context = get_default_app_context()
+
+    store = context.provider_mgr.get(DataStore.Mongo)
+    store.start(app_context=context)
+
+    stg_mgr = context.stg_mgr
+    stg_mgr.start(app_context=context)
+
+    portf_mgr = context.portf_mgr
+    portf_mgr.start(app_context=context)
+
+    ord_mrg = context.order_mgr
+    ord_mrg.start(app_context=context)
+
+    p1= portf_mgr.get(1)
+    p2= portf_mgr.get(2)
+
+
+    stg1 = stg_mgr.get('test1')
+    stg2 = stg_mgr.get('test2')
+
+    p1.start(app_context=context)
+    p2.start(app_context=context)
+    stg1.start(app_context=context)
+    stg2.start(app_context=context)
+
+    print p1
+    print p2
+    print stg1
+    print stg2
+
+    print ord_mrg.all_orders()
+
+
 def test_save_accounts():
     context = get_default_app_context()
     store = context.provider_mgr.get(DataStore.Mongo)
-    store.start(app_context= context)
+    store.start(app_context=context)
 
     acct_mgr = AccountManager(store)
-    acct_mgr.start(app_context= context)
+    acct_mgr.start(app_context=context)
 
-    store.start(app_context= context)
+    store.start(app_context=context)
 
     acct1 = acct_mgr.new_account(name="1")
     acct2 = acct_mgr.new_account(name="2")
-
 
     before = acct_mgr.all_accounts()
 
@@ -212,10 +290,10 @@ def test_save_accounts():
 def test_save_sequences():
     context = get_default_app_context()
     store = context.provider_mgr.get(DataStore.Mongo)
-    store.start(app_context= context)
+    store.start(app_context=context)
 
     seq_mgr = SequenceManager(context)
-    seq_mgr.start(app_context= context)
+    seq_mgr.start(app_context=context)
 
     print seq_mgr.get_next_sequence("order")
     print seq_mgr.get_next_sequence("order")
@@ -229,6 +307,10 @@ def test_save_sequences():
 # test_save_orders()
 
 
-#test_save_portfolio()
+# test_save_portfolio()
 
-test_save_strategies()
+#test_save_strategies()
+
+#test_save()
+
+test_load()

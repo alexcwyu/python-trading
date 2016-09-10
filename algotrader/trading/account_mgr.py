@@ -1,6 +1,7 @@
 from algotrader import SimpleManager
 from algotrader.trading.account import Account
 
+
 class AccountManager(SimpleManager):
     def __init__(self):
         super(AccountManager, self).__init__()
@@ -20,10 +21,15 @@ class AccountManager(SimpleManager):
             for account in self.all_items():
                 self.store.save_account(account)
 
+    def add(self, account):
+        super(AccountManager, self).add(account)
+        if self.store:
+            self.store.save_account(account)
+
     def id(self):
         return "AccountManager"
 
-    def new_account(self, name, values ={}):
+    def new_account(self, name, values={}):
         account = Account(name, values=values)
         self.add(account)
         return account

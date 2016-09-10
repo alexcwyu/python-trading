@@ -23,6 +23,11 @@ class StrategyManager(SimpleManager):
             for stg in self.all_items():
                 self.store.save_strategy(stg)
 
+    def add(self, stg):
+        super(StrategyManager, self).add(stg)
+        if self.store:
+            self.store.save_strategy(stg)
+
     def id(self):
         return "StrategyManager"
 

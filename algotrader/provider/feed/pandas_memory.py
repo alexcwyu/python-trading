@@ -16,7 +16,7 @@ class PandasMemoryDataFeed(Feed):
     This is a class to make a data feed from dataframe we already have in memory
     """
 
-    def __init__(self, app_context=None, dict_of_df=None):
+    def __init__(self):
         """
         :param dict_of_df: dictionary of pandas DataFrame with symbol as key
         :param ref_data_mgr:
@@ -24,12 +24,11 @@ class PandasMemoryDataFeed(Feed):
         :return:
         """
         super(PandasMemoryDataFeed, self).__init__()
-        self.dict_of_df = dict_of_df
-        self.app_context = app_context
         self.sub_keys = []
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, dict_of_df=None):
         self.ref_data_mgr = self.app_context.ref_data_mgr
+        self.dict_of_df = dict_of_df
         self.data_event_bus = self.app_context.event_bus.data_subject
         self.__load_data(self.sub_keys)
         for index, row in self.df.iterrows():

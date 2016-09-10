@@ -8,19 +8,21 @@ from algotrader.utils import logger
 
 
 class VixVxvRatio(Strategy):
-    def __init__(self, stg_id, qty, threshold, app_context, trading_config):
-        super(VixVxvRatio, self).__init__(stg_id=stg_id, app_context=app_context, trading_config=trading_config)
+    def __init__(self, stg_id, qty, threshold, trading_config):
+        super(VixVxvRatio, self).__init__(stg_id=stg_id, trading_config=trading_config)
 
+        self.threshold = threshold
+        self.day_count = 0
+        self.order = None
+        self.qty = qty
+
+    def _start(self, app_context, **kwargs):
         self.xiv = app_context.ref_data_mgr.get_inst('XIV', 'SMART')
         self.vxx = app_context.ref_data_mgr.get_inst('VXX', 'SMART')
         self.vxv = app_context.ref_data_mgr.get_inst('VXV', 'SMART')
         self.vix = app_context.ref_data_mgr.get_inst('VIX', 'SMART')  # TODO: Review index
         instruments = [self.vxx, self.xiv, self.vix]
 
-        self.threshold = threshold
-        self.day_count = 0
-        self.order = None
-        self.qty = qty
         self.vix_bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.vix.get_symbol())  # non tradable
         self.vxv_bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.vxv.get_symbol())  # non tradable
         self.xiv_bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.xiv.get_symbol())
@@ -55,17 +57,19 @@ class VixVxvRatio(Strategy):
 
 class VxvVxmtRatio(Strategy):
     def __init__(self, stg_id, qty, threshold,
-                 app_context, trading_config):
+                 trading_config):
+        super(VxvVxmtRatio, self).__init__(stg_id=stg_id, trading_config=trading_config)
+        self.threshold = threshold
+        self.day_count = 0
+        self.order = None
+        self.qty = qty
+
+    def _start(self, app_context, **kwargs):
         self.xiv = app_context.ref_data_mgr.get_inst('XIV', 'SMART')
         self.vxx = app_context.ref_data_mgr.get_inst('VXX', 'SMART')
         self.vxv = app_context.ref_data_mgr.get_inst('VXV', 'SMART')
         self.vxmt = app_context.ref_data_mgr.get_inst('VXMT', 'SMART')
         instruments = [self.vxx, self.xiv, self.vxmt]
-        super(VxvVxmtRatio, self).__init__(stg_id=stg_id, app_context=app_context, trading_config=trading_config)
-        self.threshold = threshold
-        self.day_count = 0
-        self.order = None
-        self.qty = qty
         self.vix_close = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.vix.get_symbol())
         self.xiv_close = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.xiv.get_symbol())
         self.vxv_close = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.vxv.get_symbol())

@@ -6,12 +6,11 @@ from algotrader.utils.ser_deser import MapSerializer
 
 
 class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
-    def __init__(self, app_context):
+    def __init__(self):
         super(MongoDBDataStore, self).__init__()
-        self.app_context = app_context
-        self.mongo_config = app_context.app_config.get_config(MongoDBConfig)
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
+        self.mongo_config = app_context.app_config.get_config(MongoDBConfig)
         self.client = MongoClient(host=self.mongo_config.host, port=self.mongo_config.port)
         self.db = self.client[self.mongo_config.dbname]
 

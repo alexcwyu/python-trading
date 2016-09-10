@@ -30,21 +30,20 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         'orders',
     )
 
-    def __init__(self, portf_id="test", cash=1000000, analyzers=None, app_context=None):
+    def __init__(self, portf_id="test", cash=1000000, analyzers=None):
 
         super(Portfolio, self).__init__()
         self.portf_id = portf_id
         self.ord_reqs = {}
         self.orders = {}
 
-        self.app_context = app_context
         self.performance_series = DataSeries("%s.Performance" % self.portf_id, missing_value=0)
         self.total_equity = 0
         self.cash = cash
         self.stock_value = 0
         self.analyzers = analyzers if analyzers is not None else [Pnl(), DrawDown()]
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         for analyzer in self.analyzers:
             analyzer.set_portfolio(self)
         for order in self.app_context.order_mgr.get_portf_orders(self.id()):

@@ -48,13 +48,26 @@ class ApplicationContext(Startable):
             return InMemoryRefDataManager(self)
         return DBRefDataManager(self)
 
-    def _start(self, app_context=None):
-        for startable in self.startables:
-            startable.start()
+    def start(self):
+        if not hasattr(self, "started") or not self.started:
+            for startable in self.startables:
+                startable.start(app_context=self)
+            self.started = True
 
-    def _stop(self):
-        for startable in self.startables:
-            startable.stop()
+    def stop(self):
+        if self.started:
+            for startable in self.startables:
+                startable.stop()
+            self.started = False
+
+    #
+    # def _start(self, app_context, **kwargs):
+    #     for startable in self.startables:
+    #         startable.start()
+    #
+    # def _stop(self):
+    #     for startable in self.startables:
+    #         startable.stop()
 
     def get_trade_data_store(self):
         return self.provider_mgr.get(self.app_config.trade_datastore_id)

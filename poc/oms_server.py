@@ -9,7 +9,7 @@ class RemoteOrderManager(OrderManager):
         super(RemoteOrderManager, self).__init__()
         self.__address = address
 
-    def _start(self):
+    def _start(self, app_context, **kwargs):
         self.__server = zerorpc.Server(self)
         self.__server.bind(self.__address)
         logger.info("starting OMS")

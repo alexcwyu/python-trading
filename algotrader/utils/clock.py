@@ -72,7 +72,7 @@ class RealTimeClock(Clock):
     def id(self):
         return Clock.RealTime
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         self.app_context = app_context
         pass
 
@@ -102,7 +102,7 @@ class SimulationClock(Clock, MarketDataEventHandler):
         super(SimulationClock, self).__init__(scheduler=scheduler if scheduler else SimulationScheduler(
             initial_clock=self.__current_timestamp_mills / 1000))
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         self.app_context = app_context
         self.subscription = EventBus.data_subject.subscribe(self.on_next)
 

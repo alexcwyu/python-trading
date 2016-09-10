@@ -12,17 +12,8 @@ from algotrader.utils import logger
 
 
 class Simulator(Broker, MarketDataEventHandler):
-    def __init__(self, app_context=None):
-
+    def __init__(self):
         super(Simulator, self).__init__()
-        self.app_context = app_context
-        self.sim_config = app_context.app_config.get_config(SimulatorConfig)
-        self.clock = app_context.get_clock()
-        self.next_ord_id = self.sim_config.next_ord_id
-        self.next_exec_id = self.sim_config.next_exec_id
-        self.fill_strategy = self.get_fill_strategy(self.sim_config.fill_strategy_id)
-        self.commission = self.get_commission(self.sim_config.commission_id)
-
         self.ord_req_map = defaultdict(lambda: defaultdict(dict))
         self.ord_req_fill_status = defaultdict(dict)
         self.clordid_ordid_map = defaultdict(dict)
@@ -34,7 +25,14 @@ class Simulator(Broker, MarketDataEventHandler):
     def get_commission(self, commission_id=None):
         return NoCommission()
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
+        self.app_context = app_context
+        self.sim_config = app_context.app_config.get_config(SimulatorConfig)
+        self.clock = app_context.get_clock()
+        self.next_ord_id = self.sim_config.next_ord_id
+        self.next_exec_id = self.sim_config.next_exec_id
+        self.fill_strategy = self.get_fill_strategy(self.sim_config.fill_strategy_id)
+        self.commission = self.get_commission(self.sim_config.commission_id)
         self.exec_handler = self.app_context.order_mgr
         self.subscription = EventBus.data_subject.subscribe(self.on_next)
 

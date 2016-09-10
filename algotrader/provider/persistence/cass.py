@@ -5,13 +5,12 @@ from algotrader.provider.persistence import DataStore
 
 
 class CassandraDataStore(DataStore):
-    def __init__(self, app_context):
+    def __init__(self):
         super(CassandraDataStore, self).__init__()
-        self.app_context = app_context
-        self.cass_config = app_context.app_config.get_config(CassandraConfig)
 
-    def _start(self, app_context=None):
-        # TODO authentication provider
+
+    def _start(self, app_context, **kwargs):
+        self.cass_config = app_context.app_config.get_config(CassandraConfig)
         self.cluster = Cluster(contact_points=self.cass_config.contact_points, port=self.cass_config.port)
         self.session = self.cluster.connect()
 

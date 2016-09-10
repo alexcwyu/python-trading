@@ -10,12 +10,12 @@ dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
 
 
 class CSVDataFeed(Feed):
-    def __init__(self, app_context=None):
+    def __init__(self):
         super(CSVDataFeed, self).__init__()
+
+    def _start(self, app_context, **kwargs):
         self.csv_config = app_context.app_config.get_config(CSVFeedConfig)
         self.path = self.csv_config.path
-
-    def _start(self, app_context=None):
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
 

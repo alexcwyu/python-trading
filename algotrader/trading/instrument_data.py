@@ -8,21 +8,22 @@ from algotrader.utils.time_series import DataSeries
 
 
 class InstrumentDataManager(MarketDataEventHandler, Manager):
-    def __init__(self, app_context):
+    def __init__(self):
         super(InstrumentDataManager, self).__init__()
-        self.app_context = app_context
         self.__bar_dict = {}
         self.__quote_dict = {}
         self.__trade_dict = {}
         self.__series_dict = {}
+        self.subscription = None
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         self.store = self.app_context.get_timeseries_data_store()
         self._load_all()
         self.subscription = EventBus.data_subject.subscribe(self.on_next)
 
     def _stop(self):
-        self.subscription.dispose()
+        if self.subscription:
+            self.subscription.dispose()
         self._save_all()
         self.reset()
 

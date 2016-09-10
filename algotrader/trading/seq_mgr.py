@@ -6,7 +6,7 @@ class SequenceManager(SimpleManager):
     def __init__(self):
         super(SequenceManager, self).__init__()
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         self.app_context = app_context
         self.store = self.app_context.get_seq_data_store()
         self._load_all()

@@ -17,12 +17,11 @@ from algotrader.utils.date_utils import DateUtils
 class PandasWebDataFeed(Feed):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, system, app_context=None):
+    def __init__(self, system):
         super(PandasWebDataFeed, self).__init__()
-        self.app_context = app_context
         self.system = system
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
 
@@ -73,8 +72,8 @@ class PandasWebDataFeed(Feed):
 class YahooDataFeed(PandasWebDataFeed):
     URL = 'http://real-chart.finance.yahoo.com/table.csv?s=%s&d=%s&e=%s&f=%s&g=d&a=%s&b=%s&c=%s&ignore=.csv'
 
-    def __init__(self, app_context=None):
-        super(YahooDataFeed, self).__init__(system='yahoo', app_context=app_context)
+    def __init__(self):
+        super(YahooDataFeed, self).__init__(system='yahoo')
 
     def id(self):
         return Feed.Yahoo
@@ -93,8 +92,8 @@ class YahooDataFeed(PandasWebDataFeed):
 
 
 class GoogleDataFeed(PandasWebDataFeed):
-    def __init__(self, app_context=None):
-        super(GoogleDataFeed, self).__init__(system='google', app_context=app_context)
+    def __init__(self):
+        super(GoogleDataFeed, self).__init__(system='google')
 
     def id(self):
         return Feed.Google

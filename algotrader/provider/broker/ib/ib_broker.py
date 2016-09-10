@@ -165,9 +165,15 @@ class TWSPoller(threading.Thread):
 
 
 class IBBroker(IBSocket, Broker, Feed):
-    def __init__(self, app_context=None):
+    def __init__(self):
         super(IBBroker, self).__init__()
-        self.app_context = app_context
+
+        self.data_sub_reg = SubscriptionRegistry()
+        self.ord_req_reg = OrderReqRegistry()
+        self.next_request_id = self.ib_config.next_request_id
+        self.next_order_id = self.ib_config.next_order_id
+
+    def _start(self, app_context, **kwargs):
         self.ib_config = app_context.app_config.get_config(IBConfig)
 
         self.tws = swigibpy.EPosixClientSocket(self)
@@ -175,13 +181,6 @@ class IBBroker(IBSocket, Broker, Feed):
         self.port = self.ib_config.port
         self.client_id = self.ib_config.client_id
         self.account = self.ib_config.account
-
-        self.data_sub_reg = SubscriptionRegistry()
-        self.ord_req_reg = OrderReqRegistry()
-        self.next_request_id = self.ib_config.next_request_id
-        self.next_order_id = self.ib_config.next_order_id
-
-    def _start(self, app_context=None):
 
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject

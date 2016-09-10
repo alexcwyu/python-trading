@@ -2,11 +2,10 @@ from algotrader import SimpleManager
 
 
 class AccountManager(SimpleManager):
-    def __init__(self, app_context=None):
+    def __init__(self):
         super(AccountManager, self).__init__()
-        self.app_context = app_context
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         self.store = self.app_context.get_trade_data_store()
         self._load_all()
 

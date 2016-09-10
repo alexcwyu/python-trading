@@ -36,7 +36,7 @@ class BarAggregator(MarketDataEventHandler):
         self.__timestamp = clock.now()
         self.__reset()
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         self.__input.subject.subscribe(on_next=self.on_update)
         if self.__output_bar_type == BarType.Time:
             current_ts = self.__clock.now()

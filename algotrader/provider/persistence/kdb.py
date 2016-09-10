@@ -5,12 +5,11 @@ from algotrader.provider.persistence import DataStore
 
 
 class KDBDataStore(DataStore):
-    def __init__(self, app_context):
+    def __init__(self):
         super(KDBDataStore, self).__init__()
-        self.app_context = app_context
-        self.kdb_config = app_context.app_config.get_config(KDBConfig)
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
+        self.kdb_config = app_context.app_config.get_config(KDBConfig)
         self.q = qconnection.QConnection(host=self.kdb_config.host, port=self.kdb_config.port)
 
     def _stop(self):

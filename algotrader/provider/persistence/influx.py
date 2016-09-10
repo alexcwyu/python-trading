@@ -5,12 +5,12 @@ from algotrader.provider.persistence import DataStore
 
 
 class InfluxDataStore(DataStore):
-    def __init__(self, app_context):
+    def __init__(self):
         super(InfluxDataStore, self).__init__()
-        self.app_context = app_context
-        self.influx_config = app_context.app_config.get_config(InfluxDBConfig)
 
-    def _start(self, app_context=None):
+
+    def _start(self, app_context, **kwargs):
+        self.influx_config = app_context.app_config.get_config(InfluxDBConfig)
         self.client = InfluxDBClient(self.influx_config.host, self.influx_config.port, self.influx_config.username,
                                      self.influx_config.password,
                                      self.influx_config.dbname)

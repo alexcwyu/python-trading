@@ -12,13 +12,12 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         'ord_reqs_dict',
     )
 
-    def __init__(self, app_context=None):
+    def __init__(self):
         super(OrderManager, self).__init__()
-        self.app_context = app_context
         self.order_dict = {}
         self.ord_reqs_dict = {}
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         self.store = self.app_context.get_trade_data_store()
         self._load_all()
         self.subscriptions = []

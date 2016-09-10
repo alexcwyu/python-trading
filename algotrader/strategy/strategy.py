@@ -39,10 +39,9 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         'instruments'
     )
 
-    def __init__(self, stg_id=None, app_context=None, trading_config=None):
+    def __init__(self, stg_id=None, trading_config=None):
         super(Strategy, self).__init__()
         self.stg_id = stg_id
-        self.app_context = app_context
         self.trading_config = trading_config
         self.ord_reqs = {}
         self.orders = {}
@@ -50,7 +49,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
     def __get_next_ord_id(self):
         return self.app_context.seq_mgr.get_next_sequence(self.id())
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.portfolio = self.app_context.portf_mgr.get_portfolio(self.trading_config.portfolio_id)
         self.feed = self.app_context.feed_mgr.get(self.trading_config.feed_id) if self.trading_config else None

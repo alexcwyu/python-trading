@@ -18,7 +18,7 @@ class EventHandler(Observer, Startable):
     def on_completed(self):
         logger.debug("[%s] Completed" % self.__class__.__name__)
 
-    def _start(self, app_context=None):
+    def _start(self, app_context, **kwargs):
         pass
 
     def _stop(self):

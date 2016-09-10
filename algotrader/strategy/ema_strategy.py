@@ -5,11 +5,13 @@ from algotrader.utils import logger
 
 
 class EMAStrategy(Strategy):
-    def __init__(self, stg_id, qty, app_context, trading_config):
-        super(EMAStrategy, self).__init__(stg_id=stg_id, app_context=app_context, trading_config=trading_config)
+    def __init__(self, stg_id, qty, trading_config):
+        super(EMAStrategy, self).__init__(stg_id=stg_id, trading_config=trading_config)
         self.buy_order = None
         self.qty = qty
-        self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % trading_config.instrument_ids[0])
+
+    def _start(self, app_context, **kwargs):
+        self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
         self.ema_fast = EMA(self.bar, 'close', 10)
         self.ema_slow = EMA(self.bar, 'close', 25)
 

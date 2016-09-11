@@ -4,14 +4,18 @@ from unittest import TestCase
 
 import numpy as np
 
+from algotrader.config.app import ApplicationConfig
 from algotrader.technical.ma import SMA
-from algotrader.trading.instrument_data import inst_data_mgr
+from algotrader.trading.context import ApplicationContext
 
 
 class MovingAverageTest(TestCase):
+    def setUp(self):
+        self.app_config = ApplicationConfig(None, None, None, None, None, None, None)
+        self.app_context = ApplicationContext(app_config=self.app_config)
+
     def test_name(self):
-        inst_data_mgr.clear()
-        bar = inst_data_mgr.get_series("bar")
+        bar = self.app_context.inst_data_mgr.get_series("bar")
         sma = SMA(bar, input_key='close', length=3)
         self.assertEquals("SMA('bar',close,3)", sma.name)
 
@@ -19,15 +23,17 @@ class MovingAverageTest(TestCase):
         self.assertEquals("SMA(SMA('bar',close,3),value,10)", sma2.name)
 
     def test_empty_at_initialize(self):
-        inst_data_mgr.clear()
-        close = inst_data_mgr.get_series("bar")
+        close = self.app_context.inst_data_mgr.get_series("bar")
         sma = SMA(close, 'close', 3)
         self.assertEquals(0, len(sma.get_data()))
 
     def test_nan_before_size(self):
-        inst_data_mgr.clear()
-        bar = inst_data_mgr.get_series("bar")
+        bar = self.app_context.inst_data_mgr.get_series("bar")
+        bar.start(self.app_context)
+
         sma = SMA(bar, 'close', 3)
+        sma.start(self.app_context)
+
         t1 = datetime.datetime.now()
         t2 = t1 + datetime.timedelta(0, 3)
         t3 = t2 + datetime.timedelta(0, 3)
@@ -48,9 +54,11 @@ class MovingAverageTest(TestCase):
                           sma.get_data())
 
     def test_moving_average_calculation(self):
-        inst_data_mgr.clear()
-        bar = inst_data_mgr.get_series("bar")
+        bar = self.app_context.inst_data_mgr.get_series("bar")
+        bar.start(self.app_context)
+
         sma = SMA(bar, input_key='close', length=3)
+        sma.start(self.app_context)
 
         t1 = datetime.datetime.now()
         t2 = t1 + datetime.timedelta(0, 3)

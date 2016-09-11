@@ -11,9 +11,9 @@ class EMAStrategy(Strategy):
 
     def _start(self, app_context, **kwargs):
         self.qty = self.get_config_value("qty", 1)
-        # self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
-        # self.ema_fast = EMA(self.bar, 'close', 10)
-        # self.ema_slow = EMA(self.bar, 'close', 25)
+        self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
+        self.ema_fast = EMA(self.bar, 'close', 10)
+        self.ema_slow = EMA(self.bar, 'close', 25)
         super(EMAStrategy, self)._start(app_context, **kwargs)
 
     def on_bar(self, bar):

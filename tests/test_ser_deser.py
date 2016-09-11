@@ -3,6 +3,8 @@ from unittest import TestCase
 
 from nose_parameterized import parameterized, param
 
+from algotrader.provider.broker import Broker
+from algotrader.provider.feed import Feed
 from algotrader.config.trading import BacktestingConfig
 from algotrader.event.account import AccountUpdate, PortfolioUpdate
 from algotrader.event.market_data import Bar, Trade, Quote, MarketDepth, MDOperation, MDSide
@@ -15,12 +17,14 @@ from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.technical.ma import SMA
 from algotrader.trading.account import Account
-from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.order import Order
 from algotrader.trading.position import Position
 from algotrader.trading.ref_data import Instrument, Exchange, Currency
 from algotrader.utils.ser_deser import MsgPackSerializer, JsonSerializer, MapSerializer
 from algotrader.utils.time_series import DataSeries
+
+from algotrader.config.app import ApplicationConfig
+from algotrader.trading.context import ApplicationContext
 
 params = [
     param('MsgPackSerializer', MsgPackSerializer),
@@ -141,10 +145,10 @@ class SerializerTest(TestCase):
         SerializerTest.ser_deser(name, serializer, item)
 
     @parameterized.expand(params)
-    def test_account(self, name, serializer):
-        item = Account(name="")
+    def test_account(self, id, serializer):
+        item = Account(id="")
 
-        SerializerTest.ser_deser(name, serializer, item)
+        SerializerTest.ser_deser(id, serializer, item)
 
     @parameterized.expand(params)
     def test_data_series(self, name, serializer):
@@ -162,8 +166,11 @@ class SerializerTest(TestCase):
 
     @parameterized.expand(params)
     def test_indicator(self, name, serializer):
-        inst_data_mgr.clear()
-        bar = inst_data_mgr.get_series("bar")
+
+        self.app_config = ApplicationConfig(None, None, None, None, None, None, None)
+        self.app_context = ApplicationContext(app_config=self.app_config)
+
+        bar = self.app_context.inst_data_mgr.get_series("bar")
         sma = SMA(bar.name, 'close', 1, missing_value=0)
         t1 = datetime.datetime.now()
         t2 = t1 + datetime.timedelta(0, 3)
@@ -186,8 +193,8 @@ class SerializerTest(TestCase):
                                    instrument_ids=[instrument],
                                    subscription_types=[BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                    from_date=dates[0], to_date=dates[-1],
-                                   broker_id=Simulator.ID,
-                                   feed_id=PandasMemoryDataFeed.ID)
+                                   broker_id=Broker.Simulator,
+                                   feed_id=Feed.PandasMemory)
         SerializerTest.ser_deser(name, serializer, config)
 
     # # TODO fix error

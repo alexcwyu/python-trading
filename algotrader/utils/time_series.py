@@ -4,12 +4,13 @@ import numpy as np
 import pandas as pd
 from rx.subjects import Subject
 
+from algotrader import Startable
 from algotrader.provider.persistence import Persistable
 
 timestamp_key = "timestamp"
 
 
-class DataSeries(Persistable):
+class DataSeries(Persistable, Startable):
     TIMESTAMP = 'timestamp'
 
     __slots__ = (
@@ -23,6 +24,10 @@ class DataSeries(Persistable):
         'use_col_np'
     )
 
+    __transient__ = (
+        'subject'
+    )
+
     def __init__(self, name=None, keys=None, desc=None, missing_value=np.nan, data_list=None, use_col_np=False):
         """
         :param name:
@@ -32,6 +37,7 @@ class DataSeries(Persistable):
         :param data_list:
         :param use_col_np: If True, the column based storage of list will used to pass to numpy function
         """
+        super(DataSeries, self).__init__()
         self.name = name
         self.keys = self._get_key(keys, None)
         self.desc = desc if desc else name
@@ -47,6 +53,12 @@ class DataSeries(Persistable):
         if data_list:
             for data in data_list:
                 self.add(data)
+
+    def _start(self, app_context, **kwargs):
+        pass
+
+    def _stop(self):
+        pass
 
     def id(self):
         self.name

@@ -20,10 +20,11 @@ from algotrader import Startable
 
 
 class Clock(Startable):
+    __metaclass__ = abc.ABCMeta
+
     Simulation = "Simulation"
     RealTime = "RealTime"
 
-    __metaclass__ = abc.ABCMeta
     epoch = datetime.datetime.fromtimestamp(0)
 
     def __init__(self, scheduler):
@@ -137,6 +138,3 @@ class SimulationClock(Clock, MarketDataEventHandler):
 
     def id(self):
         return Clock.Simulation
-
-
-realtime_clock = RealTimeClock()

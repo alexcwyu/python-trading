@@ -7,6 +7,17 @@ from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
 
 
+from algotrader.technical.atr import ATR
+from algotrader.technical.bb import BB
+from algotrader.technical.ma import SMA
+from algotrader.technical.roc import ROC
+from algotrader.technical.rsi import RSI
+from algotrader.technical.stats import MAX
+from algotrader.technical.stats import MIN
+from algotrader.technical.stats import STD
+from algotrader.technical.stats import VAR
+
+
 class InstrumentDataManager(MarketDataEventHandler, Manager):
     def __init__(self):
         super(InstrumentDataManager, self).__init__()
@@ -107,3 +118,4 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
     def id(self):
         return "InstrumentDataManager"
+

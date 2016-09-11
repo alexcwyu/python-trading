@@ -34,7 +34,7 @@ class SequenceManager(SimpleManager):
     def add(self, id, initial=1):
         self.item_dict[id] = initial
 
-        if self.store:
+        if hasattr(self,"store") and self.store:
             self.store.save_sequence(id, initial)
 
     def all_items(self):

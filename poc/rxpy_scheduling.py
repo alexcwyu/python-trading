@@ -4,8 +4,12 @@ import gevent
 from rx.concurrency.historicalscheduler import HistoricalScheduler
 
 from algotrader.event.market_data import Bar, BarSize
-from algotrader.utils.clock import realtime_clock
+from algotrader.utils.clock import RealTimeClock
 from algotrader.utils.date_utils import DateUtils
+
+
+
+realtime_clock = RealTimeClock()
 
 
 class HistoricalScheduler2(HistoricalScheduler):

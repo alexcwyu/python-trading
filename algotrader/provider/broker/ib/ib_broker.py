@@ -14,7 +14,6 @@ from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, \
     TradeSubscriptionType, MarketDepthSubscriptionType
 from algotrader.utils import logger
-from algotrader.utils.clock import realtime_clock
 
 
 class DataRecord(object):
@@ -228,6 +227,9 @@ class IBBroker(IBSocket, Broker, Feed):
         self.next_order_id += 1
         return order_id
 
+    def next_ord_status_id(self):
+        self.app_context.seq_mgr.get_next_sequence("%s.ordstatus" % self.id())
+
     def subscribe_mktdata(self, sub_key):
         if isinstance(sub_key, HistDataSubscriptionKey):
             req_func = self.__req_hist_data
@@ -417,7 +419,7 @@ class IBBroker(IBSocket, Broker, Feed):
     def __emit_market_data(self, field, record):
         if record.quote_req and (
                                 field == swigibpy.BID or field == swigibpy.BID_SIZE or field == swigibpy.ASK or field == swigibpy.ASK_SIZE) and record.bid > 0 and record.ask > 0:
-            self.data_event_bus.on_next(Quote(inst_id=record.inst_id, timestamp=realtime_clock.now(),
+            self.data_event_bus.on_next(Quote(inst_id=record.inst_id, timestamp=self.app_context.clock.now(),
                                               bid=record.bid,
                                               bid_size=record.bid_size,
                                               ask=record.ask,
@@ -425,7 +427,7 @@ class IBBroker(IBSocket, Broker, Feed):
 
         if record.trade_req and (field == swigibpy.LAST or field == swigibpy.LAST_SIZE) and record.last > 0:
             self.data_event_bus.on_next(
-                Trade(inst_id=record.inst_id, timestamp=realtime_clock.now(), price=record.last,
+                Trade(inst_id=record.inst_id, timestamp=self.app_context.clock.now(), price=record.last,
                       size=record.last_size))
 
     def updateMktDepth(self, id, position, operation, side, price, size):
@@ -435,7 +437,7 @@ class IBBroker(IBSocket, Broker, Feed):
         # TODO fix provider_id
         sub_key = self.data_sub_reg.get_subscription_key(id)
         self.data_event_bus.on_next(
-            MarketDepth(inst_id=sub_key.inst_id, timestamp=realtime_clock.now(), provider_id=self.ID,
+            MarketDepth(inst_id=sub_key.inst_id, timestamp=self.app_context.clock.now(), provider_id=self.ID,
                         position=position,
                         operation=self.model_factory.convert_ib_md_operation(operation),
                         side=self.model_factory.convert_ib_md_side(side),
@@ -449,7 +451,7 @@ class IBBroker(IBSocket, Broker, Feed):
         # TODO fix provider_id
         sub_key = self.data_sub_reg.get_subscription_key(id)
         self.data_event_bus.on_next(
-            MarketDepth(inst_id=sub_key.inst_id, timestamp=realtime_clock.now(), provider_id=self.ID,
+            MarketDepth(inst_id=sub_key.inst_id, timestamp=self.app_context.clock.now(), provider_id=self.ID,
                         position=position,
                         operation=self.model_factory.convert_ib_md_operation(operation),
                         side=self.model_factory.convert_ib_md_side(side),
@@ -516,11 +518,12 @@ class IBBroker(IBSocket, Broker, Feed):
 
             if create_er:
                 self.execution_event_bus.on_next(OrderStatusUpdate(
+                    ord_status_id = self.next_ord_status_id(),
                     broker_id=self.ID,
                     ord_id=id,
                     cl_id=new_ord_req.cl_id,
                     cl_ord_id=new_ord_req.cl_ord_id,
-                    timestamp=realtime_clock.now(),
+                    timestamp=self.app_context.clock.now(),
                     inst_id=new_ord_req.inst_id,
                     filled_qty=filled,
                     avg_price=avgFillPrice,

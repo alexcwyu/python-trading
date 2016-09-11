@@ -18,7 +18,6 @@ class BarInputType:
 
 class BarAggregator(MarketDataEventHandler):
     def __init__(self, data_bus, clock, inst_id, input,
-                 inst_data_mgr=None,
                  input_type=BarInputType.Trade,
                  output_bar_type=BarType.Time,
                  output_size=BarSize.M1):
@@ -28,15 +27,21 @@ class BarAggregator(MarketDataEventHandler):
         self.__input_type = input_type
         self.__output_bar_type = output_bar_type
         self.__output_size = output_size
+
+
         if isinstance(input, DataSeries):
             self.__input = input
+            self.__input_name = input.name
         else:
-            self.__input = inst_data_mgr.get_series(input)
+            self.__input = None
+            self.__input_name = input.name
 
         self.__timestamp = clock.now()
         self.__reset()
 
     def _start(self, app_context, **kwargs):
+        if self.__input is None:
+            self.__input = app_context.inst_data_mgr.get_series(self.input.name)
         self.__input.subject.subscribe(on_next=self.on_update)
         if self.__output_bar_type == BarType.Time:
             current_ts = self.__clock.now()
@@ -179,3 +184,7 @@ class BarAggregator(MarketDataEventHandler):
 
     def count(self):
         return self.__count
+
+    def id(self):
+        return "%s.%s.%s.%s.%s" % (self.__inst_id, self.__input_name, self.__input_type, self.__output_bar_type, self.__output_size)
+

@@ -3,14 +3,17 @@ from unittest import TestCase
 
 from algotrader.event.market_data import Trade, Bar, Quote
 from algotrader.event.order import OrdAction, OrdType, NewOrderRequest, OrdStatus, ExecutionReport
-from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio import Portfolio
-
+from algotrader.config.app import ApplicationConfig
+from algotrader.trading.context import ApplicationContext
 
 class PortfolioTest(TestCase):
     def setUp(self):
-        self.portfolio = Portfolio(cash=100000)
-        order_mgr.reset()
+        self.app_config = ApplicationConfig(None, None, None, None, None, None, None)
+        self.app_context = ApplicationContext(app_config=self.app_config)
+        self.app_context.start()
+        self.portfolio = self.app_context.portf_mgr.new_portfolio(portf_id="test", cash=100000)
+        self.portfolio.start(self.app_context)
 
     def test_portfolio(self):
         self.assertEqual(Portfolio(cash=100000).cash, 100000)
@@ -45,7 +48,7 @@ class PortfolioTest(TestCase):
         er1 = ExecutionReport(cl_id='test', cl_ord_id=1, ord_id=1, er_id=1, inst_id=1, last_qty=500, last_price=18.4,
                               status=OrdStatus.PARTIALLY_FILLED)
 
-        order_mgr.on_exec_report(er1)
+        self.app_context.order_mgr.on_exec_report(er1)
 
         self.assertEqual(500, order1.last_qty)
         self.assertEqual(18.4, order1.last_price)
@@ -65,7 +68,7 @@ class PortfolioTest(TestCase):
 
         er2 = ExecutionReport(cl_id='test', cl_ord_id=1, ord_id=1, er_id=2, inst_id=1, last_qty=500, last_price=18.2,
                               status=OrdStatus.FILLED)
-        order_mgr.on_exec_report(er2)
+        self.app_context.order_mgr.on_exec_report(er2)
         self.assertEqual(500, order1.last_qty)
         self.assertEqual(18.2, order1.last_price)
         self.assertEqual(1000, order1.filled_qty)
@@ -91,7 +94,7 @@ class PortfolioTest(TestCase):
 
         er1 = ExecutionReport(cl_id='test', cl_ord_id=1, ord_id=1, er_id=1, inst_id=1, last_qty=500, last_price=18.4,
                               status=OrdStatus.PARTIALLY_FILLED, timestamp=1)
-        order_mgr.on_exec_report(er1)
+        self.app_context.order_mgr.on_exec_report(er1)
 
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 18.4
@@ -139,7 +142,7 @@ class PortfolioTest(TestCase):
             self.assertTrue(order in all_orders)
 
         for inst, pos_orders in expected_positon.iteritems():
-            position = portfolio.positions[inst]
+            position = portfolio.positions[str(inst)]
 
             all_position_orders = position.all_orders()
             self.assertEqual(len(pos_orders), len(all_position_orders))

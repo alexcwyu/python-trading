@@ -29,8 +29,8 @@ class Simulator(Broker, MarketDataEventHandler):
         self.app_context = app_context
         self.sim_config = app_context.app_config.get_config(SimulatorConfig)
         self.clock = app_context.get_clock()
-        self.next_ord_id = self.sim_config.next_ord_id
-        self.next_exec_id = self.sim_config.next_exec_id
+        #self.next_ord_id = self.sim_config.next_ord_id
+        #self.next_exec_id = self.sim_config.next_exec_id
         self.fill_strategy = self.get_fill_strategy(self.sim_config.fill_strategy_id)
         self.commission = self.get_commission(self.sim_config.commission_id)
         self.exec_handler = self.app_context.order_mgr
@@ -44,14 +44,14 @@ class Simulator(Broker, MarketDataEventHandler):
         return Broker.Simulator
 
     def next_ord_id(self):
-        __next_ord_id = self.next_ord_id
-        self.next_ord_id += 1
-        return __next_ord_id
+        return self.app_context.seq_mgr.get_next_sequence("%s.order"%self.id())
 
     def next_exec_id(self):
-        __next_exec_id = self.next_exec_id
-        self.next_exec_id += 1
-        return __next_exec_id
+        return self.app_context.seq_mgr.get_next_sequence("%s.exec"%self.id())
+
+
+    def next_ord_status_id(self):
+        return self.app_context.seq_mgr.get_next_sequence("%s.ordstatus"%self.id())
 
     def on_bar(self, bar):
         self.__process_event(bar)
@@ -122,7 +122,8 @@ class Simulator(Broker, MarketDataEventHandler):
 
     def __send_status(self, new_ord_req, ord_status):
         ord_id = self.clordid_ordid_map[new_ord_req.cl_id][new_ord_req.cl_ord_id]
-        ord_update = OrderStatusUpdate(broker_id=Simulator.ID,
+        ord_update = OrderStatusUpdate(ord_status_id= self.next_ord_status_id(),
+                                       broker_id=Broker.Simulator,
                                        ord_id=ord_id,
                                        cl_id=new_ord_req.cl_id,
                                        cl_ord_id=new_ord_req.cl_ord_id,
@@ -134,7 +135,7 @@ class Simulator(Broker, MarketDataEventHandler):
     def __send_exec_report(self, new_ord_req, last_price, last_qty, ord_status):
         commission = self.commission.calc(new_ord_req, last_price, last_qty)
         ord_id = self.clordid_ordid_map[new_ord_req.cl_id][new_ord_req.cl_ord_id]
-        exec_report = ExecutionReport(broker_id=Simulator.ID,
+        exec_report = ExecutionReport(broker_id=Broker.Simulator,
                                       ord_id=ord_id,
                                       cl_id=new_ord_req.cl_id,
                                       cl_ord_id=new_ord_req.cl_ord_id,

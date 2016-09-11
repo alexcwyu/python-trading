@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from algotrader.event.market_data import Trade, Bar, Quote
 from algotrader.trading.bar_aggregator import BarAggregator, BarInputType, BarType
-from algotrader.utils.clock import simluation_clock
 from algotrader.utils.time_series import DataSeries
+from algotrader.utils.clock import SimulationClock
 
 
 class BarAggregatorTest(TestCase):
@@ -19,22 +19,19 @@ class BarAggregatorTest(TestCase):
             self.items.append(item)
 
     def setUp(self):
-        simluation_clock.reset()
+        self.time = 9000000000
+        self.simluation_clock = SimulationClock()
+        self.simluation_clock.reset()
+        self.simluation_clock.update_time(self.time)
         self.input = DataSeries()
         self.event_bus = BarAggregatorTest.DummyEventBus()
-        self.time = 9000000000
-        simluation_clock.update_time(self.time)
-
-    @classmethod
-    def tearDownClass(cls):
-        simluation_clock.reset()
 
     def update(self, input, data):
-        simluation_clock.update_time(data.timestamp)
+        self.simluation_clock.update_time(data.timestamp)
         self.input.add(data.to_dict())
 
     def test_time_bar_from_trade(self):
-        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input)
+        agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id=1, input=self.input)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
 
@@ -57,7 +54,7 @@ class BarAggregatorTest(TestCase):
                 close=10, vol=400, adj_close=0), items[0])
 
     def test_time_bar_from_bid(self):
-        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+        agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id=1, input=self.input,
                             input_type=BarInputType.Bid)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
@@ -87,7 +84,7 @@ class BarAggregatorTest(TestCase):
         self.assertTrue(len(self.event_bus.items) == 0)
 
         self.time += 3
-        simluation_clock.update_time(self.time)
+        self.simluation_clock.update_time(self.time)
         items = self.event_bus.items
         self.assertEqual(1, len(items))
         self.assertEqual(0, agg.count())
@@ -96,7 +93,7 @@ class BarAggregatorTest(TestCase):
                 close=50, vol=1000, adj_close=0), items[0])
 
     def test_time_bar_from_ask(self):
-        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+        agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id=1, input=self.input,
                             input_type=BarInputType.Ask)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
@@ -130,7 +127,7 @@ class BarAggregatorTest(TestCase):
                 close=20, vol=400, adj_close=0), items[0])
 
     def test_time_bar_from_bidask(self):
-        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+        agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id=1, input=self.input,
                             input_type=BarInputType.BidAsk)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
@@ -158,7 +155,7 @@ class BarAggregatorTest(TestCase):
                 close=80, vol=260, adj_close=0), items[0])
 
     def test_time_bar_from_mid(self):
-        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+        agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id=1, input=self.input,
                             input_type=BarInputType.Middle)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
@@ -174,7 +171,7 @@ class BarAggregatorTest(TestCase):
                 close=24, vol=150, adj_close=0), items[0])
 
     def test_tick_bar_from_trade(self):
-        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+        agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id=1, input=self.input,
                             output_bar_type=BarType.Tick, output_size=3)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
@@ -204,7 +201,7 @@ class BarAggregatorTest(TestCase):
                 close=10, vol=500, adj_close=0), items[0])
 
     def test_vol_bar_from_trade(self):
-        agg = BarAggregator(data_bus=self.event_bus, clock=simluation_clock, inst_id=1, input=self.input,
+        agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id=1, input=self.input,
                             output_bar_type=BarType.Volume, output_size=1000)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))

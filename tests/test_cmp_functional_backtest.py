@@ -13,11 +13,8 @@ from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.strategy.merton_optimal import MertonOptimalBaby
 from algotrader.strategy.sma_strategy import SMAStrategy
-from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
-from algotrader.trading.order_mgr import order_mgr
 from algotrader.trading.portfolio import Portfolio
-from algotrader.trading.portfolio_mgr import portf_mgr
 from algotrader.utils import clock
 
 

@@ -179,17 +179,20 @@ class ExecutionEvent(Event):
 
 class OrderStatusUpdate(ExecutionEvent):
     __slots__ = (
+        'ord_status_id',
         'filled_qty',
         'avg_price',
         'status',
 
     )
 
-    def __init__(self, broker_id=None, ord_id=None, cl_id=None, cl_ord_id=None, inst_id=None, timestamp=None,
+    def __init__(self, ord_status_id=None, broker_id=None, ord_id=None, cl_id=None, cl_ord_id=None, inst_id=None,
+                 timestamp=None,
                  filled_qty=0,
                  avg_price=0, status=OrdStatus.NEW):
         super(OrderStatusUpdate, self).__init__(broker_id=broker_id, ord_id=ord_id, cl_id=cl_id, cl_ord_id=cl_ord_id,
                                                 inst_id=inst_id, timestamp=timestamp)
+        self.ord_status_id = ord_status_id
         self.filled_qty = filled_qty
         self.avg_price = avg_price
         self.status = status
@@ -197,13 +200,19 @@ class OrderStatusUpdate(ExecutionEvent):
     def on(self, handler):
         handler.on_ord_upd(self)
 
+    def id(self):
+        return self.ord_status_id
 
-class ExecutionReport(OrderStatusUpdate):
+
+class ExecutionReport(ExecutionEvent):
     __slots__ = (
         'er_id',
         'last_qty',
         'last_price'
-        'commission'
+        'commission',
+        'filled_qty',
+        'avg_price',
+        'status',
     )
 
     def __init__(self, broker_id=None, ord_id=None, cl_id=None, cl_ord_id=None, inst_id=None, timestamp=None,
@@ -213,12 +222,17 @@ class ExecutionReport(OrderStatusUpdate):
                  status=OrdStatus.NEW):
         super(ExecutionReport, self).__init__(broker_id=broker_id, ord_id=ord_id, cl_id=cl_id, cl_ord_id=cl_ord_id,
                                               inst_id=inst_id,
-                                              timestamp=timestamp, filled_qty=filled_qty, avg_price=avg_price,
-                                              status=status)
+                                              timestamp=timestamp)
         self.er_id = er_id
         self.last_qty = last_qty
         self.last_price = last_price
         self.commission = commission
+        self.filled_qty = filled_qty
+        self.avg_price = avg_price
+        self.status = status
 
     def on(self, handler):
         handler.on_exec_report(self)
+
+    def id(self):
+        return self.er_id

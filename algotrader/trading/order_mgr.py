@@ -79,10 +79,11 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         super(OrderManager, self).on_ord_upd(ord_upd)
 
         # persist
-        self.store.save_ord_status_upd(ord_upd)
+        if self.store:
+            self.store.save_ord_status_upd(ord_upd)
 
         # update order
-        order = self.order_dict[ord_upd.id()]
+        order = self.order_dict["%s.%s"% (ord_upd.cl_id, ord_upd.cl_ord_id)]
         order.on_ord_upd(ord_upd)
 
         # enrich the cl_id and cl_ord_id
@@ -106,16 +107,18 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                 "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.cl_id, order.cl_id, order.cl_ord_id))
 
         # persist
-        self.store.save_order(order)
+        if self.store:
+            self.store.save_order(order)
 
     def on_exec_report(self, exec_report):
         super(OrderManager, self).on_exec_report(exec_report)
 
         # persist
-        self.store.save_exec_report(exec_report)
+        if self.store:
+            self.store.save_exec_report(exec_report)
 
         # update order
-        order = self.order_dict[exec_report.id()]
+        order = self.order_dict["%s.%s"% (exec_report.cl_id, exec_report.cl_ord_id)]
         order.on_exec_report(exec_report)
 
         # enrich the cl_id and cl_ord_id
@@ -123,7 +126,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         exec_report.cl_ord_id = order.cl_ord_id
 
         # notify portfolio
-        portfolio = self.app_context.portf_mgr.get_portfolio(order.portf_id)
+        portfolio = self.app_context.portf_mgr.get(order.portf_id)
         if portfolio:
             portfolio.on_exec_report(exec_report)
         else:
@@ -139,7 +142,8 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                 "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.cl_id, order.cl_id, order.cl_ord_id))
 
         # persist
-        self.store.save_order(order)
+        if self.store:
+            self.store.save_order(order)
 
     def send_order(self, new_ord_req):
         if new_ord_req.id() in self.order_dict:
@@ -147,7 +151,8 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                 "ClientOrderId has been used!! cl_id = %s, cl_ord_id = %s" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
 
         # persist
-        self.store.save_new_order_req(new_ord_req)
+        if self.store:
+            self.store.save_new_order_req(new_ord_req)
 
         order = Order(new_ord_req)
         self.order_dict[order.id()] = order
@@ -161,7 +166,8 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                     order.broker_id, order.cl_id, order.cl_ord_id))
 
         # persist
-        self.store.save_order(order)
+        if self.store:
+            self.store.save_order(order)
 
         return order
 
@@ -171,7 +177,8 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                 ord_cancel_req.cl_id, ord_cancel_req.cl_ord_id))
 
         # persist
-        self.store.save_ord_cancel_req(ord_cancel_req)
+        if self.store:
+            self.store.save_ord_cancel_req(ord_cancel_req)
 
         order = self.order_dict[ord_cancel_req.id()]
 
@@ -179,7 +186,8 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         self.app_context.provider_mgr.get(order.broker_id).on_ord_cancel_req(ord_cancel_req)
 
         # persist
-        self.store.save_order(order)
+        if self.store:
+            self.store.save_order(order)
 
         return order
 
@@ -189,7 +197,8 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                 ord_replace_req.cl_id, ord_replace_req.cl_ord_id))
 
         # persist
-        self.store.save_ord_replace_req(ord_replace_req)
+        if self.store:
+            self.store.save_ord_replace_req(ord_replace_req)
 
         order = self.order_dict[ord_replace_req.id()]
 
@@ -197,7 +206,8 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         self.app_context.provider_mgr.get(order.broker_id).on_ord_replace_req(ord_replace_req)
 
         # persist
-        self.store.save_order(order)
+        if self.store:
+            self.store.save_order(order)
 
         return order
 

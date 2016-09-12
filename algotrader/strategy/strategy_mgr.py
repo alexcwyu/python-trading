@@ -48,3 +48,9 @@ class StrategyManager(SimpleManager):
         strategy = cls(stg_id=stg_id, trading_config=trading_config)
         self.add(strategy)
         return strategy
+
+
+    def get_or_new_stg(self, trading_config):
+        if self.has_item(trading_config.stg_id):
+            return self.get(trading_config.stg_id)
+        return self.new_stg(trading_config)

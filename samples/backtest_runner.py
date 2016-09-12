@@ -26,12 +26,10 @@ class BacktestRunner(object):
                                                                   self.backtest_config.portfolio_initial_cash)
         self.app_context.add_startable(self.portfolio)
 
-
         self.strategy = self.app_context.stg_mgr.new_stg(self.backtest_config)
         self.app_context.add_startable(self.strategy)
 
         self.strategy.start(self.app_context)
-
 
     def stop(self):
         self.app_context.stop()
@@ -63,22 +61,6 @@ def main():
     runner = BacktestRunner(config)
     try:
         runner.start()
-        # portfolio = runner.portfolio
-        # strategy = runner.strategy
-        # print portfolio.get_result()
-        #
-        # # pyfolio
-        # rets = portfolio.get_return()
-        # # import pyfolio as pf
-        # # pf.create_returns_tear_sheet(rets)
-        # # pf.create_full_tear_sheet(rets)
-        #
-        # # build in plot
-        # plotter = StrategyPlotter(strategy)
-        # plotter.plot(instrument=4)
-        #
-        # # import matplotlib.pyplot as plt
-        # # plt.show()
         runner.plot()
     finally:
         runner.stop()

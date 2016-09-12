@@ -33,3 +33,8 @@ class PortfolioManager(SimpleManager):
         portfolio = Portfolio(portf_id=portf_id, cash=cash, analyzers=analyzers)
         self.add(portfolio)
         return portfolio
+
+    def get_or_new_portfolio(self, portf_id, cash=1000000, analyzers=None):
+        if self.has_item(portf_id):
+            return self.get(portf_id)
+        return self.new_portfolio(portf_id, 1000000, analyzers)

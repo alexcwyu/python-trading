@@ -22,6 +22,8 @@ class MertonOptimalBaby(Strategy):
         self.vol = self.get_config_value("vol", 1)
 
         self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
+        self.bar.start(app_context)
+
         self.optimal_weight = self.arate / self.vol ** 2  # assume risk free rate is zero
 
         super(MertonOptimalBaby, self)._start(app_context, **kwargs)

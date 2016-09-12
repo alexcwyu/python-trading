@@ -12,8 +12,12 @@ class SMAStrategy(Strategy):
     def _start(self, app_context, **kwargs):
         self.qty = self.get_config_value("qty", 1)
         self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
+
         self.sma_fast = SMA(self.bar, 'close', 10)
+        self.sma_fast.start(app_context)
+
         self.sma_slow = SMA(self.bar, 'close', 25)
+        self.sma_slow.start(app_context)
         super(SMAStrategy, self)._start(app_context, **kwargs)
 
     def on_bar(self, bar):

@@ -36,7 +36,7 @@ class ApplicationConfig(Config):
         self.ref_data_mgr_type = ref_data_mgr_type
         self.clock_type = clock_type
 
-        # self.trading_configs = {}
+        self.trading_configs = {}
         # self.broker_configs = {}
         # self.persistence_configs = {}
         # self.feed_configs = {}

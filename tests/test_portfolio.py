@@ -15,6 +15,9 @@ class PortfolioTest(TestCase):
         self.portfolio = self.app_context.portf_mgr.new_portfolio(portf_id="test", cash=100000)
         self.portfolio.start(self.app_context)
 
+    def tearDown(self):
+        self.app_context.stop()
+
     def test_portfolio(self):
         self.assertEqual(Portfolio(cash=100000).cash, 100000)
 

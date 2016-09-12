@@ -28,7 +28,7 @@ class Simulator(Broker, MarketDataEventHandler):
     def _start(self, app_context, **kwargs):
         self.app_context = app_context
         self.sim_config = app_context.app_config.get_config(SimulatorConfig)
-        self.clock = app_context.get_clock()
+        self.clock = app_context.clock
         #self.next_ord_id = self.sim_config.next_ord_id
         #self.next_exec_id = self.sim_config.next_exec_id
         self.fill_strategy = self.get_fill_strategy(self.sim_config.fill_strategy_id)

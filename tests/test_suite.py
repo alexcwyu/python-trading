@@ -6,7 +6,7 @@ from test_bar_aggregator import BarAggregatorTest
 from test_broker import SimulatorTest
 from test_broker_mgr import BrokerManagerTest
 from test_clock import ClockTest
-#from test_cmp_functional_backtest import TestCompareWithFunctionalBacktest
+from test_cmp_functional_backtest import TestCompareWithFunctionalBacktest
 from test_data_series import DataSeriesTest
 from test_indicator import IndicatorTest
 from test_instrument_data import InstrumentDataTest
@@ -38,7 +38,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(PositionTest))
     test_suite.addTest(unittest.makeSuite(SerializerTest))
     test_suite.addTest(unittest.makeSuite(TALibSMATest))
-    #test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
+    test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
     return test_suite
 
 

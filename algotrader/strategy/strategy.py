@@ -51,7 +51,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
 
 
     def get_config_value(self, key, default_value=None):
-        self.trading_config.get_stg_configs_val(key=key, default_value=default_value)
+        return self.trading_config.get_stg_configs_val(key=key, default_value=default_value)
 
     def _start(self, app_context, **kwargs):
         self.ref_data_mgr = self.app_context.ref_data_mgr
@@ -60,7 +60,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         self.broker = self.app_context.provider_mgr.get(self.trading_config.broker_id)
 
         self.instruments = self.ref_data_mgr.get_insts(self.trading_config.instrument_ids)
-        self.clock = self.app_context.get_clock()
+        self.clock = self.app_context.clock
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
         for order in self.app_context.order_mgr.get_strategy_orders(self.id()):

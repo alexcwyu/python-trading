@@ -9,6 +9,7 @@ from algotrader.trading.portfolio_mgr import PortfolioManager
 from algotrader.trading.ref_data import InMemoryRefDataManager, RefDataManager, DBRefDataManager
 from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
+from algotrader.trading.mock_ref_data import MockRefDataManager
 
 
 class ApplicationContext(Startable):
@@ -19,13 +20,13 @@ class ApplicationContext(Startable):
 
         self.app_config = app_config
 
-        self.clock = self.add_startable(self.get_clock())
+        self.clock = self.add_startable(self.__get_clock())
         self.provider_mgr = self.add_startable(ProviderManager())
 
         self.seq_mgr = self.add_startable(SequenceManager())
 
         self.inst_data_mgr = self.add_startable(InstrumentDataManager())
-        self.ref_data_mgr = self.add_startable(self.get_ref_data_mgr())
+        self.ref_data_mgr = self.add_startable(self.__get_ref_data_mgr())
 
         self.order_mgr = self.add_startable(OrderManager())
         self.acct_mgr = self.add_startable(AccountManager())
@@ -38,15 +39,18 @@ class ApplicationContext(Startable):
         self.startables.append(startable)
         return startable
 
-    def get_clock(self):
+    def __get_clock(self):
         if self.app_config.clock_type == Clock.Simulation:
             return SimulationClock()
         return RealTimeClock()
 
-    def get_ref_data_mgr(self):
-        if self.app_config.ref_data_mgr_type == RefDataManager.InMemory:
-            return InMemoryRefDataManager()
-        return DBRefDataManager()
+    def __get_ref_data_mgr(self):
+        if self.app_config.ref_data_mgr_type == RefDataManager.DB:
+            return DBRefDataManager()
+        # elif self.app_config.ref_data_mgr_type == RefDataManager.Mock:
+        #     return MockRefDataManager()
+        return InMemoryRefDataManager()
+
 
     # def start(self):
     #     if not hasattr(self, "started") or not self.started:

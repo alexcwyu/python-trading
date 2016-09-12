@@ -9,6 +9,7 @@ from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
+from algotrader.config.feed import PandasMemoryDataFeedConfig
 
 
 class PandasMemoryDataFeed(Feed):
@@ -26,9 +27,11 @@ class PandasMemoryDataFeed(Feed):
         super(PandasMemoryDataFeed, self).__init__()
         self.sub_keys = []
 
-    def _start(self, app_context, dict_of_df=None):
+    def _start(self, app_context):
+        self.pandas_memory_config = app_context.app_config.get_config(PandasMemoryDataFeedConfig)
+        self.dict_of_df = self.pandas_memory_config.dict_df
+
         self.ref_data_mgr = self.app_context.ref_data_mgr
-        self.dict_of_df = dict_of_df
         self.data_event_bus = self.app_context.event_bus.data_subject
         self.__load_data(self.sub_keys)
         for index, row in self.df.iterrows():
@@ -71,7 +74,7 @@ class PandasMemoryDataFeed(Feed):
             if isinstance(sub_key.subscription_type,
                           BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
-                symbol = inst.get_symbol(self.ID)
+                symbol = inst.get_symbol(self.id())
 
                 # df = web.DataReader("F", self.system, sub_key.from_date, sub_key.to_date)
                 df = self.dict_of_df[symbol]

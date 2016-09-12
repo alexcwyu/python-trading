@@ -256,9 +256,14 @@ class DBRefDataManager(RefDataManager):
 class InMemoryRefDataManager(RefDataManager):
     def __init__(self):
         super(InMemoryRefDataManager, self).__init__()
+
+    def _start(self, app_context, **kwargs):
         self.inst_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/instrument.csv'))
         self.ccy_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/ccy.csv'))
         self.exch_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/exch.csv'))
+
+    def _stop(self):
+        pass
 
     def load_all(self):
         with open(self.inst_file) as csvfile:

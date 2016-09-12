@@ -31,7 +31,7 @@ class Account(AccountEventHandler, PositionHolder, Persistable, Startable):
         return self.id
 
     def _start(self, app_context, **kwargs):
-        pass
+        self.app_context.acct_mgr.add(self)
 
     def _stop(self):
         pass

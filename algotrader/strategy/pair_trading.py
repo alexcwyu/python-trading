@@ -36,7 +36,11 @@ class PairTradingWithOUSpread(Strategy):
         self.gamma = self.get_config_value("gamma", 1)
 
         self.bar_0 = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
+        self.bar_0.start(app_context)
+
         self.bar_1 = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[1])
+        self.bar_1.start(app_context)
+
         self.instruments = self.trading_config.instrument_ids
         self.log_spot_0 = BehaviorSubject(0)
         self.log_spot_1 = BehaviorSubject(0)
@@ -45,6 +49,9 @@ class PairTradingWithOUSpread(Strategy):
             .subscribe(self.rebalance)
 
         super(PairTradingWithOUSpread, self)._start(app_context, **kwargs)
+
+    def _stop(self):
+        super(PairTradingWithOUSpread, self)._stop()
 
     def on_bar(self, bar):
         # logger.info("%s,%s,%.2f" % (bar.inst_id, bar.timestamp, bar.close))

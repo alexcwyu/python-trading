@@ -54,6 +54,8 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         return self.trading_config.get_stg_configs_val(key=key, default_value=default_value)
 
     def _start(self, app_context, **kwargs):
+        self.app_context.stg_mgr.add(self)
+
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.portfolio = self.app_context.portf_mgr.get(self.trading_config.portfolio_id)
         self.feed = self.app_context.provider_mgr.get(self.trading_config.feed_id) if self.trading_config else None
@@ -69,8 +71,6 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         for order_req in self.app_context.order_mgr.get_strategy_order_reqs(self.id()):
             self.ord_reqs[order_req.cl_ord_id] = order_req
 
-        self._subscribe_market_data(self.instruments)
-
         if self.portfolio:
             self.portfolio.start(app_context)
 
@@ -79,6 +79,10 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
 
         if self.feed:
             self.feed.start(app_context)
+
+
+        self._subscribe_market_data(self.instruments)
+
 
     def _stop(self):
         if self.event_subscription:

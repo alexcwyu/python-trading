@@ -43,14 +43,15 @@ class Indicator(DataSeries):
                 self.input = None
 
     def _start(self, app_context, **kwargs):
+        super(Indicator, self)._start(self.app_context, **kwargs)
+
         if not self.input:
-            self.input = app_context.inst_data_mgr.get_series(self.input_name)
+            self.input = self.app_context.inst_data_mgr.get_series(self.input_name)
+
+        self.app_context.inst_data_mgr.add_series(self)
 
         self.input.subject.subscribe(self.on_update)
         self.update_all()
-        app_context.inst_data_mgr.add_series(self)
-
-        super(Indicator, self)._start(app_context, **kwargs)
 
     def _stop(self):
         pass

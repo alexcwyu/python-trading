@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 
-from algotrader.trading.instrument_data import inst_data_mgr
 
 
 class TimeSeriesPlot:
@@ -51,7 +50,7 @@ class StrategyPlotter:
 
     def _plot_bar_chart(self, fig, instrument=None):
         key = "Bar.%s.Time.86400" % instrument
-        series = inst_data_mgr.get_series(key)
+        series = self.strategy.app_context.inst_data_mgr.get_series(key)
         # key = series_dict.keys()[0]
 
         ax_stock = fig.add_axes(rect_stock, axisbg=axescolor)  # left, bottom, width, height

@@ -28,6 +28,9 @@ class MertonOptimalBaby(Strategy):
 
         super(MertonOptimalBaby, self)._start(app_context, **kwargs)
 
+    def _stop(self):
+        super(MertonOptimalBaby, self)._stop()
+
     def on_bar(self, bar):
         # we have to rebalance on each bar
         # print bar

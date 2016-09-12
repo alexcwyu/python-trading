@@ -35,6 +35,9 @@ class VixVxvRatio(Strategy):
 
         super(VixVxvRatio, self)._start(app_context, **kwargs)
 
+    def _stop(self):
+        super(VixVxvRatio, self)._stop()
+
     def on_bar(self, bar):
         if bar.inst_id == self.vix.id():
             self.vix_strm.on_next(bar.close)

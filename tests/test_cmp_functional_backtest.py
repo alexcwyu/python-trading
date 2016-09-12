@@ -90,7 +90,6 @@ class TestCompareWithFunctionalBacktest(TestCase):
                                    to_date=TestCompareWithFunctionalBacktest.dates[-1],
                                    broker_id=Broker.Simulator,
                                    feed_id=Feed.PandasMemory,
-                                   ref_data_mgr_type=RefDataManager.Mock,
                                    stg_configs={'qty': lot_size})
 
         self.init_context(symbols=['SPY', 'VXX', 'XLV', 'XIV'], asset=asset, config=config)
@@ -153,7 +152,6 @@ class TestCompareWithFunctionalBacktest(TestCase):
                                    to_date=TestCompareWithFunctionalBacktest.dates[-1],
                                    broker_id=Broker.Simulator,
                                    feed_id=Feed.PandasMemory,
-                                   ref_data_mgr_type=RefDataManager.Mock,
                                    stg_configs={'arate': arate, 'vol': vol})
 
         self.init_context(symbols=['DUMMY'], asset=asset, config=config)

@@ -18,7 +18,11 @@ class SMAStrategy(Strategy):
 
         self.sma_slow = SMA(self.bar, 'close', 25)
         self.sma_slow.start(app_context)
+
         super(SMAStrategy, self)._start(app_context, **kwargs)
+
+    def _stop(self):
+        super(SMAStrategy, self)._stop()
 
     def on_bar(self, bar):
         if self.buy_order is None and self.sma_fast.now('value') > self.sma_slow.now('value'):

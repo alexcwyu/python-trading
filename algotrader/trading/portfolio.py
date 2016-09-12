@@ -44,6 +44,8 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         self.analyzers = analyzers if analyzers is not None else [Pnl(), DrawDown()]
 
     def _start(self, app_context, **kwargs):
+        self.app_context.portf_mgr.add(self)
+
         for analyzer in self.analyzers:
             analyzer.set_portfolio(self)
         for order in self.app_context.order_mgr.get_portf_orders(self.id()):
@@ -51,6 +53,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
 
         for order_req in self.app_context.order_mgr.get_strategy_order_reqs(self.id()):
             self._add_order_req(order_req)
+
 
         self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)
 

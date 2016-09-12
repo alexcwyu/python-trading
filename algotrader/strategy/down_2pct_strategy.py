@@ -12,9 +12,18 @@ class Down2PctStrategy(Strategy):
 
     def _start(self, app_context, **kwargs):
         self.qty = self.get_config_value("qty", 1)
-        self.close = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
+
+        self.close = self.app_context.inst_data_mgr.get_series(
+            "Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
+        self.close.start(app_context)
+
         self.roc = ROC(self.close, 'close', 1)
+        self.roc.start(app_context)
+
         super(Down2PctStrategy, self)._start(app_context, **kwargs)
+
+    def _stop(self):
+        super(Down2PctStrategy, self)._stop()
 
     def on_bar(self, bar):
         if self.order is None:

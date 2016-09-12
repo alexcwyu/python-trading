@@ -262,6 +262,8 @@ class InMemoryRefDataManager(RefDataManager):
         self.ccy_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/ccy.csv'))
         self.exch_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/exch.csv'))
 
+        self.load_all()
+
     def _stop(self):
         pass
 

@@ -47,7 +47,7 @@ class CSVDataFeed(Feed):
             if isinstance(sub_key.subscription_type,
                           BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
-                symbol = inst.get_symbol(self.ID)
+                symbol = inst.get_symbol(self.id())
                 df = self.read_csv(symbol, '%s/%s.csv' % (self.path, symbol.lower()))
                 self.dfs.append(df)
 

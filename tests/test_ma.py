@@ -92,3 +92,4 @@ class MovingAverageTest(TestCase):
         self.assertEquals(2.4, sma.get_by_time(t3, 'value'))
         self.assertEquals(2.8, sma.get_by_time(t4, 'value'))
         self.assertEquals(3.2, sma.get_by_time(t5, 'value'))
+

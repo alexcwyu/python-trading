@@ -1,5 +1,7 @@
+import time
+
 from algotrader.provider.persistence import Persistable
-import datetime
+
 
 class Event(Persistable):
     __slots__ = (
@@ -7,7 +9,7 @@ class Event(Persistable):
     )
 
     def __init__(self, timestamp=None):
-        self.timestamp = timestamp if timestamp else datetime.datetime.now()
+        self.timestamp = timestamp if timestamp is not None else int(time.time() * 1000)
 
     def on(self, handler):
         pass

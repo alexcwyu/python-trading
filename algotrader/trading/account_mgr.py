@@ -12,6 +12,7 @@ class AccountManager(SimpleManager):
 
     def load_all(self):
         if self.store:
+            self.store.start(self.app_context)
             accounts = self.store.load_all('accounts')
             for account in accounts:
                 self.add(account)

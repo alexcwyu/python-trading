@@ -45,7 +45,7 @@ class Indicator(DataSeries):
     def _start(self, app_context, **kwargs):
         super(Indicator, self)._start(self.app_context, **kwargs)
 
-        if not self.input:
+        if not hasattr(self, 'input') or not self.input:
             self.input = self.app_context.inst_data_mgr.get_series(self.input_name)
 
         self.app_context.inst_data_mgr.add_series(self)
@@ -59,12 +59,14 @@ class Indicator(DataSeries):
     def update_all(self):
         data_list = self.input.get_data()
         for data in data_list:
-            if self.input_keys:
-                filtered_data = {key: data[key] for key in self.input_keys}
-                filtered_data['timestamp'] = data['timestamp']
-                self.on_update(filtered_data)
-            else:
-                self.on_update(data)
+            #if timestamp has been processed, we should skipped the update.....
+            if data['timestamp'] not in self.time_list:
+                if self.input_keys:
+                    filtered_data = {key: data[key] for key in self.input_keys}
+                    filtered_data['timestamp'] = data['timestamp']
+                    self.on_update(filtered_data)
+                else:
+                    self.on_update(data)
 
     def on_update(self, data):
         raise NotImplementedError()

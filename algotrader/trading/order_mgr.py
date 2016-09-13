@@ -40,6 +40,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
 
     def load_all(self):
         if self.store:
+            self.store.start(self.app_context)
             orders = self.store.load_all('orders')
             for order in orders:
                 self.order_dict[order.id()] = order

@@ -8,6 +8,7 @@ from algotrader.provider.persistence.cass import CassandraDataStore
 from algotrader.provider.persistence.influx import InfluxDataStore
 from algotrader.provider.persistence.kdb import KDBDataStore
 from algotrader.provider.persistence.mongodb import MongoDBDataStore
+from algotrader.provider.persistence.inmemory import InMemoryDataStore
 
 
 class ProviderManager(SimpleManager):
@@ -21,6 +22,7 @@ class ProviderManager(SimpleManager):
         self.add(InfluxDataStore())
         self.add(KDBDataStore())
         self.add(MongoDBDataStore())
+        self.add(InMemoryDataStore())
 
         self.add(CSVDataFeed())
         self.add(PandasMemoryDataFeed())

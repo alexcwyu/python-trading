@@ -61,7 +61,7 @@ class DataSeries(Persistable, Startable):
         pass
 
     def id(self):
-        self.name
+        return self.name
 
     def add(self, data):
         time = data.get(timestamp_key)

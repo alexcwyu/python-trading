@@ -12,6 +12,7 @@ class PortfolioManager(SimpleManager):
 
     def load_all(self):
         if self.store:
+            self.store.start(self.app_context)
             portfolios = self.store.load_all('portfolios')
             for portfolio in portfolios:
                 self.add(portfolio)

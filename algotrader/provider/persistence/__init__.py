@@ -9,6 +9,7 @@ class DataStore(Provider):
     KDB = "KDB"
     Influx = "Influx"
     Mongo = "Mongo"
+    InMemoryDB = "InMemoryDB"
 
     __metaclass__ = abc.ABCMeta
 

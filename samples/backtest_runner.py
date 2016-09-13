@@ -47,7 +47,7 @@ class BacktestRunner(object):
 
 
 def main():
-    backtest_config = BacktestingConfig(stg_id="down2%",
+    backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
                                         stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
                                         portfolio_id='test', portfolio_initial_cash=100000,
                                         instrument_ids=[4],
@@ -57,7 +57,7 @@ def main():
                                         broker_id=Broker.Simulator,
                                         feed_id=Feed.CSV,
                                         stg_configs={'qty': 1000})
-    app_config = ApplicationConfig(None, None, None, None, None, RefDataManager.InMemory, Clock.Simulation,
+    app_config = ApplicationConfig("down2%", None, None, None, None, RefDataManager.InMemory, Clock.Simulation,
                                    backtest_config)
     runner = BacktestRunner(app_config)
     try:

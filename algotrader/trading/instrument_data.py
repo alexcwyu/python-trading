@@ -40,7 +40,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
     def load_all(self):
         if self.store:
-            series_list = self.store.load_all('series')
+            self.store.start(self.app_context)
+            series_list = self.store.load_all('time_series')
             for series in series_list:
                 self.__series_dict[series.id()] = series
 

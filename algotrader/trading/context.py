@@ -9,7 +9,6 @@ from algotrader.trading.portfolio_mgr import PortfolioManager
 from algotrader.trading.ref_data import InMemoryRefDataManager, RefDataManager, DBRefDataManager
 from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
-from algotrader.trading.mock_ref_data import MockRefDataManager
 
 
 class ApplicationContext(Startable):
@@ -22,6 +21,11 @@ class ApplicationContext(Startable):
 
         self.clock = self.add_startable(self.__get_clock())
         self.provider_mgr = self.add_startable(ProviderManager())
+        #
+        # self.add_startable(self.get_trade_data_store())
+        # self.add_startable(self.get_ref_data_store())
+        # self.add_startable(self.get_timeseries_data_store())
+        # self.add_startable(self.get_seq_data_store())
 
         self.seq_mgr = self.add_startable(SequenceManager())
 
@@ -51,7 +55,6 @@ class ApplicationContext(Startable):
         #     return MockRefDataManager()
         return InMemoryRefDataManager()
 
-
     # def start(self):
     #     if not hasattr(self, "started") or not self.started:
     #         for startable in self.startables:
@@ -70,7 +73,7 @@ class ApplicationContext(Startable):
             startable.start(self)
 
     def _stop(self):
-        for startable in self.startables:
+        for startable in reversed(self.startables):
             startable.stop()
 
     def get_trade_data_store(self):

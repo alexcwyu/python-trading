@@ -14,6 +14,7 @@ class StrategyManager(SimpleManager):
 
     def load_all(self):
         if self.store:
+            self.store.start(self.app_context)
             strategies = self.store.load_all('strategies')
             for stg in strategies:
                 self.add(stg)

@@ -12,6 +12,7 @@ class SequenceManager(SimpleManager):
 
     def load_all(self):
         if self.store:
+            self.store.start(self.app_context)
             items = self.store.load_all('sequences')
             for item in items:
                 self.add(item['_id'], item['seq'])

@@ -18,6 +18,8 @@ from test_portfolio import PortfolioTest
 from test_position import PositionTest
 from test_ser_deser import SerializerTest
 from test_talib_wrapper import TALibSMATest
+from test_in_memory_db import InMemoryDBTest
+from test_persistence import PersistenceTest
 
 
 def suite():
@@ -39,6 +41,8 @@ def suite():
     test_suite.addTest(unittest.makeSuite(SerializerTest))
     test_suite.addTest(unittest.makeSuite(TALibSMATest))
     test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
+    test_suite.addTest(unittest.makeSuite(InMemoryDBTest))
+    test_suite.addTest(unittest.makeSuite(PersistenceTest))
     return test_suite
 
 

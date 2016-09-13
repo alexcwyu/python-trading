@@ -211,6 +211,7 @@ class DBRefDataManager(RefDataManager):
 
     def load_all(self):
         if self.store:
+            self.store.start(self.app_context)
             for inst in self.store.load_all('instruments'):
                 self.__inst_symbol_dict[inst.id()] = inst
                 self.__inst_dict[inst.inst_id] = inst

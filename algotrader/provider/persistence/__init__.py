@@ -4,6 +4,12 @@ from algotrader.provider import Provider
 from algotrader.utils.ser_deser import Serializable
 
 
+class PersistenceMode(object):
+    Disable = 0
+    Batch = 1
+    RealTime = 2
+
+
 class DataStore(Provider):
     Cassandra = "Cassandra"
     KDB = "KDB"

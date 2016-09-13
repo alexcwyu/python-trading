@@ -17,24 +17,21 @@ from algotrader.utils.clock import Clock
 
 
 class ATSRunner(object):
-    def __init__(self, broker_config, live_trading_config):
-        self.broker_config = broker_config
-        self.live_trading_config = live_trading_config
+    def __init__(self, app_config):
+        self.app_config = app_config
 
     def start(self):
         logger.info("starting ATS")
 
-        self.app_config = ApplicationConfig(None, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo,
-                                            RefDataManager.DB, Clock.RealTime,
-                                            self.live_trading_config)
+        self.trading_config = self.app_config.get_trading_configs()[0]
         self.app_context = ApplicationContext(app_config=self.app_config)
         self.app_context.start()
 
-        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.live_trading_config.portfolio_id,
-                                                                         self.live_trading_config.portfolio_initial_cash)
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.trading_config.portfolio_id,
+                                                                         self.trading_config.portfolio_initial_cash)
         self.app_context.add_startable(self.portfolio)
 
-        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.live_trading_config)
+        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.trading_config)
         self.app_context.add_startable(self.strategy)
 
         self.strategy.start(self.app_context)
@@ -58,7 +55,11 @@ def main():
                                             broker_id=Broker.IB,
                                             feed_id=Broker.IB)
 
-    runner = ATSRunner(broker_config, live_trading_config)
+    app_config = ApplicationConfig(None, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo,
+                                   RefDataManager.DB, Clock.RealTime,
+                                   broker_config, live_trading_config)
+
+    runner = ATSRunner(app_config)
 
     try:
         runner.start()

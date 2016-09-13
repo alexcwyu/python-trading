@@ -61,7 +61,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
 
         self.portfolio = self.app_context.portf_mgr.new_portfolio(portf_id='test2',
                                                                   cash=TestCompareWithFunctionalBacktest.init_cash)
-        #self.portfolio.start(self.app_context)
+        self.portfolio.start(self.app_context)
 
     def tearDown(self):
         self.app_context.stop()

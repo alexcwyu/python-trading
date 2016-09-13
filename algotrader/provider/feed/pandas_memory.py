@@ -3,13 +3,13 @@ from datetime import date
 
 import pandas as pd
 
+from algotrader.config.feed import PandasMemoryDataFeedConfig
 from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
 from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
-from algotrader.config.feed import PandasMemoryDataFeedConfig
 
 
 class PandasMemoryDataFeed(Feed):
@@ -33,11 +33,6 @@ class PandasMemoryDataFeed(Feed):
 
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
-        self.__load_data(self.sub_keys)
-        for index, row in self.df.iterrows():
-            ## TODO support bar filtering // from date, to date
-            bar = self.process_row(index, row)
-            self.data_event_bus.on_next(bar)
 
     def _stop(self):
         pass
@@ -51,8 +46,20 @@ class PandasMemoryDataFeed(Feed):
         else:
             self.sub_keys.append(sub_keys)
 
+        self.__load_data(self.sub_keys)
+        for index, row in self.df.iterrows():
+            ## TODO support bar filtering // from date, to date
+            bar = self.process_row(index, row)
+            self.data_event_bus.on_next(bar)
+
     def subscribe_mktdata(self, sub_key):
         self.sub_keys.append(sub_key)
+
+        self.__load_data(self.sub_keys)
+        for index, row in self.df.iterrows():
+            ## TODO support bar filtering // from date, to date
+            bar = self.process_row(index, row)
+            self.data_event_bus.on_next(bar)
 
     def process_row(self, index, row):
         inst = self.ref_data_mgr.get_inst(symbol=row['Symbol'])

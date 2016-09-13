@@ -50,8 +50,8 @@ class Indicator(DataSeries):
 
         self.app_context.inst_data_mgr.add_series(self)
 
-        self.input.subject.subscribe(self.on_update)
         self.update_all()
+        self.input.subject.subscribe(self.on_update)
 
     def _stop(self):
         pass

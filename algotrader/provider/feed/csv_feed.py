@@ -40,7 +40,9 @@ class CSVDataFeed(Feed):
 
     def __read_csv(self, sub_keys):
 
-        self.dfs = []
+        dfs = []
+        sub_key_range = {sub_key.inst_id : (DateUtils.date_to_unixtimemillis(sub_key.from_date), DateUtils.date_to_unixtimemillis(sub_key.to_date)) for sub_key in sub_keys}
+
         for sub_key in sub_keys:
 
             ## TODO support different format, e.g. BAR, Quote, Trade csv files
@@ -49,23 +51,25 @@ class CSVDataFeed(Feed):
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.id())
                 df = self.read_csv(symbol, '%s/%s.csv' % (self.path, symbol.lower()))
-                self.dfs.append(df)
+                dfs.append(df)
 
-        self.df = pd.concat(self.dfs).sort_index(0, ascending=True)
+        df = pd.concat(dfs).sort_index(0, ascending=True)
+        for index, row in df.iterrows():
 
-        for index, row in self.df.iterrows():
-            ## TODO support bar filtering // from date, to date
             inst = self.ref_data_mgr.get_inst(symbol=row['Symbol'])
-            self.data_event_bus.on_next(
-                Bar(inst_id=inst.inst_id,
-                    timestamp=DateUtils.datetime_to_unixtimemillis(index),
-                    open=row['Open'],
-                    high=row['High'],
-                    low=row['Low'],
-                    close=row['Close'],
-                    vol=row['Volume'],
-                    adj_close=row['Adj Close'],
-                    size=row['BarSize']))
+            range = sub_key_range[inst.inst_id]
+            timestamp = DateUtils.datetime_to_unixtimemillis(index)
+            if timestamp >= range[0] and timestamp < range[1]:
+                self.data_event_bus.on_next(
+                    Bar(inst_id=inst.inst_id,
+                        timestamp=timestamp,
+                        open=row['Open'],
+                        high=row['High'],
+                        low=row['Low'],
+                        close=row['Close'],
+                        vol=row['Volume'],
+                        adj_close=row['Adj Close'],
+                        size=row['BarSize']))
 
     def unsubscribe_mktdata(self, sub_key):
         pass

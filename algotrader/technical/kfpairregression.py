@@ -22,7 +22,7 @@ class KalmanFilteringPairRegression(Indicator):
     def get_name(input, length):
         return "KalmanFilteringPairRegression(%s,%s)" % (Indicator.get_input_name(input), length)
 
-    def __init__(self, input, length, description="Kalman Filter Regression"):
+    def __init__(self, input=None, length=10, description="Kalman Filter Regression"):
         super(KalmanFilteringPairRegression, self) \
             .__init__(KalmanFilteringPairRegression.get_name(input, length),
                       input=input,

@@ -25,7 +25,8 @@ class DataSeries(Persistable, Startable):
     )
 
     __transient__ = (
-        'subject'
+        'subject',
+        'app_context',
     )
 
     def __init__(self, name=None, keys=None, desc=None, missing_value=np.nan, data_list=None, use_col_np=False):

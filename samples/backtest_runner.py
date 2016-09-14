@@ -21,11 +21,14 @@ class BacktestRunner(object):
         self.app_context = ApplicationContext(app_config=self.app_config)
         self.app_context.start()
         self.trading_config = self.app_config.get_trading_configs()[0]
-        self.portfolio = self.app_context.portf_mgr.new_portfolio(self.trading_config.portfolio_id,
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.trading_config.portfolio_id,
                                                                   self.trading_config.portfolio_initial_cash)
+
+        self.initial_result = self.portfolio.get_result()
+
         self.app_context.add_startable(self.portfolio)
 
-        self.strategy = self.app_context.stg_mgr.new_stg(self.trading_config)
+        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.trading_config)
         self.app_context.add_startable(self.strategy)
 
         self.strategy.start(self.app_context)

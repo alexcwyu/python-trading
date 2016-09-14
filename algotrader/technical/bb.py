@@ -16,7 +16,7 @@ class BB(Indicator):
         '__std_dev',
     )
 
-    def __init__(self, input, input_key=None, length=14, num_std=3, desc="Bollinger Bands"):
+    def __init__(self, input=None, input_key=None, length=14, num_std=3, desc="Bollinger Bands"):
         super(BB, self).__init__(Indicator.get_name(BB.__name__, input, input_key, length, num_std), input, input_key,
                                  desc)
         self.length = int(length)

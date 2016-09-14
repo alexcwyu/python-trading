@@ -16,8 +16,7 @@ class SequenceManager(SimpleManager):
         if hasattr(self, "store") and self.store:
             self.store.start(self.app_context)
             items = self.store.load_all('sequences')
-            for item in items:
-                self.add(item['_id'], item['seq'])
+            self.item_dict.update(items)
 
     def save_all(self):
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:

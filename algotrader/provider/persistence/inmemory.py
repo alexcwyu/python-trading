@@ -6,6 +6,7 @@ from algotrader.utils.ser_deser import MapSerializer
 
 
 class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
+
     def __init__(self):
         super(InMemoryDataStore, self).__init__()
 
@@ -60,6 +61,8 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
 
     def load_all(self, clazz):
         result = []
+        if clazz == 'sequences':
+            return self.sequences
         for data in self.db.get(clazz, {}).itervalues():
             obj = self.serializer.deserialize(data)
             result.append(obj)

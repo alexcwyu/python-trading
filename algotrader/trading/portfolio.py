@@ -28,6 +28,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
     __transient__ = (
         'ord_reqs',
         'orders',
+        'app_context',
     )
 
     def __init__(self, portf_id="test", cash=1000000, analyzers=None):

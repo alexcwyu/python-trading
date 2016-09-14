@@ -20,6 +20,7 @@ from test_ser_deser import SerializerTest
 from test_talib_wrapper import TALibSMATest
 from test_in_memory_db import InMemoryDBTest
 from test_persistence import PersistenceTest
+from test_strategy_persistence import SrategyPersistenceTest
 
 
 def suite():
@@ -43,6 +44,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
     test_suite.addTest(unittest.makeSuite(InMemoryDBTest))
     test_suite.addTest(unittest.makeSuite(PersistenceTest))
+    test_suite.addTest(unittest.makeSuite(SrategyPersistenceTest))
     return test_suite
 
 

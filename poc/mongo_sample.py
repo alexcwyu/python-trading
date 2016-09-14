@@ -297,7 +297,7 @@ def test_save_sequences():
     store = context.provider_mgr.get(DataStore.Mongo)
     store.start(app_context=context)
 
-    seq_mgr = SequenceManager(context)
+    seq_mgr = SequenceManager()
     seq_mgr.start(app_context=context)
 
     print seq_mgr.get_next_sequence("order")
@@ -308,8 +308,11 @@ def test_save_sequences():
 
     seq_mgr.stop()
 
+    seq_mgr = SequenceManager()
+    seq_mgr.start(app_context=context)
 
-# test_save_orders()
+
+test_save_sequences()
 
 
 # test_save_portfolio()

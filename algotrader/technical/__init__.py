@@ -10,8 +10,16 @@ class Indicator(DataSeries):
         'calculate',
     )
 
+
+    __transient__ = (
+        'app_context',
+        'input'
+    )
+
     @staticmethod
     def get_name(indicator_name, input, input_key, *args):
+        if not input:
+            return '%s' % indicator_name
         parts = [Indicator.get_input_name(input)]
         if input_key:
             parts.extend(DataSeries.convert_to_list(input_key))

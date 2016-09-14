@@ -8,7 +8,7 @@ class MAX(Indicator):
         'length'
     )
 
-    def __init__(self, input, input_key=None, length=0, desc="Maximum"):
+    def __init__(self, input=None, input_key=None, length=0, desc="Maximum"):
         super(MAX, self).__init__(Indicator.get_name(MAX.__class__, input, input_key, length), input, input_key,
                                   desc)
         self.length = int(length)

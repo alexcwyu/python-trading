@@ -12,7 +12,21 @@ from itertools import chain
 from algotrader.utils.date_utils import DateUtils
 
 
+class SlotPickleMixin(object):
+    def __getstate__(self):
+        return dict(
+            (slot, getattr(self, slot))
+            for slot in self.__slots__
+            if hasattr(self, slot)
+        )
+
+    def __setstate__(self, state):
+        for slot, value in state.items():
+            setattr(self, slot, value)
+
+
 class Serializable(HasId):
+
     def __eq__(self, other):
         return (isinstance(other, self.__class__)
                 and MapSerializer.extract_slot(self) == MapSerializer.extract_slot(

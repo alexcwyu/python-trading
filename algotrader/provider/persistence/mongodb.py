@@ -53,6 +53,9 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         return DataStore.Mongo
 
     def load_all(self, clazz):
+        if clazz == 'sequences':
+            return { data['_id']: data['seq'] for data in self.db[clazz].find()}
+
         result = []
         for data in self.db[clazz].find():
             obj = self.serializer.deserialize(data)

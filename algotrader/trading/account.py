@@ -12,6 +12,9 @@ class Account(AccountEventHandler, PositionHolder, Persistable, Startable):
         # 'open_orders'
     )
 
+    __transient__ = (
+        'app_context',
+    )
     def __init__(self, id=None, values=None):
         super(Account, self).__init__()
         self.id = id

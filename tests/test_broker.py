@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from algotrader.config.app import ApplicationConfig
+from algotrader.config.persistence import PersistenceConfig
 from algotrader.event.event_handler import ExecutionEventHandler
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdStatus, OrdAction, OrdType
@@ -28,8 +29,7 @@ class SimulatorTest(TestCase):
             return "ExecHandler"
 
     def setUp(self):
-        self.app_config = ApplicationConfig(None, None, None, None, None, None, None)
-        self.app_context = ApplicationContext(app_config=self.app_config)
+        self.app_context = ApplicationContext()
         #self.app_context.inst_data_mgr.clear()
 
         self.exec_handler = SimulatorTest.ExecHandler()

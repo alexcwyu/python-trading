@@ -11,8 +11,7 @@ from algotrader.trading.context import ApplicationContext
 
 class MovingAverageTest(TestCase):
     def setUp(self):
-        self.app_config = ApplicationConfig(None, None, None, None, None, None, None)
-        self.app_context = ApplicationContext(app_config=self.app_config)
+        self.app_context = ApplicationContext()
 
     def test_name(self):
         bar = self.app_context.inst_data_mgr.get_series("bar")

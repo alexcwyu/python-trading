@@ -19,7 +19,6 @@ class CassandraDataStore(DataStore):
     def id(self):
         return DataStore.Cassandra
 
-
     def load_all(self, clazz):
         pass
 

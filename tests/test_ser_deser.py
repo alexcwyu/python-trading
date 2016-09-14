@@ -166,9 +166,7 @@ class SerializerTest(TestCase):
 
     @parameterized.expand(params)
     def test_indicator(self, name, serializer):
-
-        self.app_config = ApplicationConfig(None, None, None, None, None, None, None)
-        self.app_context = ApplicationContext(app_config=self.app_config)
+        self.app_context = ApplicationContext()
 
         bar = self.app_context.inst_data_mgr.get_series("bar")
         sma = SMA(bar.name, 'close', 1, missing_value=0)

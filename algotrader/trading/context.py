@@ -1,4 +1,5 @@
 from algotrader import Startable
+from algotrader.config.app import ApplicationConfig
 from algotrader.event.event_bus import EventBus
 from algotrader.provider.provider_mgr import ProviderManager
 from algotrader.strategy.strategy_mgr import StrategyManager
@@ -12,12 +13,12 @@ from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
 
 
 class ApplicationContext(Startable):
-    def __init__(self, app_config):
+    def __init__(self, app_config=None):
         super(ApplicationContext, self).__init__()
 
         self.startables = []
 
-        self.app_config = app_config
+        self.app_config = app_config if app_config else ApplicationConfig()
 
         self.clock = self.add_startable(self.__get_clock())
         self.provider_mgr = self.add_startable(ProviderManager())
@@ -44,9 +45,9 @@ class ApplicationContext(Startable):
         return startable
 
     def __get_clock(self):
-        if self.app_config.clock_type == Clock.Simulation:
-            return SimulationClock()
-        return RealTimeClock()
+        if self.app_config.clock_type == Clock.RealTime:
+            return RealTimeClock()
+        return SimulationClock()
 
     def __get_ref_data_mgr(self):
         if self.app_config.ref_data_mgr_type == RefDataManager.DB:
@@ -77,16 +78,16 @@ class ApplicationContext(Startable):
             startable.stop()
 
     def get_trade_data_store(self):
-        return self.provider_mgr.get(self.app_config.trade_datastore_id)
+        return self.provider_mgr.get(self.app_config.persistence_config.trade_ds_id)
 
     def get_ref_data_store(self):
-        return self.provider_mgr.get(self.app_config.ref_datastore_id)
+        return self.provider_mgr.get(self.app_config.persistence_config.ref_ds_id)
 
     def get_timeseries_data_store(self):
-        return self.provider_mgr.get(self.app_config.time_series_datastore_id)
+        return self.provider_mgr.get(self.app_config.persistence_config.ts_ds_id)
 
     def get_seq_data_store(self):
-        return self.provider_mgr.get(self.app_config.seq_datastore_id)
+        return self.provider_mgr.get(self.app_config.persistence_config.seq_ds_id)
 
     def id(self):
         return "ApplicationContext"

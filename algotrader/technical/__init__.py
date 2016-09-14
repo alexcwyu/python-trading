@@ -59,7 +59,7 @@ class Indicator(DataSeries):
     def update_all(self):
         data_list = self.input.get_data()
         for data in data_list:
-            #if timestamp has been processed, we should skipped the update.....
+            # if timestamp has been processed, we should skipped the update.....
             if data['timestamp'] not in self.time_list:
                 if self.input_keys:
                     filtered_data = {key: data[key] for key in self.input_keys}

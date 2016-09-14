@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 
 
-
 class TimeSeriesPlot:
     def __init__(self, time_series, marker=" ", color=None):
         self.time_series = time_series

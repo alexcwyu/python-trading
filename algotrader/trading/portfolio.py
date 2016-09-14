@@ -54,7 +54,6 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         for order_req in self.app_context.order_mgr.get_strategy_order_reqs(self.id()):
             self._add_order_req(order_req)
 
-
         self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
     def _stop(self):

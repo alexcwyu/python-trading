@@ -7,8 +7,7 @@ from algotrader.trading.context import ApplicationContext
 
 class IndicatorTest(TestCase):
     def setUp(self):
-        self.app_config = ApplicationConfig(None, None, None, None, None, None, None)
-        self.app_context = ApplicationContext(app_config=self.app_config)
+        self.app_context = ApplicationContext()
         self.utils = DataSeriesUtils(self.app_context)
 
 

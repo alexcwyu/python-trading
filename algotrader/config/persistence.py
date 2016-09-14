@@ -1,37 +1,38 @@
 import abc
 
 from algotrader.config.config import Config
+from algotrader.provider.persistence import PersistenceMode
 
 
 class PersistenceConfig(Config):
     __slots__ = (
         'ref_ds_id',
-        'ref_persis_mode',
+        'ref_persist_mode',
 
         'trade_ds_id',
-        'trade_persis_mode',
+        'trade_persist_mode',
 
         'ts_ds_id',
-        'ts_persis_mode',
+        'ts_persist_mode',
 
         'seq_ds_id',
-        'seq_persis_mode',
+        'seq_persist_mode',
     )
 
-    def __init__(self, id,
-                 ref_ds_id, ref_persis_mode,
-                 trade_ds_id, trade_persis_mode,
-                 ts_ds_id, ts_persis_mode,
-                 seq_ds_id, seq_persis_mode):
+    def __init__(self, id=None,
+                 ref_ds_id=None, ref_persist_mode=PersistenceMode.Disable,
+                 trade_ds_id=None, trade_persist_mode=PersistenceMode.Disable,
+                 ts_ds_id=None, ts_persist_mode=PersistenceMode.Disable,
+                 seq_ds_id=None, seq_persist_mode=PersistenceMode.Disable):
         super(PersistenceConfig, self).__init__(id)
         self.ref_ds_id = ref_ds_id
-        self.ref_persis_mode = ref_persis_mode
+        self.ref_persist_mode = ref_persist_mode
         self.trade_ds_id = trade_ds_id
-        self.trade_persis_mode = trade_persis_mode
+        self.trade_persist_mode = trade_persist_mode
         self.ts_ds_id = ts_ds_id
-        self.ts_persis_mode = ts_persis_mode
+        self.ts_persist_mode = ts_persist_mode
         self.seq_ds_id = seq_ds_id
-        self.seq_persis_mode = seq_persis_mode
+        self.seq_persist_mode = seq_persist_mode
 
 
 class DataStoreConfig(Config):

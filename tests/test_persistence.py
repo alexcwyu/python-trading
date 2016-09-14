@@ -1,6 +1,8 @@
 import math
 from unittest import TestCase
 
+from algotrader.provider.persistence import DataStore, PersistenceMode
+from algotrader.config.persistence import PersistenceConfig
 from algotrader.config.app import ApplicationConfig
 from algotrader.provider.persistence import DataStore
 from algotrader.technical.ma import SMA
@@ -11,8 +13,11 @@ from algotrader.utils.clock import Clock
 
 class PersistenceTest(TestCase):
     def new_app_context(self):
-        app_config = ApplicationConfig(None, DataStore.InMemoryDB, DataStore.InMemoryDB, DataStore.InMemoryDB,
-                                       DataStore.InMemoryDB, RefDataManager.InMemory, Clock.Simulation)
+        app_config = ApplicationConfig(persistence_config = PersistenceConfig(
+            ref_ds_id=DataStore.InMemoryDB, ref_persist_mode=PersistenceMode.RealTime,
+            trade_ds_id=DataStore.InMemoryDB, trade_persist_mode=PersistenceMode.RealTime,
+            ts_ds_id=DataStore.InMemoryDB, ts_persist_mode=PersistenceMode.RealTime,
+            seq_ds_id=DataStore.InMemoryDB, seq_persist_mode=PersistenceMode.RealTime))
         app_context = ApplicationContext(app_config=app_config)
         app_context.start()
         return app_context

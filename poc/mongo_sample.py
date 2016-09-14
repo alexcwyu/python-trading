@@ -4,11 +4,11 @@ import time
 from pymongo import MongoClient
 
 from algotrader.config.app import ApplicationConfig
-from algotrader.config.persistence import MongoDBConfig
+from algotrader.config.persistence import MongoDBConfig, PersistenceConfig
 from algotrader.config.trading import BacktestingConfig
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
-from algotrader.provider.persistence import DataStore
+from algotrader.provider.persistence import DataStore, PersistenceMode
 from algotrader.provider.persistence.mongodb import MongoDBDataStore
 from algotrader.trading.account_mgr import AccountManager
 from algotrader.trading.context import ApplicationContext
@@ -19,7 +19,12 @@ from algotrader.utils.ser_deser import JsonSerializer, MapSerializer
 
 def get_default_app_context():
     config = MongoDBConfig()
-    app_config = ApplicationConfig(None, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo, None, None,
+    persistence_config = PersistenceConfig(None,
+                                           DataStore.Mongo, PersistenceMode.Batch,
+                                           DataStore.Mongo, PersistenceMode.Batch,
+                                           DataStore.Mongo, PersistenceMode.Batch,
+                                           DataStore.Mongo, PersistenceMode.Batch)
+    app_config = ApplicationConfig(None, None, None, persistence_config,
                                    config)
     return ApplicationContext(app_config=app_config)
 

@@ -518,7 +518,7 @@ class IBBroker(IBSocket, Broker, Feed):
 
             if create_er:
                 self.execution_event_bus.on_next(OrderStatusUpdate(
-                    ord_status_id = self.next_ord_status_id(),
+                    ord_status_id=self.next_ord_status_id(),
                     broker_id=self.ID,
                     ord_id=id,
                     cl_id=new_ord_req.cl_id,

@@ -9,8 +9,7 @@ from algotrader.trading.context import ApplicationContext
 
 class PortfolioTest(TestCase):
     def setUp(self):
-        self.app_config = ApplicationConfig(None, None, None, None, None, None, None)
-        self.app_context = ApplicationContext(app_config=self.app_config)
+        self.app_context = ApplicationContext()
         self.app_context.start()
         self.portfolio = self.app_context.portf_mgr.new_portfolio(portf_id="test", cash=100000)
         self.portfolio.start(self.app_context)

@@ -2,6 +2,7 @@ from datetime import date
 
 from algotrader.chart.plotter import StrategyPlotter
 from algotrader.config.app import ApplicationConfig
+from algotrader.config.persistence import PersistenceConfig
 from algotrader.config.trading import BacktestingConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
@@ -57,7 +58,7 @@ def main():
                                         broker_id=Broker.Simulator,
                                         feed_id=Feed.CSV,
                                         stg_configs={'qty': 1000})
-    app_config = ApplicationConfig("down2%", None, None, None, None, RefDataManager.InMemory, Clock.Simulation,
+    app_config = ApplicationConfig("down2%", RefDataManager.InMemory, Clock.Simulation, PersistenceConfig(),
                                    backtest_config)
     runner = BacktestRunner(app_config)
     try:

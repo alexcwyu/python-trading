@@ -3,6 +3,7 @@ import abc
 from algotrader.event.market_data import BarType, BarSize, MarketDataType
 from algotrader.utils.ser_deser import Serializable
 
+
 class DataSubscriptionType(Serializable):
     __metaclass__ = abc.ABCMeta
 
@@ -78,6 +79,7 @@ class MarketDepthSubscriptionType(DataSubscriptionType):
 
     def id(self):
         return "%s.%s" % (self.get_type(), self.num_rows)
+
 
 class SubscriptionKey(object):
     __slots__ = (

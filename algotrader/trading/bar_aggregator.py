@@ -28,7 +28,6 @@ class BarAggregator(MarketDataEventHandler):
         self.__output_bar_type = output_bar_type
         self.__output_size = output_size
 
-
         if isinstance(input, DataSeries):
             self.__input = input
             self.__input_name = input.name
@@ -186,5 +185,5 @@ class BarAggregator(MarketDataEventHandler):
         return self.__count
 
     def id(self):
-        return "%s.%s.%s.%s.%s" % (self.__inst_id, self.__input_name, self.__input_type, self.__output_bar_type, self.__output_size)
-
+        return "%s.%s.%s.%s.%s" % (
+        self.__inst_id, self.__input_name, self.__input_type, self.__output_bar_type, self.__output_size)

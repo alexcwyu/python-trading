@@ -1,12 +1,11 @@
 import numpy as np
 
 from algotrader import Manager
+from algotrader.config.persistence import PersistenceMode
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
-
-
 from algotrader.technical.atr import ATR
 from algotrader.technical.bb import BB
 from algotrader.technical.ma import SMA
@@ -29,6 +28,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
     def _start(self, app_context, **kwargs):
         self.store = self.app_context.get_timeseries_data_store()
+        self.persist_mode = self.app_context.app_config.persistence_config.ts_persist_mode
         self.load_all()
         self.subscription = EventBus.data_subject.subscribe(self.on_next)
 
@@ -39,14 +39,14 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.reset()
 
     def load_all(self):
-        if self.store:
+        if hasattr(self, "store") and self.store:
             self.store.start(self.app_context)
             series_list = self.store.load_all('time_series')
             for series in series_list:
                 self.__series_dict[series.id()] = series
 
     def save_all(self):
-        if self.store:
+        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
             for series in self.__series_dict.values():
                 self.store.save_time_series(series)
 
@@ -105,6 +105,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def add_series(self, series, raise_if_duplicate=False):
         if series.name not in self.__series_dict:
             self.__series_dict[series.name] = series
+            if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
+                self.store.save_time_series(series)
         elif raise_if_duplicate and self.__series_dict[series.name] != series:
             raise AssertionError("Series [%s] already exist" % series.name)
 
@@ -119,4 +121,3 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
     def id(self):
         return "InstrumentDataManager"
-

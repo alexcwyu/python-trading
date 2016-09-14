@@ -49,7 +49,6 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
     def __get_next_ord_id(self):
         return self.app_context.seq_mgr.get_next_sequence(self.id())
 
-
     def get_config_value(self, key, default_value=None):
         return self.trading_config.get_stg_configs_val(key=key, default_value=default_value)
 
@@ -80,9 +79,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         if self.feed:
             self.feed.start(app_context)
 
-
         self._subscribe_market_data(self.instruments)
-
 
     def _stop(self):
         if self.event_subscription:

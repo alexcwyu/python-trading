@@ -1,22 +1,18 @@
 import datetime
 import math
-#from datetime import datetime
 from unittest import TestCase
 
 import numpy as np
 import talib
 
 from algotrader.technical.talib_wrapper import SMA
-from algotrader.utils.time_series import DataSeries
-
-from algotrader.config.app import ApplicationConfig
 from algotrader.trading.context import ApplicationContext
+from algotrader.utils.time_series import DataSeries
 
 
 class TALibSMATest(TestCase):
     def setUp(self):
-        self.app_config = ApplicationConfig(None, None, None, None, None, None, None)
-        self.app_context = ApplicationContext(app_config=self.app_config)
+        self.app_context = ApplicationContext()
 
 
 

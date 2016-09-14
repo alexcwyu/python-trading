@@ -1,71 +1,40 @@
 from algotrader.config.config import Config
+from algotrader.config.persistence import PersistenceConfig
 from algotrader.config.trading import TradingConfig
+from algotrader.trading.ref_data import RefDataManager
+from algotrader.utils.clock import Clock
 
 
 class ApplicationConfig(Config):
     __slots__ = (
-        'ref_datastore_id',
-        'trade_datastore_id',
-        'time_series_datastore_id',
-        'seq_datastore_id',
 
         'ref_data_mgr_type',
         'clock_type',
-
+        'persistence_config',
         'trading_config',
-        # 'broker_configs',
-        # 'persistence_configs',
-        # 'feed_configs',
         'configs',
     )
 
-    def __init__(self, id,
-                 ref_datastore_id,
-                 trade_datastore_id,
-                 time_series_datastore_id,
-                 seq_datastore_id,
-                 ref_data_mgr_type,
-                 clock_type,
+    def __init__(self, id=None,
+                 ref_data_mgr_type=RefDataManager.InMemory,
+                 clock_type=Clock.Simulation,
+                 persistence_config=None,
                  *configs):
         super(ApplicationConfig, self).__init__(id)
-        self.ref_datastore_id = ref_datastore_id
-        self.time_series_datastore_id = time_series_datastore_id
-        self.trade_datastore_id = trade_datastore_id
-        self.seq_datastore_id = seq_datastore_id
 
         self.ref_data_mgr_type = ref_data_mgr_type
         self.clock_type = clock_type
-
+        self.persistence_config = persistence_config if persistence_config else PersistenceConfig()
         self.trading_configs = []
-        # self.broker_configs = {}
-        # self.persistence_configs = {}
-        # self.feed_configs = {}
         self.configs = {}
 
         for config in configs:
             if isinstance(config, TradingConfig):
                 self.trading_configs.append(config)
+            elif isinstance(config, TradingConfig):
+                self.trading_configs.append(config)
             else:
                 self.configs[config.__class__] = config
-
-                # elif isinstance(config, BrokerConfig):
-                #     self.broker_configs[config.__class__.__name__] = config
-                # elif isinstance(config, PersistenceConfig):
-                #     self.persistence_configs[config.__class__.__name__] = config
-                # elif isinstance(config, FeedConfig):
-                #     self.feed_configs[config.__class__.__name__] = config
-
-    # def get_trading_config(self, cls, create=True):
-    #     return self._get_or_create_config(self.trading_configs, cls, create)
-    #
-    # def get_broker_config(self, cls, create=True):
-    #     return self._get_or_create_config(self.broker_configs, cls, create)
-    #
-    # def get_persistence_config(self, cls, create=True):
-    #     return self._get_or_create_config(self.persistence_configs, cls, create)
-    #
-    # def get_feed_config(self, cls, create=True):
-    #     return self._get_or_create_config(self.feed_configs, cls, create)
 
     def get_config(self, cls, create=True):
         return self._get_or_create_config(self.configs, cls, create)

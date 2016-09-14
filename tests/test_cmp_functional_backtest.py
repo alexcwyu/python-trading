@@ -45,7 +45,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
         for symbol in symbols:
             dict_df[symbol] = df
 
-        self.app_config = ApplicationConfig(None, None, None, None, None, None, Clock.Simulation,
+        self.app_config = ApplicationConfig(None, None, Clock.Simulation, None,
                                             PandasMemoryDataFeedConfig(dict_df=dict_df), config)
         self.app_context = ApplicationContext(app_config=self.app_config)
 

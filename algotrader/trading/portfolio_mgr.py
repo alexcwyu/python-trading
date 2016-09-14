@@ -1,4 +1,5 @@
 from algotrader import SimpleManager
+from algotrader.config.persistence import PersistenceMode
 from algotrader.trading.portfolio import Portfolio
 
 
@@ -8,23 +9,24 @@ class PortfolioManager(SimpleManager):
 
     def _start(self, app_context, **kwargs):
         self.store = self.app_context.get_trade_data_store()
+        self.persist_mode = self.app_context.app_config.persistence_config.trade_persist_mode
         self.load_all()
 
     def load_all(self):
-        if self.store:
+        if hasattr(self, "store") and self.store:
             self.store.start(self.app_context)
             portfolios = self.store.load_all('portfolios')
             for portfolio in portfolios:
                 self.add(portfolio)
 
     def save_all(self):
-        if self.store:
+        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
             for portfolio in self.all_items():
                 self.store.save_portfolio(portfolio)
 
     def add(self, portfolio):
         super(PortfolioManager, self).add(portfolio)
-        if self.store:
+        if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
             self.store.save_portfolio(portfolio)
 
     def id(self):

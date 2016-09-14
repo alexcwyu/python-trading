@@ -6,7 +6,6 @@ from algotrader.event.market_data import BarType, BarSize
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import BarSubscriptionType
-from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
 
 

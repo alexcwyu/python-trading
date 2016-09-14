@@ -1,4 +1,5 @@
 from algotrader import SimpleManager
+from algotrader.config.persistence import PersistenceMode
 from algotrader.trading.account import Account
 
 
@@ -8,23 +9,24 @@ class AccountManager(SimpleManager):
 
     def _start(self, app_context, **kwargs):
         self.store = self.app_context.get_trade_data_store()
+        self.persist_mode = self.app_context.app_config.persistence_config.trade_persist_mode
         self.load_all()
 
     def load_all(self):
-        if self.store:
+        if hasattr(self, "store") and self.store:
             self.store.start(self.app_context)
             accounts = self.store.load_all('accounts')
             for account in accounts:
                 self.add(account)
 
     def save_all(self):
-        if self.store:
+        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
             for account in self.all_items():
                 self.store.save_account(account)
 
     def add(self, account):
         super(AccountManager, self).add(account)
-        if self.store:
+        if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
             self.store.save_account(account)
 
     def id(self):

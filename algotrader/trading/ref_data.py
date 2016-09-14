@@ -3,6 +3,7 @@ import csv
 import os
 
 from algotrader import Manager
+from algotrader.config.persistence import PersistenceMode
 from algotrader.provider.persistence import Persistable
 
 
@@ -203,6 +204,7 @@ class DBRefDataManager(RefDataManager):
 
     def _start(self, app_context, **kwargs):
         self.store = self.app_context.get_ref_data_store()
+        self.persist_mode = self.app_context.app_config.persistence_config.ref_persist_mode
         self.load_all()
 
     def _stop(self):
@@ -210,7 +212,7 @@ class DBRefDataManager(RefDataManager):
         self.reset()
 
     def load_all(self):
-        if self.store:
+        if hasattr(self, "store") and self.store:
             self.store.start(self.app_context)
             for inst in self.store.load_all('instruments'):
                 self.__inst_symbol_dict[inst.id()] = inst
@@ -221,7 +223,7 @@ class DBRefDataManager(RefDataManager):
                 self.__exch_dict[exch.exch_id] = exch
 
     def save_all(self):
-        if self.store:
+        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
             for inst in self.__inst_dict.values():
                 self.store.save_instrument(inst)
             for ccy in self.__ccy_dict.values():
@@ -237,17 +239,17 @@ class DBRefDataManager(RefDataManager):
 
     def add_inst(self, inst):
         super(DBRefDataManager, self).add_inst(inst)
-        if self.store:
+        if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
             self.store.save_instrument(inst)
 
     def add_ccy(self, ccy):
         super(DBRefDataManager, self).add_ccy(ccy)
-        if self.store:
+        if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
             self.store.save_exchange(ccy)
 
     def add_exch(self, exch):
         super(DBRefDataManager, self).add_exch(exch)
-        if self.store:
+        if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
             self.store.save_currency(exch)
 
     def id(self):

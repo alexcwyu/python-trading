@@ -5,10 +5,10 @@ Created on 4/16/16
 
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.broker import IBConfig
+from algotrader.config.persistence import PersistenceConfig
 from algotrader.config.trading import LiveTradingConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
-from algotrader.provider.persistence import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
@@ -55,8 +55,7 @@ def main():
                                             broker_id=Broker.IB,
                                             feed_id=Broker.IB)
 
-    app_config = ApplicationConfig(None, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo, DataStore.Mongo,
-                                   RefDataManager.DB, Clock.RealTime,
+    app_config = ApplicationConfig(None, RefDataManager.DB, Clock.RealTime, PersistenceConfig(),
                                    broker_config, live_trading_config)
 
     runner = ATSRunner(app_config)

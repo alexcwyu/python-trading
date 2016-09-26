@@ -3,7 +3,7 @@ from algotrader.utils.time_series import DataSeries
 from algotrader.technical import Indicator
 import numpy as np
 import pandas as pd
-
+from collections import OrderedDict
 
 class PipeLine(DataSeries):
     VALUE = 'value'
@@ -12,6 +12,7 @@ class PipeLine(DataSeries):
         'length',
         'input_keys',
         'df',
+        'cache'
         'input_names_pos',
         'input_keys',
         'calculate',
@@ -36,7 +37,8 @@ class PipeLine(DataSeries):
         if isinstance(inputs, list):
             parts.extend([Indicator.get_input_name(i) for i in inputs])
         else:
-            parts.extend(Indicator.get_input_name(inputs))
+            # parts.extend(Indicator.get_input_name(inputs))
+            parts.append(Indicator.get_input_name(inputs))
 
         return ",".join(str(part) for part in parts)
 
@@ -62,7 +64,6 @@ class PipeLine(DataSeries):
         self.numPipes = len(input_names)
         self.length = length if length is not None else 1
         self.input_names = input_names
-        self.df = pd.DataFrame(index=range(self.length), columns=input_names)
         self.input_names_pos = dict(zip(input_names,
                                         range(len(input_names))))
 
@@ -71,10 +72,14 @@ class PipeLine(DataSeries):
         inst_data_mgr.add_series(self)
         self.calculate = True
         self.__curr_timestamp = None
+        self._flush_and_create()
+        # self.df = pd.DataFrame(index=range(self.length), columns=input_names)
+        # self.cache = {} # key is input name, value is numpy array
         # self.update_all()
 
     def _flush_and_create(self):
-        self.df = pd.DataFrame(index=range(self.length), columns=self.input_names)
+        # self.df = pd.DataFrame(index=range(self.length), columns=self.input_names)
+        self.cache = OrderedDict(zip(self.input_names, [None for i in range(len(self.input_names))]))
 
     def update_all(self):
         for input in self.inputs:
@@ -88,8 +93,10 @@ class PipeLine(DataSeries):
                     self.on_update(data)
 
     def all_filled(self):
-        check_df = self.df.isnull()*1
-        return False if check_df.sum(axis=1).sum(axis=0) > 0 else True
+        has_none = np.sum(np.array([v is None for v in self.cache.values()]))
+        return False if has_none > 0 else True
+        # check_df = self.df.isnull()*1
+        # return False if check_df.sum(axis=1).sum(axis=0) > 0 else True
 
     def on_update(self, data):
         if data['timestamp'] != self.__curr_timestamp:
@@ -99,9 +106,12 @@ class PipeLine(DataSeries):
         data_name = data['name']
         if data_name in self.input_names:
             j = self.input_names_pos[data_name]
-            self.df[data_name] = self.inputs[j].get_by_idx(
+            self.cache[data_name] = self.inputs[j].get_by_idx(
                 keys=self.input_keys,
                 idx=slice(-self.length, None, None))
+            # self.df[data_name] = self.inputs[j].get_by_idx(
+            #     keys=self.input_keys,
+            #     idx=slice(-self.length, None, None))
 
     def numPipes(self):
         return self.numPipes

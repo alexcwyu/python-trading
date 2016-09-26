@@ -10,7 +10,7 @@ from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.utils import logger
 
 
-class PairTradingWithOUSpread(Strategy):
+class PairTradingWithOUSpreadOld(Strategy):
     """
     This is the baby version that assume the asset we are trading paris
     that the spread follows Ornstein-Uhlenbeck mean reverting process with known parameters in advance
@@ -32,7 +32,7 @@ class PairTradingWithOUSpread(Strategy):
         :param trading_config:
         :return:
         """
-        super(PairTradingWithOUSpread, self).__init__(stg_id, portfolio,
+        super(PairTradingWithOUSpreadOld, self).__init__(stg_id, portfolio,
                                                       instruments, trading_config,
                                                       ref_data_mgr=ref_data_mgr)
         self.buy_order = None

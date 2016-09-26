@@ -1,14 +1,18 @@
+
+from jinja2 import Template
+
+
+importTmp = """
 import datetime
 import math
 from unittest import TestCase
-
 import numpy as np
-
 from algotrader.technical.ma import SMA
 from algotrader.trading.instrument_data import inst_data_mgr
+"""
 
-
-class MovingAverageTest(TestCase):
+pipelineTestTmp = """
+class {{testName}}Test(TestCase):
     def test_name(self):
         inst_data_mgr.clear()
         bar = inst_data_mgr.get_series("bar")
@@ -33,19 +37,18 @@ class MovingAverageTest(TestCase):
         t3 = t2 + datetime.timedelta(0, 3)
 
         bar.add({"timestamp": t1, "close": 2.0, "open": 0})
-        self.assertEquals([{"name": "'SMA('bar',close,3)'",
-                            "timestamp": t1, 'value': np.nan}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan}],
                           sma.get_data())
 
         bar.add({"timestamp": t2, "close": 2.4, "open": 1.4})
-        self.assertEquals([{"name": "'SMA('bar',close,3)'", "timestamp": t1, 'value': np.nan},
-                           {"name": "'SMA('bar',close,3)'", "timestamp": t2, 'value': np.nan}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan},
+                           {"timestamp": t2, 'value': np.nan}],
                           sma.get_data())
 
         bar.add({"timestamp": t3, "close": 2.8, "open": 1.8})
-        self.assertEquals([{"name": "'SMA('bar',close,3)'", "timestamp": t1, 'value': np.nan},
-                           {"name": "'SMA('bar',close,3)'", "timestamp": t2, 'value': np.nan},
-                           {"name": "'SMA('bar',close,3)'", "timestamp": t3, 'value': 2.4}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan},
+                           {"timestamp": t2, 'value': np.nan},
+                           {"timestamp": t3, 'value': 2.4}],
                           sma.get_data())
 
     def test_moving_average_calculation(self):
@@ -85,3 +88,4 @@ class MovingAverageTest(TestCase):
         self.assertEquals(2.4, sma.get_by_time(t3, 'value'))
         self.assertEquals(2.8, sma.get_by_time(t4, 'value'))
         self.assertEquals(3.2, sma.get_by_time(t5, 'value'))
+

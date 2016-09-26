@@ -84,19 +84,19 @@ class DataSeriesTest(TestCase):
         series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
         series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
 
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 2, "v2": 2}], series.get_data())
+        self.assertEqual([{'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 1},
+                          {'name': "'None'", "timestamp": self.t2, "v1": 2, "v2": 2}], series.get_data())
 
         series.add({"timestamp": self.t2, "v1": 3, "v2": 3})
 
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 3, "v2": 3}], series.get_data())
+        self.assertEqual([{'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 1},
+                          {'name': "'None'", "timestamp": self.t2, "v1": 3, "v2": 3}], series.get_data())
 
         series.add({"timestamp": self.t3, "v1": 4, "v2": 4})
 
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 3, "v2": 3},
-                          {"timestamp": self.t3, "v1": 4, "v2": 4}], series.get_data())
+        self.assertEqual([{'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 1},
+                          {'name': "'None'", "timestamp": self.t2, "v1": 3, "v2": 3},
+                          {'name': "'None'", "timestamp": self.t3, "v1": 4, "v2": 4}], series.get_data())
 
     def test_current_time(self):
         series = DataSeries()
@@ -117,7 +117,8 @@ class DataSeriesTest(TestCase):
         series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
         series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
 
-        self.assertEqual({"timestamp": {self.t1: self.t1, self.t2: self.t2}, "v1": {self.t1: 1, self.t2: 2},
+        self.assertEqual({'name': {self.t1: "'None'",  self.t2: "'None'"},
+                          "timestamp": {self.t1: self.t1, self.t2: self.t2}, "v1": {self.t1: 1, self.t2: 2},
                           "v2": {self.t1: 1, self.t2: 2}}, series.get_data_dict())
 
         self.assertEqual({"v1": {self.t1: 1, self.t2: 2}, "v2": {self.t1: 1, self.t2: 2}},
@@ -130,8 +131,8 @@ class DataSeriesTest(TestCase):
         series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
         series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
 
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 2, "v2": 2}], series.get_data())
+        self.assertEqual([{'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 1},
+                          {'name': "'None'", "timestamp": self.t2, "v1": 2, "v2": 2}], series.get_data())
 
     def test_get_series(self):
 
@@ -186,15 +187,15 @@ class DataSeriesTest(TestCase):
         self.assertTrue(np.isnan(series.now()))
 
         series.add({"timestamp": self.t1, "v1": 1, "v2": 2})
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.now())
+        self.assertEqual({'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 2}, series.now())
 
         series.add({"timestamp": self.t2, "v1": 1.2, "v2": 2.2})
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.now())
+        self.assertEqual({'name': "'None'", "timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.now())
 
         series.add({"timestamp": self.t3, "v1": 1.3, "v2": 2.3})
         series.add({"timestamp": self.t4, "v1": 1.4, "v2": 2.4})
 
-        self.assertEqual({"timestamp": self.t4, "v1": 1.4, "v2": 2.4}, series.now())
+        self.assertEqual({'name': "'None'", "timestamp": self.t4, "v1": 1.4, "v2": 2.4}, series.now())
         self.assertEqual(1.4, series.now(["v1"]))
         self.assertEqual({"v1": 1.4, "v2": 2.4}, series.now(["v1", "v2"]))
 
@@ -203,22 +204,22 @@ class DataSeriesTest(TestCase):
         self.assertTrue(np.isnan(series.now()))
 
         series.add({"timestamp": self.t1, "v1": 1, "v2": 2})
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(0))
+        self.assertEqual({'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(0))
 
         series.add({"timestamp": self.t2, "v1": 1.2, "v2": 2.2})
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(0))
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(1))
+        self.assertEqual({'name': "'None'", "timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(0))
+        self.assertEqual({'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(1))
 
         series.add({"timestamp": self.t3, "v1": 1.3, "v2": 2.3})
-        self.assertEqual({"timestamp": self.t3, "v1": 1.3, "v2": 2.3}, series.ago(0))
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(1))
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(2))
+        self.assertEqual({'name': "'None'", "timestamp": self.t3, "v1": 1.3, "v2": 2.3}, series.ago(0))
+        self.assertEqual({'name': "'None'", "timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(1))
+        self.assertEqual({'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(2))
 
         series.add({"timestamp": self.t4, "v1": 1.4, "v2": 2.4})
-        self.assertEqual({"timestamp": self.t4, "v1": 1.4, "v2": 2.4}, series.ago(0))
-        self.assertEqual({"timestamp": self.t3, "v1": 1.3, "v2": 2.3}, series.ago(1))
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(2))
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(3))
+        self.assertEqual({'name': "'None'", "timestamp": self.t4, "v1": 1.4, "v2": 2.4}, series.ago(0))
+        self.assertEqual({'name': "'None'", "timestamp": self.t3, "v1": 1.3, "v2": 2.3}, series.ago(1))
+        self.assertEqual({'name': "'None'", "timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(2))
+        self.assertEqual({'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(3))
 
         self.assertEqual({"v1": 1.4, "v2": 2.4}, series.ago(0, ["v1", "v2"]))
         self.assertEqual(1.4, series.ago(0, "v1"))

@@ -16,6 +16,8 @@ from test_ser_deser import SerializerTest
 from test_talib_wrapper import TALibSMATest
 from test_cmp_functional_backtest import TestCompareWithFunctionalBacktest
 from test_bar_aggregator import BarAggregatorTest
+from test_pipeline import PipelineTest
+from test_pipeline_pairwise import PairwiseTest
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -35,6 +37,8 @@ def suite():
     test_suite.addTest(unittest.makeSuite(TALibSMATest))
     test_suite.addTest(unittest.makeSuite(BarAggregatorTest))
     test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
+    test_suite.addTest(unittest.makeSuite(PipelineTest))
+    test_suite.addTest(unittest.makeSuite(PairwiseTest))
     return test_suite
 
 mySuit = suite()

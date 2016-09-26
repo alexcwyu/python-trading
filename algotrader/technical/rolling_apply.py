@@ -8,8 +8,8 @@ class RollingApply(Indicator):
         'func'
     )
 
-    def __init__(self, input, input_key=None, length=0, func=np.std, desc="Rolling Apply"):
-        super(RollingApply, self).__init__(Indicator.get_name(RollingApply.__name__, input, input_key, length), input, input_key, desc)
+    def __init__(self, name, input, input_key=None, length=0, func=np.std, desc="Rolling Apply"):
+        super(RollingApply, self).__init__(name, input, input_key, desc)
         self.length = int(length)
         self.func = func
         super(RollingApply, self).update_all()
@@ -24,3 +24,10 @@ class RollingApply(Indicator):
             result[Indicator.VALUE] = np.nan
 
         self.add(result)
+
+
+class StdDev(RollingApply):
+    def __init__(self, input, input_key='close', length=30, desc="Rolling Standard Deviation"):
+        super(StdDev, self).__init__(input, func=lambda x: np.std(x, axis=0),
+                                      name=Indicator.get_name(StdDev.__name__, input, input_key),
+                                      input_key=input_key, desc=desc)

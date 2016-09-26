@@ -1,6 +1,7 @@
 from algotrader.technical import Indicator
 from algotrader.technical.pipeline import PipeLine
 import numpy as np
+import pandas as pd
 
 
 class Rank(PipeLine):
@@ -19,7 +20,8 @@ class Rank(PipeLine):
         result = {}
         result['timestamp'] = data['timestamp']
         if self.all_filled():
-            result[PipeLine.VALUE] = ((self.df.rank(axis=1, ascending=self.ascending) - 1)/(self.df.shape[1]-1)).head(1).values
+            df = pd.DataFrame(self.cache)
+            result[PipeLine.VALUE] = ((df.rank(axis=1, ascending=self.ascending) - 1)/(df.shape[1]-1)).tail(1).values
         else:
             result[PipeLine.VALUE] = self._default_output()
 

@@ -4,6 +4,7 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 from rx.subjects import Subject
+# from algotrader.technical.pipeline.pairwise import Plus, Minus, Times, Divides
 
 timestamp_key = "timestamp"
 
@@ -210,6 +211,19 @@ class DataSeries(object):
             data = self.get_by_idx(idx, key)
             result[key] = func(np.array(data), *argv, **kwargs)
         return result if len(keys) > 1 else result[keys[0]]
+    #
+    # def __add__(self, other):
+    #     return Plus(self, other, self.keys)
+    #
+    # def __radd__(self, other):
+    #     return Plus(other, self, self.keys)
+    #
+    # def __mul__(self, other):
+    #     return Times(self, other, self.keys)
+    #
+    # def __rmul__(self, other):
+    #     return Times(other, self, self.keys)
+
 
     def __getitem__(self, pos):
         if isinstance(pos, tuple):

@@ -41,7 +41,6 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         self.exec_reports = self.db['exec_reports']
         self.ord_status_upds = self.db['ord_status_upds']
 
-        self.strategies = self.db['strategies']
         self.sequences = self.db['sequences']
         self.serializer = MapSerializer
 

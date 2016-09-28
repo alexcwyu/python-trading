@@ -8,6 +8,7 @@ class AccountEvent(Event):
 
 class AccountUpdate(AccountEvent):
     __slots__ = (
+        'id',
         'account_name',
         'key',
         'ccy',
@@ -31,6 +32,8 @@ class AccountUpdate(AccountEvent):
 
 class PortfolioUpdate(AccountEvent):
     __slots__ = (
+        'id',
+        'portf_id',
         'inst_id',
         'position',
         'mkt_price',
@@ -41,11 +44,12 @@ class PortfolioUpdate(AccountEvent):
         'account_name'
     )
 
-    def __init__(self, id=None, inst_id=None, position=0, mkt_price=0, mkt_value=0, avg_cost=0, unrealized_pnl=0,
+    def __init__(self, id=None, portf_id = None, inst_id=None, position=0, mkt_price=0, mkt_value=0, avg_cost=0, unrealized_pnl=0,
                  realized_pnl=0,
                  account_name=None, timestamp=None):
         super(PortfolioUpdate, self).__init__(timestamp=timestamp)
         self.id = id
+        self.portf_id = portf_id
         self.inst_id = inst_id
         self.position = position
         self.mkt_price = mkt_price

@@ -56,20 +56,6 @@ CREATE TABLE IF NOT EXISTS time_series(
   PRIMARY KEY (id) // primary key
 );
 
-CREATE TABLE IF NOT EXISTS time_series_entry(
-  id varchar,
-  keys set<varchar>,
-  desc varchar
-  PRIMARY KEY (id) // primary key
-);
-
-CREATE TABLE IF NOT EXISTS time_series_data(
-  id varchar,
-  timestamp bigint,
-  values map
-  PRIMARY KEY (id, timestamp)
-);
-
 // ref data
 CREATE TABLE IF NOT EXISTS instruments(
   inst_id varchar,
@@ -186,7 +172,7 @@ CREATE TABLE IF NOT EXISTS ord_status_upds(
 );
 
 // seq data
-CREATE TABLE IF NOT EXISTS sequence(
+CREATE TABLE IF NOT EXISTS sequences(
   id varchar,
   seq counter,
   PRIMARY KEY (id)

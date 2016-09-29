@@ -5,6 +5,7 @@ from test_broker_mgr import BrokerManagerTest
 from test_clock import ClockTest
 from test_data_series import DataSeriesTest
 from test_indicator import IndicatorTest
+from test_rolling import RollingApplyTest
 from test_instrument_data import InstrumentDataTest
 from test_ma import MovingAverageTest
 from test_market_data_processor import MarketDataProcessorTest
@@ -39,6 +40,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
     test_suite.addTest(unittest.makeSuite(PipelineTest))
     test_suite.addTest(unittest.makeSuite(PairwiseTest))
+    test_suite.addTest(unittest.makeSuite(RollingApplyTest))
     return test_suite
 
 mySuit = suite()

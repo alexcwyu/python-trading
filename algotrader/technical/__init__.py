@@ -64,6 +64,12 @@ from algotrader.technical.stats import MAX
 from algotrader.technical.stats import MIN
 from algotrader.technical.stats import STD
 from algotrader.technical.stats import VAR
+from algotrader.technical.pipeline.rank import Rank
+from algotrader.technical.pipeline.pairwise import *
+from algotrader.technical.pipeline.make_vector import MakeVector
+from algotrader.technical.pipeline.cross_sessional_apply import Abs, Average, DecayExp, DecayLinear, Log, Scale, Sign, Sum, Tail, TsRank
+
+
 
 
 def parse(name):

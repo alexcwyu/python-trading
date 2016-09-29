@@ -174,6 +174,27 @@ class TsRank(CrossSessionalApply):
                                       input_key=input_key, length=length, desc=desc)
 
 
+class SignPower(CrossSessionalApply):
+    def __init__(self, inputs, input_key='close', desc="Cross Sessional SignPower"):
+        super(SignPower, self).__init__(inputs=inputs, np_func=lambda x: np_sign_to_value(x)* np.power(x, e),
+                                      name=PipeLine.get_name(SignPower.__name__, inputs, input_key),
+                                      input_key=input_key, length=1, desc=desc)
+
+
+class Delta(CrossSessionalApply):
+    def __init__(self, inputs, length, input_key='close', desc="Cross Sessional Delta"):
+        super(Delta, self).__init__(inputs=inputs, np_func=lambda x: x[-1,:] - x[0,:],
+                                      name=PipeLine.get_name(Delta.__name__, inputs, input_key),
+                                      input_key=input_key, length=length, desc=desc)
+
+
+class Product(CrossSessionalApply):
+    def __init__(self, inputs, length, input_key='close', desc="Cross Sessional Product"):
+        super(Product, self).__init__(inputs=inputs, np_func=lambda x: np.prod(x,axis=0),
+                                      name=PipeLine.get_name(Product.__name__, inputs, input_key),
+                                      input_key=input_key, length=length, desc=desc)
+
+
 
 from jinja2 import Template
 csTemplate = Template(
@@ -194,8 +215,8 @@ class {{className}}(CrossSessionalApply):
 # print csTemplate.render({"className": "Log",
 #                          "func" : "lambda x: np.log(x)"})
 #
-# print csTemplate.render({"className": "SignPower",
-#                          "func" : "lambda x: np_sign_to_value(x)* np.power(x, e)"})
+print csTemplate.render({"className": "SignPower",
+                         "func" : "lambda x: np_sign_to_value(x)* np.power(x, e)"})
 #
 # print csTemplate.render({"className": "Scale",
 #                          "func" : "lambda x: x/np.sum(np.abs(x))"})
@@ -203,10 +224,16 @@ class {{className}}(CrossSessionalApply):
 # print csTemplate.render({"className": "DecayLinear",
 #                          "func": "lambda x: np.dot(np.arange(n,0,-1), x)/np.sum(np.arange(n,0,-1))"})
 
-print csTemplate.render({"className": "DecayExp",
-                         "func": "lambda x: np.dot(np.power(f,np.arange(n)), x)/np.sum(np.power(f,np.arange(n)))"})
+# print csTemplate.render({"className": "DecayExp",
+#                          "func": "lambda x: np.dot(np.power(f,np.arange(n)), x)/np.sum(np.power(f,np.arange(n)))"})
+#
+# print csTemplate.render({"className": "TsRank",
+#                          "func": "lambda x : timeseries_rank_helper(x,ascending=asc)"
+#                          })
 
-print csTemplate.render({"className": "TsRank",
-                         "func": "lambda x : timeseries_rank_helper(x,ascending=asc)"
-                         })
+print csTemplate.render({"className": "Delta",
+                         "func" : "lambda x: x[-1,:] - x[0,:]"})
 
+
+print csTemplate.render({"className": "Product",
+                         "func" : "lambda x: np.prod(x,axis=0)"})

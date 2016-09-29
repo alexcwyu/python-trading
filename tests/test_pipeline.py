@@ -43,6 +43,7 @@ class PipelineTest(TestCase):
         avg = Average([bar0, bar1, bar2, bar3], input_key='close')
         gssum = GSSum([bar0, bar1, bar2, bar3], input_key='close')
         basket = MakeVector([bar0, bar1, bar2, bar3], input_key='close')
+        # TODO: the name printed by pipeline now break the "parse" machnism so we have to review it
         self.assertEquals("Average('bar0','bar1','bar2','bar3',close)", avg.name)
         self.assertEquals("Sum('bar0','bar1','bar2','bar3',close)", gssum.name)
         self.assertEquals("MakeVector('bar0','bar1','bar2','bar3',close)", basket.name)

@@ -1,26 +1,32 @@
 import datetime
-from collections import defaultdict
 
 import numpy as np
 import pandas as pd
 from rx.subjects import Subject
 
+from algotrader import Startable
+from algotrader.provider.persistence import Persistable
+
 timestamp_key = "timestamp"
 
-class DataSeries(object):
+
+class DataSeries(Persistable, Startable):
     TIMESTAMP = 'timestamp'
 
-    _slots__ = (
+    __slots__ = (
         'name',
         'keys',
         'desc',
-        'missing_value'
-        'subject',
+        'missing_value',
+        'data_list',
+        'time_list',
+        'data_time_dict',
+        'use_col_np'
+    )
 
-        '__data_list',
-        '__time_list',
-        '__data_time_dict',
-        '__use_col_np'
+    __transient__ = (
+        'subject',
+        'app_context',
     )
 
     def __init__(self, name=None, keys=None, desc=None, missing_value=np.nan, data_list=None, use_col_np=False):
@@ -32,20 +38,31 @@ class DataSeries(object):
         :param data_list:
         :param use_col_np: If True, the column based storage of list will used to pass to numpy function
         """
+        super(DataSeries, self).__init__()
         self.name = name
         self.keys = self._get_key(keys, None)
         self.desc = desc if desc else name
         self.missing_value = missing_value
-        self.subject = Subject()
 
-        self.__data_list = list()
-        self.__time_list = list()
-        self.__data_time_dict = defaultdict(dict)
-        self.__use_col_np = use_col_np
+        self.data_list = []
+        self.time_list = []
+        self.data_time_dict = {}
+        self.use_col_np = use_col_np
+
+        self.subject = Subject()
 
         if data_list:
             for data in data_list:
                 self.add(data)
+
+    def _start(self, app_context, **kwargs):
+        pass
+
+    def _stop(self):
+        pass
+
+    def id(self):
+        return self.name
 
     def add(self, data):
         time = data.get(timestamp_key)
@@ -53,43 +70,48 @@ class DataSeries(object):
             self.keys = data.keys()
 
         if self.current_time() == None or time > self.current_time():
-            self.__time_list.append(time)
+            self.time_list.append(time)
             enhanced_data = {}
             for key in self.keys:
                 value = data.get(key, self.missing_value)
-                self.__data_time_dict[key][time] = value
+                if key not in self.data_time_dict:
+                    self.data_time_dict[key] = {}
+                self.data_time_dict[key][str(time)] = value
                 enhanced_data[key] = value
-            self.__data_list.append(enhanced_data)
+            self.data_list.append(enhanced_data)
 
         elif time == self.current_time():
 
-            enhanced_data = self.__data_list.pop()
+            enhanced_data = self.data_list.pop()
             for key in self.keys:
                 if key in data:
                     value = data.get(key)
-                    self.__data_time_dict[key][time] = value
+                    if key not in self.data_time_dict:
+                        self.data_time_dict[key] = {}
+                    self.data_time_dict[key][str(time)] = value
                     enhanced_data[key] = value
-            self.__data_list.append(enhanced_data)
+            self.data_list.append(enhanced_data)
         else:
             raise AssertionError(
-                "Time for new Item %s cannot be earlier then previous item %s" % (time, self._prev_time))
+                "Time for new Item %s cannot be earlier then previous item %s" % (time, self.current_time()))
         self.subject.on_next(data)
 
     def current_time(self):
-        return self.__time_list[-1] if self.__time_list else None
+        return self.time_list[-1] if self.time_list else None
 
     def get_data_dict(self, keys=None):
         keys = self._get_key(keys, self.keys)
         result = {}
         for key in keys:
-            result[key] = self.__data_time_dict[key]
+            if key in self.data_time_dict:
+                result[key] = self.data_time_dict[key]
         return result if len(keys) > 1 else result[keys[0]]
 
     def get_data(self):
-        return self.__data_list
+        return self.data_list
 
     def get_data_frame(self, keys=None):
-        df = pd.DataFrame(self.__data_list, index=self.__time_list)
+        df = pd.DataFrame(self.data_list, index=self.time_list)
         if keys:
             return df[self._get_key(keys, self.keys)]
         return df
@@ -103,7 +125,7 @@ class DataSeries(object):
         return result if len(keys) > 1 else result[keys[0]]
 
     def size(self):
-        return len(self.__time_list)
+        return len(self.time_list)
 
     def now(self, keys=None):
         return self.get_by_idx(-1, keys)
@@ -125,9 +147,9 @@ class DataSeries(object):
         result = {}
         for key in keys:
             if isinstance(idx, int):
-                result[key] = self.__data_list[idx].get(key, self.missing_value)
+                result[key] = self.data_list[idx].get(key, self.missing_value)
             elif isinstance(idx, slice):
-                result[key] = [data.get(key, self.missing_value) for data in self.__data_list[idx]]
+                result[key] = [data.get(key, self.missing_value) for data in self.data_list[idx]]
             else:
                 raise AssertionError("unknown index type %s" % (idx))
 
@@ -137,7 +159,8 @@ class DataSeries(object):
         keys = self._get_key(keys, self.keys)
         result = {}
         for key in keys:
-            result[key] = self.__data_time_dict[key][time]
+            if key in self.data_time_dict:
+                result[key] = self.data_time_dict[key][str(time)]
 
         return result if len(keys) > 1 else result[keys[0]]
 

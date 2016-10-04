@@ -1,49 +1,56 @@
-import math
 from collections import defaultdict
 from unittest import TestCase
 
 from algotrader.event.market_data import Trade, Bar, Quote
-from algotrader.event.order import Order, OrdAction, OrdType, NewOrderRequest, OrdStatus, OrderStatusUpdate, ExecutionReport
+from algotrader.event.order import OrdAction, OrdType, NewOrderRequest, OrdStatus, ExecutionReport
 from algotrader.trading.portfolio import Portfolio
-from algotrader.trading.order_mgr import order_mgr
-
+from algotrader.config.app import ApplicationConfig
+from algotrader.trading.context import ApplicationContext
 
 class PortfolioTest(TestCase):
     def setUp(self):
-        self.portfolio = Portfolio(cash=100000)
-        order_mgr.reset()
+        self.app_context = ApplicationContext()
+        self.app_context.start()
+        self.portfolio = self.app_context.portf_mgr.new_portfolio(portf_id="test", cash=100000)
+        self.portfolio.start(self.app_context)
+
+    def tearDown(self):
+        self.app_context.stop()
 
     def test_portfolio(self):
         self.assertEqual(Portfolio(cash=100000).cash, 100000)
 
     def test_position(self):
 
-        ord_req1 = NewOrderRequest(cl_id='test', cl_ord_id=1, portf_id="test", broker_id ="Dummy", inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
-        ord_req2 = NewOrderRequest(cl_id='test', cl_ord_id=2, portf_id="test", broker_id ="Dummy", inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1800, limit_price=18.2)
+        ord_req1 = NewOrderRequest(cl_id='test', cl_ord_id=1, portf_id="test", broker_id="Dummy", inst_id=1,
+                                   action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        ord_req2 = NewOrderRequest(cl_id='test', cl_ord_id=2, portf_id="test", broker_id="Dummy", inst_id=1,
+                                   action=OrdAction.BUY, type=OrdType.LIMIT, qty=1800, limit_price=18.2)
 
         self.assertEqual(0, len(self.portfolio.positions))
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertTrue(math.isnan(self.portfolio.performance_series.now("total_equity")))
+        self.assertEqual(0, (self.portfolio.performance_series.now("total_equity")))
 
         order1 = self.portfolio.send_order(ord_req1)
         self.check_order(self.portfolio, [order1], {1: (1000, 0)})
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertTrue(math.isnan(self.portfolio.performance_series.now("total_equity")))
+        self.assertEqual(0, (self.portfolio.performance_series.now("total_equity")))
 
         order2 = self.portfolio.send_order(ord_req2)
         self.check_order(self.portfolio, [order1, order2], {1: (2800, 0)})
         self.assertEqual(100000, self.portfolio.cash)
-        self.assertTrue(math.isnan(self.portfolio.performance_series.now("total_equity")))
+        self.assertEqual(0, (self.portfolio.performance_series.now("total_equity")))
 
     def test_on_exec_report(self):
 
-        ord_req = NewOrderRequest(cl_id='test', cl_ord_id=1, portf_id="test", broker_id ="Dummy", inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        ord_req = NewOrderRequest(cl_id='test', cl_ord_id=1, portf_id="test", broker_id="Dummy", inst_id=1,
+                                  action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
         order1 = self.portfolio.send_order(ord_req)
 
         er1 = ExecutionReport(cl_id='test', cl_ord_id=1, ord_id=1, er_id=1, inst_id=1, last_qty=500, last_price=18.4,
                               status=OrdStatus.PARTIALLY_FILLED)
 
-        order_mgr.on_exec_report(er1)
+        self.app_context.order_mgr.on_exec_report(er1)
 
         self.assertEqual(500, order1.last_qty)
         self.assertEqual(18.4, order1.last_price)
@@ -63,7 +70,7 @@ class PortfolioTest(TestCase):
 
         er2 = ExecutionReport(cl_id='test', cl_ord_id=1, ord_id=1, er_id=2, inst_id=1, last_qty=500, last_price=18.2,
                               status=OrdStatus.FILLED)
-        order_mgr.on_exec_report(er2)
+        self.app_context.order_mgr.on_exec_report(er2)
         self.assertEqual(500, order1.last_qty)
         self.assertEqual(18.2, order1.last_price)
         self.assertEqual(1000, order1.filled_qty)
@@ -82,13 +89,14 @@ class PortfolioTest(TestCase):
 
     def test_on_market_date_update(self):
 
-        ord_req = NewOrderRequest(cl_id='test', cl_ord_id=1, portf_id="test", broker_id ="Dummy", inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5,
-                                timestamp=0)
+        ord_req = NewOrderRequest(cl_id='test', cl_ord_id=1, portf_id="test", broker_id="Dummy", inst_id=1,
+                                  action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5,
+                                  timestamp=0)
         order1 = self.portfolio.on_new_ord_req(ord_req)
 
         er1 = ExecutionReport(cl_id='test', cl_ord_id=1, ord_id=1, er_id=1, inst_id=1, last_qty=500, last_price=18.4,
                               status=OrdStatus.PARTIALLY_FILLED, timestamp=1)
-        order_mgr.on_exec_report(er1)
+        self.app_context.order_mgr.on_exec_report(er1)
 
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 18.4
@@ -136,7 +144,7 @@ class PortfolioTest(TestCase):
             self.assertTrue(order in all_orders)
 
         for inst, pos_orders in expected_positon.iteritems():
-            position = portfolio.positions[inst]
+            position = portfolio.positions[str(inst)]
 
             all_position_orders = position.all_orders()
             self.assertEqual(len(pos_orders), len(all_position_orders))

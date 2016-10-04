@@ -3,14 +3,14 @@ from algotrader.technical.ma import SMA
 
 
 class ATR(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length',
         '__prev_close',
         '__value',
         '__average',
     )
 
-    def __init__(self, input, length=14, desc="Average True Range"):
+    def __init__(self, input=None, length=14, desc="Average True Range"):
         super(ATR, self).__init__(Indicator.get_name(ATR.__name__, input, length), input, ['high', 'low', 'close'],
                                   desc)
         self.length = int(length)

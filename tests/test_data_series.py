@@ -117,12 +117,13 @@ class DataSeriesTest(TestCase):
         series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
         series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
 
-        self.assertEqual({"timestamp": {self.t1: self.t1, self.t2: self.t2}, "v1": {self.t1: 1, self.t2: 2},
-                          "v2": {self.t1: 1, self.t2: 2}}, series.get_data_dict())
+        self.assertEqual(
+            {"timestamp": {str(self.t1): self.t1, str(self.t2): self.t2}, "v1": {str(self.t1): 1, str(self.t2): 2},
+             "v2": {str(self.t1): 1, str(self.t2): 2}}, series.get_data_dict())
 
-        self.assertEqual({"v1": {self.t1: 1, self.t2: 2}, "v2": {self.t1: 1, self.t2: 2}},
+        self.assertEqual({"v1": {str(self.t1): 1, str(self.t2): 2}, "v2": {str(self.t1): 1, str(self.t2): 2}},
                          series.get_data_dict(['v1', 'v2']))
-        self.assertEqual({self.t1: 1, self.t2: 2}, series.get_data_dict('v1'))
+        self.assertEqual({str(self.t1): 1, str(self.t2): 2}, series.get_data_dict('v1'))
 
     def test_get_data(self):
         series = DataSeries()
@@ -243,12 +244,11 @@ class DataSeriesTest(TestCase):
 
         # test index slice
         series2 = self.create_series_by_list(range(100))
-        sliced = series2.get_by_idx(keys='v1', idx=slice(-10,None,None))
+        sliced = series2.get_by_idx(keys='v1', idx=slice(-10, None, None))
         self.assertEqual(len(sliced), 10)
 
         endPoint = series2.get_by_idx(keys='v1', idx=slice(-1, None, None))
         self.assertEqual(endPoint[0], 99)
-
 
     def test_get_by_time(self):
         series = DataSeries(keys=set(["timestamp", "v1", "v2"]))
@@ -356,11 +356,11 @@ class DataSeriesTest(TestCase):
         r = [x for x in range(20) if x % 2 == 0]
 
         close = self.create_series_by_list(r)
-        f = lambda x : x**2
+        f = lambda x: x ** 2
         fvec = np.vectorize(f)
-        result = close.apply(keys="v1", func=fvec, start=None, end=None )
+        result = close.apply(keys="v1", func=fvec, start=None, end=None)
 
-        target = [x**2 for x in range(20) if x % 2 == 0]
+        target = [x ** 2 for x in range(20) if x % 2 == 0]
 
         try:
             np.testing.assert_almost_equal(target, result, 9)
@@ -376,11 +376,10 @@ class DataSeriesTest(TestCase):
         result[np.isnan(result)] = 0
         target[np.isnan(target)] = 0
 
-        deviation = np.sum((result - target)**2)
-        self.assertTrue(deviation< 1e-6)
+        deviation = np.sum((result - target) ** 2)
+        self.assertTrue(deviation < 1e-6)
 
         try:
             np.testing.assert_almost_equal(target, result, 5)
         except AssertionError as e:
             self.fail(e.message)
-

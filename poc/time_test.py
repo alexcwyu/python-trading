@@ -1,13 +1,12 @@
-import time
 import datetime
+
 from algotrader.event.market_data import BarSize
-from dateutil.tz import *
 
 epoch = datetime.datetime.fromtimestamp(0)
 
 
 def get_bar_end_time(timestamp, bar_size):
-    return get_bar_start_time(timestamp, bar_size) + bar_size * 1000 -1
+    return get_bar_start_time(timestamp, bar_size) + bar_size * 1000 - 1
 
 
 def get_bar_start_time(timestamp, bar_size):

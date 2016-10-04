@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, ExecutionReport, OrdStatus, Order
+from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, ExecutionReport, OrdStatus
+from algotrader.trading.order import Order
 from algotrader.trading.position import Position
 
 
@@ -10,20 +11,25 @@ class PositionTest(TestCase):
         self.assertEquals(0, position.filled_qty())
         self.assertEquals(0, len(position.all_orders()))
 
-        order1 = Order(NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5))
+        order1 = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+                            limit_price=18.5))
         position.add_order(order1)
 
         self.assertEquals(1000, position.ordered_qty())
         self.assertEquals(1, len(position.all_orders()))
 
-        order2 = Order(NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5))
+        order2 = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+                            limit_price=18.5))
         position.add_order(order2)
 
         self.assertEquals(2000, position.ordered_qty())
         self.assertEquals(2, len(position.all_orders()))
 
-        order3 = Order(NewOrderRequest(cl_id='test', cl_ord_id=3, inst_id=1, action=OrdAction.SELL, type=OrdType.LIMIT, qty=1200,
-                                limit_price=18.5))
+        order3 = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=3, inst_id=1, action=OrdAction.SELL, type=OrdType.LIMIT, qty=1200,
+                            limit_price=18.5))
         position.add_order(order3)
 
         self.assertEquals(800, position.ordered_qty())
@@ -31,8 +37,12 @@ class PositionTest(TestCase):
 
     def test_add_order_with_same_ord_id(self):
         position = Position(1)
-        order1 = Order(NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5))
-        order2 = Order(NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5))
+        order1 = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+                            limit_price=18.5))
+        order2 = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+                            limit_price=18.5))
 
         position.add_order(order1)
 
@@ -41,9 +51,12 @@ class PositionTest(TestCase):
 
     def test_add_order_with_diff_inst(self):
         position = Position(1)
-        order1 = Order(NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5))
-        order2 = Order(NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=2, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
-                                limit_price=18.5))
+        order1 = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+                            limit_price=18.5))
+        order2 = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=2, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+                            limit_price=18.5))
 
         position.add_order(order1)
 
@@ -54,7 +67,9 @@ class PositionTest(TestCase):
         position = Position(1)
         self.assertEquals(0, position.filled_qty())
 
-        order1 = Order(NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5))
+        order1 = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
+                            limit_price=18.5))
         position.add_order(order1)
         self.assertEquals(0, position.filled_qty())
 
@@ -70,8 +85,9 @@ class PositionTest(TestCase):
         position.add_position(er2.cl_id, er2.cl_ord_id, er2.last_qty)
         self.assertEquals(1000, position.filled_qty())
 
-        order2 = Order(NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=1, action=OrdAction.SELL, type=OrdType.LIMIT, qty=1200,
-                                limit_price=18.5))
+        order2 = Order(
+            NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=1, action=OrdAction.SELL, type=OrdType.LIMIT, qty=1200,
+                            limit_price=18.5))
         position.add_order(order2)
         self.assertEquals(1000, position.filled_qty())
 

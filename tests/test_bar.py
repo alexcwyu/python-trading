@@ -2,12 +2,12 @@ import datetime
 from unittest import TestCase
 
 from algotrader.event.market_data import Bar, BarSize
-from algotrader.utils.clock import Clock
+from algotrader.utils.date_utils import DateUtils
 
 
 class BarTest(TestCase):
     current_dt = datetime.datetime(year=2016, month=8, day=1, hour=6, minute=3, second=4)
-    current_ts = Clock.datetime_to_unixtimemillis(current_dt)
+    current_ts = DateUtils.datetime_to_unixtimemillis(current_dt)
 
     def ts(self, func, size):
         return func(BarTest.current_ts, size)
@@ -21,7 +21,7 @@ class BarTest(TestCase):
         second = second if second >= 0 else BarTest.current_dt.second
         microsecond = microsecond if microsecond >= 0 else BarTest.current_dt.microsecond
 
-        return Clock.datetime_to_unixtimemillis(
+        return DateUtils.datetime_to_unixtimemillis(
             datetime.datetime(year=year, month=month, day=day, hour=hour, minute=minute, second=second,
                               microsecond=microsecond))
 

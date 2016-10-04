@@ -1,5 +1,4 @@
 from algotrader.event.event import Event
-from algotrader.event.event_handler import AccountEventEventHandler
 
 
 class AccountEvent(Event):
@@ -9,25 +8,32 @@ class AccountEvent(Event):
 
 class AccountUpdate(AccountEvent):
     __slots__ = (
+        'id',
         'account_name',
         'key',
-        'val',
         'ccy',
+        'val',
     )
 
-    def __init__(self, account_name, key, val, ccy, timestamp=None):
+    def __init__(self, id=None, account_name=None, key=None, ccy=None, val=0.0, timestamp=None):
         super(AccountUpdate, self).__init__(timestamp=timestamp)
+        self.id = id
         self.account_name = account_name
         self.key = key
-        self.val = val
         self.ccy = ccy
+        self.val = val
 
     def on(self, handler):
         handler.on_acc_upd(self)
 
+    def id(self):
+        return self.id
+
 
 class PortfolioUpdate(AccountEvent):
     __slots__ = (
+        'id',
+        'portf_id',
         'inst_id',
         'position',
         'mkt_price',
@@ -38,9 +44,12 @@ class PortfolioUpdate(AccountEvent):
         'account_name'
     )
 
-    def __init__(self, inst_id, position, mkt_price, mkt_value, avg_cost, unrealized_pnl, realized_pnl,
-                 account_name, timestamp=None):
+    def __init__(self, id=None, portf_id = None, inst_id=None, position=0, mkt_price=0, mkt_value=0, avg_cost=0, unrealized_pnl=0,
+                 realized_pnl=0,
+                 account_name=None, timestamp=None):
         super(PortfolioUpdate, self).__init__(timestamp=timestamp)
+        self.id = id
+        self.portf_id = portf_id
         self.inst_id = inst_id
         self.position = position
         self.mkt_price = mkt_price
@@ -53,33 +62,5 @@ class PortfolioUpdate(AccountEvent):
     def on(self, handler):
         handler.on_portf_upd(self)
 
-
-class AccountValue:
-    __slots__ = (
-        'key',
-        'value'
-    )
-
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
-
-    def __repr__(self):
-        return '%s = %s' % (self.key, self.value)
-
-
-class Account(AccountEventEventHandler):
-    def __init__(self, name):
-        self.name = name
-        self.account_value = {}
-        self.positions = {}
-        self.open_orders = []
-
-    def on_acc_upd(self, acc_upd):
-        pass
-
-    def on_portf_upd(self, portf_upd):
-        pass
-
-    def on_order(self, order):
-        pass
+    def id(self):
+        return self.id

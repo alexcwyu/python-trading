@@ -1,29 +1,60 @@
-from collections import defaultdict
-
 import numpy as np
 
+from algotrader import Manager
+from algotrader.config.persistence import PersistenceMode
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
+from algotrader.technical.atr import ATR
+from algotrader.technical.bb import BB
+from algotrader.technical.ma import SMA
+from algotrader.technical.roc import ROC
+from algotrader.technical.rsi import RSI
+from algotrader.technical.stats import MAX
+from algotrader.technical.stats import MIN
+from algotrader.technical.stats import STD
+from algotrader.technical.stats import VAR
 
 
-class InstrumentDataManager(MarketDataEventHandler):
+class InstrumentDataManager(MarketDataEventHandler, Manager):
     def __init__(self):
+        super(InstrumentDataManager, self).__init__()
         self.__bar_dict = {}
         self.__quote_dict = {}
         self.__trade_dict = {}
-
         self.__series_dict = {}
+        self.subscription = None
 
-    def start(self):
-        EventBus.data_subject.subscribe(self.on_next)
+    def _start(self, app_context, **kwargs):
+        self.store = self.app_context.get_timeseries_data_store()
+        self.persist_mode = self.app_context.app_config.persistence_config.ts_persist_mode
+        self.load_all()
+        self.subscription = EventBus.data_subject.subscribe(self.on_next)
+
+    def _stop(self):
+        if self.subscription:
+            self.subscription.dispose()
+        self.save_all()
+        self.reset()
+
+    def load_all(self):
+        if hasattr(self, "store") and self.store:
+            self.store.start(self.app_context)
+            series_list = self.store.load_all('time_series')
+            for series in series_list:
+                self.__series_dict[series.id()] = series
+
+    def save_all(self):
+        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
+            for series in self.__series_dict.values():
+                self.store.save_time_series(series)
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
         self.__bar_dict[bar.inst_id] = bar
 
-        self.get_series(bar.id()).add(
+        self.get_series(bar.series_id()).add(
             {"timestamp": bar.timestamp, "open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
              "vol": bar.vol})
 
@@ -31,14 +62,14 @@ class InstrumentDataManager(MarketDataEventHandler):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
         self.__quote_dict[quote.inst_id] = quote
 
-        self.get_series(quote.id()).add(
+        self.get_series(quote.series_id()).add(
             {"timestamp": quote.timestamp, "bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
              "ask_size": quote.ask_size})
 
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__trade_dict[trade.inst_id] = trade
-        self.get_series(trade.id()).add({"timestamp": trade.timestamp, "price": trade.price, "size": trade.size})
+        self.get_series(trade.series_id()).add({"timestamp": trade.timestamp, "price": trade.price, "size": trade.size})
 
     def get_bar(self, inst_id):
         if inst_id in self.__bar_dict:
@@ -71,20 +102,22 @@ class InstrumentDataManager(MarketDataEventHandler):
             return self.__series_dict[key]
         raise AssertionError()
 
-    def add_series(self, series, raise_if_duplicate=True):
+    def add_series(self, series, raise_if_duplicate=False):
         if series.name not in self.__series_dict:
             self.__series_dict[series.name] = series
+            if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
+                self.store.save_time_series(series)
         elif raise_if_duplicate and self.__series_dict[series.name] != series:
             raise AssertionError("Series [%s] already exist" % series.name)
 
     def has_series(self, name):
         return name in self.__series_dict
 
-    def clear(self):
+    def reset(self):
         self.__bar_dict = {}
         self.__quote_dict = {}
         self.__trade_dict = {}
-        self.__series_dict = defaultdict(DataSeries)
+        self.__series_dict = {}
 
-
-inst_data_mgr = InstrumentDataManager()
+    def id(self):
+        return "InstrumentDataManager"

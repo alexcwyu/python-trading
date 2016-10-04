@@ -1,6 +1,14 @@
 import datetime
 
 from algotrader.event.event import Event
+from algotrader.utils.date_utils import DateUtils
+
+
+class MarketDataType(object):
+    Bar = 'Bar'
+    Quote = 'Quote'
+    Trade = 'Trade'
+    MarketDepth = 'MarketDepth'
 
 
 class BarSize(object):
@@ -54,11 +62,11 @@ class MarketDataEvent(Event):
         super(MarketDataEvent, self).__init__(timestamp)
         self.inst_id = inst_id
 
-    def id(self):
+    def series_id(self):
         raise NotImplementedError()
 
-
-from algotrader.utils.clock import Clock
+    def id(self):
+        return "%s-%s" % (self.series_id(), self.timestamp)
 
 
 class Bar(MarketDataEvent):
@@ -88,21 +96,13 @@ class Bar(MarketDataEvent):
         self.vol = vol
         self.adj_close = adj_close
 
-    def id(self):
+    def series_id(self):
         return "Bar.%s.%s.%s" % (self.inst_id, BarType.name(self.type), self.size)
-
-    def __str__(self):
-        return "Bar(inst_id = %s, begin_time = %s, timestamp = %s,type = %s, size = %s, open = %s, high = %s, low = %s, close = %s, vol = %s, adj_close = %s)" \
-               % (
-                   self.inst_id, self.begin_time, self.timestamp, self.type, self.size, self.open, self.high, self.low,
-                   self.close, self.vol,
-                   self.adj_close)
 
     def on(self, handler):
         handler.on_bar(self)
 
     def close_or_adj_close(self):
-        # return self.adj_close if self.adj_close > 0 else self.close
         return self.close
 
     def to_dict(self, all_data=False):
@@ -118,6 +118,9 @@ class Bar(MarketDataEvent):
 
         return data
 
+    def save(self, data_store):
+        data_store.save_bar(self)
+
     @staticmethod
     def get_next_bar_start_time(timestamp, bar_size):
         return Bar.get_current_bar_start_time(timestamp, bar_size) + bar_size * 1000
@@ -132,7 +135,7 @@ class Bar(MarketDataEvent):
             return int(timestamp / (bar_size * 1000)) * bar_size * 1000
         else:
             dt = datetime.datetime.fromtimestamp(timestamp / 1000)
-            return Clock.datetime_to_unixtimemillis(datetime.datetime(year=dt.year, month=dt.month, day=dt.day))
+            return DateUtils.datetime_to_unixtimemillis(datetime.datetime(year=dt.year, month=dt.month, day=dt.day))
 
 
 class Trade(MarketDataEvent):
@@ -146,12 +149,8 @@ class Trade(MarketDataEvent):
         self.price = price
         self.size = size
 
-    def id(self):
+    def series_id(self):
         return "Trade.%s" % (self.inst_id)
-
-    def __str__(self):
-        return "Trade(inst_id = %s, timestamp = %s,price = %s, size = %s)" \
-               % (self.inst_id, self.timestamp, self.price, self.size)
 
     def on(self, handler):
         handler.on_trade(self)
@@ -163,6 +162,9 @@ class Trade(MarketDataEvent):
             data['inst_id'] = self.inst_id
 
         return data
+
+    def save(self, data_store):
+        data_store.save_trade(self)
 
 
 class Quote(MarketDataEvent):
@@ -180,12 +182,8 @@ class Quote(MarketDataEvent):
         self.ask = ask
         self.ask_size = ask_size
 
-    def id(self):
+    def series_id(self):
         return "Quote.%s" % (self.inst_id)
-
-    def __str__(self):
-        return "Quote(inst_id = %s, timestamp = %s,bid = %s, bid_size = %s, ask = %s, ask_size = %s)" \
-               % (self.inst_id, self.timestamp, self.bid, self.bid_size, self.ask, self.ask_size)
 
     def on(self, handler):
         handler.on_quote(self)
@@ -203,6 +201,9 @@ class Quote(MarketDataEvent):
         if all_data:
             data['inst_id'] = self.inst_id
         return data
+
+    def save(self, data_store):
+        data_store.save_quote(self)
 
 
 class MarketDepth(MarketDataEvent):
@@ -225,14 +226,11 @@ class MarketDepth(MarketDataEvent):
         self.price = price
         self.size = size
 
-    def id(self):
+    def series_id(self):
         return "MarketDepth.%s" % (self.inst_id)
-
-    def __str__(self):
-        return "MarketDepth(inst_id = %s, timestamp = %s, provider_id = %s, position = %s, operation = %s, side = %s, price = %s, size = %s)" \
-               % (
-                   self.inst_id, self.timestamp, self.provider_id, self.position, self.operation, self.side, self.price,
-                   self.size)
 
     def on(self, handler):
         handler.on_market_depth(self)
+
+    def save(self, data_store):
+        data_store.save_market_depth(self)

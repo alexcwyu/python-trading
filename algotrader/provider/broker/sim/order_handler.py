@@ -1,9 +1,10 @@
 import abc
 import sys
+from collections import defaultdict
 
 from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.provider.broker.sim.data_processor import BarProcessor, TradeProcessor, QuoteProcessor
-from collections import defaultdict
+
 
 class FillInfo(object):
     def __init__(self, fill_qty, fill_price):
@@ -120,6 +121,7 @@ class StopLimitOrderHandler(SimOrderHandler):
     def stop_limit_ready(self, cl_id, cl_ord_id):
         return self.__stop_limit_ready[cl_id].get(cl_ord_id, False)
 
+
 class StopOrderHandler(SimOrderHandler):
     def __init__(self, config, slippage=None):
         super(StopOrderHandler, self).__init__(config)
@@ -158,6 +160,7 @@ class StopOrderHandler(SimOrderHandler):
 
     def stop_limit_ready(self, cl_id, cl_ord_id):
         return self.__stop_limit_ready[cl_id].get(cl_ord_id, False)
+
 
 class TrailingStopOrderHandler(SimOrderHandler):
     def __init__(self, config, slippage=None):

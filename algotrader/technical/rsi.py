@@ -48,13 +48,13 @@ def rsi(values, input_key, length):
 
 
 class RSI(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length',
         '__prev_gain',
         '__prev_loss'
     )
 
-    def __init__(self, input, input_key=None, length=14, desc="Relative Strength Indicator"):
+    def __init__(self, input=None, input_key=None, length=14, desc="Relative Strength Indicator"):
         super(RSI, self).__init__(Indicator.get_name(RSI.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
         self.__prev_gain = None

@@ -10,11 +10,11 @@ def roc(prev_value, curr_value):
 
 
 class ROC(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 
-    def __init__(self, input, input_key=None, length=1, desc="Rate Of Change"):
+    def __init__(self, input=None, input_key=None, length=1, desc="Rate Of Change"):
         super(ROC, self).__init__(Indicator.get_name(ROC.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
 

@@ -4,11 +4,11 @@ from algotrader.technical import Indicator
 
 
 class MAX(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 
-    def __init__(self, input, input_key=None, length=0, desc="Maximum"):
+    def __init__(self, input=None, input_key=None, length=0, desc="Maximum"):
         super(MAX, self).__init__(Indicator.get_name(MAX.__class__, input, input_key, length), input, input_key,
                                   desc)
         self.length = int(length)
@@ -25,7 +25,7 @@ class MAX(Indicator):
 
 
 class MIN(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 
@@ -46,7 +46,7 @@ class MIN(Indicator):
 
 
 class STD(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 
@@ -67,7 +67,7 @@ class STD(Indicator):
 
 
 class VAR(Indicator):
-    _slots__ = (
+    __slots__ = (
         'length'
     )
 

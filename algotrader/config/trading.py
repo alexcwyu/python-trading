@@ -29,7 +29,7 @@ class TradingConfig(Config):
                  subscription_types,
                  instrument_ids,
                  feed_id, broker_id, clock_type, stg_configs):
-        super(TradingConfig, self).__init__(id=id if id else stg_id)
+        super(TradingConfig, self).__init__(config_id=id if id else stg_id)
         self.stg_id = stg_id
         self.stg_cls = stg_cls
         self.portfolio_id = portfolio_id

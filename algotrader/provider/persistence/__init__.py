@@ -26,6 +26,12 @@ class DataStore(Provider):
     def load_all(self, clazz):
         raise NotImplementedError()
 
+    def create_database(self):
+        pass
+
+    def remove_database(self):
+        pass
+
 
 class RefDataStore(DataStore):
     __metaclass__ = abc.ABCMeta
@@ -84,6 +90,10 @@ class TradeDataStore(DataStore):
 
     @abc.abstractmethod
     def save_strategy(self, strategy):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def save_config(self, config):
         raise NotImplementedError()
 
     @abc.abstractmethod

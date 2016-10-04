@@ -1,19 +1,21 @@
 import cPickle as pickle
+import os
 
+from algotrader.config.persistence import InMemoryStoreConfig
 from algotrader.provider.persistence import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
     SequenceDataStore
 from algotrader.utils.ser_deser import MapSerializer
 
 
 class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
-
     def __init__(self):
         super(InMemoryDataStore, self).__init__()
 
     def _start(self, app_context, **kwargs):
-        self.db_file = 'in_memory_db.p'
+        self.config = app_context.app_config.get_config(InMemoryStoreConfig)
+
         try:
-            self.db = pickle.load(open(self.db_file, "rb"))
+            self.db = pickle.load(open(self.config.file, "rb"))
         except:
             self.db = {}
 
@@ -32,6 +34,7 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
         self.portfolios = self._get_data('portfolios')
         self.orders = self._get_data('orders')
         self.strategies = self._get_data('strategies')
+        self.configs = self._get_data('configs')
 
         self.account_updates = self._get_data('account_updates')
         self.portfolio_updates = self._get_data('portfolio_updates')
@@ -54,7 +57,16 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
         return self.db[key]
 
     def _stop(self):
-        pickle.dump(self.db, open(self.db_file, "wb+"))
+        if self.config.delete_at_stop:
+            self.remove_database()
+        else:
+            pickle.dump(self.db, open(self.config.file, "wb+"))
+
+    def remove_database(self):
+        try:
+            os.remove(self.config.file)
+        except:
+            pass
 
     def id(self):
         return DataStore.InMemoryDB
@@ -122,6 +134,10 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
         id, packed = self._serialize(strategy)
         self.strategies[id] = packed
 
+    def save_config(self, config):
+        id, packed = self._serialize(config)
+        self.configs[id] = packed
+
     def save_account_update(self, account_update):
         id, packed = self._serialize(account_update)
         self.account_updates[id] = packed
@@ -153,7 +169,3 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
     # SequenceDataStore
     def save_sequence(self, key, seq):
         self.sequences[key] = seq
-
-    def delete_db(self):
-        import os
-        os.remove(self.db_file)

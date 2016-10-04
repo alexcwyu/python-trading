@@ -146,7 +146,7 @@ class SerializerTest(TestCase):
 
     @parameterized.expand(params)
     def test_account(self, id, serializer):
-        item = Account(id="")
+        item = Account(acct_id="")
 
         SerializerTest.ser_deser(id, serializer, item)
 

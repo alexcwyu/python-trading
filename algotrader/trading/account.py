@@ -6,7 +6,7 @@ from algotrader.trading.position import PositionHolder
 
 class Account(AccountEventHandler, PositionHolder, Persistable, Startable):
     __slots__ = (
-        'id',
+        'acct_id',
         'values',
         # 'positions',
         # 'open_orders'
@@ -15,9 +15,9 @@ class Account(AccountEventHandler, PositionHolder, Persistable, Startable):
     __transient__ = (
         'app_context',
     )
-    def __init__(self, id=None, values=None):
+    def __init__(self, acct_id=None, values=None):
         super(Account, self).__init__()
-        self.id = id
+        self.acct_id = acct_id
         self.values = values if values else {}
         # self.positions = {}
         # self.open_orders = []
@@ -31,7 +31,7 @@ class Account(AccountEventHandler, PositionHolder, Persistable, Startable):
         pass
 
     def id(self):
-        return self.id
+        return self.acct_id
 
     def _start(self, app_context, **kwargs):
         self.app_context.acct_mgr.add(self)

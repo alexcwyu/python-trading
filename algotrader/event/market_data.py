@@ -82,7 +82,7 @@ class Bar(MarketDataEvent):
         'adj_close'
     )
 
-    def __init__(self, inst_id=None, begin_time=None, timestamp=None, open=0, high=0, low=0, close=0, vol=0,
+    def __init__(self, inst_id=None, begin_time=0, timestamp=None, open=0, high=0, low=0, close=0, vol=0,
                  adj_close=0,
                  size=BarSize.D1, type=BarType.Time):
         super(Bar, self).__init__(inst_id, timestamp)

@@ -30,6 +30,7 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         self.portfolios = self.db['portfolios']
         self.orders = self.db['orders']
         self.strategies = self.db['strategies']
+        self.configs = self.db['configs']
 
         self.account_updates = self.db['account_updates']
         self.portfolio_updates = self.db['portfolio_updates']
@@ -46,14 +47,22 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
 
     def _stop(self):
         if self.client:
+            if self.mongo_config.delete_at_stop:
+                self.remove_database()
             self.client.close()
+
+    def remove_database(self):
+        try:
+            self.client.drop_database(self.mongo_config.dbname)
+        except:
+            pass
 
     def id(self):
         return DataStore.Mongo
 
     def load_all(self, clazz):
         if clazz == 'sequences':
-            return { data['_id']: data['seq'] for data in self.db[clazz].find()}
+            return {data['_id']: data['seq'] for data in self.db[clazz].find()}
 
         result = []
         for data in self.db[clazz].find():
@@ -117,6 +126,11 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
     def save_strategy(self, strategy):
         id, packed = self._serialize(strategy)
         self.strategies.update({'_id': id}, packed, upsert=True)
+
+    def save_config(self, config):
+        id, packed = self._serialize(config)
+        self.configs.update({'_id': id}, packed, upsert=True)
+
 
     def save_account_update(self, account_update):
         id, packed = self._serialize(account_update)

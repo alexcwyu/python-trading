@@ -1,23 +1,29 @@
 import math
 from unittest import TestCase
 
-from algotrader.provider.persistence import DataStore, PersistenceMode
-from algotrader.config.persistence import PersistenceConfig
 from algotrader.config.app import ApplicationConfig
+from algotrader.config.persistence import PersistenceConfig, InMemoryStoreConfig
 from algotrader.provider.persistence import DataStore
+from algotrader.provider.persistence import PersistenceMode
 from algotrader.technical.ma import SMA
 from algotrader.trading.context import ApplicationContext
-from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
 
 
 class PersistenceTest(TestCase):
     def new_app_context(self):
-        app_config = ApplicationConfig(persistence_config = PersistenceConfig(
+        name = "test"
+        create_at_start = True
+        delete_at_stop = False
+
+        app_config = ApplicationConfig("app", None, Clock.Simulation, PersistenceConfig(
             ref_ds_id=DataStore.InMemoryDB, ref_persist_mode=PersistenceMode.RealTime,
             trade_ds_id=DataStore.InMemoryDB, trade_persist_mode=PersistenceMode.RealTime,
             ts_ds_id=DataStore.InMemoryDB, ts_persist_mode=PersistenceMode.RealTime,
-            seq_ds_id=DataStore.InMemoryDB, seq_persist_mode=PersistenceMode.RealTime))
+            seq_ds_id=DataStore.InMemoryDB, seq_persist_mode=PersistenceMode.RealTime),
+                                       InMemoryStoreConfig(file="%s_db.p" % name,
+                                                           create_at_start=create_at_start,
+                                                           delete_at_stop=delete_at_stop))
         app_context = ApplicationContext(app_config=app_config)
         app_context.start()
         return app_context
@@ -107,4 +113,4 @@ class PersistenceTest(TestCase):
 
         db = app_context.get_ref_data_store()
         app_context.stop()
-        db.delete_db()
+        db.remove_database()

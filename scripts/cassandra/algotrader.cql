@@ -1,12 +1,5 @@
-// table to store historical stock quote data
-
-CREATE KEYSPACE IF NOT EXISTS algotrader WITH replication ={'class':'SimpleStrategy','replication_factor':1};
-
-USE algotrader;
-
-// timeseries data
 CREATE TABLE IF NOT EXISTS bars (
-  inst_id varchar,
+  inst_id int,
   type int,
   size int,
   begin_time bigint,
@@ -21,7 +14,7 @@ CREATE TABLE IF NOT EXISTS bars (
 );
 
 CREATE TABLE IF NOT EXISTS quotes(
-  inst_id varchar,
+  inst_id int,
   timestamp bigint,
   bid double,
   ask double,
@@ -31,7 +24,7 @@ CREATE TABLE IF NOT EXISTS quotes(
 );
 
 CREATE TABLE IF NOT EXISTS trades(
-  inst_id varchar,
+  inst_id int,
   timestamp bigint,
   price double,
   size int,
@@ -39,7 +32,7 @@ CREATE TABLE IF NOT EXISTS trades(
 );
 
 CREATE TABLE IF NOT EXISTS market_depths(
-  inst_id varchar,
+  inst_id int,
   provider_id int,
   timestamp bigint,
   position bigint,
@@ -53,12 +46,11 @@ CREATE TABLE IF NOT EXISTS market_depths(
 CREATE TABLE IF NOT EXISTS time_series(
   id varchar,
   data blob,
-  PRIMARY KEY (id) // primary key
+  PRIMARY KEY (id)
 );
 
-// ref data
 CREATE TABLE IF NOT EXISTS instruments(
-  inst_id varchar,
+  inst_id int,
   name varchar,
   type varchar,
   symbol varchar,
@@ -68,7 +60,7 @@ CREATE TABLE IF NOT EXISTS instruments(
   alt_exch_id map<varchar, varchar>,
   sector varchar,
   group varchar,
-  und_inst_id varchar,
+  und_inst_id int,
   expiry_date timestamp,
   factor double,
   strike double,
@@ -89,7 +81,6 @@ CREATE TABLE IF NOT EXISTS currencies(
   PRIMARY KEY (ccy_id)
 );
 
-// trade data
 CREATE TABLE IF NOT EXISTS accounts(
   id varchar,
   data blob,
@@ -170,11 +161,9 @@ CREATE TABLE IF NOT EXISTS ord_status_upds(
   data blob,
   PRIMARY KEY (id)
 );
-
-// seq data
 CREATE TABLE IF NOT EXISTS sequences(
   id varchar,
-  seq counter,
+  seq bigint,
   PRIMARY KEY (id)
 );
 

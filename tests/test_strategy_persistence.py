@@ -14,7 +14,7 @@ from algotrader.utils.clock import Clock
 from samples.backtest_runner import BacktestRunner
 
 
-class SrategyPersistenceTest(TestCase):
+class StrategyPersistenceTest(TestCase):
     def test(self):
         backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
                                             stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
@@ -97,4 +97,4 @@ class SrategyPersistenceTest(TestCase):
         print "part2 end = %s"%part2_end_result
 
         runner2.stop()
-        db.delete_db()
+        db.remove_database()

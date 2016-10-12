@@ -215,8 +215,8 @@ class {{className}}(CrossSessionalApply):
 # print csTemplate.render({"className": "Log",
 #                          "func" : "lambda x: np.log(x)"})
 #
-print csTemplate.render({"className": "SignPower",
-                         "func" : "lambda x: np_sign_to_value(x)* np.power(x, e)"})
+# print csTemplate.render({"className": "SignPower",
+#                          "func" : "lambda x: np_sign_to_value(x)* np.power(x, e)"})
 #
 # print csTemplate.render({"className": "Scale",
 #                          "func" : "lambda x: x/np.sum(np.abs(x))"})
@@ -231,9 +231,9 @@ print csTemplate.render({"className": "SignPower",
 #                          "func": "lambda x : timeseries_rank_helper(x,ascending=asc)"
 #                          })
 
-print csTemplate.render({"className": "Delta",
-                         "func" : "lambda x: x[-1,:] - x[0,:]"})
-
-
-print csTemplate.render({"className": "Product",
-                         "func" : "lambda x: np.prod(x,axis=0)"})
+# print csTemplate.render({"className": "Delta",
+#                          "func" : "lambda x: x[-1,:] - x[0,:]"})
+#
+#
+# print csTemplate.render({"className": "Product",
+#                          "func" : "lambda x: np.prod(x,axis=0)"})

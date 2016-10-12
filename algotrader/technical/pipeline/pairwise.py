@@ -3,7 +3,6 @@ from algotrader.technical import DataSeries
 from algotrader.technical import Indicator
 from algotrader.technical.pipeline import PipeLine
 import numpy as np
-from jinja2 import Template
 
 class Pairwise(PipeLine):
     _slots__ = (
@@ -19,8 +18,8 @@ class Pairwise(PipeLine):
                                  inputs=[input_lhs, input_rhs],
                                  input_key=input_key, *args)
 
-    def __init__(self, input_lhs, input_rhs, func, name, input_key='close', desc="Pairwise"):
-        super(Pairwise, self).__init__(name, [input_lhs, input_rhs], input_key, length=1, desc=desc)
+    def __init__(self, input_lhs, input_rhs, func, name, length=1, input_key='close', desc="Pairwise"):
+        super(Pairwise, self).__init__(name, [input_lhs, input_rhs], input_key, length=length, desc=desc)
         self.lhs_name = PipeLine.get_input_name(input_lhs)
         self.rhs_name = PipeLine.get_input_name(input_rhs)
         self.func = func
@@ -52,8 +51,9 @@ class Pairwise(PipeLine):
         result['timestamp'] = data['timestamp']
         if self.inputs[0].size() >= self.length:
             if self.all_filled():
-                # TODO what if the cache value is a higher dimension matrix?
-                result[PipeLine.VALUE] = self.func(self.cache[self.lhs_name][-1], self.cache[self.rhs_name][-1])
+                x = self.cache[self.lhs_name][-self.length:] if self.length > 1 else self.cache[self.lhs_name][-1]
+                y = self.cache[self.rhs_name][-self.length:] if self.length > 1 else self.cache[self.rhs_name][-1]
+                result[PipeLine.VALUE] = self.func(x, y)
             else:
                 result[PipeLine.VALUE] = self._default_output()
         else:
@@ -70,15 +70,7 @@ class Pairwise(PipeLine):
         return self.__shape
 
 
-pairwiseTemplate = Template(
-"""
-class {{className}}(Pairwise):
-    def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise {{className}}"):
-        super({{className}}, self).__init__(input_lhs, input_rhs, func={{func}},
-                                      name=PipeLine.get_name({{className}}.__name__, [input_lhs, input_rhs], input_key),
-                                      input_key=input_key, desc=desc)
-"""
-)
+
 
 # print pairwiseTemplate.render({"className" : "Plus",
 #                          "func" : "lambda x: x[0, 0]+x[0, 1]"})
@@ -175,9 +167,29 @@ class Max(Pairwise):
                                       name=PipeLine.get_name(Max.__name__, [input_lhs, input_rhs], input_key),
                                       input_key=input_key, desc=desc)
 
+class PairCorrelation(Pairwise):
+    def __init__(self, input_lhs, input_rhs, length, input_key='close', desc="Pairwise PairCorrelation"):
+        super(PairCorrelation, self).__init__(input_lhs, input_rhs, length=length, func=lambda x, y: np.corrcoef(x, y)[0, 1],
+                                      name=PipeLine.get_name(PairCorrelation.__name__, [input_lhs, input_rhs], input_key),
+                                      input_key=input_key, desc=desc)
+
+#
+# from jinja2 import Template
+# pairwiseTemplate = Template(
+# """
+# class {{className}}(Pairwise):
+#     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise {{className}}"):
+#         super({{className}}, self).__init__(input_lhs, input_rhs, func={{func}},
+#                                       name=PipeLine.get_name({{className}}.__name__, [input_lhs, input_rhs], input_key),
+#                                       input_key=input_key, desc=desc)
+# """
+# )
 
 # print pairwiseTemplate.render({"className" : "Min",
 #                          "func" : "lambda x, y: np.min(np.vstack([x, y]), axis=0)"})
 #
 # print pairwiseTemplate.render({"className" : "Max",
 #                                "func" : "lambda x, y: np.max(np.vstack([x, y]), axis=0)"})
+#
+# print pairwiseTemplate.render({"className": "PairCorrelation",
+#                                 "func" : "lambda x, y: np.corrcoef(x, y)[0,1]"})

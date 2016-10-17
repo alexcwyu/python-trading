@@ -1,4 +1,4 @@
-from algotrader import Startable
+from algotrader import Startable, HasId
 from algotrader.config.app import ApplicationConfig
 from algotrader.event.event_bus import EventBus
 from algotrader.provider.provider_mgr import ProviderManager
@@ -12,7 +12,7 @@ from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
 
 
-class ApplicationContext(Startable):
+class ApplicationContext(Startable, HasId):
     def __init__(self, app_config=None):
         super(ApplicationContext, self).__init__()
 

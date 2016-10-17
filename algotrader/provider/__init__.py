@@ -1,9 +1,9 @@
 import abc
 
-from algotrader import Startable
+from algotrader import Startable, HasId
 
 
-class Provider(Startable):
+class Provider(Startable, HasId):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self):

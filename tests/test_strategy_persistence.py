@@ -1,6 +1,7 @@
 from datetime import date
 from unittest import TestCase
 
+from algotrader.app import BacktestRunner
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import PersistenceConfig, PersistenceMode
 from algotrader.config.trading import BacktestingConfig
@@ -11,7 +12,6 @@ from algotrader.provider.persistence import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
-from samples.backtest_runner import BacktestRunner
 
 
 class StrategyPersistenceTest(TestCase):

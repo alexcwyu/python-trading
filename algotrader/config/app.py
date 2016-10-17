@@ -3,6 +3,7 @@ from algotrader.config.persistence import PersistenceConfig
 from algotrader.config.trading import TradingConfig
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
+from datetime import date
 
 
 class ApplicationConfig(Config):
@@ -47,3 +48,49 @@ class ApplicationConfig(Config):
         if result is None and create:
             result = cls()
         return result
+
+
+class RealtimeMarketDataImporterConfig(ApplicationConfig):
+    __slots__ = (
+        'feed_id',
+        'instrument_ids',
+        'subscription_types',
+    )
+
+    def __init__(self, id=None,
+                 ref_data_mgr_type=RefDataManager.InMemory,
+                 clock_type=Clock.Simulation,
+                 feed_id=None,
+                 instrument_ids=None, subscription_types=None,
+                 persistence_config=None,
+                 *configs):
+        super(RealtimeMarketDataImporterConfig, self).__init__(id, ref_data_mgr_type, clock_type, persistence_config, configs)
+        self.feed_id = feed_id
+        self.instrument_ids = instrument_ids
+        self.subscription_types = subscription_types
+
+
+
+
+class HistoricalMarketDataImporterConfig(ApplicationConfig):
+    __slots__ = (
+        'feed_id',
+        'instrument_ids',
+        'subscription_types',
+        'from_date',
+        'to_date',
+    )
+
+    def __init__(self, id=None,
+                 ref_data_mgr_type=RefDataManager.InMemory,
+                 feed_id=None,
+                 instrument_ids=None, subscription_types=None,
+                 from_date=date(2010, 1, 1), to_date=date.today(),
+                 persistence_config=None,
+                 *configs):
+        super(HistoricalMarketDataImporterConfig, self).__init__(id, ref_data_mgr_type, Clock.Simulation, persistence_config, configs)
+        self.feed_id = feed_id
+        self.instrument_ids = instrument_ids
+        self.subscription_types = subscription_types
+        self.from_date = from_date
+        self.to_date = to_date

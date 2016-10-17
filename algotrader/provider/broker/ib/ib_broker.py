@@ -14,6 +14,7 @@ from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, \
     TradeSubscriptionType, MarketDepthSubscriptionType
 from algotrader.utils import logger
+from algotrader.event.market_data import BarType, BarSize, MarketDataType
 
 
 class DataRecord(object):
@@ -65,8 +66,8 @@ class SubscriptionRegistry(object):
             raise "Duplicated req_id %s" % req_id
 
         self.subscriptions[req_id] = sub_key
-        self.data_records[req_id] = DataRecord(sub_key.inst_id, quote_req=sub_key.data_type == Quote,
-                                               trade_req=sub_key.data_type == Trade)
+        self.data_records[req_id] = DataRecord(sub_key.inst_id, quote_req=sub_key.subscription_type.get_type() == MarketDataType.Quote,
+                                               trade_req=sub_key.subscription_type.get_type() == MarketDataType.Trade)
 
     def get_subscription_key(self, req_id):
         return self.subscriptions.get(req_id, None)
@@ -216,7 +217,7 @@ class IBBroker(IBSocket, Broker, Feed):
     def id(self):
         return Broker.IB
 
-    def next_request_id(self):
+    def get_next_request_id(self):
         req_id = self.next_request_id
         self.next_request_id += 1
         return req_id
@@ -241,7 +242,7 @@ class IBBroker(IBSocket, Broker, Feed):
             req_func = self.__req_mktdata
 
         if req_func and not self.data_sub_reg.has_subscription(sub_key=sub_key):
-            req_id = self.next_request_id()
+            req_id = self.get_next_request_id()
             self.data_sub_reg.add_subscription(req_id, sub_key)
             contract = self.model_factory.create_ib_contract(sub_key.inst_id)
 
@@ -275,7 +276,7 @@ class IBBroker(IBSocket, Broker, Feed):
     def __req_real_time_bar(self, req_id, sub_key, contract):
         self.tws.reqRealTimeBars(req_id, contract,
                                  sub_key.subscription_type.bar_size,  # barSizeSetting,
-                                 self.model_factory.convert_hist_data_type(sub_key.subscription_type.data_type),
+                                 self.model_factory.convert_hist_data_type(sub_key.subscription_type.get_type()),
                                  0  # RTH Regular trading hour
                                  )
 
@@ -500,7 +501,7 @@ class IBBroker(IBSocket, Broker, Feed):
             timestamp = self.model_factory.convert_ib_time(time)
             self.data_event_bus.on_next(
                 Bar(inst_id=record.inst_id, timestamp=timestamp, open=open, high=high, low=low, close=close,
-                    vol=volume, size=sub_key.bar_size))
+                    vol=volume, size=sub_key.subscription_type.bar_size))
 
     def orderStatus(self, id, status, filled, remaining, avgFillPrice, permId,
                     parentId, lastFilledPrice, clientId, whyHeld):

@@ -4,13 +4,13 @@ import numpy as np
 import pandas as pd
 from rx.subjects import Subject
 
-from algotrader import Startable
+from algotrader import Startable, HasId
 from algotrader.provider.persistence import Persistable
 
 timestamp_key = "timestamp"
 
 
-class DataSeries(Persistable, Startable):
+class DataSeries(Persistable, Startable, HasId):
     TIMESTAMP = 'timestamp'
 
     __slots__ = (

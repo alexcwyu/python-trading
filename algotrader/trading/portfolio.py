@@ -1,4 +1,4 @@
-from algotrader import Startable
+from algotrader import Startable, HasId
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import AccountEventHandler, MarketDataEventHandler, OrderEventHandler, \
     ExecutionEventHandler
@@ -12,7 +12,7 @@ from algotrader.utils.time_series import DataSeries
 
 
 class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler,
-                Persistable, Startable):
+                Persistable, Startable, HasId):
     __slots__ = (
         'portf_id',
         'ord_reqs',

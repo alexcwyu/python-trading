@@ -16,10 +16,10 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
-from algotrader import Startable
+from algotrader import Startable, HasId
 
 
-class Clock(Startable):
+class Clock(Startable, HasId):
     __metaclass__ = abc.ABCMeta
 
     Simulation = "Simulation"

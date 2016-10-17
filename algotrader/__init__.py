@@ -9,7 +9,7 @@ class HasId(object):
         raise NotImplementedError()
 
 
-class Startable(HasId):
+class Startable(object):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self):
@@ -17,14 +17,14 @@ class Startable(HasId):
 
     def start(self, app_context=None, **kwargs):
         if not hasattr(self, "started") or not self.started:
+            self.started = True
             self.app_context = app_context
             self._start(app_context=app_context, **kwargs)
-        self.started = True
 
     def stop(self):
         if hasattr(self, "started") and self.started:
             self._stop()
-        self.started = False
+            self.started = False
 
     def reset(self):
         pass
@@ -37,7 +37,7 @@ class Startable(HasId):
         pass
 
 
-class Manager(Startable):
+class Manager(Startable, HasId):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self):

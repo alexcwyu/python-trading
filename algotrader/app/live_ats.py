@@ -3,6 +3,7 @@ Created on 4/16/16
 @author = 'jason'
 '''
 
+from algotrader.app import Application
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.broker import IBConfig
 from algotrader.config.persistence import PersistenceConfig
@@ -16,11 +17,8 @@ from algotrader.utils import logger
 from algotrader.utils.clock import Clock
 
 
-class ATSRunner(object):
-    def __init__(self, app_config):
-        self.app_config = app_config
-
-    def start(self):
+class ATSRunner(Application):
+    def init(self):
         logger.info("starting ATS")
 
         self.trading_config = self.app_config.get_trading_configs()[0]
@@ -34,14 +32,11 @@ class ATSRunner(object):
         self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.trading_config)
         self.app_context.add_startable(self.strategy)
 
+    def run(self):
         self.strategy.start(self.app_context)
 
+        logger.info("ATS started, presss Ctrl-C to stop")
 
-logger.info("ATS started, presss Ctrl-C to stop")
-
-
-def stop(self):
-    self.app_context.stop()
 
 
 def main():
@@ -57,16 +52,8 @@ def main():
 
     app_config = ApplicationConfig(None, RefDataManager.DB, Clock.RealTime, PersistenceConfig(),
                                    broker_config, live_trading_config)
-
-    runner = ATSRunner(app_config)
-
-    try:
-        runner.start()
-
-        # wait until stop
-        # threading.Thread.join()
-    finally:
-        runner.stop()
+    app_context = ApplicationContext(app_config=app_config)
+    ATSRunner().start(app_context)
 
 
 if __name__ == "__main__":

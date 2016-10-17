@@ -4,6 +4,7 @@ from algotrader.config.persistence import MongoDBConfig
 from algotrader.provider.persistence import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
     SequenceDataStore
 from algotrader.utils.ser_deser import MapSerializer
+from algotrader.utils import logger
 
 
 class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
@@ -91,14 +92,17 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
 
     # TimeSeriesDataStore
     def save_bar(self, bar):
+        logger.info("[%s] saving %s" % (self.__class__.__name__, bar))
         id, packed = self._serialize(bar)
         self.bars.update({'_id': id}, packed, upsert=True)
 
     def save_quote(self, quote):
+        logger.info("[%s] saving %s" % (self.__class__.__name__, quote))
         id, packed = self._serialize(quote)
         self.quotes.update({'_id': id}, packed, upsert=True)
 
     def save_trade(self, trade):
+        logger.info("[%s] saving %s" % (self.__class__.__name__, trade))
         id, packed = self._serialize(trade)
         self.trades.update({'_id': id}, packed, upsert=True)
 

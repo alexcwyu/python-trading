@@ -5,11 +5,12 @@ from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEven
 from algotrader.event.order import OrdAction, OrdType, TIF, NewOrderRequest, OrderReplaceRequest, \
     OrderCancelRequest
 from algotrader.provider.persistence import Persistable
-from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey
+from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, MarketDataSubscriber
 from algotrader.trading.position import PositionHolder
 
 
-class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable, Startable, HasId):
+class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable, Startable, HasId,
+               MarketDataSubscriber):
     __slots__ = (
         'stg_id',
         'trading_config',
@@ -79,15 +80,19 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         if self.feed:
             self.feed.start(app_context)
 
-        self._subscribe_market_data(self.instruments)
+        if isinstance(self.trading_config, BacktestingConfig):
+            self.subscript_market_data(self.feed, self.instruments, self.trading_config.subscription_types,
+                                       self.trading_config.from_date, self.trading_config.to_date)
+        else:
+            self.subscript_market_data(self.feed, self.instruments, self.trading_config.subscription_types)
 
     def _stop(self):
         if self.event_subscription:
             self.event_subscription.dispose()
 
-    def _subscribe_market_data(self, instruments):
+    def _subscribe_market_data(self, feed, instruments, subscription_types):
         for instrument in instruments:
-            for subscription_type in self.trading_config.subscription_types:
+            for subscription_type in subscription_types:
                 if isinstance(self.trading_config, BacktestingConfig):
 
                     sub_key = HistDataSubscriptionKey(inst_id=instrument.inst_id,

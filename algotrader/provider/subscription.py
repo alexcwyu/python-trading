@@ -127,3 +127,28 @@ class HistDataSubscriptionKey(SubscriptionKey):
                  self.from_date, self.to_date) ==
                 (other.provider_id, other.inst_id, other.subscription_type,
                  other.from_date, other.to_date))
+
+
+class MarketDataSubscriber(object):
+    def subscript_market_data(self, feed, instruments, subscription_types, from_date=None, to_date=None):
+        for sub_key in self.get_subscription_keys(feed.id(), instruments, subscription_types, from_date, to_date):
+            feed.subscribe_mktdata(sub_key)
+
+    def get_subscription_keys(self, feed_id, instruments, subscription_types, from_date=None, to_date=None):
+        keys = []
+        for instrument in instruments:
+            for subscription_type in subscription_types:
+                if from_date and to_date:
+
+                    keys.append(HistDataSubscriptionKey(inst_id=instrument.inst_id,
+                                                        provider_id=feed_id,
+                                                        subscription_type=subscription_type,
+                                                        from_date=from_date,
+                                                        to_date=to_date))
+
+                else:
+                    keys.append(SubscriptionKey(inst_id=instrument.inst_id,
+                                                provider_id=feed_id,
+                                                subscription_type=subscription_type))
+                    # feed.subscribe_mktdata(sub_key)
+        return keys

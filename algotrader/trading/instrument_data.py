@@ -6,15 +6,6 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
-from algotrader.technical.atr import ATR
-from algotrader.technical.bb import BB
-from algotrader.technical.ma import SMA
-from algotrader.technical.roc import ROC
-from algotrader.technical.rsi import RSI
-from algotrader.technical.stats import MAX
-from algotrader.technical.stats import MIN
-from algotrader.technical.stats import STD
-from algotrader.technical.stats import VAR
 
 
 class InstrumentDataManager(MarketDataEventHandler, Manager):
@@ -45,10 +36,33 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             for series in series_list:
                 self.__series_dict[series.id()] = series
 
+            bars = self.store.load_all('bars')
+            for bar in bars:
+                self.__bar_dict[bar.id()] = bar
+
+            trades = self.store.load_all('trades')
+            for trade in trades:
+                self.__trade_dict[trade.id()] = trade
+
+            quotes = self.store.load_all('quotes')
+            for quote in quotes:
+                self.__quote_dict[quote.id()] = quote
+
     def save_all(self):
+        if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.Batch:
+            for bar in self.__bar_dict.values():
+                self.store.save_bar(bar)
+            for quote in self.__quote_dict.values():
+                self.store.save_quote(quote)
+            for trade in self.__trade_dict.values():
+                self.store.save_trade(trade)
+
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
             for series in self.__series_dict.values():
                 self.store.save_time_series(series)
+
+    def _is_realtime_persist(self):
+        return hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
@@ -58,6 +72,9 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             {"timestamp": bar.timestamp, "open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
              "vol": bar.vol})
 
+        if self._is_realtime_persist():
+            self.store.save_bar(bar)
+
     def on_quote(self, quote):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
         self.__quote_dict[quote.inst_id] = quote
@@ -66,10 +83,16 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             {"timestamp": quote.timestamp, "bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
              "ask_size": quote.ask_size})
 
+        if self._is_realtime_persist():
+            self.store.save_quote(quote)
+
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__trade_dict[trade.inst_id] = trade
         self.get_series(trade.series_id()).add({"timestamp": trade.timestamp, "price": trade.price, "size": trade.size})
+
+        if self._is_realtime_persist():
+            self.store.save_trade(trade)
 
     def get_bar(self, inst_id):
         if inst_id in self.__bar_dict:
@@ -105,7 +128,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def add_series(self, series, raise_if_duplicate=False):
         if series.name not in self.__series_dict:
             self.__series_dict[series.name] = series
-            if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
+            if self._is_realtime_persist():
                 self.store.save_time_series(series)
         elif raise_if_duplicate and self.__series_dict[series.name] != series:
             raise AssertionError("Series [%s] already exist" % series.name)

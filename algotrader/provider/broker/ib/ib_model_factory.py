@@ -6,6 +6,9 @@ from dateutil.relativedelta import relativedelta
 from algotrader.event.market_data import Bar, Quote, Trade, BarSize, MDOperation, MDSide
 from algotrader.event.order import OrdAction, OrdType, TIF, OrdStatus
 from algotrader.utils.date_utils import DateUtils
+from algotrader.provider.broker import Broker
+from algotrader.event.market_data import BarType, BarSize, MarketDataType
+
 
 
 class IBModelFactory:
@@ -46,9 +49,9 @@ class IBModelFactory:
     }
 
     hist_data_type_mapping = {
-        Bar: "TRADES",
-        Quote: "BID_ASK",
-        Trade: "TRADES"
+        MarketDataType.Bar: "TRADES",
+        MarketDataType.Quote: "BID_ASK",
+        MarketDataType.Trade: "TRADES"
     }
 
     bar_size_mapping = {
@@ -136,10 +139,10 @@ class IBModelFactory:
         inst = self.__ref_data_mgr.get_inst(inst_id=inst_id)
 
         contract = swigibpy.Contract()
-        contract.exchange = inst.get_exch_id(IBBroker.ID)
-        contract.symbol = inst.get_symbol(IBBroker.ID)
+        contract.exchange = inst.get_exch_id(Broker.IB)
+        contract.symbol = inst.get_symbol(Broker.IB)
         contract.secType = self.convert_sec_type(inst.type)
-        contract.currency = self.convert_sec_type(inst.ccy_id)
+        contract.currency = self.convert_ccy(inst.ccy_id)
         return contract
 
     def convert_hist_data_type(self, type):

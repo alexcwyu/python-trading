@@ -2,12 +2,12 @@ import abc
 
 from rx import Observer
 
-from algotrader import Startable
+from algotrader import Startable, HasId
 from algotrader.event.event_bus import EventBus
 from algotrader.utils import logger
 
 
-class EventHandler(Observer, Startable):
+class EventHandler(Observer, Startable, HasId):
     __metaclass__ = abc.ABCMeta
 
     def on_next(self, event):

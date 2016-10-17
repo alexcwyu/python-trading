@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 
-from algotrader.trading.instrument_data import inst_data_mgr
-
 
 class TimeSeriesPlot:
     def __init__(self, time_series, marker=" ", color=None):
@@ -51,7 +49,7 @@ class StrategyPlotter:
 
     def _plot_bar_chart(self, fig, instrument=None):
         key = "Bar.%s.Time.86400" % instrument
-        series = inst_data_mgr.get_series(key)
+        series = self.strategy.app_context.inst_data_mgr.get_series(key)
         # key = series_dict.keys()[0]
 
         ax_stock = fig.add_axes(rect_stock, axisbg=axescolor)  # left, bottom, width, height
@@ -87,7 +85,7 @@ class StrategyPlotter:
         ax_equity = fig.add_axes(rect_equity, axisbg=axescolor, sharex=ax_stock)
         ax_equity.text(0.025, 0.95, 'Equity', va='top', transform=ax_equity.transAxes, fontsize=textsize)
 
-        if (self.strategy.get_portfolio().performance_series.size() > 0):
+        if self.strategy.get_portfolio().performance_series.size() > 0:
             series = TimeSeriesPlot(self.strategy.get_portfolio().performance_series.get_series("total_equity"))
             series.plot(ax=ax_equity)
 
@@ -99,7 +97,7 @@ class StrategyPlotter:
         ax_pnl.text(0.025, 0.95, 'Pnl', va='top', transform=ax_pnl.transAxes, fontsize=textsize)
 
         result = self.strategy.get_portfolio().get_series()
-        if (result['Pnl'].size > 0):
+        if result['Pnl'].size > 0:
             series = TimeSeriesPlot(result['Pnl'])
             series.plot(ax=ax_pnl)
 
@@ -111,7 +109,7 @@ class StrategyPlotter:
         ax_drawdown.text(0.025, 0.95, 'Drawdown', va='top', transform=ax_drawdown.transAxes, fontsize=textsize)
 
         result = self.strategy.get_portfolio().get_series()
-        if (result['DrawDown'].size > 0):
+        if result['DrawDown'].size > 0:
             series = TimeSeriesPlot(result['DrawDown'])
             series.plot(ax=ax_drawdown)
 

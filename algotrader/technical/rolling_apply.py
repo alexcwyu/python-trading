@@ -9,11 +9,10 @@ class RollingApply(Indicator):
         'func'
     )
 
-    def __init__(self, input, name, input_key=None, length=0, func=np.std, desc="Rolling Apply"):
-        super(RollingApply, self).__init__(name=name, input=input, input_keys=input_key, desc=desc)
+    def __init__(self, input, name, input_key=None, length=0, func=np.std, desc="Rolling Apply", *args, **kwargs):
         self.length = int(length)
         self.func = func
-        super(RollingApply, self).update_all()
+        super(RollingApply, self).__init__(name=name, input=input, input_keys=input_key, desc=desc, *args, **kwargs)
 
     def on_update(self, data):
         result = {}

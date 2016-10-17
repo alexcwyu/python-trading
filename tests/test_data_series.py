@@ -117,13 +117,14 @@ class DataSeriesTest(TestCase):
         series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
         series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
 
-        self.assertEqual({'name': {self.t1: "'None'",  self.t2: "'None'"},
-                          "timestamp": {self.t1: self.t1, self.t2: self.t2}, "v1": {self.t1: 1, self.t2: 2},
-                          "v2": {self.t1: 1, self.t2: 2}}, series.get_data_dict())
+        self.assertEqual({'name': {str(self.t1): "'None'",  str(self.t2): "'None'"},
+                          "timestamp": {str(self.t1): self.t1, str(self.t2): self.t2},
+                          "v1": {str(self.t1): 1, str(self.t2): 2},
+                          "v2": {str(self.t1): 1, str(self.t2): 2}}, series.get_data_dict())
 
-        self.assertEqual({"v1": {self.t1: 1, self.t2: 2}, "v2": {self.t1: 1, self.t2: 2}},
+        self.assertEqual({"v1": {str(self.t1): 1, str(self.t2): 2}, "v2": {str(self.t1): 1, str(self.t2): 2}},
                          series.get_data_dict(['v1', 'v2']))
-        self.assertEqual({self.t1: 1, self.t2: 2}, series.get_data_dict('v1'))
+        self.assertEqual({str(self.t1): 1, str(self.t2): 2}, series.get_data_dict('v1'))
 
     def test_get_data(self):
         series = DataSeries()

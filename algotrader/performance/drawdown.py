@@ -10,8 +10,20 @@ class DrawDown(PortfolioAnalyzer):
     CurrentRunUp = "CurrentRunUp"
     CurrentDrawDown = "CurrentDrawDown"
 
+    __slots__ = (
+        'drawdown_series',
+        'drawdown',
+        'drawdown_pct',
+        'high_equity',
+        'low_equity',
+        'current_run_up',
+        'current_drawdown',
+    )
+
     def __init__(self):
-        self.drawdown_series = DataSeries(name=DrawDown)
+        super(DrawDown, self).__init__()
+
+        self.drawdown_series = DataSeries(name='DrawDown', missing_value=0)
         self.drawdown = 0
         self.drawdown_pct = 0
         self.high_equity = 0
@@ -55,3 +67,6 @@ class DrawDown(PortfolioAnalyzer):
 
     def get_series(self):
         return self.drawdown_series.get_series([self.DrawDown, self.DrawDownPct])
+
+    def id(self):
+        return '%s.%s' % (self.portfolio.id(), DrawDown.DrawDown)

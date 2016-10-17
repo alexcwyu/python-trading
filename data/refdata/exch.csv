@@ -1,0 +1,32 @@
+exch_id,name
+SEHK,Hong Kong Stock Exchange
+HKFE,Hong Kong Futures Exchange
+SEHKNTL,Shanghai-Hong Kong Stock Connect
+NSE,National Stock Exchange of India
+CHIXJ,CHI-X Japan
+OSE,Osaka Securities Exchange
+TSEJ,Tokyo Stock Exchange
+SGX,Singapore Exchange
+KSE,Korea Stock Exchange
+ASX,Australian Stock Exchange
+IDEAL,IDEAL FX
+IDEALPRO,IDEALPRO Metals
+LSE,London Stock Exchange
+SWX,Swiss Exchange
+FWB,Frankfurt Stock Exchange
+CFE,CBOE Futures Exchange
+ECBOT,CBOT
+CBOE,Chicago Board Options Exchange
+CHX,Chicago Stock Exchange
+GLOBEX,CME
+NYBOT,ICE Futures U.S.
+ICEUS,ICE Futures US
+ISE,ISE Options Exchange
+NASDAQ,NASDAQ
+AMEX,NYSE Amex
+ARCA,NYSE Arca
+PSE,NYSE Arca
+NYMEX,New York Mercantile Exchange
+NYSE,New York Stock Exchange
+TSE,Toronto Stock Exchange
+SMART,Smart Order Routing

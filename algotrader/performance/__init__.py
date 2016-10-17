@@ -1,4 +1,18 @@
-class PortfolioAnalyzer(object):
+from algotrader.provider.persistence import Persistable
+
+
+class PortfolioAnalyzer(Persistable):
+    __slots__ = (
+        'portfolio'
+    )
+
+    __transient__ = (
+        'portfolio',
+    )
+
+    def __init__(self):
+        self.portfolio = None
+
     def update(self, time):
         pass
 

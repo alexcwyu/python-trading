@@ -3,12 +3,11 @@
 Generator of TALib Wrapper Class code
 
 """
-import jinja2
 from jinja2 import Template
 
 indicatorTmp = Template("""
 class {{IndicatorClass}}(Indicator):
-    _slots__ = (
+    __slots__ = (
         {% for i in params %}'{{i}}'{% if not loop.last %},{% endif %}{% endfor %}
     )
 
@@ -36,8 +35,9 @@ class {{IndicatorClass}}(Indicator):
         self.add(result)
 """)
 
-print indicatorTmp.render({"IndicatorClass" : "APO",
-                           "description" : "apo test",
-                           "params" :["fastperiod", "slowperiod", "matype"]})
+print indicatorTmp.render({"IndicatorClass": "APO",
+                           "description": "apo test",
+                           "params": ["fastperiod", "slowperiod", "matype"]})
 
-single_ds_list = ["APO", "BBANDS", "CMO", "DEMA", "EMA", "HT_DCPERIOD", "HT_DCPHASE", "HT_PHASOR", "HT_SINE", "HT_TRENDLINE", "HT_TRENDMODE", "KAMA", "LINEARREG", "LINEARREG_ANGLE", "LINEARREG_INTERCEPT" ]
+single_ds_list = ["APO", "BBANDS", "CMO", "DEMA", "EMA", "HT_DCPERIOD", "HT_DCPHASE", "HT_PHASOR", "HT_SINE",
+                  "HT_TRENDLINE", "HT_TRENDMODE", "KAMA", "LINEARREG", "LINEARREG_ANGLE", "LINEARREG_INTERCEPT"]

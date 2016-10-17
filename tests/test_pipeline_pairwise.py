@@ -9,40 +9,55 @@ from algotrader.technical import Indicator
 from algotrader.technical.pipeline import PipeLine
 from algotrader.technical.pipeline.pairwise import Plus, Minus, Times, Divides, Greater, PairCorrelation
 from algotrader.technical.talib_wrapper import SMA
-from algotrader.trading.instrument_data import inst_data_mgr
 from algotrader.utils.time_series import DataSeries
+from algotrader.config.app import ApplicationConfig
+from algotrader.trading.context import ApplicationContext
 
 
 class PairwiseTest(TestCase):
+    def setUp(self):
+        self.app_context = ApplicationContext()
+
     def test_name(self):
-        inst_data_mgr.clear()
-        bar0 = inst_data_mgr.get_series("bar0")
-        bar1 = inst_data_mgr.get_series("bar1")
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
 
         bar0_plus_bar1 = Plus(bar0, bar1, input_key='close')
+        bar0_plus_bar1.start(self.app_context)
 
         self.assertEquals("Plus('bar0','bar1',close)",
                           bar0_plus_bar1.name)
 
         spread = Minus(bar0, bar1, input_key='close')
+        spread.start(self.app_context)
+
         self.assertEquals("Minus('bar0','bar1',close)",
                           spread.name)
 
     def test_empty_at_initialize(self):
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
 
-        inst_data_mgr.clear()
-        bar0 = inst_data_mgr.get_series("bar0")
-        bar1 = inst_data_mgr.get_series("bar1")
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
 
         bar0_plus_bar1 = Plus(bar0, bar1, input_key='close')
+        bar0_plus_bar1.start(self.app_context)
+
         self.assertEquals(0, len(bar0_plus_bar1.get_data()))
 
     def test_shape(self):
-        inst_data_mgr.clear()
-        bar0 = inst_data_mgr.get_series("bar0")
-        bar1 = inst_data_mgr.get_series("bar1")
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
 
         bar0_plus_bar1 = Plus(bar0, bar1, input_key='close')
+        bar0_plus_bar1.start(self.app_context)
 
         try:
             np.testing.assert_almost_equal(np.array([1, 1]), bar0_plus_bar1.shape(), 5)
@@ -52,9 +67,11 @@ class PairwiseTest(TestCase):
 
     # def test_nan_before_size(self):
     def test_with_single_bar_multi_time(self):
-        inst_data_mgr.clear()
-        bar0 = inst_data_mgr.get_series("bar0")
-        bar1 = inst_data_mgr.get_series("bar1")
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
 
         plus = Plus(bar0, bar1, input_key='close')
         minus = Minus(bar0, bar1, input_key='close')
@@ -62,6 +79,11 @@ class PairwiseTest(TestCase):
         divides = Divides(bar0, bar1, input_key='close')
         pcorr = PairCorrelation(bar0, bar1, length=4, input_key='close')
 
+        plus.start(self.app_context)
+        minus.start(self.app_context)
+        times.start(self.app_context)
+        divides.start(self.app_context)
+        pcorr.start(self.app_context)
 
         now = datetime.datetime.now()
         x = np.array([80.0, 102.0, 101.0, 99.0])

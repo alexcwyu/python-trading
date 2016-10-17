@@ -15,29 +15,38 @@ from algotrader.technical.pipeline.cross_sessional_apply import Sum as GSSum
 from algotrader.technical.pipeline.make_vector import MakeVector
 from algotrader.technical.pipeline.pairwise import Minus
 from algotrader.technical.talib_wrapper import SMA
-from algotrader.trading.instrument_data import inst_data_mgr
-from algotrader.utils.time_series import DataSeries
-# from nose.tools import assert_equal
-# from nose_parameterized import parameterized
+from algotrader.config.app import ApplicationConfig
+from algotrader.trading.context import ApplicationContext
 
 
 class PipelineTest(TestCase):
+    def setUp(self):
+        self.app_context = ApplicationContext()
 
     def test_name(self):
-        inst_data_mgr.clear()
-        bar = inst_data_mgr.get_series("bar")
+
+        bar = self.app_context.inst_data_mgr.get_series("bar")
+        bar.start(self.app_context)
         sma3 = SMA(bar, input_key='close', length=3)
         sma20 = SMA(bar, input_key='close', length=20)
         sma50 = SMA(bar, input_key='close', length=50)
+        sma3.start(self.app_context)
+        sma20.start(self.app_context)
+        sma50.start(self.app_context)
 
         rank = Rank([sma3, sma20, sma50], input_key='close')
+        rank.start(self.app_context)
         self.assertEquals("Rank(SMA('bar',close,3),SMA('bar',close,20),SMA('bar',close,50),close)",
             rank.name)
 
-        bar0 = inst_data_mgr.get_series("bar0")
-        bar1 = inst_data_mgr.get_series("bar1")
-        bar2 = inst_data_mgr.get_series("bar2")
-        bar3 = inst_data_mgr.get_series("bar3")
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+        bar2 = self.app_context.inst_data_mgr.get_series("bar2")
+        bar3 = self.app_context.inst_data_mgr.get_series("bar3")
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
+        bar2.start(self.app_context)
+        bar3.start(self.app_context)
         barlist = [bar0, bar1, bar2, bar3]
 
         avg = Average([bar0, bar1, bar2, bar3], input_key='close')
@@ -48,10 +57,10 @@ class PipelineTest(TestCase):
         self.assertEquals("Sum('bar0','bar1','bar2','bar3',close)", gssum.name)
         self.assertEquals("MakeVector('bar0','bar1','bar2','bar3',close)", basket.name)
 
-        bar4 = inst_data_mgr.get_series("bar4")
-        bar5 = inst_data_mgr.get_series("bar5")
-        bar6 = inst_data_mgr.get_series("bar6")
-        bar7 = inst_data_mgr.get_series("bar7")
+        bar4 = self.app_context.inst_data_mgr.get_series("bar4")
+        bar5 = self.app_context.inst_data_mgr.get_series("bar5")
+        bar6 = self.app_context.inst_data_mgr.get_series("bar6")
+        bar7 = self.app_context.inst_data_mgr.get_series("bar7")
         basket2 = MakeVector([bar4, bar5, bar6, bar7], input_key='close')
 
         cross_basket_spread = Minus(basket2, basket)
@@ -59,34 +68,43 @@ class PipelineTest(TestCase):
 
 
     def test_empty_at_initialize(self):
-        inst_data_mgr.clear()
-        close = inst_data_mgr.get_series("bar")
+        close = self.app_context.inst_data_mgr.get_series("bar")
+        close.start(self.app_context)
         sma3 = SMA(close, input_key='close', length=3)
         sma20 = SMA(close, input_key='close', length=20)
         sma50 = SMA(close, input_key='close', length=50)
 
+        sma3.start(self.app_context)
+        sma20.start(self.app_context)
+
         rank = Rank([sma3, sma20, sma50], input_key='close')
+        rank.start(self.app_context)
         self.assertEquals(0, len(rank.get_data()))
 
     def test_shape(self):
-        inst_data_mgr.clear()
-        close = inst_data_mgr.get_series("bar")
+        close = self.app_context.inst_data_mgr.get_series("bar")
+        close.start(self.app_context)
+
         sma3 = SMA(close, input_key='close', length=3)
         sma20 = SMA(close, input_key='close', length=20)
         sma50 = SMA(close, input_key='close', length=50)
 
+        sma3.start(self.app_context)
+        sma20.start(self.app_context)
+        sma50.start(self.app_context)
+
         rank = Rank([sma3, sma20, sma50], input_key='close')
+        rank.start(self.app_context)
         try:
             np.testing.assert_almost_equal(np.array([1, 3]), rank.shape(), 5)
         except AssertionError as e:
             self.fail(e.message)
 
     def test_with_spread(self):
-        inst_data_mgr.clear()
-        bar0 = inst_data_mgr.get_series("bar0")
-        bar1 = inst_data_mgr.get_series("bar1")
-        bar2 = inst_data_mgr.get_series("bar2")
-        bar3 = inst_data_mgr.get_series("bar3")
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+        bar2 = self.app_context.inst_data_mgr.get_series("bar2")
+        bar3 = self.app_context.inst_data_mgr.get_series("bar3")
 
     def __np_assert_almost_equal(self, target, output, precision=10):
         try:
@@ -96,22 +114,37 @@ class PipelineTest(TestCase):
 
 
     def test_sync(self):
-        inst_data_mgr.clear()
-        bar0 = inst_data_mgr.get_series("bar0")
-        bar1 = inst_data_mgr.get_series("bar1")
-        bar2 = inst_data_mgr.get_series("bar2")
-        bar3 = inst_data_mgr.get_series("bar3")
-        bar4 = inst_data_mgr.get_series("bar4")
-        bar5 = inst_data_mgr.get_series("bar5")
-        bar6 = inst_data_mgr.get_series("bar6")
-        bar7 = inst_data_mgr.get_series("bar7")
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+        bar2 = self.app_context.inst_data_mgr.get_series("bar2")
+        bar3 = self.app_context.inst_data_mgr.get_series("bar3")
+        bar4 = self.app_context.inst_data_mgr.get_series("bar4")
+        bar5 = self.app_context.inst_data_mgr.get_series("bar5")
+        bar6 = self.app_context.inst_data_mgr.get_series("bar6")
+        bar7 = self.app_context.inst_data_mgr.get_series("bar7")
+
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
+        bar2.start(self.app_context)
+        bar3.start(self.app_context)
+        bar4.start(self.app_context)
+        bar5.start(self.app_context)
+        bar6.start(self.app_context)
+        bar7.start(self.app_context)
 
         basket = MakeVector([bar0, bar1, bar2, bar3], input_key='close')
         basket2 = MakeVector([bar4, bar5, bar6, bar7], input_key='close')
 
+        basket.start(self.app_context)
+        basket2.start(self.app_context)
+
         basket_open = MakeVector([bar0, bar1, bar2, bar3], input_key='open')
         basket_open2 = MakeVector([bar4, bar5, bar6, bar7], input_key='open')
         cross_basket_spread = Minus(basket2, basket, input_key=PipeLine.VALUE)
+
+        basket_open.start(self.app_context)
+        basket_open2.start(self.app_context)
+        cross_basket_spread.start(self.app_context)
 
         nan_arr = np.empty([1,4])
         nan_arr[:] = np.nan
@@ -147,11 +180,16 @@ class PipelineTest(TestCase):
 
     # def test_nan_before_size(self):
     def test_with_multiple_bar(self):
-        inst_data_mgr.clear()
-        bar0 = inst_data_mgr.get_series("bar0")
-        bar1 = inst_data_mgr.get_series("bar1")
-        bar2 = inst_data_mgr.get_series("bar2")
-        bar3 = inst_data_mgr.get_series("bar3")
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+        bar2 = self.app_context.inst_data_mgr.get_series("bar2")
+        bar3 = self.app_context.inst_data_mgr.get_series("bar3")
+
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
+        bar2.start(self.app_context)
+        bar3.start(self.app_context)
+
         barlist = [bar0, bar1, bar2, bar3]
 
         rank = Rank(barlist, input_key='close')
@@ -163,6 +201,14 @@ class PipelineTest(TestCase):
         decaylinear = DecayLinear(barlist, length=3, input_key='close')
         scale = Scale(barlist, input_key='close')
 
+        rank.start(self.app_context)
+        avg.start(self.app_context)
+        gssum.start(self.app_context)
+        absv.start(self.app_context)
+        tail.start(self.app_context)
+        signvec.start(self.app_context)
+        decaylinear.start(self.app_context)
+        scale.start(self.app_context)
 
         t1 = datetime.datetime.now()
         bar_t1_array = np.array([80, 95, 102, 105])
@@ -217,15 +263,22 @@ class PipelineTest(TestCase):
 
 
     def test_with_multi_bar_multi_indicator(self):
-        inst_data_mgr.clear()
-        bar0 = inst_data_mgr.get_series("bar0")
-        bar1 = inst_data_mgr.get_series("bar1")
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
 
         sma_2_bar0 = SMA(bar0, "close", 2)
         sma_4_bar0 = SMA(bar0, "close", 4)
         sma_3_bar1 = SMA(bar1, "close", 3)
 
+        sma_2_bar0.start(self.app_context)
+        sma_4_bar0.start(self.app_context)
+        sma_3_bar1.start(self.app_context)
+
         rank = Rank([sma_2_bar0, sma_3_bar1, sma_4_bar0], input_key=Indicator.VALUE)
+        rank.start(self.app_context)
 
         t = datetime.datetime.now()
         bar0.add({"timestamp": t, "close": 80.0, "open": 0})

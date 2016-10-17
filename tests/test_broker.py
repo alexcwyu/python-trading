@@ -1,10 +1,12 @@
 from unittest import TestCase
 
+from algotrader.config.app import ApplicationConfig
+from algotrader.config.persistence import PersistenceConfig
+from algotrader.event.event_handler import ExecutionEventHandler
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdStatus, OrdAction, OrdType
-from algotrader.event.event_handler import ExecutionEventHandler
 from algotrader.provider.broker.sim.simulator import Simulator
-from algotrader.trading.instrument_data import inst_data_mgr
+from algotrader.trading.context import ApplicationContext
 
 
 class SimulatorTest(TestCase):
@@ -23,17 +25,24 @@ class SimulatorTest(TestCase):
             self.ord_upds = list()
             self.exec_reports = list()
 
+        def id(self):
+            return "ExecHandler"
+
     def setUp(self):
-        inst_data_mgr.clear()
+        self.app_context = ApplicationContext()
+        #self.app_context.inst_data_mgr.clear()
 
         self.exec_handler = SimulatorTest.ExecHandler()
-        self.simulator = Simulator(exec_handler=self.exec_handler)
+        self.app_context.order_mgr = self.exec_handler
+        self.simulator = Simulator()
+        self.simulator.start(app_context=self.app_context)
 
     def test_on_limit_order_fill_with_new_data(self):
         orders = self.simulator._get_orders()
         self.assertEqual(0, len(orders))
 
-        order1 = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        order1 = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT,
+                                 qty=1000, limit_price=18.5)
         self.simulator.on_new_ord_req(order1)
 
         orders = self.simulator._get_orders()
@@ -63,12 +72,13 @@ class SimulatorTest(TestCase):
         bar1 = Bar(inst_id=1, open=20, high=21, low=19, close=20.5, vol=1000)
         bar2 = Bar(inst_id=1, open=16, high=18, low=15, close=17, vol=1000)
 
-        inst_data_mgr.on_bar(bar2)
+        self.app_context.inst_data_mgr.on_bar(bar2)
 
         orders = self.simulator._get_orders()
         self.assertEqual(0, len(orders))
 
-        order1 = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        order1 = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT,
+                                 qty=1000, limit_price=18.5)
         self.simulator.on_new_ord_req(order1)
 
         orders = self.simulator._get_orders()

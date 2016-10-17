@@ -1,38 +1,37 @@
-import os
 import csv
+import os
 import re
-import sys
 from datetime import datetime
+
 import numpy as np
 import pandas as pd
-from algotrader.event.market_data import Quote
-from algotrader.event.market_data import Trade
 from algotrader.event.orderbook import OrderBook
 
+from algotrader.event.market_data import Trade
 
 directory = "/home/jason/workspace/data/Equity/SET/data20130717"
 datfile = "TH0264010Z02.BK.20130717.dat"
 
 
-
 def orderBookRowParser(row):
     ts = datetime.strptime(row[0], '%Y%m%d%H%M%S%f')
-    raw_quote_row= row[1:]
+    raw_quote_row = row[1:]
 
-    raw_bid_book = [ x for x in raw_quote_row if x[0] == 'B']
-    raw_ask_book = [ x for x in raw_quote_row if x[0] == 'A']
+    raw_bid_book = [x for x in raw_quote_row if x[0] == 'B']
+    raw_ask_book = [x for x in raw_quote_row if x[0] == 'A']
 
-    bid_split = [re.split('@', x) for x in raw_bid_book ]
+    bid_split = [re.split('@', x) for x in raw_bid_book]
     bid_flattened = map(list, zip(*bid_split))
     bid_size = np.array([x[1:] for x in bid_flattened[0]], dtype='float')
     bid_array = np.array([x for x in bid_flattened[1]], dtype='float')
 
-    ask_split = [ re.split('@', x) for x in raw_ask_book ]
+    ask_split = [re.split('@', x) for x in raw_ask_book]
     ask_flattened = map(list, zip(*ask_split))
     ask_size = np.array([x[1:] for x in ask_flattened[0]], dtype='float')
     ask_array = np.array([x for x in ask_flattened[1]], dtype='float')
 
-    return OrderBook(instrument='Test' , timestamp=ts, bid=bid_array, ask=ask_array, bid_size=bid_size, ask_size=ask_size, depth=10)
+    return OrderBook(instrument='Test', timestamp=ts, bid=bid_array, ask=ask_array, bid_size=bid_size,
+                     ask_size=ask_size, depth=10)
 
 
 def traderRowParser(row):
@@ -43,6 +42,7 @@ def traderRowParser(row):
     else:
         return None
 
+
 # with open(os.path.join(directory, datfile), 'rb') as csvfile:
 #     reader = csv.reader(csvfile, delimiter=' ')
 #     for row in reader:
@@ -52,10 +52,10 @@ def traderRowParser(row):
 #             print traderRowParser(row)
 
 
-#sampleQuoteRow = ['20130717093442335', 'B79800@1.7976931348623e+308', 'B3500@165', 'B26000@160', 'B200@158', 'B36000@157.5', 'B0@0', 'B0@0', 'B0@0', 'B0@0', 'B0@0', 'A110700@1.7976931348623e+308', 'A100@129', 'A3500@155', 'A900@156', 'A20300@156.5', 'A0@0', 'A0@0', 'A0@0', 'A0@0', 'A0@0']
-#sampleTradeRow = ['20130717093523396', 'T153800@156.5']
-#traderRowParser(sampleTradeRow)
-#orderBookRowParser(sampleQuoteRow)
+# sampleQuoteRow = ['20130717093442335', 'B79800@1.7976931348623e+308', 'B3500@165', 'B26000@160', 'B200@158', 'B36000@157.5', 'B0@0', 'B0@0', 'B0@0', 'B0@0', 'B0@0', 'A110700@1.7976931348623e+308', 'A100@129', 'A3500@155', 'A900@156', 'A20300@156.5', 'A0@0', 'A0@0', 'A0@0', 'A0@0', 'A0@0']
+# sampleTradeRow = ['20130717093523396', 'T153800@156.5']
+# traderRowParser(sampleTradeRow)
+# orderBookRowParser(sampleQuoteRow)
 
 class DecideDataFeed(object):
     def __init__(self, directory, datfile, subject=None):
@@ -75,9 +75,9 @@ class DecideDataFeed(object):
         with open(os.path.join(self.directory, self.datfile), 'rb') as csvfile:
             reader = csv.reader(csvfile, delimiter=' ')
             for row in reader:
-                if row[1][0] == 'B' :
+                if row[1][0] == 'B':
                     self.subject.on_next(orderBookRowParser(row))
-                elif row[1][0] == 'T' :
+                elif row[1][0] == 'T':
                     self.subject.on_next(traderRowParser(row))
 
     def stop(self):
@@ -93,8 +93,7 @@ class DecideDataFeed(object):
         df['BarSize'] = int(BarSize.D1)
         return df
 
-
-#def decideGenerator(directory, datfile):
+# def decideGenerator(directory, datfile):
 #    with open(os.path.join(directory, datfile), 'rb') as csvfile:
 #        reader = csv.reader(csvfile, delimiter=' ')
 #        for row in reader:
@@ -104,7 +103,7 @@ class DecideDataFeed(object):
 #                yield traderRowParser(row)
 
 
-#import itertools
+# import itertools
 #
 # generator = decideGenerator(directory, datfile)
 # top10 = itertools.islice(generator, 10)

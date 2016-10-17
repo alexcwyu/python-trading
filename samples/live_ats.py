@@ -3,51 +3,70 @@ Created on 4/16/16
 @author = 'jason'
 '''
 
-from algotrader.event.market_data import Bar, BarSize, BarType
-from algotrader.provider.broker.ib.ib_broker import IBBroker
-from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
-from algotrader.strategy.strategy import LiveTradingConfig
-from algotrader.trading.instrument_data import inst_data_mgr
-from algotrader.trading.order_mgr import order_mgr
-from algotrader.trading.portfolio import Portfolio
+from algotrader.config.app import ApplicationConfig
+from algotrader.config.broker import IBConfig
+from algotrader.config.persistence import PersistenceConfig
+from algotrader.config.trading import LiveTradingConfig
+from algotrader.event.market_data import BarSize, BarType
+from algotrader.provider.broker import Broker
+from algotrader.provider.subscription import BarSubscriptionType
+from algotrader.trading.context import ApplicationContext
+from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils import logger
+from algotrader.utils.clock import Clock
 
 
 class ATSRunner(object):
-    def __init__(self, stg):
-        self.__stg = stg
+    def __init__(self, app_config):
+        self.app_config = app_config
 
     def start(self):
-        # clock.default_clock = clock.realtime_clock
-        inst_data_mgr.start()
-        order_mgr.start()
+        logger.info("starting ATS")
 
-        self.__stg.start()
+        self.trading_config = self.app_config.get_trading_configs()[0]
+        self.app_context = ApplicationContext(app_config=self.app_config)
+        self.app_context.start()
+
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.trading_config.portfolio_id,
+                                                                         self.trading_config.portfolio_initial_cash)
+        self.app_context.add_startable(self.portfolio)
+
+        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.trading_config)
+        self.app_context.add_startable(self.strategy)
+
+        self.strategy.start(self.app_context)
+
+
+logger.info("ATS started, presss Ctrl-C to stop")
+
+
+def stop(self):
+    self.app_context.stop()
 
 
 def main():
-    portfolio = Portfolio(cash=100000)
-    broker = IBBroker(client_id=2)
+    broker_config = IBConfig(client_id=2)
+    live_trading_config = LiveTradingConfig(stg_id="down2%",
+                                            stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
+                                            portfolio_id='test', portfolio_initial_cash=100000,
+                                            instrument_ids=[4],
+                                            subscription_types=[
+                                                BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.M1)],
+                                            broker_id=Broker.IB,
+                                            feed_id=Broker.IB)
 
-    config = LiveTradingConfig(broker_id=IBBroker.ID,
-                               feed_id=IBBroker.ID,
-                               data_type=Bar,
-                               bar_type=BarType.Time,
-                               bar_size=BarSize.M1)
+    app_config = ApplicationConfig(None, RefDataManager.DB, Clock.RealTime, PersistenceConfig(),
+                                   broker_config, live_trading_config)
 
-    # strategy = SMAStrategy("sma", portfolio, instrument='spy', qty=1000, trading_config=config)
-    strategy = Down2PctStrategy("down2%", portfolio, instrument='GOOG', qty=1000, trading_config=config)
+    runner = ATSRunner(app_config)
 
-    runner = ATSRunner(strategy)
+    try:
+        runner.start()
 
-    logger.info("starting ATS")
-
-    runner.start()
-
-    logger.info("ATS started, presss Ctrl-C to stop")
-
-    # wait until stop
-    # threading.Thread.join()
+        # wait until stop
+        # threading.Thread.join()
+    finally:
+        runner.stop()
 
 
 if __name__ == "__main__":

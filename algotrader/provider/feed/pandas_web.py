@@ -4,31 +4,29 @@ from datetime import date
 from datetime import datetime
 
 import pandas as pd
-import pandas.io.data as web
+# import pandas.io.data as web # this is in pandas 0.15.2
+from pandas_datareader import data
 
-from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
-from algotrader.provider.provider import HistDataSubscriptionKey, Feed, feed_mgr
-from algotrader.trading.ref_data import inmemory_ref_data_mgr
+from algotrader.provider.feed import Feed
+from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
 from algotrader.utils import logger
-from algotrader.utils.clock import Clock
+from algotrader.utils.date_utils import DateUtils
 
 
 class PandasWebDataFeed(Feed):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, system, ref_data_mgr=None, data_event_bus=None):
+    def __init__(self, system):
+        super(PandasWebDataFeed, self).__init__()
         self.system = system
-        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
-        self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject
 
-        feed_mgr.register(self)
+    def _start(self, app_context, **kwargs):
+        self.ref_data_mgr = self.app_context.ref_data_mgr
+        self.data_event_bus = self.app_context.event_bus.data_subject
 
-    def start(self):
-        pass
-
-    def stop(self):
+    def _stop(self):
         pass
 
     def subscribe_all_mktdata(self, sub_keys):
@@ -47,11 +45,13 @@ class PandasWebDataFeed(Feed):
         for sub_key in sub_keys:
             if not isinstance(sub_key, HistDataSubscriptionKey):
                 raise RuntimeError("only HistDataSubscriptionKey is supported!")
-            if sub_key.data_type == Bar and sub_key.bar_type == BarType.Time and sub_key.bar_size == BarSize.D1:
+            if isinstance(sub_key.subscription_type,
+                          BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
                 inst = self.__ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.ID)
 
-                df = web.DataReader("F", self.system, sub_key.from_date, sub_key.to_date)
+                # df = web.DataReader("F", self.system, sub_key.from_date, sub_key.to_date)
+                df = data.DataReader("F", self.system, sub_key.from_date, sub_key.to_date)
                 df['Symbol'] = symbol
                 df['BarSize'] = int(BarSize.D1)
 
@@ -67,21 +67,23 @@ class PandasWebDataFeed(Feed):
     def unsubscribe_mktdata(self, sub_key):
         pass
 
+    def id(self):
+        return Feed.PandasWeb
+
 
 class YahooDataFeed(PandasWebDataFeed):
-    ID = "Yahoo"
     URL = 'http://real-chart.finance.yahoo.com/table.csv?s=%s&d=%s&e=%s&f=%s&g=d&a=%s&b=%s&c=%s&ignore=.csv'
 
-    def __init__(self, ref_data_mgr=None, data_event_bus=None):
-        super(YahooDataFeed, self).__init__(system='yahoo', ref_data_mgr=ref_data_mgr, data_event_bus=data_event_bus)
+    def __init__(self):
+        super(YahooDataFeed, self).__init__(system='yahoo')
 
     def id(self):
-        return YahooDataFeed.ID
+        return Feed.Yahoo
 
     def process_row(self, index, row):
         inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
         return Bar(inst_id=inst.inst_id,
-                   timestamp=Clock.datetime_to_unixtimemillis(index),
+                   timestamp=DateUtils.datetime_to_unixtimemillis(index),
                    open=row['Open'],
                    high=row['High'],
                    low=row['Low'],
@@ -92,18 +94,16 @@ class YahooDataFeed(PandasWebDataFeed):
 
 
 class GoogleDataFeed(PandasWebDataFeed):
-    ID = "Google"
-
-    def __init__(self, ref_data_mgr=None, data_event_bus=None):
-        super(GoogleDataFeed, self).__init__(system='google', ref_data_mgr=ref_data_mgr, data_event_bus=data_event_bus)
+    def __init__(self):
+        super(GoogleDataFeed, self).__init__(system='google')
 
     def id(self):
-        return GoogleDataFeed.ID
+        return Feed.Google
 
     def process_row(self, index, row):
         inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
         return Bar(inst_id=inst.inst_id,
-                   timestamp=Clock.datetime_to_unixtimemillis(index),
+                   timestamp=DateUtils.datetime_to_unixtimemillis(index),
                    open=row['Open'],
                    high=row['High'],
                    low=row['Low'],
@@ -116,7 +116,8 @@ if __name__ == "__main__":
     feed = YahooDataFeed()
 
     today = date.today()
-    sub_key = HistDataSubscriptionKey(inst_id=3, provider_id=YahooDataFeed.ID, data_type=Bar, bar_size=BarSize.D1,
+    sub_key = HistDataSubscriptionKey(inst_id=3, provider_id=YahooDataFeed.ID,
+                                      subscription_type=BarSubscriptionType(data_type=Bar, bar_size=BarSize.D1),
                                       from_date=datetime(2010, 1, 1), to_date=today)
 
     logger.setLevel(logging.DEBUG)

@@ -1,7 +1,5 @@
 from algotrader.event.order import OrdAction
 from algotrader.strategy.strategy import Strategy
-from algotrader.trading.instrument_data import inst_data_mgr
-from algotrader.utils import logger
 
 
 class MertonOptimalBaby(Strategy):
@@ -15,24 +13,33 @@ class MertonOptimalBaby(Strategy):
     So now this class is used as testing purpose
     """
 
-    def __init__(self, stg_id, portfolio, instrument, arate, vol, trading_config):
-        super(MertonOptimalBaby, self).__init__(stg_id, portfolio, instrument, trading_config)
+    def __init__(self, stg_id=None, trading_config=None):
+        super(MertonOptimalBaby, self).__init__(stg_id=stg_id, trading_config=trading_config)
         self.buy_order = None
-        self.arate = arate
-        self.vol = vol
-        self.bar = inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
-        self.optimal_weight = arate / self.vol**2 # assume risk free rate is zero
+
+    def _start(self, app_context, **kwargs):
+        self.arate = self.get_config_value("arate", 1)
+        self.vol = self.get_config_value("vol", 1)
+
+        self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
+        self.bar.start(app_context)
+
+        self.optimal_weight = self.arate / self.vol ** 2  # assume risk free rate is zero
+
+        super(MertonOptimalBaby, self)._start(app_context, **kwargs)
+
+    def _stop(self):
+        super(MertonOptimalBaby, self)._stop()
 
     def on_bar(self, bar):
         # we have to rebalance on each bar
+        # print bar
         portfolio = self.get_portfolio()
         allocation = portfolio.total_equity * self.optimal_weight
         delta = allocation - portfolio.stock_value
-        if delta > 0 :
-            qty = delta / bar.close # assume no lot size here
+        if delta > 0:
+            qty = delta / bar.close  # assume no lot size here
             self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=qty)
         else:
-            qty = -delta / bar.close # assume no lot size here
+            qty = -delta / bar.close  # assume no lot size here
             self.market_order(inst_id=bar.inst_id, action=OrdAction.SELL, qty=qty)
-
-

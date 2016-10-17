@@ -2,6 +2,8 @@ import abc
 
 
 class Commission(object):
+    Default = 0
+
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod

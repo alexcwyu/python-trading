@@ -1,34 +1,48 @@
-import math
-import talib
-from datetime import datetime
-from unittest import TestCase
-import numpy as np
 import datetime
+import math
+from unittest import TestCase
+
+import numpy as np
+import talib
+
 from algotrader.technical.talib_wrapper import SMA
-from algotrader.trading.instrument_data import inst_data_mgr
+from algotrader.trading.context import ApplicationContext
 from algotrader.utils.time_series import DataSeries
 
 
 class TALibSMATest(TestCase):
+    def setUp(self):
+        self.app_context = ApplicationContext()
+
+
+
     def test_name(self):
-        inst_data_mgr.clear()
-        bar = inst_data_mgr.get_series("bar")
+        bar = self.app_context.inst_data_mgr.get_series("bar")
+        bar.start(self.app_context)
         sma = SMA(bar, input_key='close', length=3)
+        sma.start(self.app_context)
+
         self.assertEquals("SMA('bar',close,3)", sma.name)
 
         sma2 = SMA(sma, input_key='value', length=10)
         self.assertEquals("SMA(SMA('bar',close,3),value,10)", sma2.name)
 
     def test_empty_at_initialize(self):
-        inst_data_mgr.clear()
-        close = inst_data_mgr.get_series("bar")
+        close = self.app_context.inst_data_mgr.get_series("bar")
+        close.start(self.app_context)
+
         sma = SMA(close, 'close', 3)
+        sma.start(self.app_context)
+
         self.assertEquals(0, len(sma.get_data()))
 
     def test_nan_before_size(self):
-        inst_data_mgr.clear()
-        bar = inst_data_mgr.get_series("bar")
+        bar = self.app_context.inst_data_mgr.get_series("bar")
+        bar.start(self.app_context)
+
         sma = SMA(bar, 'close', 3)
+        sma.start(self.app_context)
+
         t1 = datetime.datetime.now()
         t2 = t1 + datetime.timedelta(0, 3)
         t3 = t2 + datetime.timedelta(0, 3)
@@ -49,9 +63,11 @@ class TALibSMATest(TestCase):
                           sma.get_data())
 
     def test_moving_average_calculation(self):
-        inst_data_mgr.clear()
-        bar = inst_data_mgr.get_series("bar")
+        bar = self.app_context.inst_data_mgr.get_series("bar")
+        bar.start(self.app_context)
+
         sma = SMA(bar, input_key='close', length=3)
+        sma.start(self.app_context)
 
         t1 = datetime.datetime.now()
         t2 = t1 + datetime.timedelta(0, 3)
@@ -102,8 +118,11 @@ class TALibSMATest(TestCase):
     def test_compare_against_oneoff_calculation(self):
         rw = np.cumsum(np.random.normal(0, 2, 1000)) + 100
         close = DataSeries("close")
+        close.start(self.app_context)
+
         t = datetime.datetime.now()
         sma = SMA(close, input_key='close', length=50)
+        sma.start(self.app_context)
 
         result = []
 
@@ -125,7 +144,3 @@ class TALibSMATest(TestCase):
             np.testing.assert_almost_equal(target, result, 5)
         except AssertionError as e:
             self.fail(e.message)
-
-
-
-

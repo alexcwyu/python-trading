@@ -4,28 +4,34 @@ from unittest import TestCase
 
 import numpy as np
 
+from algotrader.config.app import ApplicationConfig
 from algotrader.technical.rolling_apply import StdDev, Skew, Kurt, Kurtosis
-from algotrader.trading.instrument_data import inst_data_mgr
+from algotrader.trading.context import ApplicationContext
+# from algotrader.trading.instrument_data import inst_data_mgr
 
 
 class RollingApplyTest(TestCase):
+    def setUp(self):
+        self.app_context = ApplicationContext()
+
     def test_name(self):
-        inst_data_mgr.clear()
-        bar = inst_data_mgr.get_series("bar")
+        bar = self.app_context.inst_data_mgr.get_series("bar")
         stddev = StdDev(bar, input_key='close', length=3)
         self.assertEquals("StdDev('bar',close,3)", stddev.name)
 
 
     def test_empty_at_initialize(self):
-        inst_data_mgr.clear()
-        close = inst_data_mgr.get_series("bar")
+        close = self.app_context.inst_data_mgr.get_series("bar")
         stddev = StdDev(close, input_key='close', length=3)
         self.assertEquals(0, len(stddev.get_data()))
 
     def test_nan_before_size(self):
-        inst_data_mgr.clear()
-        bar = inst_data_mgr.get_series("bar")
+        bar = self.app_context.inst_data_mgr.get_series("bar")
+        bar.start(self.app_context)
+
         stddev = StdDev(bar, input_key='close', length=3)
+        stddev.start(self.app_context)
+
         t1 = datetime.datetime.now()
 
         nextTime = lambda t : t + datetime.timedelta(0,3)

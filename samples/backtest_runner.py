@@ -1,65 +1,74 @@
 from datetime import date
 
 from algotrader.chart.plotter import StrategyPlotter
-from algotrader.event.market_data import Bar, BarSize, BarType
-from algotrader.provider.feed.csv_feed import CSVDataFeed
-from algotrader.provider.broker.sim.simulator import Simulator
-from algotrader.strategy.sma_strategy import SMAStrategy
-from algotrader.strategy.down_2pct_strategy import Down2PctStrategy
-from algotrader.strategy.strategy import BacktestingConfig
-from algotrader.trading.instrument_data import inst_data_mgr
-from algotrader.trading.order_mgr import order_mgr
-from algotrader.trading.portfolio import Portfolio
-from algotrader.utils import clock
+from algotrader.config.app import ApplicationConfig
+from algotrader.config.persistence import PersistenceConfig
+from algotrader.config.trading import BacktestingConfig
+from algotrader.event.market_data import BarSize, BarType
+from algotrader.provider.broker import Broker
+from algotrader.provider.feed import Feed
+from algotrader.provider.subscription import BarSubscriptionType
+from algotrader.trading.context import ApplicationContext
+from algotrader.trading.ref_data import RefDataManager
+from algotrader.utils.clock import Clock
 
 
 class BacktestRunner(object):
-    def __init__(self, stg):
-        self.__stg = stg
+    def __init__(self, app_config):
+        self.app_config = app_config
 
     def start(self):
-        clock.default_clock = clock.simluation_clock
-        clock.simluation_clock.start()
-        inst_data_mgr.start()
-        order_mgr.start()
+        self.app_context = ApplicationContext(app_config=self.app_config)
+        self.app_context.start()
+        self.trading_config = self.app_config.get_trading_configs()[0]
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.trading_config.portfolio_id,
+                                                                  self.trading_config.portfolio_initial_cash)
 
-        self.__stg.start()
+        self.initial_result = self.portfolio.get_result()
+
+        self.app_context.add_startable(self.portfolio)
+
+        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.trading_config)
+        self.app_context.add_startable(self.strategy)
+
+        self.strategy.start(self.app_context)
+
+    def stop(self):
+        self.app_context.stop()
+
+    def plot(self):
+        print self.portfolio.get_result()
+
+        # pyfolio
+        rets = self.portfolio.get_return()
+        # import pyfolio as pf
+        # pf.create_returns_tear_sheet(rets)
+        # pf.create_full_tear_sheet(rets)
+
+        # build in plot
+        plotter = StrategyPlotter(self.strategy)
+        plotter.plot(instrument=4)
 
 
 def main():
-    portfolio = Portfolio(cash=100000)
-
-    feed = CSVDataFeed()
-    broker = Simulator()
-
-    config = BacktestingConfig(broker_id=Simulator.ID,
-                               feed_id=CSVDataFeed.ID,
-                               data_type=Bar,
-                               bar_type=BarType.Time,
-                               bar_size=BarSize.D1,
-                               from_date=date(2010, 1, 1), to_date=date.today())
-
-    strategy = Down2PctStrategy("down2%", portfolio,
-                                instrument=4, qty=1000,  trading_config=config )
-
-    #strategy = SMAStrategy("sma", portfolio, instrument=4, qty=1000, trading_config=config)
-
-    runner = BacktestRunner(strategy)
-    runner.start()
-    print portfolio.get_result()
-
-    # pyfolio
-    rets = strategy.get_portfolio().get_return()
-    # import pyfolio as pf
-    # pf.create_returns_tear_sheet(rets)
-    # pf.create_full_tear_sheet(rets)
-
-    # build in plot
-    plotter = StrategyPlotter(strategy)
-    plotter.plot(instrument=4)
-
-    #import matplotlib.pyplot as plt
-    #plt.show()
+    backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
+                                        stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
+                                        portfolio_id='test', portfolio_initial_cash=100000,
+                                        instrument_ids=[4],
+                                        subscription_types=[
+                                            BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                                        from_date=date(2010, 1, 1), to_date=date.today(),
+                                        broker_id=Broker.Simulator,
+                                        feed_id=Feed.CSV,
+                                        stg_configs={'qty': 1000})
+    app_config = ApplicationConfig("down2%", RefDataManager.InMemory, Clock.Simulation, PersistenceConfig(),
+                                   backtest_config)
+    runner = BacktestRunner(app_config)
+    try:
+        runner.start()
+        runner.plot()
+    finally:
+        runner.stop()
 
 
 if __name__ == "__main__":

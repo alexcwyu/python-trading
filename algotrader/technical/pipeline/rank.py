@@ -10,10 +10,10 @@ class Rank(PipeLine):
     )
 
     def __init__(self, inputs, ascending=True, input_key='close', desc="Rank"):
+        self.ascending = ascending
         super(Rank, self).__init__(PipeLine.get_name(Rank.__name__, inputs, input_key),
                                    inputs, input_key, length=1, desc=desc)
-        self.ascending = ascending
-        super(Rank, self).update_all()
+        # super(Rank, self).update_all()
 
     def on_update(self, data):
         super(Rank, self).on_update(data)

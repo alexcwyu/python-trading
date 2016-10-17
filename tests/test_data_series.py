@@ -84,19 +84,19 @@ class DataSeriesTest(TestCase):
         series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
         series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
 
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 2, "v2": 2}], series.get_data())
+        self.assertEqual([{'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 1},
+                          {'name': "'None'", "timestamp": self.t2, "v1": 2, "v2": 2}], series.get_data())
 
         series.add({"timestamp": self.t2, "v1": 3, "v2": 3})
 
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 3, "v2": 3}], series.get_data())
+        self.assertEqual([{'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 1},
+                          {'name': "'None'", "timestamp": self.t2, "v1": 3, "v2": 3}], series.get_data())
 
         series.add({"timestamp": self.t3, "v1": 4, "v2": 4})
 
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 3, "v2": 3},
-                          {"timestamp": self.t3, "v1": 4, "v2": 4}], series.get_data())
+        self.assertEqual([{'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 1},
+                          {'name': "'None'", "timestamp": self.t2, "v1": 3, "v2": 3},
+                          {'name': "'None'", "timestamp": self.t3, "v1": 4, "v2": 4}], series.get_data())
 
     def test_current_time(self):
         series = DataSeries()
@@ -117,9 +117,10 @@ class DataSeriesTest(TestCase):
         series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
         series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
 
-        self.assertEqual(
-            {"timestamp": {str(self.t1): self.t1, str(self.t2): self.t2}, "v1": {str(self.t1): 1, str(self.t2): 2},
-             "v2": {str(self.t1): 1, str(self.t2): 2}}, series.get_data_dict())
+        self.assertEqual({'name': {str(self.t1): "'None'",  str(self.t2): "'None'"},
+                          "timestamp": {str(self.t1): self.t1, str(self.t2): self.t2},
+                          "v1": {str(self.t1): 1, str(self.t2): 2},
+                          "v2": {str(self.t1): 1, str(self.t2): 2}}, series.get_data_dict())
 
         self.assertEqual({"v1": {str(self.t1): 1, str(self.t2): 2}, "v2": {str(self.t1): 1, str(self.t2): 2}},
                          series.get_data_dict(['v1', 'v2']))
@@ -131,8 +132,8 @@ class DataSeriesTest(TestCase):
         series.add({"timestamp": self.t1, "v1": 1, "v2": 1})
         series.add({"timestamp": self.t2, "v1": 2, "v2": 2})
 
-        self.assertEqual([{"timestamp": self.t1, "v1": 1, "v2": 1},
-                          {"timestamp": self.t2, "v1": 2, "v2": 2}], series.get_data())
+        self.assertEqual([{'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 1},
+                          {'name': "'None'", "timestamp": self.t2, "v1": 2, "v2": 2}], series.get_data())
 
     def test_get_series(self):
 
@@ -187,15 +188,15 @@ class DataSeriesTest(TestCase):
         self.assertTrue(np.isnan(series.now()))
 
         series.add({"timestamp": self.t1, "v1": 1, "v2": 2})
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.now())
+        self.assertEqual({'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 2}, series.now())
 
         series.add({"timestamp": self.t2, "v1": 1.2, "v2": 2.2})
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.now())
+        self.assertEqual({'name': "'None'", "timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.now())
 
         series.add({"timestamp": self.t3, "v1": 1.3, "v2": 2.3})
         series.add({"timestamp": self.t4, "v1": 1.4, "v2": 2.4})
 
-        self.assertEqual({"timestamp": self.t4, "v1": 1.4, "v2": 2.4}, series.now())
+        self.assertEqual({'name': "'None'", "timestamp": self.t4, "v1": 1.4, "v2": 2.4}, series.now())
         self.assertEqual(1.4, series.now(["v1"]))
         self.assertEqual({"v1": 1.4, "v2": 2.4}, series.now(["v1", "v2"]))
 
@@ -204,22 +205,22 @@ class DataSeriesTest(TestCase):
         self.assertTrue(np.isnan(series.now()))
 
         series.add({"timestamp": self.t1, "v1": 1, "v2": 2})
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(0))
+        self.assertEqual({'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(0))
 
         series.add({"timestamp": self.t2, "v1": 1.2, "v2": 2.2})
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(0))
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(1))
+        self.assertEqual({'name': "'None'", "timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(0))
+        self.assertEqual({'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(1))
 
         series.add({"timestamp": self.t3, "v1": 1.3, "v2": 2.3})
-        self.assertEqual({"timestamp": self.t3, "v1": 1.3, "v2": 2.3}, series.ago(0))
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(1))
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(2))
+        self.assertEqual({'name': "'None'", "timestamp": self.t3, "v1": 1.3, "v2": 2.3}, series.ago(0))
+        self.assertEqual({'name': "'None'", "timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(1))
+        self.assertEqual({'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(2))
 
         series.add({"timestamp": self.t4, "v1": 1.4, "v2": 2.4})
-        self.assertEqual({"timestamp": self.t4, "v1": 1.4, "v2": 2.4}, series.ago(0))
-        self.assertEqual({"timestamp": self.t3, "v1": 1.3, "v2": 2.3}, series.ago(1))
-        self.assertEqual({"timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(2))
-        self.assertEqual({"timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(3))
+        self.assertEqual({'name': "'None'", "timestamp": self.t4, "v1": 1.4, "v2": 2.4}, series.ago(0))
+        self.assertEqual({'name': "'None'", "timestamp": self.t3, "v1": 1.3, "v2": 2.3}, series.ago(1))
+        self.assertEqual({'name': "'None'", "timestamp": self.t2, "v1": 1.2, "v2": 2.2}, series.ago(2))
+        self.assertEqual({'name': "'None'", "timestamp": self.t1, "v1": 1, "v2": 2}, series.ago(3))
 
         self.assertEqual({"v1": 1.4, "v2": 2.4}, series.ago(0, ["v1", "v2"]))
         self.assertEqual(1.4, series.ago(0, "v1"))
@@ -244,11 +245,12 @@ class DataSeriesTest(TestCase):
 
         # test index slice
         series2 = self.create_series_by_list(range(100))
-        sliced = series2.get_by_idx(keys='v1', idx=slice(-10, None, None))
+        sliced = series2.get_by_idx(keys='v1', idx=slice(-10,None,None))
         self.assertEqual(len(sliced), 10)
 
         endPoint = series2.get_by_idx(keys='v1', idx=slice(-1, None, None))
         self.assertEqual(endPoint[0], 99)
+
 
     def test_get_by_time(self):
         series = DataSeries(keys=set(["timestamp", "v1", "v2"]))
@@ -356,11 +358,11 @@ class DataSeriesTest(TestCase):
         r = [x for x in range(20) if x % 2 == 0]
 
         close = self.create_series_by_list(r)
-        f = lambda x: x ** 2
+        f = lambda x : x**2
         fvec = np.vectorize(f)
-        result = close.apply(keys="v1", func=fvec, start=None, end=None)
+        result = close.apply(keys="v1", func=fvec, start=None, end=None )
 
-        target = [x ** 2 for x in range(20) if x % 2 == 0]
+        target = [x**2 for x in range(20) if x % 2 == 0]
 
         try:
             np.testing.assert_almost_equal(target, result, 9)
@@ -376,10 +378,11 @@ class DataSeriesTest(TestCase):
         result[np.isnan(result)] = 0
         target[np.isnan(target)] = 0
 
-        deviation = np.sum((result - target) ** 2)
-        self.assertTrue(deviation < 1e-6)
+        deviation = np.sum((result - target)**2)
+        self.assertTrue(deviation< 1e-6)
 
         try:
             np.testing.assert_almost_equal(target, result, 5)
         except AssertionError as e:
             self.fail(e.message)
+

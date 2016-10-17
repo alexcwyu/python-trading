@@ -16,6 +16,7 @@ class {{IndicatorClass}}(Indicator):
         self.length = int(length)
         {% for p in params %}self.{{p}} = {{p}}
         {% endfor %}
+        super({{IndicatorClass}}, self).update_all()
 
     def on_update(self, data):
 

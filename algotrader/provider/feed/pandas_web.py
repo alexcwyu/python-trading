@@ -4,7 +4,8 @@ from datetime import date
 from datetime import datetime
 
 import pandas as pd
-import pandas.io.data as web
+# import pandas.io.data as web # this is in pandas 0.15.2
+from pandas_datareader import data
 
 from algotrader.event.event_handler import EventLogger
 from algotrader.event.market_data import Bar, BarType, BarSize
@@ -49,7 +50,8 @@ class PandasWebDataFeed(Feed):
                 inst = self.__ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.ID)
 
-                df = web.DataReader("F", self.system, sub_key.from_date, sub_key.to_date)
+                # df = web.DataReader("F", self.system, sub_key.from_date, sub_key.to_date)
+                df = data.DataReader("F", self.system, sub_key.from_date, sub_key.to_date)
                 df['Symbol'] = symbol
                 df['BarSize'] = int(BarSize.D1)
 

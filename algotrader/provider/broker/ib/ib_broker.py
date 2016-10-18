@@ -1,7 +1,7 @@
 import threading
 import time
 from collections import defaultdict
-
+import gevent
 import swigibpy
 
 from algotrader.config.broker import IBConfig
@@ -141,28 +141,6 @@ class OrderReqRegistry(object):
         return None
 
 
-class TWSPoller(threading.Thread):
-    '''Continually polls TWS for any outstanding messages.
-
-    Loops indefinitely until killed or a fatal error is encountered. Calls
-    TWS's `EClientSocketBase::checkMessages` function which blocks on socket
-    receive (synchronous I/O).
-    '''
-
-    def __init__(self, tws, daemon=False):
-        super(TWSPoller, self).__init__()
-        self.daemon = daemon
-        self._tws = tws
-
-    def run(self):
-        '''Continually poll TWS'''
-        ok = True
-        while ok:
-            ok = self._tws.checkMessages()
-
-            if ok and (not self._tws or not self._tws.isConnected()):
-                ok = False
-
 
 class IBBroker(IBSocket, Broker, Feed):
     def __init__(self):
@@ -177,7 +155,6 @@ class IBBroker(IBSocket, Broker, Feed):
         self.next_request_id = self.ib_config.next_request_id
         self.next_order_id = self.ib_config.next_order_id
         self.tws = swigibpy.EPosixClientSocket(self)
-        self.poller = TWSPoller(self.tws, daemon=self.ib_config.daemon)
         self.port = self.ib_config.port
         self.client_id = self.ib_config.client_id
         self.account = self.ib_config.account
@@ -189,9 +166,13 @@ class IBBroker(IBSocket, Broker, Feed):
 
         if not self.tws.eConnect("", self.port, self.client_id, poll_auto=False):
             raise RuntimeError('Failed to connect TWS')
-        self.poller.start()
 
-        logger.info("Server version, %s", self.tws.serverVersion())
+        if self.ib_config.use_gevent:
+            gevent.spawn(self.poll)
+        else:
+            thread = threading.Thread(target=self.poll)
+            thread.daemon = self.ib_config.daemon
+            thread.start()
 
         if self.account:
             self.__req_acct_update()
@@ -202,8 +183,17 @@ class IBBroker(IBSocket, Broker, Feed):
         self.tws.reqOpenOrders()
 
         # wait until we get the next_order_id
-        while (not self.next_order_id):
-            time.sleep(1)
+        #while (not self.next_order_id):
+        #    time.sleep(1)
+
+
+    def poll(self):
+        ok = True
+        while ok:
+            ok = self.tws.checkMessages()
+
+            if ok and (not self.tws or not self.tws.isConnected()):
+                ok = False
 
     def _stop(self):
         self.tws.eDisconnect()
@@ -222,7 +212,7 @@ class IBBroker(IBSocket, Broker, Feed):
         self.next_request_id += 1
         return req_id
 
-    def next_order_id(self):
+    def get_next_order_id(self):
         """get from next_order_id, increment and set the value back to next_order_id, """
         order_id = self.next_order_id
         self.next_order_id += 1
@@ -316,7 +306,7 @@ class IBBroker(IBSocket, Broker, Feed):
     def on_new_ord_req(self, new_ord_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))
 
-        ord_id = self.next_order_id()
+        ord_id = self.get_next_order_id()
         self.ord_req_reg.add_ord_req(ord_id, new_ord_req)
 
         ib_order = self.model_factory.create_ib_order(new_ord_req)
@@ -363,6 +353,7 @@ class IBBroker(IBSocket, Broker, Feed):
         """
         OrderId orderId
         """
+        logger.info("next valid id %s" % orderId)
         if not self.next_order_id or orderId > self.next_order_id:
             self.next_order_id = orderId
 

@@ -19,6 +19,7 @@ class IBConfig(BrokerConfig):
         'client_id',
         'account',
         'daemon',
+        'use_gevent',
         'next_request_id',
         'next_order_id',
     )
@@ -28,6 +29,7 @@ class IBConfig(BrokerConfig):
                  client_id=0,
                  account=None,
                  daemon=False,
+                 use_gevent=True,
                  next_request_id=1,
                  next_order_id=None):
         super(IBConfig, self).__init__(BrokerConfig.IBConfig)
@@ -36,6 +38,7 @@ class IBConfig(BrokerConfig):
         self.client_id = client_id
         self.account = account
         self.daemon = daemon
+        self.use_gevent = use_gevent
         self.next_request_id = next_request_id
         self.next_order_id = next_order_id
 

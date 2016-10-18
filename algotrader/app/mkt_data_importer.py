@@ -1,3 +1,7 @@
+from gevent import monkey
+
+monkey.patch_all()
+
 from algotrader.app import Application
 from algotrader.config.app import RealtimeMarketDataImporterConfig, HistoricalMarketDataImporterConfig
 from algotrader.config.broker import IBConfig
@@ -43,7 +47,7 @@ def main():
     persistence_config = PersistenceConfig(None,
                                            DataStore.Mongo, PersistenceMode.RealTime,
                                            DataStore.Mongo, PersistenceMode.RealTime,
-                                           DataStore.Mongo, PersistenceMode.Batch,
+                                           DataStore.Mongo, PersistenceMode.RealTime,
                                            DataStore.Mongo, PersistenceMode.RealTime)
     app_config = RealtimeMarketDataImporterConfig(None, RefDataManager.InMemory, Clock.RealTime,
                                                   Broker.IB, [3],

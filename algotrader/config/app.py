@@ -64,7 +64,7 @@ class RealtimeMarketDataImporterConfig(ApplicationConfig):
                  instrument_ids=None, subscription_types=None,
                  persistence_config=None,
                  *configs):
-        super(RealtimeMarketDataImporterConfig, self).__init__(id, ref_data_mgr_type, clock_type, persistence_config, configs)
+        super(RealtimeMarketDataImporterConfig, self).__init__(id, ref_data_mgr_type, clock_type, persistence_config, *configs)
         self.feed_id = feed_id
         self.instrument_ids = instrument_ids
         self.subscription_types = subscription_types
@@ -88,7 +88,7 @@ class HistoricalMarketDataImporterConfig(ApplicationConfig):
                  from_date=date(2010, 1, 1), to_date=date.today(),
                  persistence_config=None,
                  *configs):
-        super(HistoricalMarketDataImporterConfig, self).__init__(id, ref_data_mgr_type, Clock.Simulation, persistence_config, configs)
+        super(HistoricalMarketDataImporterConfig, self).__init__(id, ref_data_mgr_type, Clock.Simulation, persistence_config, *configs)
         self.feed_id = feed_id
         self.instrument_ids = instrument_ids
         self.subscription_types = subscription_types

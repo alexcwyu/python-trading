@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 import pandas as pd
 from rx.subjects import Subject
+# from algotrader.technical.pipeline.pairwise import Plus, Minus, Times, Divides
 
 from algotrader import Startable, HasId
 from algotrader.provider.persistence import Persistable
@@ -28,6 +29,12 @@ class DataSeries(Persistable, Startable, HasId):
         'subject',
         'app_context',
     )
+
+    @staticmethod
+    def get_name(input):
+        if isinstance(input, DataSeries):
+            return "'%s'" % input.name
+        return "'%s'" % input
 
     def __init__(self, name=None, keys=None, desc=None, missing_value=np.nan, data_list=None, use_col_np=False):
         """
@@ -65,6 +72,7 @@ class DataSeries(Persistable, Startable, HasId):
         return self.name
 
     def add(self, data):
+        data["name"] = DataSeries.get_name(self)
         time = data.get(timestamp_key)
         if not self.keys:
             self.keys = data.keys()
@@ -226,6 +234,19 @@ class DataSeries(Persistable, Startable, HasId):
             data = self.get_by_idx(idx, key)
             result[key] = func(np.array(data), *argv, **kwargs)
         return result if len(keys) > 1 else result[keys[0]]
+    #
+    # def __add__(self, other):
+    #     return Plus(self, other, self.keys)
+    #
+    # def __radd__(self, other):
+    #     return Plus(other, self, self.keys)
+    #
+    # def __mul__(self, other):
+    #     return Times(self, other, self.keys)
+    #
+    # def __rmul__(self, other):
+    #     return Times(other, self, self.keys)
+
 
     def __getitem__(self, pos):
         if isinstance(pos, tuple):

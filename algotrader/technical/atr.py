@@ -11,12 +11,12 @@ class ATR(Indicator):
     )
 
     def __init__(self, input=None, length=14, desc="Average True Range"):
-        super(ATR, self).__init__(Indicator.get_name(ATR.__name__, input, length), input, ['high', 'low', 'close'],
-                                  desc)
         self.length = int(length)
         self.__prev_close = None
         self.__value = None
         self.__average = SMA(input, self.length)
+        super(ATR, self).__init__(Indicator.get_name(ATR.__name__, input, length), input, ['high', 'low', 'close'],
+                                  desc)
 
     def on_update(self, data):
         sma_input = {}

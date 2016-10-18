@@ -138,7 +138,7 @@ if __name__ == "__main__":
     # with open(filename, 'rb') as ifile:
     #     df_dict = pickle.load(ifile)
 
-    start_date = date(2000, 1, 1)
+    start_date = datetime(2000, 1, 1)
     num_days = 500
     from datetime import timedelta
     import numpy as np

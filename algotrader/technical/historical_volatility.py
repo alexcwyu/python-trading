@@ -12,10 +12,10 @@ class HistoricalVolatility(Indicator):
     )
 
     def __init__(self, input=None, input_key=None, length=0, ann_factor=252, desc="Historical Volatility"):
-        super(HistoricalVolatility, self).__init__(
-            Indicator.get_name(HistoricalVolatility.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
         self.ann_factor = ann_factor
+        super(HistoricalVolatility, self).__init__(
+            Indicator.get_name(HistoricalVolatility.__name__, input, input_key, length), input, input_key, desc)
 
     def on_update(self, data):
         result = {}

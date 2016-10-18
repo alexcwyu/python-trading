@@ -32,6 +32,7 @@ class KalmanFilteringPairRegression(Indicator):
         self.length = int(length)
         delta = 1e-5
         self.trans_cov = delta / (1 - delta) * np.eye(2)
+        super(KalmanFilteringPairRegression, self).update_all()
 
     def on_update(self, data):
         result = {}

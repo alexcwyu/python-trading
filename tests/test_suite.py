@@ -9,6 +9,7 @@ from test_clock import ClockTest
 from test_cmp_functional_backtest import TestCompareWithFunctionalBacktest
 from test_data_series import DataSeriesTest
 from test_indicator import IndicatorTest
+from test_rolling import RollingApplyTest
 from test_instrument_data import InstrumentDataTest
 from test_ma import MovingAverageTest
 from test_market_data_processor import MarketDataProcessorTest
@@ -18,6 +19,10 @@ from test_portfolio import PortfolioTest
 from test_position import PositionTest
 from test_ser_deser import SerializerTest
 from test_talib_wrapper import TALibSMATest
+from test_cmp_functional_backtest import TestCompareWithFunctionalBacktest
+from test_bar_aggregator import BarAggregatorTest
+from test_pipeline import PipelineTest
+from test_pipeline_pairwise import PairwiseTest
 from test_in_memory_db import InMemoryDBTest
 from test_persistence import PersistenceTest
 from test_strategy_persistence import StrategyPersistenceTest
@@ -28,7 +33,7 @@ def suite():
     test_suite = unittest.TestSuite()
     test_suite.addTest(unittest.makeSuite(BarTest))
     test_suite.addTest(unittest.makeSuite(BarAggregatorTest))
-    test_suite.addTest(unittest.makeSuite(SimulatorTest))
+    # test_suite.addTest(unittest.makeSuite(SimulatorTest))
     test_suite.addTest(unittest.makeSuite(BrokerManagerTest))
     test_suite.addTest(unittest.makeSuite(ClockTest))
     test_suite.addTest(unittest.makeSuite(DataSeriesTest))
@@ -44,9 +49,12 @@ def suite():
     test_suite.addTest(unittest.makeSuite(TALibSMATest))
     test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
     test_suite.addTest(unittest.makeSuite(InMemoryDBTest))
-    test_suite.addTest(unittest.makeSuite(PersistenceTest))
+    # test_suite.addTest(unittest.makeSuite(PersistenceTest))
     test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
-    #test_suite.addTest(unittest.makeSuite(DataStoreTest))
+    # test_suite.addTest(unittest.makeSuite(DataStoreTest))
+    test_suite.addTest(unittest.makeSuite(PipelineTest))
+    test_suite.addTest(unittest.makeSuite(PairwiseTest))
+    test_suite.addTest(unittest.makeSuite(RollingApplyTest))
     return test_suite
 
 

@@ -17,12 +17,12 @@ class BB(Indicator):
     )
 
     def __init__(self, input=None, input_key=None, length=14, num_std=3, desc="Bollinger Bands"):
-        super(BB, self).__init__(Indicator.get_name(BB.__name__, input, input_key, length, num_std), input, input_key,
-                                 desc)
         self.length = int(length)
         self.num_std = int(num_std)
         self.__sma = SMA(input, self.length)
         self.__std_dev = STD(input, self.length)
+        super(BB, self).__init__(Indicator.get_name(BB.__name__, input, input_key, length, num_std), input, input_key,
+                                 desc)
 
     def on_update(self, data):
         result = {}

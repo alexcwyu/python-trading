@@ -58,8 +58,8 @@ class SMA(Indicator):
     )
 
     def __init__(self, input, input_key=None, length=0, desc="TALib Simple Moving Average"):
-        super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
+        super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc)
 
     def on_update(self, data):
 
@@ -86,6 +86,7 @@ class EMA(Indicator):
     def __init__(self, input, input_key=None, length=0, desc="TALib Exponential Moving Average"):
         super(EMA, self).__init__(Indicator.get_name(EMA.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
+        super(EMA, self).update_all()
 
     def on_update(self, data):
 

@@ -5,7 +5,7 @@ from nose_parameterized import parameterized, param
 
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
-from algotrader.config.trading import BacktestingConfig
+from algotrader.config.app import BacktestingConfig
 from algotrader.event.account import AccountUpdate, PortfolioUpdate
 from algotrader.event.market_data import Bar, Trade, Quote, MarketDepth, MDOperation, MDSide
 from algotrader.event.market_data import BarSize, BarType

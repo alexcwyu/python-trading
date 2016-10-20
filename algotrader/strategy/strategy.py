@@ -1,5 +1,4 @@
 from algotrader import Startable, HasId
-from algotrader.config.trading import BacktestingConfig
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
 from algotrader.event.order import OrdAction, OrdType, TIF, NewOrderRequest, OrderReplaceRequest, \
@@ -7,7 +6,7 @@ from algotrader.event.order import OrdAction, OrdType, TIF, NewOrderRequest, Ord
 from algotrader.provider.persistence import Persistable
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, MarketDataSubscriber
 from algotrader.trading.position import PositionHolder
-
+from algotrader.config.app import BacktestingConfig, LiveTradingConfig
 
 class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable, Startable, HasId,
                MarketDataSubscriber):
@@ -40,10 +39,9 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         'instruments'
     )
 
-    def __init__(self, stg_id=None, trading_config=None):
+    def __init__(self, stg_id=None):
         super(Strategy, self).__init__()
         self.stg_id = stg_id
-        self.trading_config = trading_config
         self.ord_reqs = {}
         self.orders = {}
 
@@ -55,7 +53,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
 
     def _start(self, app_context, **kwargs):
         self.app_context.stg_mgr.add(self)
-
+        self.trading_config = self.app_context.app_config if self.app_context.app_config else self.trading_config
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.portfolio = self.app_context.portf_mgr.get(self.trading_config.portfolio_id)
         self.feed = self.app_context.provider_mgr.get(self.trading_config.feed_id) if self.trading_config else None

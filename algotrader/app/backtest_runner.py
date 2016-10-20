@@ -4,9 +4,8 @@ from datetime import date
 
 from algotrader.app import Application
 from algotrader.chart.plotter import StrategyPlotter
-from algotrader.config.app import ApplicationConfig
+from algotrader.config.app import ApplicationConfig, BacktestingConfig
 from algotrader.config.persistence import PersistenceConfig
-from algotrader.config.trading import BacktestingConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
@@ -20,7 +19,7 @@ from algotrader.provider.broker import Broker
 class BacktestRunner(Application):
     def init(self):
         self.app_context.start()
-        self.trading_config = self.app_config.get_trading_configs()[0]
+        self.trading_config = self.app_config
         self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.trading_config.portfolio_id,
                                                                          self.trading_config.portfolio_initial_cash)
 
@@ -59,10 +58,9 @@ def main():
                                         from_date=date(2010, 1, 1), to_date=date.today(),
                                         broker_id=Broker.Simulator,
                                         feed_id=Feed.CSV,
-                                        stg_configs={'qty': 1000})
-    app_config = ApplicationConfig("down2%", RefDataManager.InMemory, Clock.Simulation, PersistenceConfig(),
-                                   backtest_config)
-    app_context = ApplicationContext(app_config=app_config)
+                                        stg_configs={'qty': 1000},
+                                        ref_data_mgr_type=RefDataManager.InMemory, persistence_config= PersistenceConfig())
+    app_context = ApplicationContext(app_config=backtest_config)
 
     BacktestRunner().start(app_context)
 

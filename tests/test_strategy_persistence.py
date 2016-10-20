@@ -4,7 +4,7 @@ from unittest import TestCase
 from algotrader.app import BacktestRunner
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import PersistenceConfig, PersistenceMode
-from algotrader.config.trading import BacktestingConfig
+from algotrader.config.app import BacktestingConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
@@ -25,10 +25,9 @@ class StrategyPersistenceTest(TestCase):
                                             from_date=date(1993, 1, 1), to_date=date(2017, 1, 1),
                                             broker_id=Broker.Simulator,
                                             feed_id=Feed.CSV,
-                                            stg_configs={'qty': 1000})
-        app_config = ApplicationConfig("down2%", RefDataManager.InMemory, Clock.Simulation, PersistenceConfig(),
-                                       backtest_config)
-        runner = BacktestRunner(app_config)
+                                            stg_configs={'qty': 1000},
+                                            ref_data_mgr_type=RefDataManager.InMemory, persistence_config=PersistenceConfig())
+        runner = BacktestRunner(backtest_config)
         runner.start()
         runner.stop()
 
@@ -44,16 +43,15 @@ class StrategyPersistenceTest(TestCase):
                                              from_date=date(1993, 1, 1), to_date=date(2008, 1, 1),
                                              broker_id=Broker.Simulator,
                                              feed_id=Feed.CSV,
-                                             stg_configs={'qty': 1000})
-        app_config1 = ApplicationConfig("down2%_1", RefDataManager.InMemory, Clock.Simulation,
-                                        PersistenceConfig(seq_ds_id=DataStore.InMemoryDB,
-                                                          seq_persist_mode=PersistenceMode.Batch,
-                                                          ts_ds_id=DataStore.InMemoryDB,
-                                                          ts_persist_mode=PersistenceMode.Batch,
-                                                          trade_ds_id=DataStore.InMemoryDB,
-                                                          trade_persist_mode=PersistenceMode.Batch),
-                                        backtest_config1)
-        runner1 = BacktestRunner(app_config1)
+                                             stg_configs={'qty': 1000},
+                                             ref_data_mgr_type=RefDataManager.InMemory, persistence_config=
+                                             PersistenceConfig(seq_ds_id=DataStore.InMemoryDB,
+                                                               seq_persist_mode=PersistenceMode.Batch,
+                                                               ts_ds_id=DataStore.InMemoryDB,
+                                                               ts_persist_mode=PersistenceMode.Batch,
+                                                               trade_ds_id=DataStore.InMemoryDB,
+                                                               trade_persist_mode=PersistenceMode.Batch))
+        runner1 = BacktestRunner(backtest_config1)
         runner1.start()
         runner1.stop()
 

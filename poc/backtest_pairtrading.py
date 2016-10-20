@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from algotrader.chart.plotter import StrategyPlotter
-from algotrader.config.trading import BacktestingConfig
+from algotrader.config.app import BacktestingConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.models.sde_sim import euler
 from algotrader.provider.broker.sim.simulator import Simulator

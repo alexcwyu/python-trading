@@ -9,7 +9,7 @@ import talib
 
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.feed import PandasMemoryDataFeedConfig
-from algotrader.config.trading import BacktestingConfig
+from algotrader.config.app import BacktestingConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
@@ -28,8 +28,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
     dates = [start_date + timedelta(days=i) for i in range(num_days)]
     init_cash = 1000000
 
-    def init_context(self, symbols, asset, config):
-
+    def get_df(self, asset):
         df = pd.DataFrame({"dates": TestCompareWithFunctionalBacktest.dates,
                            "Open": asset,
                            "High": asset,
@@ -39,15 +38,12 @@ class TestCompareWithFunctionalBacktest(TestCase):
 
         df = df.set_index(keys="dates")
 
-        self.df = df
+        return df
 
-        dict_df = {}
-        for symbol in symbols:
-            dict_df[symbol] = df
 
-        self.app_config = ApplicationConfig(None, None, Clock.Simulation, None,
-                                            PandasMemoryDataFeedConfig(dict_df=dict_df), config)
-        self.app_context = ApplicationContext(app_config=self.app_config)
+    def init_context(self, symbols, asset, app_config):
+
+        self.app_context = ApplicationContext(app_config=app_config)
 
         inst_df = build_inst_dataframe_from_list(symbols)
         ccy_df = pd.DataFrame({"ccy_id": ["USD", "HKD"],
@@ -83,16 +79,24 @@ class TestCompareWithFunctionalBacktest(TestCase):
         instrument = 0
 
         lot_size = 10000
-        config = BacktestingConfig(stg_id='sma', portfolio_id='test2',
+
+        symbols=['SPY', 'VXX', 'XLV', 'XIV']
+        dict_df = {}
+        for symbol in symbols:
+            dict_df[symbol] = self.get_df(asset=asset)
+
+        config = BacktestingConfig(id = None, stg_id='sma', portfolio_id='test2',
                                    instrument_ids=[instrument],
                                    subscription_types=[BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                    from_date=TestCompareWithFunctionalBacktest.dates[0],
                                    to_date=TestCompareWithFunctionalBacktest.dates[-1],
                                    broker_id=Broker.Simulator,
                                    feed_id=Feed.PandasMemory,
-                                   stg_configs={'qty': lot_size})
+                                   stg_configs={'qty': lot_size},
+                                   ref_data_mgr_type= None, persistence_config= None,
+                                   config = PandasMemoryDataFeedConfig(dict_df=dict_df))
 
-        self.init_context(symbols=['SPY', 'VXX', 'XLV', 'XIV'], asset=asset, config=config)
+        self.init_context(symbols=symbols, asset=asset, config=config)
 
         close = self.app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
         close.start(self.app_context)
@@ -145,6 +149,12 @@ class TestCompareWithFunctionalBacktest(TestCase):
         asset = sim_paths[1, :]  # pick the first sim path
 
         instrument = 0
+
+        symbols=['DUMMY']
+        dict_df = {}
+        for symbol in symbols:
+            dict_df[symbol] = self.get_df(asset=asset)
+
         config = BacktestingConfig(stg_id='mtnb', portfolio_id='test2',
                                    instrument_ids=[instrument],
                                    subscription_types=[BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
@@ -152,9 +162,11 @@ class TestCompareWithFunctionalBacktest(TestCase):
                                    to_date=TestCompareWithFunctionalBacktest.dates[-1],
                                    broker_id=Broker.Simulator,
                                    feed_id=Feed.PandasMemory,
-                                   stg_configs={'arate': arate, 'vol': vol})
+                                   stg_configs={'arate': arate, 'vol': vol},
+                                   ref_data_mgr_type= None, persistence_config= None,
+                                   config = PandasMemoryDataFeedConfig(dict_df=dict_df))
 
-        self.init_context(symbols=['DUMMY'], asset=asset, config=config)
+        self.init_context(symbols=symbols, asset=asset, config=config)
 
         close = self.app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
         close.start(self.app_context)

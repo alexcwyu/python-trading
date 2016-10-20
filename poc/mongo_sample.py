@@ -5,7 +5,7 @@ from pymongo import MongoClient
 
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import MongoDBConfig, PersistenceConfig
-from algotrader.config.trading import BacktestingConfig
+from algotrader.config.app import BacktestingConfig
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
 from algotrader.provider.persistence import DataStore, PersistenceMode

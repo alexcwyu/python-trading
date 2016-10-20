@@ -4,9 +4,8 @@ from unittest import TestCase
 from cassandra.cluster import Cluster
 from nose_parameterized import parameterized, param
 
-from algotrader.config.app import ApplicationConfig
+from algotrader.config.app import ApplicationConfig, BacktestingConfig
 from algotrader.config.persistence import MongoDBConfig, CassandraConfig, PersistenceConfig, InMemoryStoreConfig
-from algotrader.config.trading import BacktestingConfig
 from algotrader.event.account import AccountUpdate, PortfolioUpdate
 from algotrader.event.market_data import Bar, Trade, Quote, MarketDepth, MDOperation, MDSide
 from algotrader.event.market_data import BarSize, BarType

@@ -5,16 +5,16 @@ from algotrader.utils import logger
 
 
 class Down2PctStrategy(Strategy):
-    def __init__(self, stg_id=None, trading_config=None):
-        super(Down2PctStrategy, self).__init__(stg_id=stg_id, trading_config=trading_config)
+    def __init__(self, stg_id=None, stg_configs=None):
+        super(Down2PctStrategy, self).__init__(stg_id=stg_id, stg_configs=stg_configs)
         self.day_count = 0
         self.order = None
 
     def _start(self, app_context, **kwargs):
-        self.qty = self.get_config_value("qty", 1)
+        self.qty = self.get_stg_config_value("qty", 1)
 
         self.close = self.app_context.inst_data_mgr.get_series(
-            "Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
+            "Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
         self.close.start(app_context)
 
         self.roc = ROC(self.close, 'close', 1)

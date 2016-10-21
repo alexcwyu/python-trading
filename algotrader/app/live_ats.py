@@ -20,15 +20,15 @@ class ATSRunner(Application):
     def init(self):
         logger.info("starting ATS")
 
-        self.trading_config = self.app_config
+        self.app_config = self.app_config
         self.app_context = ApplicationContext(app_config=self.app_config)
         self.app_context.start()
 
-        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.trading_config.portfolio_id,
-                                                                         self.trading_config.portfolio_initial_cash)
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.portfolio_id,
+                                                                         self.app_config.portfolio_initial_cash)
         self.app_context.add_startable(self.portfolio)
 
-        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.trading_config)
+        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.app_config)
         self.app_context.add_startable(self.strategy)
 
     def run(self):
@@ -50,7 +50,7 @@ def main():
                                             feed_id=Broker.IB,
                                             broker_id=Broker.IB,
                                             ref_data_mgr_type = RefDataManager.DB, clock_type = Clock.RealTime, persistence_config =PersistenceConfig(),
-                                            configs = broker_config)
+                                            configs = [broker_config])
 
     app_context = ApplicationContext(app_config=live_trading_config)
     ATSRunner().start(app_context)

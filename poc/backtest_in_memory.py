@@ -96,7 +96,7 @@ def main():
     # strategy = Down2PctStrategy("down2%", portfolio,
     #                             instrument=0, qty=1000,  trading_config=config, ref_data_mgr=mgr)
 
-    strategy = SMAStrategy("sma", qty=1, trading_config=config)
+    strategy = SMAStrategy("sma", stg_configs={'qty':1})
 
     runner = BacktestRunner(strategy)
     runner.start()

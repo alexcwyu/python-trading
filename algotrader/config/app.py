@@ -19,33 +19,30 @@ class ApplicationConfig(Config):
         'ref_data_mgr_type',
         'clock_type',
         'persistence_config',
-        'trading_config',
-        'configs',
+        'provider_configs',
     )
 
     def __init__(self, id=None,
                  ref_data_mgr_type=RefDataManager.InMemory,
                  clock_type=Clock.Simulation,
                  persistence_config=None,
-                 *configs):
+                 provider_configs=None):
         super(ApplicationConfig, self).__init__(id)
 
         self.ref_data_mgr_type = ref_data_mgr_type
         self.clock_type = clock_type
         self.persistence_config = persistence_config if persistence_config else PersistenceConfig()
-        self.trading_configs = []
-        self.configs = {}
+        self.provider_configs = {}
 
-        for config in configs:
-            if isinstance(config, TradingConfig):
-                self.trading_configs.append(config)
-            elif isinstance(config, TradingConfig):
-                self.trading_configs.append(config)
+        if provider_configs:
+            if not isinstance(provider_configs, (list, tuple)):
+                self.provider_configs[provider_configs.__class__] = provider_configs
             else:
-                self.configs[config.__class__] = config
+                for provider_config in provider_configs:
+                    self.provider_configs[provider_config.__class__] = provider_config
 
     def get_config(self, cls, create=True):
-        return self._get_or_create_config(self.configs, cls, create)
+        return self._get_or_create_config(self.provider_configs, cls, create)
 
     def _get_or_create_config(self, dict, cls, create=True):
         result = dict.get(cls, None)
@@ -69,8 +66,8 @@ class RealtimeMarketDataImporterConfig(ApplicationConfig):
                  ref_data_mgr_type=RefDataManager.InMemory,
                  clock_type=Clock.Simulation,
                  persistence_config=None,
-                 *configs):
-        super(RealtimeMarketDataImporterConfig, self).__init__(id, ref_data_mgr_type, clock_type, persistence_config, *configs)
+                 provider_configs=None):
+        super(RealtimeMarketDataImporterConfig, self).__init__(id, ref_data_mgr_type, clock_type, persistence_config, provider_configs)
         self.feed_id = feed_id
         self.instrument_ids = instrument_ids
         self.subscription_types = subscription_types
@@ -93,8 +90,8 @@ class HistoricalMarketDataImporterConfig(ApplicationConfig):
                  from_date=date(2010, 1, 1), to_date=date.today(),
                  ref_data_mgr_type=RefDataManager.InMemory,
                  persistence_config=None,
-                 *configs):
-        super(HistoricalMarketDataImporterConfig, self).__init__(id, ref_data_mgr_type, Clock.Simulation, persistence_config, *configs)
+                 provider_configs=None):
+        super(HistoricalMarketDataImporterConfig, self).__init__(id, ref_data_mgr_type, Clock.Simulation, persistence_config, provider_configs)
         self.feed_id = feed_id
         self.instrument_ids = instrument_ids
         self.subscription_types = subscription_types
@@ -124,8 +121,8 @@ class TradingConfig(ApplicationConfig):
                  ref_data_mgr_type=RefDataManager.InMemory,
                  clock_type = Clock.Simulation,
                  persistence_config=None,
-                 *configs):
-        super(TradingConfig, self).__init__(id if id else stg_id, id, ref_data_mgr_type, clock_type, persistence_config, *configs)
+                 provider_configs=None):
+        super(TradingConfig, self).__init__(id = id if id else stg_id, ref_data_mgr_type=ref_data_mgr_type, clock_type=clock_type, persistence_config= persistence_config,  provider_configs=provider_configs)
         self.stg_id = stg_id
         self.stg_cls = stg_cls
         self.portfolio_id = portfolio_id
@@ -144,12 +141,6 @@ class TradingConfig(ApplicationConfig):
         self.clock_type = clock_type
         self.stg_configs = stg_configs
 
-    def get_stg_configs_val(self, key, default_value=None):
-        if self.stg_configs:
-            return self.stg_configs.get(key, default_value)
-        return default_value
-
-
 class LiveTradingConfig(TradingConfig):
 
     def __init__(self, id=None, stg_id=None, stg_cls=None, portfolio_id=None,
@@ -158,7 +149,7 @@ class LiveTradingConfig(TradingConfig):
                  feed_id=Broker.IB, broker_id=Broker.IB, stg_configs=None,
                  ref_data_mgr_type=RefDataManager.DB,
                  persistence_config=None,
-                 *configs):
+                 provider_configs=None):
         super(LiveTradingConfig, self).__init__(id=id, stg_id=stg_id, stg_cls=stg_cls, portfolio_id=portfolio_id,
                                                 instrument_ids=instrument_ids,
                                                 subscription_types=subscription_types,
@@ -166,7 +157,7 @@ class LiveTradingConfig(TradingConfig):
                                                 stg_configs=stg_configs,
                                                 ref_data_mgr_type = ref_data_mgr_type,
                                                 clock_type=Clock.RealTime,
-                                                persistence_config=persistence_config, configs=configs)
+                                                persistence_config=persistence_config, provider_configs=provider_configs)
 
 
 class BacktestingConfig(TradingConfig):
@@ -182,7 +173,7 @@ class BacktestingConfig(TradingConfig):
                  stg_configs=None,
                  ref_data_mgr_type=RefDataManager.DB,
                  persistence_config=None,
-                 *configs):
+                 provider_configs=None):
         super(BacktestingConfig, self).__init__(id=id, stg_id=stg_id, stg_cls=stg_cls, portfolio_id=portfolio_id,
                                                 instrument_ids=instrument_ids,
                                                 subscription_types=subscription_types,
@@ -190,7 +181,7 @@ class BacktestingConfig(TradingConfig):
                                                 stg_configs=stg_configs,
                                                 ref_data_mgr_type = ref_data_mgr_type,
                                                 clock_type=Clock.Simulation,
-                                                persistence_config=persistence_config, configs=configs)
+                                                persistence_config=persistence_config, provider_configs=provider_configs)
         self.portfolio_initial_cash = portfolio_initial_cash
         self.from_date = from_date
         self.to_date = to_date

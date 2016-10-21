@@ -206,10 +206,8 @@ def test_save():
     p2.start(app_context=context)
 
 
-    stg1 = stg_mgr.new_stg(trading_config=BacktestingConfig(id='1', stg_id='test1',
-                                                            stg_cls='algotrader.strategy.ema_strategy.EMAStrategy'))
-    stg2 = stg_mgr.new_stg(trading_config=BacktestingConfig(id='2', stg_id='test2',
-                                                            stg_cls='algotrader.strategy.ema_strategy.EMAStrategy'))
+    stg1 = stg_mgr.new_stg(stg_id='test1', stg_cls='algotrader.strategy.ema_strategy.EMAStrategy')
+    stg2 = stg_mgr.new_stg(stg_id='test2', stg_cls='algotrader.strategy.ema_strategy.EMAStrategy')
     stg1.start(app_context=context)
     stg2.start(app_context=context)
 

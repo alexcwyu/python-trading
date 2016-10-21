@@ -247,7 +247,7 @@ class DataStoreTest(TestCase):
                                         broker_id=Broker.Simulator,
                                         feed_id=Feed.PandasMemory)
 
-        stg = Strategy(stg_id='st1', trading_config=conf)
+        stg = Strategy(stg_id='st1')
         # nos = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
         #                       limit_price=18.5)
         #

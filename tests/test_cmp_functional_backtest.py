@@ -101,7 +101,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
         close = self.app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
         close.start(self.app_context)
 
-        strategy = SMAStrategy("sma", trading_config=config)
+        strategy = SMAStrategy("sma")
         strategy.start(self.app_context)
 
         rets = strategy.get_portfolio().get_return()
@@ -171,7 +171,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
         close = self.app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
         close.start(self.app_context)
 
-        strategy = MertonOptimalBaby("mtnb", trading_config=config)
+        strategy = MertonOptimalBaby("mtnb")
         strategy.start(app_context=self.app_context)
 
         rets = strategy.get_portfolio().get_return()

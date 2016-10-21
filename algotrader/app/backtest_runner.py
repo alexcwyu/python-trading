@@ -14,20 +14,21 @@ from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
 from algotrader.provider.broker import Broker
+from algotrader.config.feed import CSVFeedConfig
 
 
 class BacktestRunner(Application):
     def init(self):
         self.app_context.start()
-        self.trading_config = self.app_config
-        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.trading_config.portfolio_id,
-                                                                         self.trading_config.portfolio_initial_cash)
+        self.app_config = self.app_context.app_config
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.portfolio_id,
+                                                                         self.app_config.portfolio_initial_cash)
 
         self.initial_result = self.portfolio.get_result()
 
         self.app_context.add_startable(self.portfolio)
 
-        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.trading_config)
+        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.app_config)
         self.app_context.add_startable(self.strategy)
 
     def run(self):
@@ -59,7 +60,7 @@ def main():
                                         broker_id=Broker.Simulator,
                                         feed_id=Feed.CSV,
                                         stg_configs={'qty': 1000},
-                                        ref_data_mgr_type=RefDataManager.InMemory, persistence_config= PersistenceConfig())
+                                        ref_data_mgr_type=RefDataManager.InMemory, persistence_config= PersistenceConfig(), provider_configs=[CSVFeedConfig(path='../../data/tradedata')])
     app_context = ApplicationContext(app_config=backtest_config)
 
     BacktestRunner().start(app_context)

@@ -1,11 +1,10 @@
 from datetime import date
 from unittest import TestCase
 
-# from algotrader.app import BacktestRunner
 from algotrader.app.backtest_runner import BacktestRunner
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import PersistenceConfig, PersistenceMode
-from algotrader.config.trading import BacktestingConfig
+from algotrader.config.app import BacktestingConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
@@ -13,6 +12,7 @@ from algotrader.provider.persistence import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
+from algotrader.trading.context import ApplicationContext
 
 
 class StrategyPersistenceTest(TestCase):
@@ -26,12 +26,12 @@ class StrategyPersistenceTest(TestCase):
                                             from_date=date(1993, 1, 1), to_date=date(2017, 1, 1),
                                             broker_id=Broker.Simulator,
                                             feed_id=Feed.CSV,
-                                            stg_configs={'qty': 1000})
-        app_config = ApplicationConfig("down2%", RefDataManager.InMemory, Clock.Simulation, PersistenceConfig(),
-                                       backtest_config)
-        runner = BacktestRunner(app_config)
-        runner.start()
-        runner.stop()
+                                            stg_configs={'qty': 1000},
+                                            ref_data_mgr_type=RefDataManager.InMemory, persistence_config=PersistenceConfig())
+        app_context = ApplicationContext(app_config=backtest_config)
+        runner = BacktestRunner(plot = False)
+
+        runner.start(app_context)
 
         total_begin_result = runner.initial_result
         total_end_result = runner.portfolio.get_result()
@@ -45,16 +45,15 @@ class StrategyPersistenceTest(TestCase):
                                              from_date=date(1993, 1, 1), to_date=date(2008, 1, 1),
                                              broker_id=Broker.Simulator,
                                              feed_id=Feed.CSV,
-                                             stg_configs={'qty': 1000})
-        app_config1 = ApplicationConfig("down2%_1", RefDataManager.InMemory, Clock.Simulation,
-                                        PersistenceConfig(seq_ds_id=DataStore.InMemoryDB,
-                                                          seq_persist_mode=PersistenceMode.Batch,
-                                                          ts_ds_id=DataStore.InMemoryDB,
-                                                          ts_persist_mode=PersistenceMode.Batch,
-                                                          trade_ds_id=DataStore.InMemoryDB,
-                                                          trade_persist_mode=PersistenceMode.Batch),
-                                        backtest_config1)
-        runner1 = BacktestRunner(app_config1)
+                                             stg_configs={'qty': 1000},
+                                             ref_data_mgr_type=RefDataManager.InMemory, persistence_config=
+                                             PersistenceConfig(seq_ds_id=DataStore.InMemoryDB,
+                                                               seq_persist_mode=PersistenceMode.Batch,
+                                                               ts_ds_id=DataStore.InMemoryDB,
+                                                               ts_persist_mode=PersistenceMode.Batch,
+                                                               trade_ds_id=DataStore.InMemoryDB,
+                                                               trade_persist_mode=PersistenceMode.Batch))
+        runner1 = BacktestRunner(backtest_config1)
         runner1.start()
         runner1.stop()
 
@@ -99,3 +98,13 @@ class StrategyPersistenceTest(TestCase):
 
         runner2.stop()
         db.remove_database()
+
+if __name__== "__main__":
+    import unittest
+    runner = unittest.TextTestRunner()
+    test_suite = unittest.TestSuite()
+    test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
+    runner.run(test_suite)
+
+    # creating a new test suite
+    newSuite = unittest.TestSuite()

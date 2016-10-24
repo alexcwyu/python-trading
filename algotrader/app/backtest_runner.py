@@ -4,9 +4,8 @@ from datetime import date
 
 from algotrader.app import Application
 from algotrader.chart.plotter import StrategyPlotter
-from algotrader.config.app import ApplicationConfig
+from algotrader.config.app import ApplicationConfig, BacktestingConfig
 from algotrader.config.persistence import PersistenceConfig
-from algotrader.config.trading import BacktestingConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
@@ -15,25 +14,28 @@ from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
 from algotrader.provider.broker import Broker
+from algotrader.config.feed import CSVFeedConfig
 
 
 class BacktestRunner(Application):
-    def init(self):
+    def init(self, plot=False):
         self.app_context.start()
-        self.trading_config = self.app_config.get_trading_configs()[0]
-        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.trading_config.portfolio_id,
-                                                                         self.trading_config.portfolio_initial_cash)
+        self.app_config = self.app_context.app_config
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.portfolio_id,
+                                                                         self.app_config.portfolio_initial_cash)
 
         self.initial_result = self.portfolio.get_result()
 
         self.app_context.add_startable(self.portfolio)
 
-        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.trading_config)
+        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.app_config)
         self.app_context.add_startable(self.strategy)
+        self.plot = plot
 
     def run(self):
         self.strategy.start(self.app_context)
-        self.plot()
+        if self.plot:
+            self.plot()
 
     def plot(self):
         print self.portfolio.get_result()
@@ -59,10 +61,9 @@ def main():
                                         from_date=date(2010, 1, 1), to_date=date.today(),
                                         broker_id=Broker.Simulator,
                                         feed_id=Feed.CSV,
-                                        stg_configs={'qty': 1000})
-    app_config = ApplicationConfig("down2%", RefDataManager.InMemory, Clock.Simulation, PersistenceConfig(),
-                                   backtest_config)
-    app_context = ApplicationContext(app_config=app_config)
+                                        stg_configs={'qty': 1000},
+                                        ref_data_mgr_type=RefDataManager.InMemory, persistence_config= PersistenceConfig(), provider_configs=[CSVFeedConfig(path='../../data/tradedata')])
+    app_context = ApplicationContext(app_config=backtest_config)
 
     BacktestRunner().start(app_context)
 

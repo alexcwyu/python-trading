@@ -5,13 +5,13 @@ from algotrader.utils import logger
 
 
 class SMAStrategy(Strategy):
-    def __init__(self, stg_id=None, trading_config=None):
-        super(SMAStrategy, self).__init__(stg_id=stg_id, trading_config=trading_config)
+    def __init__(self, stg_id=None, stg_configs=None):
+        super(SMAStrategy, self).__init__(stg_id=stg_id, stg_configs=stg_configs)
         self.buy_order = None
 
     def _start(self, app_context, **kwargs):
-        self.qty = self.get_config_value("qty", 1)
-        self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.trading_config.instrument_ids[0])
+        self.qty = self.get_stg_config_value("qty", 1)
+        self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
 
         self.sma_fast = SMA(self.bar, 'close', 10)
         self.sma_fast.start(app_context)

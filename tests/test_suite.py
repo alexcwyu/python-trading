@@ -26,7 +26,7 @@ from test_pipeline_pairwise import PairwiseTest
 from test_in_memory_db import InMemoryDBTest
 from test_persistence import PersistenceTest
 from test_strategy_persistence import StrategyPersistenceTest
-#from test_data_store import DataStoreTest
+from test_data_store import DataStoreTest
 
 
 def suite():
@@ -47,11 +47,11 @@ def suite():
     test_suite.addTest(unittest.makeSuite(PositionTest))
     test_suite.addTest(unittest.makeSuite(SerializerTest))
     test_suite.addTest(unittest.makeSuite(TALibSMATest))
-    test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
+    # test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
     test_suite.addTest(unittest.makeSuite(InMemoryDBTest))
-    # test_suite.addTest(unittest.makeSuite(PersistenceTest))
+    test_suite.addTest(unittest.makeSuite(PersistenceTest))
     test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
-    # test_suite.addTest(unittest.makeSuite(DataStoreTest))
+    test_suite.addTest(unittest.makeSuite(DataStoreTest))
     test_suite.addTest(unittest.makeSuite(PipelineTest))
     test_suite.addTest(unittest.makeSuite(PairwiseTest))
     test_suite.addTest(unittest.makeSuite(RollingApplyTest))

@@ -34,12 +34,9 @@ class StrategyManager(SimpleManager):
     def id(self):
         return "StrategyManager"
 
-    def new_stg(self, trading_config):
-        stg_id = trading_config.stg_id
+    def new_stg(self, stg_id, stg_cls, stg_configs=None):
         if self.has_item(stg_id):
             raise "Strategy Id %s already exist" % stg_id
-
-        stg_cls = trading_config.stg_cls
 
         if stg_cls not in self.stg_cls_dict:
             module_name, cls_name = stg_cls.rsplit('.', 1)
@@ -48,13 +45,16 @@ class StrategyManager(SimpleManager):
             self.stg_cls_dict[stg_cls] = cls
 
         cls = self.stg_cls_dict[stg_cls]
-        strategy = cls(stg_id=stg_id, trading_config=trading_config)
+        strategy = cls(stg_id=stg_id, stg_configs=stg_configs)
         self.add(strategy)
         return strategy
 
-    def get_or_new_stg(self, trading_config):
-        if self.has_item(trading_config.stg_id):
-            stg = self.get(trading_config.stg_id)
-            stg.trading_config = trading_config
+    def get_or_new_stg(self, app_config):
+        stg_id = app_config.stg_id
+        stg_cls = app_config.stg_cls
+        stg_configs = app_config.stg_configs
+        if self.has_item(stg_id):
+            stg = self.get(stg_id)
+            stg.stg_configs = stg_configs
             return stg
-        return self.new_stg(trading_config)
+        return self.new_stg(stg_id, stg_cls, stg_configs)

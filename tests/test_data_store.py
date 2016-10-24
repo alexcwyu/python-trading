@@ -46,22 +46,16 @@ app_config = ApplicationConfig(None, None, Clock.RealTime, persistence_config,
                                CassandraConfig(contact_points=['127.0.0.1'], keyspace=name,
                                                create_at_start=create_at_start, delete_at_stop=delete_at_stop),
                                InMemoryStoreConfig(file="%s_db.p"%name,
-                                                   create_at_start=create_at_start, delete_at_stop=delete_at_stop)])
+                                                   create_at_start=create_at_start, delete_at_stop=True)])
 context = ApplicationContext(app_config=app_config)
 clock = context.clock
 mongo = context.provider_mgr.get(DataStore.Mongo)
-mongo.start(app_context=context)
-
-#cassandra = context.provider_mgr.get(DataStore.Cassandra)
-#cassandra.start(app_context=context)
-
-
+cassandra = context.provider_mgr.get(DataStore.Cassandra)
 inmemory = context.provider_mgr.get(DataStore.InMemoryDB)
-inmemory.start(app_context=context)
 
 params = [
     param('Mongo', mongo),
-    #param('Cassandra', cassandra),
+    param('Cassandra', cassandra),
     param('InMemory', inmemory)
 ]
 
@@ -269,7 +263,24 @@ class DataStoreTest(TestCase):
         assert MapSerializer.extract_slot(persistable) == MapSerializer.extract_slot(unpacked)
 
     @classmethod
+    def setUpClass(cls):
+        mongo.start(app_context=context)
+        cassandra.start(app_context=context)
+        inmemory.start(app_context=context)
+
+    @classmethod
     def tearDownClass(cls):
         mongo.stop()
         cassandra.stop()
         inmemory.stop()
+
+
+if __name__== "__main__":
+    import unittest
+    runner = unittest.TextTestRunner()
+    test_suite = unittest.TestSuite()
+    test_suite.addTest(unittest.makeSuite(DataStoreTest))
+    runner.run(test_suite)
+
+    # creating a new test suite
+    newSuite = unittest.TestSuite()

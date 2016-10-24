@@ -239,11 +239,10 @@ class DBRefDataManager(RefDataManager):
                 self.store.save_exchange(exch)
 
     def reset(self):
-        super(DBRefDataManager, self).reset()
-        # self.__inst_dict = {}
-        # self.__inst_symbol_dict = {}
-        # self.__ccy_dict = {}
-        # self.__exch_dict = {}
+        self._RefDataManager__inst_dict = {}
+        self._RefDataManager__inst_symbol_dict = {}
+        self._RefDataManager__ccy_dict = {}
+        self._RefDataManager__exch_dict = {}
 
     def add_inst(self, inst):
         super(DBRefDataManager, self).add_inst(inst)

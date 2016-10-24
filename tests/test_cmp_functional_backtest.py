@@ -6,10 +6,8 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 import talib
-
-from algotrader.config.app import ApplicationConfig
-from algotrader.config.feed import PandasMemoryDataFeedConfig
 from algotrader.config.app import BacktestingConfig
+from algotrader.config.feed import PandasMemoryDataFeedConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
@@ -18,8 +16,6 @@ from algotrader.strategy.merton_optimal import MertonOptimalBaby
 from algotrader.strategy.sma_strategy import SMAStrategy
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
-from algotrader.trading.ref_data import RefDataManager
-from algotrader.utils.clock import Clock
 
 
 class TestCompareWithFunctionalBacktest(TestCase):
@@ -39,7 +35,6 @@ class TestCompareWithFunctionalBacktest(TestCase):
         df = df.set_index(keys="dates")
 
         return df
-
 
     def init_context(self, symbols, asset, app_config):
 
@@ -82,8 +77,10 @@ class TestCompareWithFunctionalBacktest(TestCase):
 
         symbols=['SPY', 'VXX', 'XLV', 'XIV']
         dict_df = {}
+
+        self.df = self.get_df(asset=asset)
         for symbol in symbols:
-            dict_df[symbol] = self.get_df(asset=asset)
+            dict_df[symbol] = self.df
 
         config = BacktestingConfig(id = None, stg_id='sma', portfolio_id='test2',
                                    instrument_ids=[instrument],
@@ -94,9 +91,9 @@ class TestCompareWithFunctionalBacktest(TestCase):
                                    feed_id=Feed.PandasMemory,
                                    stg_configs={'qty': lot_size},
                                    ref_data_mgr_type= None, persistence_config= None,
-                                   config = PandasMemoryDataFeedConfig(dict_df=dict_df))
+                                   provider_configs = PandasMemoryDataFeedConfig(dict_df=dict_df))
 
-        self.init_context(symbols=symbols, asset=asset, config=config)
+        self.init_context(symbols=symbols, asset=asset, app_config=config)
 
         close = self.app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
         close.start(self.app_context)
@@ -164,9 +161,9 @@ class TestCompareWithFunctionalBacktest(TestCase):
                                    feed_id=Feed.PandasMemory,
                                    stg_configs={'arate': arate, 'vol': vol},
                                    ref_data_mgr_type= None, persistence_config= None,
-                                   config = PandasMemoryDataFeedConfig(dict_df=dict_df))
+                                   provider_configs = PandasMemoryDataFeedConfig(dict_df=dict_df))
 
-        self.init_context(symbols=symbols, asset=asset, config=config)
+        self.init_context(symbols=symbols, asset=asset, app_config=config)
 
         close = self.app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
         close.start(self.app_context)
@@ -220,3 +217,14 @@ class TestCompareWithFunctionalBacktest(TestCase):
             self.fail(e.message)
         finally:
             strategy.stop()
+
+
+if __name__== "__main__":
+    import unittest
+    runner = unittest.TextTestRunner()
+    test_suite = unittest.TestSuite()
+    test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
+    runner.run(test_suite)
+
+    # creating a new test suite
+    newSuite = unittest.TestSuite()

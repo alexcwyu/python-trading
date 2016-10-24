@@ -1,7 +1,7 @@
 from datetime import date
 from unittest import TestCase
 
-from algotrader.app import BacktestRunner
+from algotrader.app.backtest_runner import BacktestRunner
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import PersistenceConfig, PersistenceMode
 from algotrader.config.app import BacktestingConfig
@@ -12,6 +12,7 @@ from algotrader.provider.persistence import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
+from algotrader.trading.context import ApplicationContext
 
 
 class StrategyPersistenceTest(TestCase):
@@ -27,9 +28,10 @@ class StrategyPersistenceTest(TestCase):
                                             feed_id=Feed.CSV,
                                             stg_configs={'qty': 1000},
                                             ref_data_mgr_type=RefDataManager.InMemory, persistence_config=PersistenceConfig())
-        runner = BacktestRunner(backtest_config)
-        runner.start()
-        runner.stop()
+        app_context = ApplicationContext(app_config=backtest_config)
+        runner = BacktestRunner(plot = False)
+
+        runner.start(app_context)
 
         total_begin_result = runner.initial_result
         total_end_result = runner.portfolio.get_result()
@@ -96,3 +98,13 @@ class StrategyPersistenceTest(TestCase):
 
         runner2.stop()
         db.remove_database()
+
+if __name__== "__main__":
+    import unittest
+    runner = unittest.TextTestRunner()
+    test_suite = unittest.TestSuite()
+    test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
+    runner.run(test_suite)
+
+    # creating a new test suite
+    newSuite = unittest.TestSuite()

@@ -41,19 +41,19 @@ create_at_start = True
 delete_at_stop = False
 
 app_config = ApplicationConfig(None, None, Clock.RealTime, persistence_config,
-                               MongoDBConfig(dbname=name, create_at_start=create_at_start,
+                               provider_configs=[MongoDBConfig(dbname=name, create_at_start=create_at_start,
                                              delete_at_stop=delete_at_stop),
                                CassandraConfig(contact_points=['127.0.0.1'], keyspace=name,
                                                create_at_start=create_at_start, delete_at_stop=delete_at_stop),
                                InMemoryStoreConfig(file="%s_db.p"%name,
-                                                   create_at_start=create_at_start, delete_at_stop=delete_at_stop))
+                                                   create_at_start=create_at_start, delete_at_stop=delete_at_stop)])
 context = ApplicationContext(app_config=app_config)
 clock = context.clock
 mongo = context.provider_mgr.get(DataStore.Mongo)
 mongo.start(app_context=context)
 
-cassandra = context.provider_mgr.get(DataStore.Cassandra)
-cassandra.start(app_context=context)
+#cassandra = context.provider_mgr.get(DataStore.Cassandra)
+#cassandra.start(app_context=context)
 
 
 inmemory = context.provider_mgr.get(DataStore.InMemoryDB)
@@ -61,7 +61,7 @@ inmemory.start(app_context=context)
 
 params = [
     param('Mongo', mongo),
-    param('Cassandra', cassandra),
+    #param('Cassandra', cassandra),
     param('InMemory', inmemory)
 ]
 

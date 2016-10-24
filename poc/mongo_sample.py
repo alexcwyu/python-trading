@@ -127,7 +127,7 @@ def test_save_portfolio():
     store = context.provider_mgr.get(DataStore.Mongo)
     store.start(app_context=context)
 
-    portf_mgr = context.provider_mgr
+    portf_mgr = context.portf_mgr
     portf_mgr.start(app_context=context)
 
     p1 = portf_mgr.new_portfolio(portf_id=1, cash=1000)
@@ -135,8 +135,8 @@ def test_save_portfolio():
 
     before = portf_mgr.get(1)
 
-    portf_mgr.stop()
     portf_mgr.start()
+    portf_mgr.stop()
 
     after = portf_mgr.get(1)
     print "before %s" % before
@@ -315,10 +315,10 @@ def test_save_sequences():
 test_save_sequences()
 
 
-# test_save_portfolio()
+test_save_portfolio()
 
-#test_save_strategies()
+# test_save_strategies()
 
-#test_save()
+# test_save()
 
 test_load()

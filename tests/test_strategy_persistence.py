@@ -1,7 +1,8 @@
 from datetime import date
 from unittest import TestCase
 
-from algotrader.app import BacktestRunner
+# from algotrader.app import BacktestRunner
+from algotrader.app.backtest_runner import BacktestRunner
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import PersistenceConfig, PersistenceMode
 from algotrader.config.trading import BacktestingConfig

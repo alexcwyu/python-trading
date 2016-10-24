@@ -5,6 +5,7 @@ import os
 from algotrader import Manager
 from algotrader.config.persistence import PersistenceMode
 from algotrader.provider.persistence import Persistable
+import numpy as np
 
 
 class ReferenceData(Persistable):
@@ -197,7 +198,6 @@ class RefDataManager(Manager):
     def get_exch(self, exch_id):
         return self.__exch_dict.get(exch_id, None)
 
-
 class DBRefDataManager(RefDataManager):
     def __init__(self):
         super(DBRefDataManager, self).__init__()
@@ -215,27 +215,35 @@ class DBRefDataManager(RefDataManager):
         if hasattr(self, "store") and self.store:
             self.store.start(self.app_context)
             for inst in self.store.load_all('instruments'):
-                self.__inst_symbol_dict[inst.id()] = inst
-                self.__inst_dict[inst.inst_id] = inst
+                # self.__inst_symbol_dict[inst.id()] = inst
+                # self.__inst_dict[inst.inst_id] = inst
+                self._RefDataManager__inst_symbol_dict[inst.id()] = inst
+                self._RefDataManager__inst_dict[inst.inst_id] = inst
             for ccy in self.store.load_all('currencies'):
-                self.__ccy_dict[ccy.ccy_id] = ccy
+                # self.__ccy_dict[ccy.ccy_id] = ccy
+                self._RefDataManager__ccy_dict[ccy.ccy_id] = ccy
             for exch in self.store.load_all('exchanges'):
-                self.__exch_dict[exch.exch_id] = exch
+                # self.__exch_dict[exch.exch_id] = exch
+                self._RefDataManager__exch_dict[exch.exch_id] = exch
 
     def save_all(self):
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
-            for inst in self.__inst_dict.values():
+            # for inst in self.__inst_dict.values():
+            for inst in self._RefDataManager__inst_dict.values():
                 self.store.save_instrument(inst)
-            for ccy in self.__ccy_dict.values():
-                self.store.save_exchange(ccy)
-            for exch in self.__exch_dict.values():
-                self.store.save_currency(exch)
+            # for ccy in self.__ccy_dict.values():
+            for ccy in self._RefDataManager__ccy_dict.values():
+                self.store.save_currency(ccy)
+            # for exch in self.__exch_dict.values():
+            for exch in self._RefDataManager__exch_dict.values():
+                self.store.save_exchange(exch)
 
     def reset(self):
-        self.__inst_dict = {}
-        self.__inst_symbol_dict = {}
-        self.__ccy_dict = {}
-        self.__exch_dict = {}
+        super(DBRefDataManager, self).reset()
+        # self.__inst_dict = {}
+        # self.__inst_symbol_dict = {}
+        # self.__ccy_dict = {}
+        # self.__exch_dict = {}
 
     def add_inst(self, inst):
         super(DBRefDataManager, self).add_inst(inst)
@@ -245,15 +253,22 @@ class DBRefDataManager(RefDataManager):
     def add_ccy(self, ccy):
         super(DBRefDataManager, self).add_ccy(ccy)
         if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
-            self.store.save_exchange(ccy)
+            self.store.save_currency(ccy)
 
     def add_exch(self, exch):
         super(DBRefDataManager, self).add_exch(exch)
         if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
-            self.store.save_currency(exch)
+            self.store.save_exchange(exch)
 
     def id(self):
         raise RefDataManager.DB
+
+    def get_ccy(self, ccy_id):
+        return self._RefDataManager__ccy_dict.get(ccy_id, None)
+        # return self.__ccy_dict.get(ccy_id, None)
+
+    def get_exch(self, exch_id):
+        return self._RefDataManager__exch_dict.get(exch_id, None)
 
 
 class InMemoryRefDataManager(RefDataManager):

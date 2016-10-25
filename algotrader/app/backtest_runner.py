@@ -18,13 +18,10 @@ from algotrader.config.feed import CSVFeedConfig
 
 
 class BacktestRunner(Application):
-    def __init__(self, plot=True):
-        super(BacktestRunner, self).__init__()
-        self.isplot = plot
+    def __init__(self, isplot=False):
+        self.isplot = isplot
 
-    def init(self, app_context):
-        self.app_context = app_context
-        self.app_context.start()
+    def init(self):
         self.app_config = self.app_context.app_config
         self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.portfolio_id,
                                                                          self.app_config.portfolio_initial_cash)
@@ -37,6 +34,7 @@ class BacktestRunner(Application):
         self.app_context.add_startable(self.strategy)
 
     def run(self):
+        self.app_context.start()
         self.strategy.start(self.app_context)
         if self.isplot:
             self.plot()
@@ -69,7 +67,7 @@ def main():
                                         ref_data_mgr_type=RefDataManager.InMemory, persistence_config= PersistenceConfig(), provider_configs=[CSVFeedConfig(path='../../data/tradedata')])
     app_context = ApplicationContext(app_config=backtest_config)
 
-    BacktestRunner().start(app_context)
+    BacktestRunner(True).start(app_context)
 
 
 if __name__ == "__main__":

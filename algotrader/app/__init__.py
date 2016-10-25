@@ -6,12 +6,12 @@ from algotrader import Startable
 class Application(Startable):
     def _start(self, app_context):
         try:
-            self.init()
+            self.init(app_context)
             self.run()
         finally:
             self.stop()
 
-    def init(self):
+    def init(self, app_context):
         pass
 
     def run(self):

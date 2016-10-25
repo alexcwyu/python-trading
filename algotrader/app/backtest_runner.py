@@ -18,8 +18,8 @@ from algotrader.config.feed import CSVFeedConfig
 
 
 class BacktestRunner(Application):
-    def __init__(self, plot=False):
-        self.plot = plot
+    def __init__(self, isplot=False):
+        self.isplot = isplot
 
     def init(self):
         self.app_config = self.app_context.app_config
@@ -36,7 +36,7 @@ class BacktestRunner(Application):
     def run(self):
         self.app_context.start()
         self.strategy.start(self.app_context)
-        if self.plot:
+        if self.isplot:
             self.plot()
 
     def plot(self):
@@ -67,7 +67,7 @@ def main():
                                         ref_data_mgr_type=RefDataManager.InMemory, persistence_config= PersistenceConfig(), provider_configs=[CSVFeedConfig(path='../../data/tradedata')])
     app_context = ApplicationContext(app_config=backtest_config)
 
-    BacktestRunner().start(app_context)
+    BacktestRunner(True).start(app_context)
 
 
 if __name__ == "__main__":

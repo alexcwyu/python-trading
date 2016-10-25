@@ -16,9 +16,9 @@ class Startable(object):
         self.started = False
 
     def start(self, app_context=None, **kwargs):
+        self.app_context = app_context
         if not hasattr(self, "started") or not self.started:
             self.started = True
-            self.app_context = app_context
             self._start(app_context=app_context, **kwargs)
 
     def stop(self):

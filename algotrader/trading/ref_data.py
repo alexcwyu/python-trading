@@ -5,7 +5,6 @@ import os
 from algotrader import Manager
 from algotrader.config.persistence import PersistenceMode
 from algotrader.provider.persistence import Persistable
-import numpy as np
 
 
 class ReferenceData(Persistable):
@@ -124,32 +123,32 @@ class RefDataManager(Manager):
     def __init__(self):
         super(RefDataManager, self).__init__()
 
-        self.__inst_dict = {}
-        self.__inst_symbol_dict = {}
-        self.__ccy_dict = {}
-        self.__exch_dict = {}
+        self._inst_dict = {}
+        self._inst_symbol_dict = {}
+        self._ccy_dict = {}
+        self._exch_dict = {}
 
     def add_inst(self, inst):
-        if inst.inst_id in self.__inst_dict:
+        if inst.inst_id in self._inst_dict:
             raise RuntimeError("duplicate inst, inst_id=%s" % inst.inst_id)
 
-        if inst.id() in self.__inst_symbol_dict:
+        if inst.id() in self._inst_symbol_dict:
             raise RuntimeError("duplicate inst, id=%s" % inst.id())
 
-        self.__inst_dict[inst.inst_id] = inst
-        self.__inst_symbol_dict[inst.id()] = inst
+        self._inst_dict[inst.inst_id] = inst
+        self._inst_symbol_dict[inst.id()] = inst
 
     def add_ccy(self, ccy):
-        if ccy.ccy_id in self.__ccy_dict:
+        if ccy.ccy_id in self._ccy_dict:
             raise RuntimeError("duplicate ccy, ccy_id %s" % ccy.ccy_id)
 
-        self.__ccy_dict[ccy.ccy_id] = ccy
+        self._ccy_dict[ccy.ccy_id] = ccy
 
     def add_exch(self, exch):
-        if exch.exch_id in self.__exch_dict:
+        if exch.exch_id in self._exch_dict:
             raise RuntimeError("duplicate exch, exch_id %s" % exch.exch_id)
 
-        self.__exch_dict[exch.exch_id] = exch
+        self._exch_dict[exch.exch_id] = exch
 
     def get_insts(self, instruments):
         insts = []
@@ -174,29 +173,30 @@ class RefDataManager(Manager):
 
     def get_inst(self, inst_id=None, symbol=None, exch_id=None):
         if inst_id:
-            return self.__inst_dict.get(inst_id, None)
+            return self._inst_dict.get(inst_id, None)
         elif symbol and exch_id:
-            return self.__inst_symbol_dict.get('%s@%s' % (symbol, exch_id), None)
+            return self._inst_symbol_dict.get('%s@%s' % (symbol, exch_id), None)
         elif symbol:
-            for key in self.__inst_dict:
-                inst = self.__inst_dict[key]
+            for key in self._inst_dict:
+                inst = self._inst_dict[key]
                 if inst.symbol == symbol:
                     return inst
         return None
 
     def search_inst(self, inst):
         if isinstance(inst, (int, long)):
-            return self.__inst_dict.get(inst, None)
-        elif inst in self.__inst_symbol_dict:
-            return self.__inst_symbol_dict[inst]
+            return self._inst_dict.get(inst, None)
+        elif inst in self._inst_symbol_dict:
+            return self._inst_symbol_dict[inst]
         else:
             return self.get_inst(symbol=inst)
 
     def get_ccy(self, ccy_id):
-        return self.__ccy_dict.get(ccy_id, None)
+        return self._ccy_dict.get(ccy_id, None)
 
     def get_exch(self, exch_id):
-        return self.__exch_dict.get(exch_id, None)
+        return self._exch_dict.get(exch_id, None)
+
 
 class DBRefDataManager(RefDataManager):
     def __init__(self):
@@ -215,34 +215,27 @@ class DBRefDataManager(RefDataManager):
         if hasattr(self, "store") and self.store:
             self.store.start(self.app_context)
             for inst in self.store.load_all('instruments'):
-                # self.__inst_symbol_dict[inst.id()] = inst
-                # self.__inst_dict[inst.inst_id] = inst
-                self._RefDataManager__inst_symbol_dict[inst.id()] = inst
-                self._RefDataManager__inst_dict[inst.inst_id] = inst
+                self._inst_symbol_dict[inst.id()] = inst
+                self._inst_dict[inst.inst_id] = inst
             for ccy in self.store.load_all('currencies'):
-                # self.__ccy_dict[ccy.ccy_id] = ccy
-                self._RefDataManager__ccy_dict[ccy.ccy_id] = ccy
+                self._ccy_dict[ccy.ccy_id] = ccy
             for exch in self.store.load_all('exchanges'):
-                # self.__exch_dict[exch.exch_id] = exch
-                self._RefDataManager__exch_dict[exch.exch_id] = exch
+                self._exch_dict[exch.exch_id] = exch
 
     def save_all(self):
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
-            # for inst in self.__inst_dict.values():
-            for inst in self._RefDataManager__inst_dict.values():
+            for inst in self._inst_dict.values():
                 self.store.save_instrument(inst)
-            # for ccy in self.__ccy_dict.values():
-            for ccy in self._RefDataManager__ccy_dict.values():
-                self.store.save_currency(ccy)
-            # for exch in self.__exch_dict.values():
-            for exch in self._RefDataManager__exch_dict.values():
-                self.store.save_exchange(exch)
+            for ccy in self._ccy_dict.values():
+                self.store.save_exchange(ccy)
+            for exch in self._exch_dict.values():
+                self.store.save_currency(exch)
 
     def reset(self):
-        self._RefDataManager__inst_dict = {}
-        self._RefDataManager__inst_symbol_dict = {}
-        self._RefDataManager__ccy_dict = {}
-        self._RefDataManager__exch_dict = {}
+        self._inst_dict = {}
+        self._inst_symbol_dict = {}
+        self._ccy_dict = {}
+        self._exch_dict = {}
 
     def add_inst(self, inst):
         super(DBRefDataManager, self).add_inst(inst)
@@ -261,13 +254,6 @@ class DBRefDataManager(RefDataManager):
 
     def id(self):
         raise RefDataManager.DB
-
-    def get_ccy(self, ccy_id):
-        return self._RefDataManager__ccy_dict.get(ccy_id, None)
-        # return self.__ccy_dict.get(ccy_id, None)
-
-    def get_exch(self, exch_id):
-        return self._RefDataManager__exch_dict.get(exch_id, None)
 
 
 class InMemoryRefDataManager(RefDataManager):
@@ -328,6 +314,10 @@ class InMemoryRefDataManager(RefDataManager):
 
 
 if __name__ == "__main__":
-    mgr = InMemoryRefDataManager();
+    mgr = InMemoryRefDataManager()
     print mgr.get_inst(symbol='EURUSD', exch_id='IDEALPRO')
     print mgr.get_inst(inst_id=2)
+
+
+    mgr2 = DBRefDataManager()
+    print mgr2.get_ccy("test")

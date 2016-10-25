@@ -17,7 +17,7 @@ from algotrader.trading.context import ApplicationContext
 
 class StrategyPersistenceTest(TestCase):
     def test(self):
-        backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
+        backtest_config0 = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
                                             stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
                                             portfolio_id='test', portfolio_initial_cash=100000,
                                             instrument_ids=[4],
@@ -28,10 +28,10 @@ class StrategyPersistenceTest(TestCase):
                                             feed_id=Feed.CSV,
                                             stg_configs={'qty': 1000},
                                             ref_data_mgr_type=RefDataManager.InMemory, persistence_config=PersistenceConfig())
-        app_context = ApplicationContext(app_config=backtest_config)
+        app_context0 = ApplicationContext(app_config=backtest_config0)
         runner = BacktestRunner(plot = False)
 
-        runner.start(app_context)
+        runner.start(app_context0)
 
         total_begin_result = runner.initial_result
         total_end_result = runner.portfolio.get_result()
@@ -53,9 +53,9 @@ class StrategyPersistenceTest(TestCase):
                                                                ts_persist_mode=PersistenceMode.Batch,
                                                                trade_ds_id=DataStore.InMemoryDB,
                                                                trade_persist_mode=PersistenceMode.Batch))
-        runner1 = BacktestRunner(backtest_config1)
-        runner1.start()
-        runner1.stop()
+        app_context1 = ApplicationContext(app_config=backtest_config1)
+        runner1 = BacktestRunner(plot = False)
+        runner1.start(app_context1)
 
         part1_begin_result = runner1.initial_result
         part1_end_result = runner1.portfolio.get_result()
@@ -69,19 +69,21 @@ class StrategyPersistenceTest(TestCase):
                                              from_date=date(2008, 1, 1), to_date=date(2017, 1, 1),
                                              broker_id=Broker.Simulator,
                                              feed_id=Feed.CSV,
-                                             stg_configs={'qty': 1000})
-        app_config2 = ApplicationConfig("down2%_1", RefDataManager.InMemory, Clock.Simulation,
-                                        PersistenceConfig(seq_ds_id=DataStore.InMemoryDB,
+                                             stg_configs={'qty': 1000},
+                                             ref_data_mgr_type= RefDataManager.InMemory,
+                                             persistence_config=PersistenceConfig(seq_ds_id=DataStore.InMemoryDB,
                                                           seq_persist_mode=PersistenceMode.Batch,
                                                           ts_ds_id=DataStore.InMemoryDB,
                                                           ts_persist_mode=PersistenceMode.Batch,
                                                           trade_ds_id=DataStore.InMemoryDB,
-                                                          trade_persist_mode=PersistenceMode.Batch),
-                                        backtest_config2)
-        runner2 = BacktestRunner(app_config2)
-        runner2.start()
+                                                          trade_persist_mode=PersistenceMode.Batch))
+        app_context2 = ApplicationContext(app_config=backtest_config2)
+        app_context2.start()
+        db = app_context2.get_seq_data_store()
 
-        db = runner2.app_context.get_seq_data_store()
+        runner2 = BacktestRunner(plot = False)
+        runner2.start(app_context2)
+
         part2_begin_result = runner2.initial_result
         part2_end_result = runner2.portfolio.get_result()
 
@@ -96,7 +98,6 @@ class StrategyPersistenceTest(TestCase):
         print "part2 begin = %s"%part2_begin_result
         print "part2 end = %s"%part2_end_result
 
-        runner2.stop()
         db.remove_database()
 
 if __name__== "__main__":

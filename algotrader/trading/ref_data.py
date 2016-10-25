@@ -227,9 +227,9 @@ class DBRefDataManager(RefDataManager):
             for inst in self._inst_dict.values():
                 self.store.save_instrument(inst)
             for ccy in self._ccy_dict.values():
-                self.store.save_exchange(ccy)
+                self.store.save_currency(ccy)
             for exch in self._exch_dict.values():
-                self.store.save_currency(exch)
+                self.store.save_exchange(exch)
 
     def reset(self):
         self._inst_dict = {}

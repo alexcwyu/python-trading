@@ -8,7 +8,8 @@ from algotrader.config.persistence import MongoDBConfig, PersistenceConfig
 from algotrader.config.app import BacktestingConfig
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
-from algotrader.provider.persistence import DataStore, PersistenceMode
+from algotrader.provider.persistence import PersistenceMode
+from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.persistence.mongodb import MongoDBDataStore
 from algotrader.trading.account_mgr import AccountManager
 from algotrader.trading.context import ApplicationContext

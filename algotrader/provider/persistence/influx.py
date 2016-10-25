@@ -1,7 +1,7 @@
 from influxdb import InfluxDBClient
 
 from algotrader.config.persistence import InfluxDBConfig
-from algotrader.provider.persistence import DataStore
+from algotrader.provider.persistence.data_store import DataStore
 
 
 class InfluxDataStore(DataStore):

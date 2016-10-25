@@ -4,7 +4,8 @@ from unittest import TestCase
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import PersistenceConfig, InMemoryStoreConfig
 from algotrader.event.market_data import Bar
-from algotrader.provider.persistence import DataStore, PersistenceMode
+from algotrader.provider.persistence import PersistenceMode
+from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.persistence.inmemory import InMemoryDataStore
 from algotrader.trading.context import ApplicationContext
 from algotrader.utils.clock import Clock

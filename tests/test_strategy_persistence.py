@@ -8,7 +8,7 @@ from algotrader.config.app import BacktestingConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
-from algotrader.provider.persistence import DataStore
+from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock

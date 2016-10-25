@@ -1,5 +1,4 @@
 import logging
-from datetime import date
 
 import pandas as pd
 
@@ -40,20 +39,8 @@ class PandasMemoryDataFeed(Feed):
     def id(self):
         return Feed.PandasMemory
 
-    def subscribe_all_mktdata(self, sub_keys):
-        if isinstance(sub_keys, list):
-            self.sub_keys = self.sub_keys + sub_keys
-        else:
-            self.sub_keys.append(sub_keys)
-
-        self.__load_data(self.sub_keys)
-        for index, row in self.df.iterrows():
-            ## TODO support bar filtering // from date, to date
-            bar = self.process_row(index, row)
-            self.data_event_bus.on_next(bar)
-
-    def subscribe_mktdata(self, sub_key):
-        self.sub_keys.append(sub_key)
+    def subscribe_mktdata(self, *sub_keys):
+        self.sub_keys.extend(sub_keys)
 
         self.__load_data(self.sub_keys)
         for index, row in self.df.iterrows():
@@ -97,7 +84,7 @@ class PandasMemoryDataFeed(Feed):
         # bar = self.process_row(index, row)
         # self.__data_event_bus.on_next(bar)
 
-    def unsubscribe_mktdata(self, sub_key):
+    def unsubscribe_mktdata(self, *sub_keys):
         pass
 
 

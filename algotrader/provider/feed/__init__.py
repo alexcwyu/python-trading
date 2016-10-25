@@ -14,18 +14,10 @@ class Feed(Provider):
     def __init__(self):
         super(Provider, self).__init__()
 
-    def subscribe_all_mktdata(self, sub_keys):
-        for sub_key in sub_keys:
-            self.subscribe_mktdata(sub_key)
-
-    def unsubscribe_all_mktdata(self, sub_keys):
-        for sub_key in sub_keys:
-            self.unsubscribe_mktdata(sub_key)
-
     @abc.abstractmethod
-    def subscribe_mktdata(self, sub_key):
+    def subscribe_mktdata(self, *sub_key):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def unsubscribe_mktdata(self, sub_key):
+    def unsubscribe_mktdata(self, *sub_key):
         raise NotImplementedError()

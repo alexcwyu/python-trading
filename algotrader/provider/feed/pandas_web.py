@@ -4,7 +4,6 @@ from datetime import date
 from datetime import datetime
 
 import pandas as pd
-# import pandas.io.data as web # this is in pandas 0.15.2
 from pandas_datareader import data
 
 from algotrader.event.event_handler import EventLogger
@@ -29,17 +28,14 @@ class PandasWebDataFeed(Feed):
     def _stop(self):
         pass
 
-    def subscribe_all_mktdata(self, sub_keys):
-        self.__load_data([sub_keys])
-
-    def subscribe_mktdata(self, sub_key):
-        self.__load_data([sub_key])
+    def subscribe_mktdata(self, *sub_keys):
+        self.__load_data(*sub_keys)
 
     @abc.abstractmethod
     def process_row(self, row):
         raise NotImplementedError
 
-    def __load_data(self, sub_keys):
+    def __load_data(self, *sub_keys):
 
         self.dfs = []
         for sub_key in sub_keys:
@@ -64,7 +60,7 @@ class PandasWebDataFeed(Feed):
             bar = self.process_row(index, row)
             self.__data_event_bus.on_next(bar)
 
-    def unsubscribe_mktdata(self, sub_key):
+    def unsubscribe_mktdata(self, *sub_keys):
         pass
 
     def id(self):

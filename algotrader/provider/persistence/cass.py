@@ -4,9 +4,11 @@ from cassandra.cluster import Cluster
 
 from algotrader.config.persistence import CassandraConfig
 from algotrader.event.market_data import Bar, Trade, Quote, MarketDepth
-from algotrader.provider.persistence import RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore, DataStore
+from algotrader.provider.persistence.data_store import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
+    SequenceDataStore
 from algotrader.trading.ref_data import Instrument, Currency, Exchange
 from algotrader.utils import logger
+from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.ser_deser import MsgPackSerializer
 
 
@@ -39,6 +41,11 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
     insert_ord_status_upds_cql = """INSERT INTO ord_status_upds (id, data) VALUES (?, ?)"""
 
     insert_sequences_cql = """INSERT INTO sequences (id, seq) VALUES (?, ?)"""
+
+    query_bars_cql = """SELECT inst_id, type, size, begin_time, timestamp, open, high, low, close, vol, adj_close FROM bars WHERE inst_id = ? AND type = ? AND size = ? AND timestamp >= ? AND timestamp < ?"""
+    query_quotes_cql = """SELECT inst_id, timestamp, bid, ask, bid_size, ask_size FROM quotes WHERE inst_id = ? AND timestamp >= ? AND timestamp < ?"""
+    query_trades_cql = """SELECT inst_id, timestamp, price, size FROM trades WHERE inst_id = ? AND timestamp >= ? AND timestamp < ?"""
+    query_market_depths_cql = """SELECT inst_id, provider_id, timestamp, position, operation, side, price, size FROM market_depths WHERE inst_id = ? AND timestamp >= ? AND timestamp < ?"""
 
     create_keyspace_cql = "CREATE KEYSPACE IF NOT EXISTS %s WITH replication ={'class':'SimpleStrategy','replication_factor':1};"
     drop_keyspace_cql = "DROP KEYSPACE %s"
@@ -86,6 +93,11 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
 
         self.insert_sequences_stmt = self.session.prepare(CassandraDataStore.insert_sequences_cql)
 
+        self.query_bars_stmt = self.session.prepare(CassandraDataStore.query_bars_cql)
+        self.query_quotes_stmt = self.session.prepare(CassandraDataStore.query_quotes_cql)
+        self.query_trades_stmt = self.session.prepare(CassandraDataStore.query_trades_cql)
+        self.query_market_depths_stmt = self.session.prepare(CassandraDataStore.query_market_depths_cql)
+
         self.serializer = MsgPackSerializer
 
     def create_database(self):
@@ -99,7 +111,7 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
         logger.info("creating table %s" % cql_path)
         with open(cql_path) as cql_file:
             for stmt in cql_file.read().split(";"):
-                if len(stmt.strip())>0:
+                if len(stmt.strip()) > 0:
                     logger.info(stmt)
                     self.session.execute(stmt, timeout=30)
         logger.info("table created")
@@ -125,7 +137,8 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
             results = []
             for r in result_list:
                 if clazz == 'bars':
-                    obj = Bar(inst_id=r.inst_id, type=r.type, size=r.size, begin_time=r.begin_time, timestamp=r.timestamp,
+                    obj = Bar(inst_id=r.inst_id, type=r.type, size=r.size, begin_time=r.begin_time,
+                              timestamp=r.timestamp,
                               open=r.open, high=r.high, low=r.low, close=r.close, vol=r.vol, adj_close=r.adj_close)
                 elif clazz == 'trades':
                     obj = Trade(inst_id=r.inst_id, timestamp=r.timestamp, price=r.price, size=r.size)
@@ -134,11 +147,14 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
                                 ask_size=r.ask_size)
                 elif clazz == 'market_depths':
                     obj = MarketDepth(inst_id=r.inst_id, provider_id=r.provider_id, timestamp=r.timestamp,
-                                      position=r.position, operation=r.operation, side=r.side, price=r.price, size=r.size)
+                                      position=r.position, operation=r.operation, side=r.side, price=r.price,
+                                      size=r.size)
                 elif clazz == 'instruments':
                     obj = Instrument(inst_id=r.inst_id, name=r.name, type=r.type, symbol=r.symbol, exch_id=r.exch_id,
-                                     ccy_id=r.ccy_id, alt_symbol=r.alt_symbol, alt_exch_id=r.alt_exch_id, sector=r.sector,
-                                     group=r.group, und_inst_id=r.und_inst_id, expiry_date=r.expiry_date, factor=r.factor,
+                                     ccy_id=r.ccy_id, alt_symbol=r.alt_symbol, alt_exch_id=r.alt_exch_id,
+                                     sector=r.sector,
+                                     group=r.group, und_inst_id=r.und_inst_id, expiry_date=r.expiry_date,
+                                     factor=r.factor,
                                      strike=r.strike, put_call=r.put_call, margin=r.margin)
                 elif clazz == 'currencies':
                     obj = Currency(ccy_id=r.ccy_id, name=r.name)
@@ -155,7 +171,7 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
 
     def _insert_blob_data(self, serializable, stmt):
         id, packed = self._serialize(serializable)
-        bound_stmt = stmt.bind(["%s"%id, packed])
+        bound_stmt = stmt.bind(["%s" % id, packed])
         stmt = self.session.execute(bound_stmt)
 
     # RefDataStore
@@ -201,6 +217,47 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
 
     def save_time_series(self, timeseries):
         self._insert_blob_data(timeseries, self.insert_time_series_stmt)
+
+    def load_bars(self, sub_key):
+        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+
+        bound_stmt = self.query_bars_stmt.bind(
+            [sub_key.inst_id, sub_key.type, sub_key.subscription_type.bar_type, sub_key.subscription_type.bar_size,
+             from_timestamp, to_timestamp])
+        result_list = self.session.execute(bound_stmt)
+
+        return [Bar(inst_id=r.inst_id, type=r.type, size=r.size, begin_time=r.begin_time, timestamp=r.timestamp,
+                    open=r.open, high=r.high, low=r.low, close=r.close, vol=r.vol, adj_close=r.adj_close) for r in
+                result_list]
+
+    def load_quotes(self, sub_key):
+        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+
+        bound_stmt = self.query_quotes_stmt.bind([sub_key.inst_id, from_timestamp, to_timestamp])
+        result_list = self.session.execute(bound_stmt)
+
+        return [Quote(inst_id=r.inst_id, timestamp=r.timestamp, bid=r.bid, ask=r.ask, bid_size=r.bid_size,
+                      ask_size=r.ask_size) for r in result_list]
+
+    def load_trades(self, sub_key):
+        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+
+        bound_stmt = self.query_trades_stmt.bind([sub_key.inst_id, from_timestamp, to_timestamp])
+        result_list = self.session.execute(bound_stmt)
+        return [Trade(inst_id=r.inst_id, timestamp=r.timestamp, price=r.price, size=r.size) for r in result_list]
+
+    def load_market_depths(self, sub_key):
+        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+
+        bound_stmt = self.query_market_depths_stmt.bind([sub_key.inst_id, from_timestamp, to_timestamp])
+        result_list = self.session.execute(bound_stmt)
+        return [MarketDepth(inst_id=r.inst_id, provider_id=r.provider_id, timestamp=r.timestamp,
+                            position=r.position, operation=r.operation, side=r.side, price=r.price, size=r.size) for r
+                in result_list]
 
     # TradeDataStore
     def save_account(self, account):

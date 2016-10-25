@@ -18,7 +18,8 @@ from algotrader.config.persistence import MongoDBConfig
 from algotrader.config.persistence import PersistenceConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
-from algotrader.provider.persistence import DataStore, PersistenceMode
+from algotrader.provider.persistence import PersistenceMode
+from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.provider.subscription import MarketDataSubscriber
 from algotrader.trading.context import ApplicationContext

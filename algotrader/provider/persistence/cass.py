@@ -45,7 +45,7 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
     query_bars_cql = """SELECT inst_id, type, size, begin_time, timestamp, open, high, low, close, vol, adj_close FROM bars WHERE inst_id = ? AND type = ? AND size = ? AND timestamp >= ? AND timestamp < ?"""
     query_quotes_cql = """SELECT inst_id, timestamp, bid, ask, bid_size, ask_size FROM quotes WHERE inst_id = ? AND timestamp >= ? AND timestamp < ?"""
     query_trades_cql = """SELECT inst_id, timestamp, price, size FROM trades WHERE inst_id = ? AND timestamp >= ? AND timestamp < ?"""
-    query_market_depths_cql = """SELECT inst_id, provider_id, timestamp, position, operation, side, price, size FROM market_depths WHERE inst_id = ? AND timestamp >= ? AND timestamp < ?"""
+    query_market_depths_cql = """SELECT inst_id, provider_id, timestamp, position, operation, side, price, size FROM market_depths WHERE inst_id = ? AND provider_id = ? AND timestamp >= ? AND timestamp < ?"""
 
     create_keyspace_cql = "CREATE KEYSPACE IF NOT EXISTS %s WITH replication ={'class':'SimpleStrategy','replication_factor':1};"
     drop_keyspace_cql = "DROP KEYSPACE %s"
@@ -223,7 +223,7 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
 
         bound_stmt = self.query_bars_stmt.bind(
-            [sub_key.inst_id, sub_key.type, sub_key.subscription_type.bar_type, sub_key.subscription_type.bar_size,
+            [sub_key.inst_id, sub_key.subscription_type.bar_type, sub_key.subscription_type.bar_size,
              from_timestamp, to_timestamp])
         result_list = self.session.execute(bound_stmt)
 
@@ -253,7 +253,7 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
 
-        bound_stmt = self.query_market_depths_stmt.bind([sub_key.inst_id, from_timestamp, to_timestamp])
+        bound_stmt = self.query_market_depths_stmt.bind([sub_key.inst_id, sub_key.subscription_type.provider_id, from_timestamp, to_timestamp])
         result_list = self.session.execute(bound_stmt)
         return [MarketDepth(inst_id=r.inst_id, provider_id=r.provider_id, timestamp=r.timestamp,
                             position=r.position, operation=r.operation, side=r.side, price=r.price, size=r.size) for r

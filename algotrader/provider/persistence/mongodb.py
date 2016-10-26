@@ -119,10 +119,10 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
         return [self.serializer.deserialize(data)
-                for data in self.bars.find({"inst_id": sub_key.inst_id,
-                                            "type": sub_key.subscription_type.bar_type,
-                                            "size": sub_key.subscription_type.bar_size,
-                                            "timestamp": {"$gte": from_timestamp,
+                for data in self.bars.find({"__slots__.inst_id": sub_key.inst_id,
+                                            "__slots__.type": sub_key.subscription_type.bar_type,
+                                            "__slots__.size": sub_key.subscription_type.bar_size,
+                                            "__slots__.timestamp": {"$gte": from_timestamp,
                                                           "$lt": to_timestamp}
                                             })]
 
@@ -130,8 +130,8 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
         return [self.serializer.deserialize(data)
-                for data in self.quotes.find({"inst_id": sub_key.inst_id,
-                                              "timestamp": {"$gte": from_timestamp,
+                for data in self.quotes.find({"__slots__.inst_id": sub_key.inst_id,
+                                              "__slots__.timestamp": {"$gte": from_timestamp,
                                                             "$lt": to_timestamp}
                                               })]
 
@@ -139,8 +139,8 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
         return [self.serializer.deserialize(data)
-                for data in self.trades.find({"inst_id": sub_key.inst_id,
-                                              "timestamp": {"$gte": from_timestamp,
+                for data in self.trades.find({"__slots__.inst_id": sub_key.inst_id,
+                                              "__slots__.timestamp": {"$gte": from_timestamp,
                                                             "$lt": to_timestamp}
                                               })]
 
@@ -148,8 +148,8 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
         return [self.serializer.deserialize(data)
-                for data in self.market_depths.find({"inst_id": sub_key.inst_id,
-                                                     "timestamp": {
+                for data in self.market_depths.find({"__slots__.inst_id": sub_key.inst_id,
+                                                     "__slots__.timestamp": {
                                                          "$gte": from_timestamp,
                                                          "$lt": to_timestamp}
                                                      })]

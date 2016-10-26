@@ -119,30 +119,30 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
         self.time_series[id] = packed
 
     def __matches_data(self, data, inst_id, from_timestamp, to_timestamp):
-        return inst_id == data.inst_id and data.timestamp >= from_timestamp and data.to_timestamp < to_timestamp
+        return inst_id == data.inst_id and data.timestamp >= from_timestamp and data.timestamp < to_timestamp
 
     def load_bars(self, sub_key):
         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
-        return [bar for bar in self.bars if self.__matches_data(bar, sub_key.inst_id, from_timestamp,
+        return [bar for bar in self.load_all('bars') if self.__matches_data(bar, sub_key.inst_id, from_timestamp,
                                                                 to_timestamp) and bar.type == sub_key.subscription_type.bar_type and bar.size == sub_key.subscription_type.bar_size]
 
     def load_quotes(self, sub_key):
         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
-        return [quote for quote in self.quotes if
+        return [quote for quote in self.load_all('quotes')  if
                 self.__matches_data(quote, sub_key.inst_id, from_timestamp, to_timestamp)]
 
     def load_trades(self, sub_key):
         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
-        return [trade for trade in self.trades if
+        return [trade for trade in self.load_all('trades')  if
                 self.__matches_data(trade, sub_key.inst_id, from_timestamp, to_timestamp)]
 
     def load_market_depths(self, sub_key):
         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
-        return [market_depth for market_depth in self.market_depths if
+        return [market_depth for market_depth in self.load_all('market_depths') if
                 self.__matches_data(market_depth, sub_key.inst_id, from_timestamp, to_timestamp)]
 
     # TradeDataStore

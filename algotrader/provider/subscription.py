@@ -61,11 +61,13 @@ class TradeSubscriptionType(DataSubscriptionType):
 
 class MarketDepthSubscriptionType(DataSubscriptionType):
     __slots__ = (
-        'num_rows'
+        'num_rows',
+        'provider_id'
     )
 
-    def __init__(self, num_rows=1):
+    def __init__(self, num_rows=1 , provider_id=None):
         self.num_rows = num_rows
+        self.provider_id = provider_id
 
     def get_type(self):
         raise MarketDataType.MarketDepth
@@ -75,7 +77,7 @@ class MarketDepthSubscriptionType(DataSubscriptionType):
             return False
         if not isinstance(other, MarketDepthSubscriptionType):
             return False
-        return (self.get_type(), self.num_rows) == (other.get_type(), other.num_rows)
+        return (self.get_type(), self.num_rows, self.provider_id) == (other.get_type(), other.num_rows, other.provider_id)
 
     def id(self):
         return "%s.%s" % (self.get_type(), self.num_rows)

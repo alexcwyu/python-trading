@@ -76,8 +76,7 @@ class TimeSeriesDataStore(DataStore, Feed):
 
     def load_and_publish_mktdata(self, *sub_keys):
         data_event_bus = self.app_context.event_bus.data_subject
-        data_list = self.load_mktdata(*sub_keys)
-        sorted_data_list = sorted(data_list, key=lambda data: data.timestamp)
+        sorted_data_list = self.load_mktdata(*sub_keys)
         for data in sorted_data_list:
             data_event_bus.on_next(data)
 
@@ -85,14 +84,16 @@ class TimeSeriesDataStore(DataStore, Feed):
         data_list = []
         for sub_key in sub_keys:
             if isinstance(sub_key.subscription_type, QuoteSubscriptionType):
-                data_list.extend(self.load_bars(sub_key))
+                data_list.extend(self.load_quotes(sub_key))
             elif isinstance(sub_key.subscription_type, MarketDepthSubscriptionType):
-                data_list.extend(self.load_bars(sub_key))
+                data_list.extend(self.load_market_depths(sub_key))
             elif isinstance(sub_key.subscription_type, BarSubscriptionType):
                 data_list.extend(self.load_bars(sub_key))
             elif isinstance(sub_key.subscription_type, TradeSubscriptionType):
-                data_list.extend(self.load_bars(sub_key))
-        return data_list
+                data_list.extend(self.load_trades(sub_key))
+
+        sorted_data_list = sorted(data_list, key=lambda data: data.timestamp)
+        return sorted_data_list
 
     @abc.abstractmethod
     def load_bars(self, sub_key):

@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS trades(
 
 CREATE TABLE IF NOT EXISTS market_depths(
   inst_id int,
-  provider_id int,
+  provider_id varchar,
   timestamp bigint,
   position bigint,
   operation int,

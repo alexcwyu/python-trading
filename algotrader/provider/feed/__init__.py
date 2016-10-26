@@ -8,6 +8,7 @@ class Feed(Provider):
     PandasMemory = "PandasMemory"
     Yahoo = "Yahoo"
     Google = "Google"
+    Quandl = "Quandl"
 
     __metaclass__ = abc.ABCMeta
 

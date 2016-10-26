@@ -1,10 +1,11 @@
 from pymongo import MongoClient
 
 from algotrader.config.persistence import MongoDBConfig
-from algotrader.provider.persistence import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
+from algotrader.provider.persistence.data_store import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
     SequenceDataStore
-from algotrader.utils.ser_deser import MapSerializer
 from algotrader.utils import logger
+from algotrader.utils.date_utils import DateUtils
+from algotrader.utils.ser_deser import MapSerializer
 
 
 class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
@@ -116,6 +117,45 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         id, packed = self._serialize(timeseries)
         self.time_series.update({'_id': id}, packed, upsert=True)
 
+    def load_bars(self, sub_key):
+        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+        return [self.serializer.deserialize(data)
+                for data in self.bars.find({"inst_id": sub_key.inst_id,
+                                            "type": sub_key.subscription_type.bar_type,
+                                            "size": sub_key.subscription_type.bar_size,
+                                            "timestamp": {"$gte": from_timestamp,
+                                                          "$lt": to_timestamp}
+                                            })]
+
+    def load_quotes(self, sub_key):
+        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+        return [self.serializer.deserialize(data)
+                for data in self.quotes.find({"inst_id": sub_key.inst_id,
+                                              "timestamp": {"$gte": from_timestamp,
+                                                            "$lt": to_timestamp}
+                                              })]
+
+    def load_trades(self, sub_key):
+        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+        return [self.serializer.deserialize(data)
+                for data in self.trades.find({"inst_id": sub_key.inst_id,
+                                              "timestamp": {"$gte": from_timestamp,
+                                                            "$lt": to_timestamp}
+                                              })]
+
+    def load_market_depths(self, sub_key):
+        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+        return [self.serializer.deserialize(data)
+                for data in self.market_depths.find({"inst_id": sub_key.inst_id,
+                                                     "timestamp": {
+                                                         "$gte": from_timestamp,
+                                                         "$lt": to_timestamp}
+                                                     })]
+
     # TradeDataStore
     def save_account(self, account):
         id, packed = self._serialize(account)
@@ -136,7 +176,6 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
     def save_config(self, config):
         id, packed = self._serialize(config)
         self.configs.update({'_id': id}, packed, upsert=True)
-
 
     def save_account_update(self, account_update):
         id, packed = self._serialize(account_update)

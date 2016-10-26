@@ -221,38 +221,39 @@ class IBBroker(IBSocket, Broker, Feed):
     def next_ord_status_id(self):
         self.app_context.seq_mgr.get_next_sequence("%s.ordstatus" % self.id())
 
-    def subscribe_mktdata(self, sub_key):
-        if isinstance(sub_key, HistDataSubscriptionKey):
-            req_func = self.__req_hist_data
-        elif isinstance(sub_key.subscription_type, MarketDepthSubscriptionType):
-            req_func = self.__req_market_depth
-        elif isinstance(sub_key.subscription_type, BarSubscriptionType):
-            req_func = self.__req_real_time_bar
-        elif isinstance(sub_key.subscription_type, (QuoteSubscriptionType, TradeSubscriptionType)):
-            req_func = self.__req_mktdata
+    def subscribe_mktdata(self, *sub_keys):
+        for sub_key in sub_keys:
+            if isinstance(sub_key, HistDataSubscriptionKey):
+                req_func = self.__req_hist_data
+            elif isinstance(sub_key.subscription_type, MarketDepthSubscriptionType):
+                req_func = self.__req_market_depth
+            elif isinstance(sub_key.subscription_type, BarSubscriptionType):
+                req_func = self.__req_real_time_bar
+            elif isinstance(sub_key.subscription_type, (QuoteSubscriptionType, TradeSubscriptionType)):
+                req_func = self.__req_mktdata
 
-        if req_func and not self.data_sub_reg.has_subscription(sub_key=sub_key):
-            req_id = self.get_next_request_id()
-            self.data_sub_reg.add_subscription(req_id, sub_key)
-            contract = self.model_factory.create_ib_contract(sub_key.inst_id)
+            if req_func and not self.data_sub_reg.has_subscription(sub_key=sub_key):
+                req_id = self.get_next_request_id()
+                self.data_sub_reg.add_subscription(req_id, sub_key)
+                contract = self.model_factory.create_ib_contract(sub_key.inst_id)
 
-            req_func(req_id, sub_key, contract)
+                req_func(req_id, sub_key, contract)
 
-    def unsubscribe_mktdata(self, sub_key):
+    def unsubscribe_mktdata(self, *sub_keys):
+        for sub_key in sub_keys:
+            if isinstance(sub_key, HistDataSubscriptionKey):
+                cancel_func = self.__cancel_hist_data
+            elif isinstance(sub_key.subscription_type, MarketDepthSubscriptionType):
+                req_func = self.__cancel_market_depth
+            elif isinstance(sub_key.subscription_type, BarSubscriptionType):
+                cancel_func = self.__cancel_real_time_bar
+            elif isinstance(sub_key.subscription_type, (QuoteSubscriptionType, TradeSubscriptionType)):
+                cancel_func = self.__cancel_mktdata
 
-        if isinstance(sub_key, HistDataSubscriptionKey):
-            cancel_func = self.__cancel_hist_data
-        elif isinstance(sub_key.subscription_type, MarketDepthSubscriptionType):
-            req_func = self.__cancel_market_depth
-        elif isinstance(sub_key.subscription_type, BarSubscriptionType):
-            cancel_func = self.__cancel_real_time_bar
-        elif isinstance(sub_key.subscription_type, (QuoteSubscriptionType, TradeSubscriptionType)):
-            cancel_func = self.__cancel_mktdata
-
-        if cancel_func:
-            req_id = self.data_sub_reg.get_subsciption_id(sub_key)
-            if req_id and self.data_sub_reg.remove_subscription(req_id):
-                cancel_func(req_id)
+            if cancel_func:
+                req_id = self.data_sub_reg.get_subsciption_id(sub_key)
+                if req_id and self.data_sub_reg.remove_subscription(req_id):
+                    cancel_func(req_id)
 
     def __req_mktdata(self, req_id, sub_key, contract):
         self.tws.reqMktData(req_id, contract,

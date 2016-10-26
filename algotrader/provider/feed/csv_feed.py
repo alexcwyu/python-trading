@@ -32,16 +32,15 @@ class CSVDataFeed(Feed):
         df['BarSize'] = int(BarSize.D1)
         return df
 
-    def subscribe_all_mktdata(self, sub_keys):
-        self.__read_csv([sub_keys])
+    def subscribe_mktdata(self, *sub_keys):
+        self.__read_csv(*sub_keys)
 
-    def subscribe_mktdata(self, sub_key):
-        self.__read_csv([sub_key])
-
-    def __read_csv(self, sub_keys):
+    def __read_csv(self, *sub_keys):
 
         dfs = []
-        sub_key_range = {sub_key.inst_id : (DateUtils.date_to_unixtimemillis(sub_key.from_date), DateUtils.date_to_unixtimemillis(sub_key.to_date)) for sub_key in sub_keys}
+        sub_key_range = {sub_key.inst_id: (
+        DateUtils.date_to_unixtimemillis(sub_key.from_date), DateUtils.date_to_unixtimemillis(sub_key.to_date)) for
+                         sub_key in sub_keys}
 
         for sub_key in sub_keys:
 
@@ -71,5 +70,5 @@ class CSVDataFeed(Feed):
                         adj_close=row['Adj Close'],
                         size=row['BarSize']))
 
-    def unsubscribe_mktdata(self, sub_key):
+    def unsubscribe_mktdata(self, *sub_keys):
         pass

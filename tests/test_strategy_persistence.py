@@ -29,7 +29,7 @@ class StrategyPersistenceTest(TestCase):
                                             stg_configs={'qty': 1000},
                                             ref_data_mgr_type=RefDataManager.InMemory, persistence_config=PersistenceConfig())
         app_context0 = ApplicationContext(app_config=backtest_config0)
-        runner = BacktestRunner(plot = False)
+        runner = BacktestRunner(isplot = False)
 
         runner.start(app_context0)
 
@@ -54,7 +54,7 @@ class StrategyPersistenceTest(TestCase):
                                                                trade_ds_id=DataStore.InMemoryDB,
                                                                trade_persist_mode=PersistenceMode.Batch))
         app_context1 = ApplicationContext(app_config=backtest_config1)
-        runner1 = BacktestRunner(plot = False)
+        runner1 = BacktestRunner(isplot = False)
         runner1.start(app_context1)
 
         part1_begin_result = runner1.initial_result
@@ -81,7 +81,7 @@ class StrategyPersistenceTest(TestCase):
         app_context2.start()
         db = app_context2.get_seq_data_store()
 
-        runner2 = BacktestRunner(plot = False)
+        runner2 = BacktestRunner(isplot = False)
         runner2.start(app_context2)
 
         part2_begin_result = runner2.initial_result

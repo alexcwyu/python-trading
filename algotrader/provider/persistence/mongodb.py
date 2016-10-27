@@ -84,10 +84,12 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         self.instruments.update({'_id': id}, packed, upsert=True)
 
     def save_exchange(self, exchange):
+        logger.info("[%s] saving %s" % (self.__class__.__name__, exchange))
         id, packed = self._serialize(exchange)
         self.exchanges.update({'_id': id}, packed, upsert=True)
 
     def save_currency(self, currency):
+        logger.info("[%s] saving %s" % (self.__class__.__name__, currency))
         id, packed = self._serialize(currency)
         self.currencies.update({'_id': id}, packed, upsert=True)
 

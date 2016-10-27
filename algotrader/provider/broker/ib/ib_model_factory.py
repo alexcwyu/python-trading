@@ -134,16 +134,78 @@ class IBModelFactory:
     def convert_ord_action(self, ord_action):
         return self.ord_action_mapping[ord_action]
 
-    def create_ib_contract(self, inst_id):
-        from .ib_broker import IBBroker
-        inst = self.__ref_data_mgr.get_inst(inst_id=inst_id)
-
+    def create_ib_contract(self, inst_id = None, symbol = None, exchange = None, sec_type = None, currency = None):
         contract = swigibpy.Contract()
-        contract.exchange = inst.get_exch_id(Broker.IB)
-        contract.symbol = inst.get_symbol(Broker.IB)
-        contract.secType = self.convert_sec_type(inst.type)
-        contract.currency = self.convert_ccy(inst.ccy_id)
+
+        if inst_id:
+            inst = self.__ref_data_mgr.get_inst(inst_id=inst_id)
+            contract.exchange = inst.get_exch_id(Broker.IB)
+            contract.symbol = inst.get_symbol(Broker.IB)
+            contract.secType = self.convert_sec_type(inst.type)
+            contract.currency = self.convert_ccy(inst.ccy_id)
+        else:
+            contract.exchange = exchange
+            contract.symbol = symbol
+            contract.secType = sec_type
+            contract.currency = currency
+
         return contract
+
+
+    def create_ib_scanner_subsciption(self, num_row = None, inst_type = None, location_code = None, scan_code = None,
+                                      above_price = None, below_price = None, above_vol = None, avg_opt_vol_above = None,
+                                      mkt_cap_above = None, mkt_cap_below = None, moody_rating_above = None, moody_rating_below = None,
+                                      sp_rating_above = None, sp_rating_below = None,  mat_date_above = None, mat_date_below = None,
+                                      coupon_rate_above = None, coupon_rate_below = None,  exc_convertible = None, scanner_setting_pairs = None,
+                                      stk_type_filter = None):
+
+        sub = swigibpy.ScannerSubscription()
+
+        if num_row is not None:
+            sub.numberOfRows = num_row
+        if inst_type is not None:
+            sub.instrument = inst_type
+        if location_code is not None:
+            sub.locationCode = location_code
+        if scan_code is not None:
+            sub.scanCode = scan_code
+        if above_price is not None:
+            sub.abovePrice = above_price
+        if below_price is not None:
+            sub.belowPrice = below_price
+        if above_vol is not None:
+            sub.aboveVolume = above_vol
+        if avg_opt_vol_above is not None:
+            sub.averageOptionVolumeAbove = avg_opt_vol_above
+        if mkt_cap_above is not None:
+            sub.marketCapAbove = mkt_cap_above
+        if mkt_cap_below is not None:
+            sub.marketCapBelow = mkt_cap_below
+        if moody_rating_above is not None:
+            sub.moodyRatingAbove = moody_rating_above
+        if moody_rating_below is not None:
+            sub.moodyRatingBelow = moody_rating_below
+        if sp_rating_above is not None:
+            sub.spRatingAbove = sp_rating_above
+        if sp_rating_below is not None:
+            sub.spRatingBelow = sp_rating_below
+        if mat_date_above is not None:
+            sub.maturityDateAbove = mat_date_above
+        if mat_date_below is not None:
+            sub.maturityDateBelow = mat_date_below
+        if coupon_rate_above is not None:
+            sub.couponRateAbove = coupon_rate_above
+        if coupon_rate_below is not None:
+            sub.couponRateBelow = coupon_rate_below
+        if exc_convertible is not None:
+            sub.excludeConvertible = exc_convertible
+        if scanner_setting_pairs is not None:
+            sub.scannerSettingPairs = scanner_setting_pairs
+        if stk_type_filter is not None:
+            sub.stockTypeFilter = stk_type_filter
+
+        return sub
+
 
     def convert_hist_data_type(self, type):
         return self.hist_data_type_mapping.get(type, "MIDPOINT")

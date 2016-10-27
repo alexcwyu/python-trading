@@ -149,6 +149,9 @@ class IBBroker(IBSocket, Broker, Feed):
         self.data_sub_reg = SubscriptionRegistry()
         self.ord_req_reg = OrderReqRegistry()
 
+        self.completed_reqs = []
+        self.req_callback = {}
+
     def _start(self, app_context, **kwargs):
         self.ib_config = app_context.app_config.get_config(IBConfig)
 
@@ -594,3 +597,97 @@ class IBBroker(IBSocket, Broker, Feed):
         """
         # TODO
         super(IBBroker, self).commissionReport(commissionReport)
+
+
+    def reqScannerSubscription(self, num_row = None, inst_type = None, location_code = None, scan_code = None,
+                               above_price = None, below_price = None, above_vol = None, avg_opt_vol_above = None,
+                               mkt_cap_above = None, mkt_cap_below = None, moody_rating_above = None, moody_rating_below = None,
+                               sp_rating_above = None, sp_rating_below = None,  mat_date_above = None, mat_date_below = None,
+                               coupon_rate_above = None, coupon_rate_below = None,  exc_convertible = None, scanner_setting_pairs = None,
+                               stk_type_filter = None, callback=None):
+
+        subscription = self.model_factory.create_ib_scanner_subsciption(num_row = num_row, inst_type=inst_type, location_code=location_code, scan_code=scan_code,
+                                                             above_price = above_price, below_price=below_price, above_vol=above_vol, avg_opt_vol_above=avg_opt_vol_above,
+                                                             mkt_cap_above = mkt_cap_above, mkt_cap_below=mkt_cap_below, moody_rating_above=moody_rating_above, moody_rating_below=moody_rating_below,
+                                                             sp_rating_above = sp_rating_above, sp_rating_below=sp_rating_below, mat_date_above=mat_date_above, mat_date_below=mat_date_below,
+                                                             coupon_rate_above = coupon_rate_above, coupon_rate_below=coupon_rate_below, exc_convertible=exc_convertible, scanner_setting_pairs=scanner_setting_pairs,
+                                                             stk_type_filter = stk_type_filter)
+
+        req_id = self.get_next_request_id()
+
+        self.tws.reqScannerSubscription(req_id, subscription)
+
+        if callback:
+            self.req_callback[req_id] = callback
+        return req_id
+
+
+    def scannerData(self, reqId, rank, contractDetails, distance, benchmark, projection, legsStr):
+        logger.info(
+            "scannerData, reqId=%s, rank=%s, contractDetails=%s, distance=%s, benchmark=%s, projection=%s, legsStr=%s",
+            reqId, rank, contractDetails, distance, benchmark, projection, legsStr)
+
+    def scannerDataEnd(self, reqId):
+        logger.info("scannerDataEnd, reqId=%s", reqId)
+        self.completed_reqs.append(reqId)
+
+        if reqId in self.req_callback:
+            self.req_callback[reqId]()
+
+
+    def reqContractDetails(self, symbol = None, exchange = None, sec_type = None, currency = None, callback=None):
+        contract = self.model_factory.create_ib_contract(symbol = symbol, exchange=exchange, sec_type=sec_type, currency=currency)
+        req_id = self.get_next_request_id()
+        self.tws.reqContractDetails(req_id, contract)
+
+        if callback:
+            self.req_callback[req_id] = callback
+        return req_id
+
+
+
+    def contractDetails(self, reqId, contractDetails):
+        """
+        int reqId, ContractDetails contractDetails
+        """
+        cd= contractDetails
+        sd = contractDetails.summary
+        logger.info("contractDetails, reqId=%s, conId=%s, symbol=%s, secType=%s, exchange=%s, " +
+                    "primaryExchange=%s, expiry=%s, strike=%s, right=%s, " +
+                    "multiplier=%s, currency=%s, localSymbol=%s, secIdType=%s, " +
+                    "secId=%s, includeExpired=%s, comboLegsDescrip=%s, comboLegs=%s, " +
+                    "underComp=%s, "+
+                    "marketName=%s, tradingClass=%s, minTick=%s, orderTypes=%s, " +
+                    "validExchanges=%s, priceMagnifier=%s, underConId=%s, longName=%s, " +
+                    "longName=%s, contractMonth=%s, industry=%s, category=%s, " +
+                    "timeZoneId=%s, tradingHours=%s, liquidHours=%s, evRule=%s, " +
+                    "evMultiplier=%s, secIdList=%s, cusip=%s, ratings=%s, " +
+                    "descAppend=%s, bondType=%s, couponType=%s, callable=%s, " +
+                    "putable=%s, coupon=%s, convertible=%s, issueDate=%s, " +
+                    "nextOptionDate=%s, nextOptionType=%s, nextOptionPartial=%s, notes=%s"
+                    , reqId,
+                    sd.conId, sd.symbol, sd.secType, sd.exchange,
+                    sd.primaryExchange, sd.expiry, sd.strike, sd.right,
+                    sd.multiplier, sd.currency, sd.localSymbol, sd.secIdType,
+                    sd.secId, sd.includeExpired, sd.comboLegsDescrip, sd.comboLegs,
+                    sd.underComp,
+                    cd.marketName, cd.tradingClass, cd.minTick, cd.orderTypes,
+                    cd.validExchanges, cd.priceMagnifier, cd.underConId, cd.longName,
+                    cd.longName, cd.contractMonth, cd.industry, cd.category,
+                    cd.timeZoneId, cd.tradingHours, cd.liquidHours, cd.evRule,
+                    cd.evMultiplier, cd.secIdList, cd.cusip, cd.ratings,
+                    cd.descAppend, cd.bondType, cd.couponType, cd.callable,
+                    cd.putable, cd.coupon, cd.convertible, cd.issueDate,
+                    cd.nextOptionDate, cd.nextOptionType, cd.nextOptionPartial, cd.notes)
+
+    def contractDetailsEnd(self, reqId):
+        logger.info("contractDetailsEnd, reqId=%s", reqId)
+
+        self.completed_reqs.append(reqId)
+
+        if reqId in self.req_callback:
+            self.req_callback[reqId]()
+
+
+    def is_completed(self, reqId):
+        return reqId in self.completed_reqs

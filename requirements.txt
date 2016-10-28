@@ -13,7 +13,7 @@ influxdb
 qpython
 pymongo
 
-pykalman
+#pykalman
 ta-lib
 jinja2
 pyfolio

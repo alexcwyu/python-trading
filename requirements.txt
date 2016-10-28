@@ -1,9 +1,11 @@
-rx == 1.2.6
+rx==1.2.6
 gevent
 msgpack-python
 
-pandas
-numpy
+pandas>=0.18.1
+numpy>=1.11.1
+scipy==0.18.0
+scikit-learn==0.17.1
 
 swigibpy
 
@@ -13,7 +15,7 @@ influxdb
 qpython
 pymongo
 
-#pykalman
+pykalman
 ta-lib
 jinja2
 pyfolio

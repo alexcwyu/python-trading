@@ -5,6 +5,7 @@ from algotrader.app.backtest_runner import BacktestRunner
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import PersistenceConfig, PersistenceMode
 from algotrader.config.app import BacktestingConfig
+from algotrader.config.feed import CSVFeedConfig
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
@@ -13,7 +14,7 @@ from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
 from algotrader.trading.context import ApplicationContext
-
+from nose.tools import nottest
 
 class StrategyPersistenceTest(TestCase):
     def test(self):
@@ -27,7 +28,9 @@ class StrategyPersistenceTest(TestCase):
                                             broker_id=Broker.Simulator,
                                             feed_id=Feed.CSV,
                                             stg_configs={'qty': 1000},
-                                            ref_data_mgr_type=RefDataManager.InMemory, persistence_config=PersistenceConfig())
+                                            ref_data_mgr_type=RefDataManager.InMemory, persistence_config=PersistenceConfig(),
+                                             provider_configs=CSVFeedConfig(path='data/tradedata')
+                                            )
         app_context0 = ApplicationContext(app_config=backtest_config0)
         runner = BacktestRunner(isplot = False)
 
@@ -52,7 +55,8 @@ class StrategyPersistenceTest(TestCase):
                                                                ts_ds_id=DataStore.InMemoryDB,
                                                                ts_persist_mode=PersistenceMode.Batch,
                                                                trade_ds_id=DataStore.InMemoryDB,
-                                                               trade_persist_mode=PersistenceMode.Batch))
+                                                               trade_persist_mode=PersistenceMode.Batch),
+                                             provider_configs=CSVFeedConfig(path='data/tradedata'))
         app_context1 = ApplicationContext(app_config=backtest_config1)
         runner1 = BacktestRunner(isplot = False)
         runner1.start(app_context1)
@@ -76,7 +80,8 @@ class StrategyPersistenceTest(TestCase):
                                                           ts_ds_id=DataStore.InMemoryDB,
                                                           ts_persist_mode=PersistenceMode.Batch,
                                                           trade_ds_id=DataStore.InMemoryDB,
-                                                          trade_persist_mode=PersistenceMode.Batch))
+                                                          trade_persist_mode=PersistenceMode.Batch),
+                                             provider_configs=CSVFeedConfig(path='data/tradedata'))
         app_context2 = ApplicationContext(app_config=backtest_config2)
         app_context2.start()
         db = app_context2.get_seq_data_store()
@@ -99,13 +104,3 @@ class StrategyPersistenceTest(TestCase):
         print "part2 end = %s"%part2_end_result
 
         db.remove_database()
-
-if __name__== "__main__":
-    import unittest
-    runner = unittest.TextTestRunner()
-    test_suite = unittest.TestSuite()
-    test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
-    runner.run(test_suite)
-
-    # creating a new test suite
-    newSuite = unittest.TestSuite()

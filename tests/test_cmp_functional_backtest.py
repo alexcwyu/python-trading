@@ -219,13 +219,3 @@ class TestCompareWithFunctionalBacktest(TestCase):
     #     finally:
     #         strategy.stop()
 
-
-if __name__== "__main__":
-    import unittest
-    runner = unittest.TextTestRunner()
-    test_suite = unittest.TestSuite()
-    test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
-    runner.run(test_suite)
-
-    # creating a new test suite
-    newSuite = unittest.TestSuite()

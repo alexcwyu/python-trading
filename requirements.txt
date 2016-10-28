@@ -1,19 +1,20 @@
 rx == 1.2.6
 gevent
-msgpack
+msgpack-python
 
 pandas
 numpy
 
 swigibpy
 
-cassandra
+cassandra-driver
+cassandra-driver-dse
 influxdb
 qpython
 pymongo
 
 pykalman
-talib
+ta-lib
 jinja2
 pyfolio
 

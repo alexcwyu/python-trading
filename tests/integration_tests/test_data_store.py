@@ -28,6 +28,7 @@ from algotrader.utils.clock import Clock
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.ser_deser import MapSerializer
 
+
 print Cluster.port
 
 persistence_config = PersistenceConfig(None,

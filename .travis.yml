@@ -2,6 +2,15 @@ language: python
 python:
   - "2.7"
 # command to install dependencies
+
+before_install:
+  -  wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
+  -  tar xvfz ta-lib-0.4.0-src.tar.gz
+  -  cd ta-lib-0.4.0
+  -  ./configure
+  -  make
+  -  make install
+
 install: "pip install -r requirements.txt"
 # command to run tests
 script: nosetests tests/test_suite.py

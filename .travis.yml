@@ -7,11 +7,11 @@ before_install:
   -  wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
   -  tar xvfz ta-lib-0.4.0-src.tar.gz
   -  cd ta-lib
-  -  ./configure
+  -  ./configure --prefix=$PWD/binary
   -  make
   -  make install
-  -  export PATH=$PATH:$PWD/ta-lib/
-  -  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PWD/ta-lib/"
+  -  export PATH=$PATH:$PWD:$PWD/binary/include:$PWD/binary/lib
+  -  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PWD:$PWD/binary/include:$PWD/binary/lib"
 
 install: "pip install -r requirements.txt"
 # command to run tests

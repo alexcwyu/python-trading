@@ -7,7 +7,8 @@ import gevent
 from algotrader.event.market_data import Bar, Quote, Trade
 from algotrader.utils.clock import SimulationClock, RealTimeClock
 from algotrader.utils.date_utils import DateUtils
-
+import pytz
+from nose.tools import nottest
 
 class ClockTest(TestCase):
     ts = 1467870720000
@@ -95,6 +96,7 @@ class ClockTest(TestCase):
         self.simluation_clock.update_time(ClockTest.ts + 5000)
         self.assertEquals([ClockTest.ts + 5000], self.endtime)
 
+    @nottest
     def test_timestamp_conversion(self):
         dt = datetime.datetime(year=2000, month=1, day=1, hour=7, minute=30, second=30)
         ts = DateUtils.datetime_to_unixtimemillis(dt)
@@ -147,3 +149,7 @@ class ClockTest(TestCase):
         print s3, s4
 
         self.assertAlmostEqual(s1 * 1000, s3, -2)
+
+
+print DateUtils.unixtimemillis_to_datetime(946683030000)
+print DateUtils.unixtimemillis_to_datetime(946711830000)

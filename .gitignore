@@ -4,4 +4,8 @@
 *.ipr
 *.iws
 *.pyc
+.RData
+.Rhistory
 out
+classes
+build

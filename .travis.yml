@@ -1,4 +1,7 @@
 language: python
+
+sudo: required
+
 python:
   - "2.7"
 # command to install dependencies
@@ -7,11 +10,9 @@ before_install:
   -  wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
   -  tar xvfz ta-lib-0.4.0-src.tar.gz
   -  cd ta-lib
-  -  ./configure --prefix=$PWD/binary
+  -  ./configure --prefix=/usr
   -  make
-  -  make install
-  -  export PATH=$PATH:ta-lib:ta-lib/binary/include:ta-lib/binary/lib
-  -  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:ta-lib:ta-lib/binary/include:ta-lib/binary/lib"
+  -  sudo make install
   -  cd ..
 
 install: "pip install -r requirements.txt"

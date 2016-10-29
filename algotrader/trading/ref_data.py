@@ -38,7 +38,7 @@ class Instrument(ReferenceData):
         'alt_symbol',
         'alt_exch_id',
         'sector',
-        'group',
+        'industry',
         'und_inst_id',
         'expiry_date',
         'factor',
@@ -50,7 +50,7 @@ class Instrument(ReferenceData):
 
     def __init__(self, inst_id=None, name=None, type=None, symbol=None, exch_id=None, ccy_id=None, alt_symbol=None,
                  alt_exch_id=None,
-                 sector=None, group=None,
+                 sector=None, industry=None,
                  put_call=None, expiry_date=None, und_inst_id=None, factor=1, strike=0.0, margin=0.0):
         self.inst_id = int(inst_id) if inst_id is not None else None
         self.name = name
@@ -62,7 +62,7 @@ class Instrument(ReferenceData):
         self.alt_exch_id = alt_exch_id if alt_exch_id else {}
 
         self.sector = sector
-        self.group = group
+        self.industry = industry
         self.put_call = put_call
         self.expiry_date = expiry_date
         self.und_inst_id = und_inst_id
@@ -128,9 +128,26 @@ class RefDataManager(Manager):
         self._ccy_dict = {}
         self._exch_dict = {}
 
+    def _start(self, app_context, **kwargs):
+        self.seq_mgr = app_context.seq_mgr
+
+    def create_inst(self, name, type, symbol, exch_id, ccy_id, alt_symbol=None,
+                    alt_exch_id=None,
+                    sector=None, industry=None,
+                    put_call=None, expiry_date=None, und_inst_id=None, factor=1, strike=0.0, margin=0.0):
+        inst_id = self.seq_mgr.get_next_sequence("instruments")
+        inst = Instrument(inst_id=inst_id, name=name, type=type,
+                          symbol=symbol,
+                          exch_id=exch_id, ccy_id=ccy_id,
+                          alt_symbol=alt_symbol, alt_exch_id=alt_exch_id, sector=sector, industry=industry, put_call=put_call,
+                          expiry_date=expiry_date, und_inst_id=und_inst_id, factor=factor, strike=strike, margin=margin)
+        print inst
+
+        self.add_inst(inst)
+
     def add_inst(self, inst):
         if inst.inst_id in self._inst_dict:
-            raise RuntimeError("duplicate inst, inst_id=%s" % inst.inst_id)
+            raise RuntimeError("duplicate inst, inst_id=%s, inst%s" % (inst.inst_id, self._inst_dict[inst.inst_id]))
 
         if inst.id() in self._inst_symbol_dict:
             raise RuntimeError("duplicate inst, id=%s" % inst.id())
@@ -149,6 +166,10 @@ class RefDataManager(Manager):
             raise RuntimeError("duplicate exch, exch_id %s" % exch.exch_id)
 
         self._exch_dict[exch.exch_id] = exch
+
+
+    def get_all_insts(self):
+        return [inst for inst in self._inst_dict.itervalues()]
 
     def get_insts(self, instruments):
         insts = []
@@ -203,6 +224,7 @@ class DBRefDataManager(RefDataManager):
         super(DBRefDataManager, self).__init__()
 
     def _start(self, app_context, **kwargs):
+        super(DBRefDataManager, self)._start(app_context, **kwargs)
         self.store = self.app_context.get_ref_data_store()
         self.persist_mode = self.app_context.app_config.persistence_config.ref_persist_mode
         self.load_all()
@@ -221,6 +243,7 @@ class DBRefDataManager(RefDataManager):
                 self._ccy_dict[ccy.ccy_id] = ccy
             for exch in self.store.load_all('exchanges'):
                 self._exch_dict[exch.exch_id] = exch
+
 
     def save_all(self):
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
@@ -288,7 +311,7 @@ class InMemoryRefDataManager(RefDataManager):
 
                 inst = Instrument(inst_id=row['inst_id'], name=row['name'], type=row['type'], symbol=row['symbol'],
                                   exch_id=row['exch_id'], ccy_id=row['ccy_id'], alt_symbol=alt_symbol,
-                                  alt_exch_id=alt_exch_id, sector=row['sector'], group=row['group'],
+                                  alt_exch_id=alt_exch_id, sector=row['sector'], industry=row['industry'],
                                   put_call=row['put_call'], expiry_date=row['expiry_date'],
                                   und_inst_id=row['und_inst_id'],
                                   factor=row['factor'], strike=row['strike'], margin=row['margin'])
@@ -317,7 +340,6 @@ if __name__ == "__main__":
     mgr = InMemoryRefDataManager()
     print mgr.get_inst(symbol='EURUSD', exch_id='IDEALPRO')
     print mgr.get_inst(inst_id=2)
-
 
     mgr2 = DBRefDataManager()
     print mgr2.get_ccy("test")

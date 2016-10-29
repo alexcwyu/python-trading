@@ -26,7 +26,7 @@ class MockRefDataManager(RefDataManager):
         for index, row in self.inst_df.iterrows():
             inst = Instrument(inst_id=row['inst_id'], name=row['name'], type=row['type'], symbol=row['symbol'],
                               exch_id=row['exch_id'], ccy_id=row['ccy_id'], alt_symbol=row['alt_symbol'],
-                              alt_exch_id=['alt_exch_id'], sector=row['sector'], group=row['group'],
+                              alt_exch_id=['alt_exch_id'], sector=row['sector'], industry=row['industry'],
                               put_call=row['put_call'], expiry_date=row['expiry_date'],
                               und_inst_id=row['und_inst_id'],
                               factor=row['factor'], strike=row['strike'], margin=row['margin'])
@@ -124,7 +124,7 @@ def build_inst_dataframe_from_list(symbols, type='ETF', exch_id='NYSE', ccy_id='
     inst_df['alt_symbol'] = ''
     inst_df['alt_exch_id'] = ''
     inst_df['sector'] = ''
-    inst_df['group'] = ''
+    inst_df['industry'] = ''
     inst_df['put_call'] = ''
     inst_df['expiry_date'] = ''
     inst_df['und_inst_id'] = ''

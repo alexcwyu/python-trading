@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS instruments(
   alt_symbol map<varchar, varchar>,
   alt_exch_id map<varchar, varchar>,
   sector varchar,
-  group varchar,
+  industry varchar,
   und_inst_id int,
   expiry_date timestamp,
   factor double,

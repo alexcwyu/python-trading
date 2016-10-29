@@ -632,7 +632,7 @@ class IBBroker(IBSocket, Broker, Feed):
         self.completed_reqs.append(reqId)
 
         if reqId in self.req_callback:
-            self.req_callback[reqId]()
+            self.req_callback[reqId].set()
 
 
     def reqContractDetails(self, symbol = None, exchange = None, sec_type = None, currency = None, callback=None):
@@ -652,41 +652,50 @@ class IBBroker(IBSocket, Broker, Feed):
         """
         cd= contractDetails
         sd = contractDetails.summary
-        logger.info("contractDetails, reqId=%s, conId=%s, symbol=%s, secType=%s, exchange=%s, " +
-                    "primaryExchange=%s, expiry=%s, strike=%s, right=%s, " +
-                    "multiplier=%s, currency=%s, localSymbol=%s, secIdType=%s, " +
-                    "secId=%s, includeExpired=%s, comboLegsDescrip=%s, comboLegs=%s, " +
-                    "underComp=%s, "+
-                    "marketName=%s, tradingClass=%s, minTick=%s, orderTypes=%s, " +
-                    "validExchanges=%s, priceMagnifier=%s, underConId=%s, longName=%s, " +
-                    "longName=%s, contractMonth=%s, industry=%s, category=%s, " +
-                    "timeZoneId=%s, tradingHours=%s, liquidHours=%s, evRule=%s, " +
-                    "evMultiplier=%s, secIdList=%s, cusip=%s, ratings=%s, " +
-                    "descAppend=%s, bondType=%s, couponType=%s, callable=%s, " +
-                    "putable=%s, coupon=%s, convertible=%s, issueDate=%s, " +
-                    "nextOptionDate=%s, nextOptionType=%s, nextOptionPartial=%s, notes=%s"
-                    , reqId,
-                    sd.conId, sd.symbol, sd.secType, sd.exchange,
-                    sd.primaryExchange, sd.expiry, sd.strike, sd.right,
-                    sd.multiplier, sd.currency, sd.localSymbol, sd.secIdType,
-                    sd.secId, sd.includeExpired, sd.comboLegsDescrip, sd.comboLegs,
-                    sd.underComp,
-                    cd.marketName, cd.tradingClass, cd.minTick, cd.orderTypes,
-                    cd.validExchanges, cd.priceMagnifier, cd.underConId, cd.longName,
-                    cd.longName, cd.contractMonth, cd.industry, cd.category,
-                    cd.timeZoneId, cd.tradingHours, cd.liquidHours, cd.evRule,
-                    cd.evMultiplier, cd.secIdList, cd.cusip, cd.ratings,
-                    cd.descAppend, cd.bondType, cd.couponType, cd.callable,
-                    cd.putable, cd.coupon, cd.convertible, cd.issueDate,
-                    cd.nextOptionDate, cd.nextOptionType, cd.nextOptionPartial, cd.notes)
+        # logger.info("contractDetails, reqId=%s, conId=%s, symbol=%s, secType=%s, exchange=%s, " +
+        #             "primaryExchange=%s, expiry=%s, strike=%s, right=%s, " +
+        #             "multiplier=%s, currency=%s, localSymbol=%s, secIdType=%s, " +
+        #             "secId=%s, includeExpired=%s, comboLegsDescrip=%s, comboLegs=%s, " +
+        #             "underComp=%s, "+
+        #             "marketName=%s, tradingClass=%s, minTick=%s, orderTypes=%s, " +
+        #             "validExchanges=%s, priceMagnifier=%s, underConId=%s, longName=%s, " +
+        #             "longName=%s, contractMonth=%s, industry=%s, category=%s, " +
+        #             "timeZoneId=%s, tradingHours=%s, liquidHours=%s, evRule=%s, " +
+        #             "evMultiplier=%s, secIdList=%s, cusip=%s, ratings=%s, " +
+        #             "descAppend=%s, bondType=%s, couponType=%s, callable=%s, " +
+        #             "putable=%s, coupon=%s, convertible=%s, issueDate=%s, " +
+        #             "nextOptionDate=%s, nextOptionType=%s, nextOptionPartial=%s, notes=%s"
+        #             , reqId,
+        #             sd.conId, sd.symbol, sd.secType, sd.exchange,
+        #             sd.primaryExchange, sd.expiry, sd.strike, sd.right,
+        #             sd.multiplier, sd.currency, sd.localSymbol, sd.secIdType,
+        #             sd.secId, sd.includeExpired, sd.comboLegsDescrip, sd.comboLegs,
+        #             sd.underComp,
+        #             cd.marketName, cd.tradingClass, cd.minTick, cd.orderTypes,
+        #             cd.validExchanges, cd.priceMagnifier, cd.underConId, cd.longName,
+        #             cd.longName, cd.contractMonth, cd.industry, cd.category,
+        #             cd.timeZoneId, cd.tradingHours, cd.liquidHours, cd.evRule,
+        #             cd.evMultiplier, cd.secIdList, cd.cusip, cd.ratings,
+        #             cd.descAppend, cd.bondType, cd.couponType, cd.callable,
+        #             cd.putable, cd.coupon, cd.convertible, cd.issueDate,
+        #             cd.nextOptionDate, cd.nextOptionType, cd.nextOptionPartial, cd.notes)
+
+
+        self.ref_data_mgr.create_inst(name=cd.longName, type=sd.secType, symbol=sd.symbol, exch_id=sd.exchange, ccy_id=sd.currency,
+                                      # alt_symbol = {Broker.IB: sd.symbol},
+                                      # alt_exch_id = {Broker.IB: sd.exchange},
+                                      sector=cd.industry, industry=cd.category)
+
+        logger.info("saved")
+
 
     def contractDetailsEnd(self, reqId):
-        logger.info("contractDetailsEnd, reqId=%s", reqId)
-
         self.completed_reqs.append(reqId)
 
         if reqId in self.req_callback:
-            self.req_callback[reqId]()
+            self.req_callback[reqId].set(reqId)
+
+        logger.info("contractDetailsEnd, reqId=%s" % reqId)
 
 
     def is_completed(self, reqId):

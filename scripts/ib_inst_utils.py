@@ -1,7 +1,7 @@
 from gevent import monkey
 from gevent.event import Event, AsyncResult
 import gevent
-#monkey.patch_all()
+monkey.patch_all()
 import time
 
 from algotrader.config.app import ApplicationConfig
@@ -26,7 +26,7 @@ def app_context():
                                            DataStore.Mongo, PersistenceMode.RealTime)
     app_config = ApplicationConfig(id=None, ref_data_mgr_type=RefDataManager.DB, clock_type=Clock.RealTime,
                                    persistence_config=persistence_config,
-                                   provider_configs=[MongoDBConfig(), IBConfig(client_id=2, use_gevent=False)])
+                                   provider_configs=[MongoDBConfig(), IBConfig(client_id=2, use_gevent=True)])
     app_context = ApplicationContext(app_config=app_config)
 
     return app_context
@@ -45,5 +45,7 @@ def import_inst_from_ib(broker, symbol, sec_type='STK', exchange=None, currency=
     logger.info("importing symbol %s" % symbol)
     broker.reqContractDetails(symbol=symbol, sec_type=sec_type, exchange=exchange, currency=currency, callback=result)
     # broker.reqScannerSubscription(inst_type='STK', location_code='STK.US', scan_code='TOP_PERC_GAIN', above_vol=1000000, callback=callback)
-    #gevent.sleep(3)
+
+    logger.info("done %s %s" % (symbol, result.get(3)))
+
 

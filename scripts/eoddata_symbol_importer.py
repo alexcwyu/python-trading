@@ -25,7 +25,6 @@ for line in f:
 
     import_inst_from_ib(broker=broker, symbol=str(symbol), exchange='SEHK')
 
-    time.sleep(2)
 
 
 for inst in app_context.ref_data_mgr.get_all_insts():

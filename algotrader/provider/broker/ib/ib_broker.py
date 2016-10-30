@@ -197,6 +197,7 @@ class IBBroker(IBSocket, Broker, Feed):
 
             if ok and (not self.tws or not self.tws.isConnected()):
                 ok = False
+            gevent.sleep(0)
 
     def _stop(self):
         self.tws.eDisconnect()

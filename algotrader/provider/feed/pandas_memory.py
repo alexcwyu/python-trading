@@ -102,7 +102,7 @@ if __name__ == "__main__":
     inst_df['alt_symbol'] = ''
     inst_df['alt_exch_id'] = ''
     inst_df['sector'] = ''
-    inst_df['group'] = ''
+    inst_df['industry'] = ''
     inst_df['put_call'] = ''
     inst_df['expiry_date'] = ''
     inst_df['und_inst_id'] = ''

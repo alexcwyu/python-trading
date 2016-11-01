@@ -342,7 +342,7 @@ class DataStoreTest(TestCase):
     def test_instrument(self, name, datastore):
         persistable = Instrument(3, "Google", "STK", "GOOG", "SMART", "USD", alt_symbol={"IB": "GOOG"},
                                  alt_exch_id=None,
-                                 sector=None, group=None,
+                                 sector=None, industry=None,
                                  put_call=None, expiry_date=None, und_inst_id=None, factor=1, strike=0.0, margin=0.0)
         DataStoreTest.save_load(name, persistable, datastore, datastore.save_instrument, 'instruments')
 

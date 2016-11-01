@@ -144,10 +144,14 @@ class IBModelFactory:
             contract.secType = self.convert_sec_type(inst.type)
             contract.currency = self.convert_ccy(inst.ccy_id)
         else:
-            contract.exchange = exchange
-            contract.symbol = symbol
-            contract.secType = sec_type
-            contract.currency = currency
+            if exchange:
+                contract.exchange = exchange
+            if symbol:
+                contract.symbol = symbol
+            if sec_type:
+                contract.secType = sec_type
+            if currency:
+                contract.currency = currency
 
         return contract
 

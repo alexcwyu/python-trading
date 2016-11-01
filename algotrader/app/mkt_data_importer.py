@@ -50,11 +50,11 @@ def main():
                                            DataStore.Mongo, PersistenceMode.RealTime,
                                            DataStore.Mongo, PersistenceMode.RealTime,
                                            DataStore.Mongo, PersistenceMode.RealTime)
-    app_config = RealtimeMarketDataImporterConfig(None, RefDataManager.InMemory, Clock.RealTime,
-                                                  Broker.IB, [3],
-                                                  [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
-                                                  persistence_config,
-                                                  MongoDBConfig(), IBConfig(client_id=2))
+    app_config = RealtimeMarketDataImporterConfig(None, feed_id=Broker.IB, instrument_ids = [3],
+                                                  subscription_types=[BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                                                  ref_data_mgr_type=RefDataManager.InMemory, clock_type=Clock.RealTime,
+                                                  persistence_config=persistence_config,
+                                                  provider_configs=[MongoDBConfig(), IBConfig(client_id=2)])
     app_context = ApplicationContext(app_config=app_config)
 
     MktDataImporter().start(app_context)

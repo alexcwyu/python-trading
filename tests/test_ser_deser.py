@@ -113,7 +113,7 @@ class SerializerTest(TestCase):
     @parameterized.expand(params)
     def test_instrument(self, name, serializer):
         item = Instrument(3, "Google", "STK", "GOOG", "SMART", "USD", alt_symbol={"IB": "GOOG"}, alt_exch_id=None,
-                          sector=None, group=None,
+                          sector=None, industry=None,
                           put_call=None, expiry_date=None, und_inst_id=None, factor=1, strike=0.0, margin=0.0)
         SerializerTest.ser_deser(name, serializer, item)
 

@@ -15,7 +15,8 @@ from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
 from algotrader.provider.broker import Broker
 from algotrader.config.feed import CSVFeedConfig
-
+from algotrader.config.persistence import MongoDBConfig
+from algotrader.config.builder import *
 
 class BacktestRunner(Application):
     def __init__(self, isplot=False):
@@ -50,21 +51,23 @@ class BacktestRunner(Application):
 
         # build in plot
         plotter = StrategyPlotter(self.strategy)
-        plotter.plot(instrument=4)
+        plotter.plot(instrument=self.app_context.app_config.instrument_ids[0])
 
 
 def main():
     backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
                                         stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
                                         portfolio_id='test', portfolio_initial_cash=100000,
-                                        instrument_ids=[4],
+                                        instrument_ids=[1],
                                         subscription_types=[
                                             BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                         from_date=date(2010, 1, 1), to_date=date.today(),
                                         broker_id=Broker.Simulator,
                                         feed_id=Feed.CSV,
                                         stg_configs={'qty': 1000},
-                                        ref_data_mgr_type=RefDataManager.InMemory, persistence_config= PersistenceConfig(), provider_configs=[CSVFeedConfig(path='../../data/tradedata')])
+                                        ref_data_mgr_type=RefDataManager.DB,
+                                        persistence_config= backtest_mongo_persistance_config(),
+                                        provider_configs=[MongoDBConfig(), CSVFeedConfig(path='../../data/tradedata')])
     app_context = ApplicationContext(app_config=backtest_config)
 
     BacktestRunner(True).start(app_context)

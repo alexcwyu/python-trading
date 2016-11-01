@@ -22,11 +22,6 @@ class ApplicationContext(Startable, HasId):
 
         self.clock = self.add_startable(self.__get_clock())
         self.provider_mgr = self.add_startable(ProviderManager())
-        #
-        # self.add_startable(self.get_trade_data_store())
-        # self.add_startable(self.get_ref_data_store())
-        # self.add_startable(self.get_timeseries_data_store())
-        # self.add_startable(self.get_seq_data_store())
 
         self.seq_mgr = self.add_startable(SequenceManager())
 
@@ -52,22 +47,7 @@ class ApplicationContext(Startable, HasId):
     def __get_ref_data_mgr(self):
         if self.app_config.ref_data_mgr_type == RefDataManager.DB:
             return DBRefDataManager()
-        # elif self.app_config.ref_data_mgr_type == RefDataManager.Mock:
-        #     return MockRefDataManager()
         return InMemoryRefDataManager()
-
-    # def start(self):
-    #     if not hasattr(self, "started") or not self.started:
-    #         for startable in self.startables:
-    #             startable.start(app_context=self)
-    #         self.started = True
-    #
-    # def stop(self):
-    #     if self.started:
-    #         for startable in self.startables:
-    #             startable.stop()
-    #         self.started = False
-
 
     def _start(self, app_context, **kwargs):
         for startable in self.startables:

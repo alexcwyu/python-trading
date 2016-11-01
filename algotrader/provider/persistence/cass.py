@@ -20,7 +20,7 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
 
     insert_time_series_cql = """INSERT INTO time_series (id, data) VALUES (?, ?)"""
 
-    insert_instruments_cql = """INSERT INTO instruments (inst_id, name, type, symbol, exch_id, ccy_id, alt_symbol, alt_exch_id, sector, group, und_inst_id, expiry_date, factor, strike, put_call, margin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+    insert_instruments_cql = """INSERT INTO instruments (inst_id, name, type, symbol, exch_id, ccy_id, alt_symbol, alt_exch_id, sector, industry, und_inst_id, expiry_date, factor, strike, put_call, margin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
     insert_exchanges_cql = """INSERT INTO exchanges (exch_id, name) VALUES (?, ?)"""
     insert_currencies_cql = """INSERT INTO currencies (ccy_id, name) VALUES (?, ?)"""
 
@@ -153,7 +153,7 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
                     obj = Instrument(inst_id=r.inst_id, name=r.name, type=r.type, symbol=r.symbol, exch_id=r.exch_id,
                                      ccy_id=r.ccy_id, alt_symbol=r.alt_symbol, alt_exch_id=r.alt_exch_id,
                                      sector=r.sector,
-                                     group=r.group, und_inst_id=r.und_inst_id, expiry_date=r.expiry_date,
+                                     industry=r.industry, und_inst_id=r.und_inst_id, expiry_date=r.expiry_date,
                                      factor=r.factor,
                                      strike=r.strike, put_call=r.put_call, margin=r.margin)
                 elif clazz == 'currencies':
@@ -180,7 +180,7 @@ class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequ
                                                         instrument.symbol, instrument.exch_id, instrument.ccy_id,
                                                         instrument.alt_symbol, instrument.alt_exch_id,
                                                         instrument.sector,
-                                                        instrument.group, instrument.und_inst_id,
+                                                        instrument.industry, instrument.und_inst_id,
                                                         instrument.expiry_date,
                                                         instrument.factor, instrument.strike, instrument.put_call,
                                                         instrument.margin])

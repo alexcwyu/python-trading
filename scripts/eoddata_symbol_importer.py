@@ -21,7 +21,7 @@ for line in f:
         symbol = line
         desc =None
 
-    print "symbol=%s, desc=%s" % (symbol, desc)
+    #print "symbol=%s, desc=%s" % (symbol, desc)
 
     import_inst_from_ib(broker=broker, symbol=str(symbol), exchange='SEHK')
 

@@ -1,11 +1,12 @@
 import threading
-import time
 from collections import defaultdict
+
 import gevent
 import swigibpy
 
 from algotrader.config.broker import IBConfig
 from algotrader.event.market_data import Bar, Quote, Trade, MarketDepth
+from algotrader.event.market_data import MarketDataType
 from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus
 from algotrader.provider.broker import Broker
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
@@ -14,7 +15,6 @@ from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, \
     TradeSubscriptionType, MarketDepthSubscriptionType
 from algotrader.utils import logger
-from algotrader.event.market_data import BarType, BarSize, MarketDataType
 
 
 class DataRecord(object):
@@ -66,7 +66,8 @@ class SubscriptionRegistry(object):
             raise "Duplicated req_id %s" % req_id
 
         self.subscriptions[req_id] = sub_key
-        self.data_records[req_id] = DataRecord(sub_key.inst_id, quote_req=sub_key.subscription_type.get_type() == MarketDataType.Quote,
+        self.data_records[req_id] = DataRecord(sub_key.inst_id,
+                                               quote_req=sub_key.subscription_type.get_type() == MarketDataType.Quote,
                                                trade_req=sub_key.subscription_type.get_type() == MarketDataType.Trade)
 
     def get_subscription_key(self, req_id):
@@ -141,7 +142,6 @@ class OrderReqRegistry(object):
         return None
 
 
-
 class IBBroker(IBSocket, Broker, Feed):
     def __init__(self):
         super(IBBroker, self).__init__()
@@ -186,9 +186,8 @@ class IBBroker(IBSocket, Broker, Feed):
         self.tws.reqOpenOrders()
 
         # wait until we get the next_order_id
-        #while (not self.next_order_id):
+        # while (not self.next_order_id):
         #    time.sleep(1)
-
 
     def poll(self):
         ok = True
@@ -599,29 +598,40 @@ class IBBroker(IBSocket, Broker, Feed):
         # TODO
         super(IBBroker, self).commissionReport(commissionReport)
 
+    def reqScannerSubscription(self, num_row=None, inst_type=None, location_code=None, scan_code=None,
+                               above_price=None, below_price=None, above_vol=None, avg_opt_vol_above=None,
+                               mkt_cap_above=None, mkt_cap_below=None, moody_rating_above=None, moody_rating_below=None,
+                               sp_rating_above=None, sp_rating_below=None, mat_date_above=None, mat_date_below=None,
+                               coupon_rate_above=None, coupon_rate_below=None, exc_convertible=None,
+                               scanner_setting_pairs=None,
+                               stk_type_filter=None, callback=None):
 
-    def reqScannerSubscription(self, num_row = None, inst_type = None, location_code = None, scan_code = None,
-                               above_price = None, below_price = None, above_vol = None, avg_opt_vol_above = None,
-                               mkt_cap_above = None, mkt_cap_below = None, moody_rating_above = None, moody_rating_below = None,
-                               sp_rating_above = None, sp_rating_below = None,  mat_date_above = None, mat_date_below = None,
-                               coupon_rate_above = None, coupon_rate_below = None,  exc_convertible = None, scanner_setting_pairs = None,
-                               stk_type_filter = None, callback=None):
-
-        subscription = self.model_factory.create_ib_scanner_subsciption(num_row = num_row, inst_type=inst_type, location_code=location_code, scan_code=scan_code,
-                                                             above_price = above_price, below_price=below_price, above_vol=above_vol, avg_opt_vol_above=avg_opt_vol_above,
-                                                             mkt_cap_above = mkt_cap_above, mkt_cap_below=mkt_cap_below, moody_rating_above=moody_rating_above, moody_rating_below=moody_rating_below,
-                                                             sp_rating_above = sp_rating_above, sp_rating_below=sp_rating_below, mat_date_above=mat_date_above, mat_date_below=mat_date_below,
-                                                             coupon_rate_above = coupon_rate_above, coupon_rate_below=coupon_rate_below, exc_convertible=exc_convertible, scanner_setting_pairs=scanner_setting_pairs,
-                                                             stk_type_filter = stk_type_filter)
+        subscription = self.model_factory.create_ib_scanner_subsciption(num_row=num_row, inst_type=inst_type,
+                                                                        location_code=location_code,
+                                                                        scan_code=scan_code,
+                                                                        above_price=above_price,
+                                                                        below_price=below_price, above_vol=above_vol,
+                                                                        avg_opt_vol_above=avg_opt_vol_above,
+                                                                        mkt_cap_above=mkt_cap_above,
+                                                                        mkt_cap_below=mkt_cap_below,
+                                                                        moody_rating_above=moody_rating_above,
+                                                                        moody_rating_below=moody_rating_below,
+                                                                        sp_rating_above=sp_rating_above,
+                                                                        sp_rating_below=sp_rating_below,
+                                                                        mat_date_above=mat_date_above,
+                                                                        mat_date_below=mat_date_below,
+                                                                        coupon_rate_above=coupon_rate_above,
+                                                                        coupon_rate_below=coupon_rate_below,
+                                                                        exc_convertible=exc_convertible,
+                                                                        scanner_setting_pairs=scanner_setting_pairs,
+                                                                        stk_type_filter=stk_type_filter)
 
         req_id = self.get_next_request_id()
+        self._reg_callback(req_id, callback)
 
         self.tws.reqScannerSubscription(req_id, subscription)
 
-        if callback:
-            self.req_callback[req_id] = callback
         return req_id
-
 
     def scannerData(self, reqId, rank, contractDetails, distance, benchmark, projection, legsStr):
         logger.info(
@@ -630,74 +640,79 @@ class IBBroker(IBSocket, Broker, Feed):
 
     def scannerDataEnd(self, reqId):
         logger.info("scannerDataEnd, reqId=%s", reqId)
-        self.completed_reqs.append(reqId)
+        self._complete_req(reqId)
 
-        if reqId in self.req_callback:
-            self.req_callback[reqId].set()
-
-
-    def reqContractDetails(self, symbol = None, exchange = None, sec_type = None, currency = None, callback=None):
-        contract = self.model_factory.create_ib_contract(symbol = symbol, exchange=exchange, sec_type=sec_type, currency=currency)
+    def reqContractDetails(self, symbol=None, exchange=None, sec_type=None, currency=None, callback=None):
+        contract = self.model_factory.create_ib_contract(symbol=symbol, exchange=exchange, sec_type=sec_type,
+                                                         currency=currency)
         req_id = self.get_next_request_id()
+        self._reg_callback(req_id, callback)
+
         self.tws.reqContractDetails(req_id, contract)
 
-        if callback:
-            self.req_callback[req_id] = callback
         return req_id
-
-
 
     def contractDetails(self, reqId, contractDetails):
         """
         int reqId, ContractDetails contractDetails
         """
-        cd= contractDetails
+        cd = contractDetails
         sd = contractDetails.summary
-        # logger.info("contractDetails, reqId=%s, conId=%s, symbol=%s, secType=%s, exchange=%s, " +
-        #             "primaryExchange=%s, expiry=%s, strike=%s, right=%s, " +
-        #             "multiplier=%s, currency=%s, localSymbol=%s, secIdType=%s, " +
-        #             "secId=%s, includeExpired=%s, comboLegsDescrip=%s, comboLegs=%s, " +
-        #             "underComp=%s, "+
-        #             "marketName=%s, tradingClass=%s, minTick=%s, orderTypes=%s, " +
-        #             "validExchanges=%s, priceMagnifier=%s, underConId=%s, longName=%s, " +
-        #             "longName=%s, contractMonth=%s, industry=%s, category=%s, " +
-        #             "timeZoneId=%s, tradingHours=%s, liquidHours=%s, evRule=%s, " +
-        #             "evMultiplier=%s, secIdList=%s, cusip=%s, ratings=%s, " +
-        #             "descAppend=%s, bondType=%s, couponType=%s, callable=%s, " +
-        #             "putable=%s, coupon=%s, convertible=%s, issueDate=%s, " +
-        #             "nextOptionDate=%s, nextOptionType=%s, nextOptionPartial=%s, notes=%s"
-        #             , reqId,
-        #             sd.conId, sd.symbol, sd.secType, sd.exchange,
-        #             sd.primaryExchange, sd.expiry, sd.strike, sd.right,
-        #             sd.multiplier, sd.currency, sd.localSymbol, sd.secIdType,
-        #             sd.secId, sd.includeExpired, sd.comboLegsDescrip, sd.comboLegs,
-        #             sd.underComp,
-        #             cd.marketName, cd.tradingClass, cd.minTick, cd.orderTypes,
-        #             cd.validExchanges, cd.priceMagnifier, cd.underConId, cd.longName,
-        #             cd.longName, cd.contractMonth, cd.industry, cd.category,
-        #             cd.timeZoneId, cd.tradingHours, cd.liquidHours, cd.evRule,
-        #             cd.evMultiplier, cd.secIdList, cd.cusip, cd.ratings,
-        #             cd.descAppend, cd.bondType, cd.couponType, cd.callable,
-        #             cd.putable, cd.coupon, cd.convertible, cd.issueDate,
-        #             cd.nextOptionDate, cd.nextOptionType, cd.nextOptionPartial, cd.notes)
+        logger.debug("contractDetails, reqId=%s, conId=%s, symbol=%s, secType=%s, exchange=%s, " +
+                     "primaryExchange=%s, expiry=%s, strike=%s, right=%s, " +
+                     "multiplier=%s, currency=%s, localSymbol=%s, secIdType=%s, " +
+                     "secId=%s, includeExpired=%s, comboLegsDescrip=%s, comboLegs=%s, " +
+                     "underComp=%s, " +
+                     "marketName=%s, tradingClass=%s, minTick=%s, orderTypes=%s, " +
+                     "validExchanges=%s, priceMagnifier=%s, underConId=%s, longName=%s, " +
+                     "longName=%s, contractMonth=%s, industry=%s, category=%s, " +
+                     "timeZoneId=%s, tradingHours=%s, liquidHours=%s, evRule=%s, " +
+                     "evMultiplier=%s, secIdList=%s, cusip=%s, ratings=%s, " +
+                     "descAppend=%s, bondType=%s, couponType=%s, callable=%s, " +
+                     "putable=%s, coupon=%s, convertible=%s, issueDate=%s, " +
+                     "nextOptionDate=%s, nextOptionType=%s, nextOptionPartial=%s, notes=%s"
+                     , reqId,
+                     sd.conId, sd.symbol, sd.secType, sd.exchange,
+                     sd.primaryExchange, sd.expiry, sd.strike, sd.right,
+                     sd.multiplier, sd.currency, sd.localSymbol, sd.secIdType,
+                     sd.secId, sd.includeExpired, sd.comboLegsDescrip, sd.comboLegs,
+                     sd.underComp,
+                     cd.marketName, cd.tradingClass, cd.minTick, cd.orderTypes,
+                     cd.validExchanges, cd.priceMagnifier, cd.underConId, cd.longName,
+                     cd.longName, cd.contractMonth, cd.industry, cd.category,
+                     cd.timeZoneId, cd.tradingHours, cd.liquidHours, cd.evRule,
+                     cd.evMultiplier, cd.secIdList, cd.cusip, cd.ratings,
+                     cd.descAppend, cd.bondType, cd.couponType, cd.callable,
+                     cd.putable, cd.coupon, cd.convertible, cd.issueDate,
+                     cd.nextOptionDate, cd.nextOptionType, cd.nextOptionPartial, cd.notes)
 
-
-        self.ref_data_mgr.create_inst(name=cd.longName, type=sd.secType, symbol=sd.symbol, exch_id=sd.exchange, ccy_id=sd.currency,
+        self.ref_data_mgr.create_inst(name=cd.longName, type=sd.secType, symbol=sd.symbol, exch_id=sd.exchange,
+                                      ccy_id=sd.currency,
                                       # alt_symbol = {Broker.IB: sd.symbol},
                                       # alt_exch_id = {Broker.IB: sd.exchange},
                                       sector=cd.industry, industry=cd.category)
 
         logger.info("saved")
 
-
     def contractDetailsEnd(self, reqId):
-        self.completed_reqs.append(reqId)
-
-        if reqId in self.req_callback:
-            self.req_callback[reqId].set(reqId)
-
         logger.info("contractDetailsEnd, reqId=%s" % reqId)
+        self._complete_req(reqId)
+
+    def error(self, id, errorCode, errorString):
+        logger.error("error, id=%s, errorCode=%s, errorString=%s", id, errorCode, errorString)
+        self._complete_req(id)
 
 
-    def is_completed(self, reqId):
-        return reqId in self.completed_reqs
+    def is_completed(self, req_id):
+        return req_id in self.completed_reqs
+
+    def _reg_callback(self, req_id, callback=None):
+        if callback:
+            self.req_callback[req_id] = callback
+
+    def _complete_req(self, req_id):
+
+        self.completed_reqs.append(req_id)
+
+        if req_id in self.req_callback:
+            self.req_callback[req_id].set(req_id)

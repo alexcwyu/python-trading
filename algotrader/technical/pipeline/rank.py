@@ -2,6 +2,7 @@ from algotrader.technical import Indicator
 from algotrader.technical.pipeline import PipeLine
 import numpy as np
 import pandas as pd
+from algotrader.utils import logger
 
 
 class Rank(PipeLine):

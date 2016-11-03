@@ -57,8 +57,8 @@ class Pairwise(PipeLine):
                 x = self.cache[self.lhs_name][-self.length:] if self.length > 1 else self.cache[self.lhs_name][-1]
                 y = self.cache[self.rhs_name][-self.length:] if self.length > 1 else self.cache[self.rhs_name][-1]
                 if self.is_input_pipeline:
-                    xstk = np.transpose(np.vstack(x))
-                    ystk = np.transpose(np.vstack(y))
+                    xstk = np.vstack(x)
+                    ystk = np.vstack(y)
                     result[PipeLine.VALUE] = self.func(xstk, ystk)
                 else:
                     result[PipeLine.VALUE] = self.func(x, y)
@@ -177,7 +177,8 @@ class Max(Pairwise):
 
 class PairCorrelation(Pairwise):
     def __init__(self, input_lhs, input_rhs, length, input_key='close', desc="Pairwise PairCorrelation"):
-        super(PairCorrelation, self).__init__(input_lhs, input_rhs, length=length, func=lambda x, y: np.corrcoef(x, y),
+        super(PairCorrelation, self).__init__(input_lhs, input_rhs, length=length,
+                                              func=lambda x, y: np.corrcoef(np.transpose(x), np.transpose(y)),
                                       name=PipeLine.get_name(PairCorrelation.__name__, [input_lhs, input_rhs], input_key),
                                       input_key=input_key, desc=desc)
 

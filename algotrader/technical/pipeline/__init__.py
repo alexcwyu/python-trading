@@ -3,6 +3,7 @@ from algotrader.technical import Indicator
 import numpy as np
 import pandas as pd
 from collections import OrderedDict
+from algotrader.utils import logger
 
 class PipeLine(DataSeries):
     VALUE = 'value'
@@ -145,6 +146,7 @@ class PipeLine(DataSeries):
         # return False if check_df.sum(axis=1).sum(axis=0) > 0 else True
 
     def on_update(self, data):
+        logger.debug("[%s] on_update %s" % (self.__class__.__name__, data))
         if data['timestamp'] != self.__curr_timestamp:
             self.__curr_timestamp = data['timestamp']
             self._flush_and_create()

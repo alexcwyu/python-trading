@@ -32,10 +32,10 @@ class CSVDataFeed(Feed):
         df['BarSize'] = int(BarSize.D1)
         return df
 
-    def subscribe_mktdata(self, *sub_keys):
-        self.__read_csv(*sub_keys)
+    def subscribe_mktdata(self, sub_keys):
+        self.__read_csv(sub_keys)
 
-    def __read_csv(self, *sub_keys):
+    def __read_csv(self, sub_keys):
 
         dfs = []
         sub_key_range = {sub_key.inst_id: (

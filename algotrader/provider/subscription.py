@@ -133,8 +133,9 @@ class HistDataSubscriptionKey(SubscriptionKey):
 
 class MarketDataSubscriber(object):
     def subscript_market_data(self, feed, instruments, subscription_types, from_date=None, to_date=None):
-        for sub_key in self.get_subscription_keys(feed.id(), instruments, subscription_types, from_date, to_date):
-            feed.subscribe_mktdata(sub_key)
+        feed.subscribe_mktdata(self.get_subscription_keys(feed.id(), instruments, subscription_types, from_date, to_date))
+        # for sub_key in self.get_subscription_keys(feed.id(), instruments, subscription_types, from_date, to_date):
+        #     feed.subscribe_mktdata(sub_key)
 
     def get_subscription_keys(self, feed_id, instruments, subscription_types, from_date=None, to_date=None):
         keys = []

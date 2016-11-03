@@ -117,7 +117,8 @@ class PairwiseTest(TestCase):
         bar0.add({"timestamp": ts[3], "close": x[3], "open": 0})
         bar1.add({"timestamp": ts[3], "close": y[3], "open": 0})
 
-        self.assertEqual(pcorr.now('value'), np.corrcoef(x, y))
+        # self.assertEqual(pcorr.now('value'), np.corrcoef(x, y))
+        self.__np_assert_almost_equal(pcorr.now('value'), np.corrcoef(x, y))
 
     def test_with_pair_corr_with_vec(self):
         bar0 = self.app_context.inst_data_mgr.get_series("bar0")

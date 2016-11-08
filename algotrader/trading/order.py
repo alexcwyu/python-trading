@@ -1,6 +1,7 @@
 from algotrader.event.event_handler import OrderEventHandler, ExecutionEventHandler
 from algotrader.event.order import OrdStatus, OrdAction
 from algotrader.provider.persistence import Persistable
+from algotrader import HasId
 
 
 class Order(OrderEventHandler, ExecutionEventHandler, Persistable):

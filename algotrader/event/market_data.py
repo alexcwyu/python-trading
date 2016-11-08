@@ -24,7 +24,7 @@ class BarSize(object):
     D1 = 24 * 60 * 60
 
 
-class BarType:
+class BarType(object):
     Time = 1
     Tick = 2
     Volume = 3
@@ -42,12 +42,12 @@ class BarType:
         return BarType.map[type]
 
 
-class MDSide:
+class MDSide(object):
     Ask = 0
     Bid = 1
 
 
-class MDOperation:
+class MDOperation(object):
     Insert = 0
     Update = 1
     Delete = 2
@@ -56,17 +56,19 @@ class MDOperation:
 class MarketDataEvent(Event):
     __slots__ = (
         'inst_id',
+        'provider_id',
     )
 
-    def __init__(self, inst_id, timestamp):
+    def __init__(self, inst_id, provider_id, timestamp):
         super(MarketDataEvent, self).__init__(timestamp)
         self.inst_id = inst_id
+        self.provider_id = provider_id
 
     def series_id(self):
         raise NotImplementedError()
 
     def id(self):
-        return "%s-%s" % (self.series_id(), self.timestamp)
+        return "%s-%s-%s" % (self.series_id(), self.provider_id, self.timestamp)
 
 
 class Bar(MarketDataEvent):
@@ -82,10 +84,11 @@ class Bar(MarketDataEvent):
         'adj_close'
     )
 
-    def __init__(self, inst_id=None, begin_time=0, timestamp=None, open=0, high=0, low=0, close=0, vol=0,
+    def __init__(self, inst_id=None, provider_id=None, begin_time=0, timestamp=None, open=0, high=0, low=0, close=0,
+                 vol=0,
                  adj_close=0,
                  size=BarSize.D1, type=BarType.Time):
-        super(Bar, self).__init__(inst_id, timestamp)
+        super(Bar, self).__init__(inst_id, provider_id, timestamp)
         self.type = type
         self.size = size
         self.begin_time = begin_time
@@ -144,8 +147,8 @@ class Trade(MarketDataEvent):
         'size'
     )
 
-    def __init__(self, inst_id=None, timestamp=None, price=0, size=0):
-        super(Trade, self).__init__(inst_id, timestamp)
+    def __init__(self, inst_id=None, provider_id=None, timestamp=None, price=0, size=0):
+        super(Trade, self).__init__(inst_id, provider_id, timestamp)
         self.price = price
         self.size = size
 
@@ -175,8 +178,8 @@ class Quote(MarketDataEvent):
         'ask_size',
     )
 
-    def __init__(self, inst_id=None, timestamp=None, bid=0, bid_size=0, ask=0, ask_size=0):
-        super(Quote, self).__init__(inst_id, timestamp)
+    def __init__(self, inst_id=None, provider_id=None, timestamp=None, bid=0, bid_size=0, ask=0, ask_size=0):
+        super(Quote, self).__init__(inst_id, provider_id, timestamp)
         self.bid = bid
         self.bid_size = bid_size
         self.ask = ask
@@ -208,7 +211,7 @@ class Quote(MarketDataEvent):
 
 class MarketDepth(MarketDataEvent):
     __slots__ = (
-        'provider_id',
+        'provider',
         'position',
         'operation',
         'side',
@@ -216,10 +219,11 @@ class MarketDepth(MarketDataEvent):
         'size',
     )
 
-    def __init__(self, inst_id=None, timestamp=None, provider_id=None, position=0, operation=None, side=None,
+    def __init__(self, inst_id=None, timestamp=None, provider_id=None, provider=None, position=0, operation=None,
+                 side=None,
                  price=0.0, size=0):
-        super(MarketDepth, self).__init__(inst_id, timestamp)
-        self.provider_id = provider_id
+        super(MarketDepth, self).__init__(inst_id, provider_id, timestamp)
+        self.provider = provider
         self.position = position
         self.operation = operation
         self.side = side

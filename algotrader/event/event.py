@@ -2,6 +2,7 @@ import time
 
 from algotrader.provider.persistence import Persistable
 
+from algotrader import HasId
 
 class Event(Persistable):
     __slots__ = (

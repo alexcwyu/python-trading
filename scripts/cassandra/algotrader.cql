@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS bars (
-  inst_id int,
+  inst_id varchar,
   type int,
   size int,
   begin_time bigint,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS bars (
 );
 
 CREATE TABLE IF NOT EXISTS quotes(
-  inst_id int,
+  inst_id varchar,
   timestamp bigint,
   bid double,
   ask double,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS quotes(
 );
 
 CREATE TABLE IF NOT EXISTS trades(
-  inst_id int,
+  inst_id varchar,
   timestamp bigint,
   price double,
   size int,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS trades(
 );
 
 CREATE TABLE IF NOT EXISTS market_depths(
-  inst_id int,
+  inst_id varchar,
   provider_id varchar,
   timestamp bigint,
   position bigint,
@@ -50,17 +50,17 @@ CREATE TABLE IF NOT EXISTS time_series(
 );
 
 CREATE TABLE IF NOT EXISTS instruments(
-  inst_id int,
+  inst_id varchar,
   name varchar,
   type varchar,
   symbol varchar,
   exch_id varchar,
   ccy_id varchar,
-  alt_symbol map<varchar, varchar>,
+  alt_symbols map<varchar, varchar>,
   alt_exch_id map<varchar, varchar>,
   sector varchar,
   industry varchar,
-  und_inst_id int,
+  und_inst_id varchar,
   expiry_date timestamp,
   factor double,
   strike double,
@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS instruments(
 
 CREATE TABLE IF NOT EXISTS exchanges(
   exch_id varchar,
+  code varchar,
   name varchar,
   PRIMARY KEY (exch_id)
 );

@@ -1,5 +1,6 @@
 import datetime
 
+from algotrader import HasId
 import numpy as np
 import pandas as pd
 from rx.subjects import Subject
@@ -11,7 +12,7 @@ from algotrader.provider.persistence import Persistable
 timestamp_key = "timestamp"
 
 
-class DataSeries(Persistable, Startable, HasId):
+class DataSeries(Persistable, Startable):
     TIMESTAMP = 'timestamp'
 
     __slots__ = (

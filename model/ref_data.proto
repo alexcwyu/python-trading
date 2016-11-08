@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+//package algotrader.model.ref_data;
+
+message Instrument {
+
+
+    enum CallPut{
+        Call = 0;
+        Put = 1;
+    }
+
+    enum InstType {
+        STK = 0;
+        FUT = 1;
+        OPT = 2;
+        FOT = 3;
+        IDX = 4;
+        CASH = 5;
+        ETF = 6;
+        CBO = 7;
+    }
+
+    int64 id = 1;
+    string symbol = 2;
+    string name = 3;
+    string long_name = 4;
+    InstType type = 5;
+    int64 primary_exch_id = 6;
+    repeated int64 exch_ids = 7;
+    int64 ccy_id = 8;
+    map<int64, string> alt_symbols = 9;
+    string sector = 10;
+    string industry = 11;
+    int64 und_inst_id = 12;
+    int64 exp_date = 13;
+    CallPut call_put = 14;
+    double factor = 15;
+    double strike = 16;
+    double margin = 17;
+    double tick_size = 18;
+    int64 trading_hours_id = 19;
+    int64 trading_holidays_id = 20;
+
+}
+
+message Exchange {
+    int64 id = 1;
+    string code = 2;
+    string name = 3;
+    int64 country_id = 4;
+    map<int64, string> alt_codes = 5;
+    int64 trading_hours_id = 6;
+    int64 trading_holidays_id = 7;
+}
+
+message Country {
+    int64 id = 1;
+    string code = 2;
+    string name = 3;
+}
+
+message Currency {
+    int64 id = 1;
+    string code = 2;
+    string name = 3;
+    map<int64, string> alt_codes = 4;
+}
+
+
+message TradingHolidays{
+    message Holiday{
+        int64 trading_date = 1;
+        int64 start_date = 2;
+        int64 start_time = 3;
+        int64 end_date = 4;
+        int64 end_time = 5;
+        Type type = 6;
+        string desc = 7;
+
+        enum Type{
+            FullDay = 0;
+            LateOpen = 1;
+            EarlyClose = 2;
+            Replace = 3;
+            Modify = 4;
+        }
+    }
+
+    int64 id = 1;
+    string name = 2;
+    repeated Holiday holidays=3;
+}
+
+message TradingHours{
+    message Session{
+        WeekDay start_weekdate = 1;
+        int64 start_time = 2;
+        WeekDay end_weekdate = 3;
+        int64 end_time = 4;
+        bool eod = 5;
+
+
+        enum WeekDay{
+            Sunday = 0;
+            Monday = 1;
+            Tuesday = 2;
+            Wednesday = 3;
+            Thursday = 4;
+            Friday = 5;
+            Saturday = 6;
+        }
+    }
+
+    int64 id = 1;
+    string name = 2;
+    string timezone = 3;
+    repeated Session sessions = 4;
+}

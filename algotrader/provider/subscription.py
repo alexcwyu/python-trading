@@ -1,5 +1,6 @@
 import abc
 
+from algotrader import HasId
 from algotrader.event.market_data import BarType, BarSize, MarketDataType
 from algotrader.utils.ser_deser import Serializable
 
@@ -39,24 +40,15 @@ class BarSubscriptionType(DataSubscriptionType):
             return False
         return (self.get_type(), self.bar_type, self.bar_size) == (other.get_type(), other.bar_type, other.bar_size)
 
-    def id(self):
-        return "%s.%s.%s" % (self.get_type(), self.bar_type, self.bar_size)
-
 
 class QuoteSubscriptionType(DataSubscriptionType):
     def get_type(self):
         return MarketDataType.Quote
 
-    def id(self):
-        return "%s" % (self.get_type())
-
 
 class TradeSubscriptionType(DataSubscriptionType):
     def get_type(self):
         return MarketDataType.Trade
-
-    def id(self):
-        return "%s" % (self.get_type())
 
 
 class MarketDepthSubscriptionType(DataSubscriptionType):
@@ -65,7 +57,7 @@ class MarketDepthSubscriptionType(DataSubscriptionType):
         'provider_id'
     )
 
-    def __init__(self, num_rows=1 , provider_id=None):
+    def __init__(self, num_rows=1, provider_id=None):
         self.num_rows = num_rows
         self.provider_id = provider_id
 
@@ -77,7 +69,8 @@ class MarketDepthSubscriptionType(DataSubscriptionType):
             return False
         if not isinstance(other, MarketDepthSubscriptionType):
             return False
-        return (self.get_type(), self.num_rows, self.provider_id) == (other.get_type(), other.num_rows, other.provider_id)
+        return (self.get_type(), self.num_rows, self.provider_id) == (
+        other.get_type(), other.num_rows, other.provider_id)
 
     def id(self):
         return "%s.%s" % (self.get_type(), self.num_rows)

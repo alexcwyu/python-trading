@@ -7,7 +7,7 @@ from algotrader.event.event_bus import EventBus
 from algotrader.utils import logger
 
 
-class EventHandler(Observer, Startable, HasId):
+class EventHandler(Observer, Startable):
     __metaclass__ = abc.ABCMeta
 
     def on_next(self, event):

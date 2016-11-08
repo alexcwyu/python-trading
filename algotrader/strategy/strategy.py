@@ -8,7 +8,7 @@ from algotrader.provider.subscription import SubscriptionKey, HistDataSubscripti
 from algotrader.trading.position import PositionHolder
 from algotrader.config.app import BacktestingConfig, LiveTradingConfig
 
-class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable, Startable, HasId,
+class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Persistable, Startable,
                MarketDataSubscriber):
     __slots__ = (
         'stg_id',

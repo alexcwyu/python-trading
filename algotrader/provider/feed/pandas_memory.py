@@ -99,7 +99,7 @@ if __name__ == "__main__":
     inst_df['symbol'] = inst_df['name']
     inst_df['exch_id'] = "NYSE"
     inst_df['ccy_id'] = 'USD'
-    inst_df['alt_symbol'] = ''
+    inst_df['alt_symbols'] = ''
     inst_df['alt_exch_id'] = ''
     inst_df['sector'] = ''
     inst_df['industry'] = ''

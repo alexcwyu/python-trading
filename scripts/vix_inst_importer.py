@@ -140,7 +140,7 @@ def build_vix_future(expiry_date_str, seq_mgr):
     return Instrument(inst_id, "VIX Future %s %s" % (tokens[1], tokens[2]), type=InstType.Future,
                       symbol=symbol,
                       exch_id='CBOE', ccy_id='USD',
-                      alt_symbol={"Quandl": "CBOE/%s" % symbol, "IB": "VIX"}, expiry_date=expiry_date, factor=1000)
+                      alt_symbols={"Quandl": "CBOE/%s" % symbol, "IB": "VIX"}, expiry_date=expiry_date, factor=1000)
 
 
 

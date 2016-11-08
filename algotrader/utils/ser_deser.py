@@ -25,7 +25,7 @@ class SlotPickleMixin(object):
             setattr(self, slot, value)
 
 
-class Serializable(HasId):
+class Serializable(object):
 
     def __eq__(self, other):
         return (isinstance(other, self.__class__)

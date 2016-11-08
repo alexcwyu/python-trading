@@ -688,7 +688,7 @@ class IBBroker(IBSocket, Broker, Feed):
 
         self.ref_data_mgr.create_inst(name=cd.longName, type=sd.secType, symbol=sd.symbol, exch_id=sd.exchange,
                                       ccy_id=sd.currency,
-                                      # alt_symbol = {Broker.IB: sd.symbol},
+                                      # alt_symbols = {Broker.IB: sd.symbol},
                                       # alt_exch_id = {Broker.IB: sd.exchange},
                                       sector=cd.industry, industry=cd.category)
 

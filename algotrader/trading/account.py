@@ -4,7 +4,7 @@ from algotrader.provider.persistence import Persistable
 from algotrader.trading.position import PositionHolder
 
 
-class Account(AccountEventHandler, PositionHolder, Persistable, Startable, HasId):
+class Account(AccountEventHandler, PositionHolder, Persistable, Startable):
     __slots__ = (
         'acct_id',
         'values',

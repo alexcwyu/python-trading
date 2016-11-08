@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS instruments(
   symbol varchar,
   exch_id varchar,
   ccy_id varchar,
-  alt_symbol map<varchar, varchar>,
+  alt_symbols map<varchar, varchar>,
   alt_exch_id map<varchar, varchar>,
   sector varchar,
   industry varchar,

@@ -4,8 +4,9 @@ from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.event.order import OrdAction
 from algotrader.provider.persistence import Persistable
 
+from algotrader.utils.ser_deser import Serializable
 
-class Position(Persistable):
+class Position(Serializable):
     __slots__ = (
         'inst_id',
         'orders',
@@ -58,9 +59,6 @@ class Position(Persistable):
 
     def all_orders(self):
         return [order for cl_orders in self.orders.values() for order in cl_orders.values()]
-
-    def id(self):
-        return self.inst_id
 
 
 class PositionHolder(MarketDataEventHandler):

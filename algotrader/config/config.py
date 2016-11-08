@@ -1,6 +1,7 @@
 import abc
 
 from algotrader.provider.persistence import Persistable
+from algotrader import HasId
 
 
 class Config(Persistable):

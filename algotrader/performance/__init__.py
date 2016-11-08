@@ -1,7 +1,7 @@
-from algotrader.provider.persistence import Persistable
 
+from algotrader.utils.ser_deser import Serializable
 
-class PortfolioAnalyzer(Persistable):
+class PortfolioAnalyzer(Serializable):
     __slots__ = (
         'portfolio'
     )

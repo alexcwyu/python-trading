@@ -12,7 +12,7 @@ from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
 
 
-class ApplicationContext(Startable, HasId):
+class ApplicationContext(Startable):
     def __init__(self, app_config=None):
         super(ApplicationContext, self).__init__()
 
@@ -69,5 +69,3 @@ class ApplicationContext(Startable, HasId):
     def get_seq_data_store(self):
         return self.provider_mgr.get(self.app_config.persistence_config.seq_ds_id)
 
-    def id(self):
-        return "ApplicationContext"

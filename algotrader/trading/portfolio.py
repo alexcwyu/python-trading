@@ -7,6 +7,7 @@ from algotrader.performance.drawdown import DrawDown
 from algotrader.performance.returns import Pnl
 from algotrader.provider.persistence import Persistable
 from algotrader.trading.position import PositionHolder
+from algotrader.trading.ref_data import InstType
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
 
@@ -142,10 +143,12 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         new_ord_req = self.ord_reqs[exec_report.cl_id][exec_report.cl_ord_id]
         direction = 1 if new_ord_req.action == OrdAction.BUY else -1
         if exec_report.last_qty > 0:
-            self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
+            inst = self.app_context.ref_data_mgr.get_inst(exec_report.inst_id)
+            multiplier = inst.factor if inst.type in [InstType.Future, InstType.Option] else 1
+            self.cash -= (direction * multiplier* exec_report.last_qty * exec_report.last_price + exec_report.commission)
             self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id,
                               direction * exec_report.last_qty)
-            self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
+            self.update_position_price(exec_report.timestamp, exec_report.inst_id, multiplier*exec_report.last_price)
 
     def update_position_price(self, timestamp, inst_id, price):
         super(Portfolio, self).update_position_price(timestamp, inst_id, price)

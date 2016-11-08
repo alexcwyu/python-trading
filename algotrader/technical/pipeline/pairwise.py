@@ -9,6 +9,7 @@ class Pairwise(PipeLine):
         'lhs_name',
         'rhs_name',
         'func',
+        'is_input_pipeline'
         '__shape'
     )
 
@@ -23,6 +24,7 @@ class Pairwise(PipeLine):
         self.lhs_name = PipeLine.get_input_name(input_lhs)
         self.rhs_name = PipeLine.get_input_name(input_rhs)
         self.func = func
+        self.is_input_pipeline = False
 
         if isinstance(input_lhs, PipeLine) and not isinstance(input_rhs, PipeLine):
             raise TypeError("input_lhs has to be the same type as input_rhs as Pipeline")
@@ -34,6 +36,7 @@ class Pairwise(PipeLine):
             raise TypeError("input_lhs has to be the same type as input_rhs as DataSeries")
 
         if isinstance(input_lhs, PipeLine):
+            self.is_input_pipeline = True
             try:
                 np.testing.assert_almost_equal(input_lhs.shape(), input_rhs.shape(), 10)
                 self.__shape = input_lhs.shape()
@@ -53,7 +56,12 @@ class Pairwise(PipeLine):
             if self.all_filled():
                 x = self.cache[self.lhs_name][-self.length:] if self.length > 1 else self.cache[self.lhs_name][-1]
                 y = self.cache[self.rhs_name][-self.length:] if self.length > 1 else self.cache[self.rhs_name][-1]
-                result[PipeLine.VALUE] = self.func(x, y)
+                if self.is_input_pipeline:
+                    xstk = np.vstack(x)
+                    ystk = np.vstack(y)
+                    result[PipeLine.VALUE] = self.func(xstk, ystk)
+                else:
+                    result[PipeLine.VALUE] = self.func(x, y)
             else:
                 result[PipeLine.VALUE] = self._default_output()
         else:
@@ -169,7 +177,8 @@ class Max(Pairwise):
 
 class PairCorrelation(Pairwise):
     def __init__(self, input_lhs, input_rhs, length, input_key='close', desc="Pairwise PairCorrelation"):
-        super(PairCorrelation, self).__init__(input_lhs, input_rhs, length=length, func=lambda x, y: np.corrcoef(x, y)[0, 1],
+        super(PairCorrelation, self).__init__(input_lhs, input_rhs, length=length,
+                                              func=lambda x, y: np.corrcoef(np.transpose(x), np.transpose(y)),
                                       name=PipeLine.get_name(PairCorrelation.__name__, [input_lhs, input_rhs], input_key),
                                       input_key=input_key, desc=desc)
 

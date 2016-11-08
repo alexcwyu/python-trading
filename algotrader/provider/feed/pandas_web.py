@@ -35,7 +35,7 @@ class PandasWebDataFeed(Feed):
     def process_row(self, row):
         raise NotImplementedError
 
-    def __load_data(self, *sub_keys):
+    def __load_data(self, sub_keys):
 
         self.dfs = []
         for sub_key in sub_keys:

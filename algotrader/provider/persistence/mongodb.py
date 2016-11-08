@@ -80,6 +80,7 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
 
     # RefDataStore
     def save_instrument(self, instrument):
+        logger.info("[%s] saving %s" % (self.__class__.__name__, instrument))
         id, packed = self._serialize(instrument)
         self.instruments.update({'_id': id}, packed, upsert=True)
 
@@ -114,6 +115,7 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         self.market_depths.update({'_id': id}, packed, upsert=True)
 
     def save_time_series(self, timeseries):
+        logger.info("[%s] saving %s" % (self.__class__.__name__, timeseries))
         id, packed = self._serialize(timeseries)
         self.time_series.update({'_id': id}, packed, upsert=True)
 

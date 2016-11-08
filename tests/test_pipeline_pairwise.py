@@ -7,6 +7,7 @@ import numpy as np
 import datetime
 from algotrader.technical import Indicator
 from algotrader.technical.pipeline import PipeLine
+from algotrader.technical.pipeline.make_vector import MakeVector
 from algotrader.technical.pipeline.pairwise import Plus, Minus, Times, Divides, Greater, PairCorrelation
 from algotrader.technical.talib_wrapper import SMA
 from algotrader.utils.time_series import DataSeries
@@ -116,4 +117,49 @@ class PairwiseTest(TestCase):
         bar0.add({"timestamp": ts[3], "close": x[3], "open": 0})
         bar1.add({"timestamp": ts[3], "close": y[3], "open": 0})
 
-        self.assertEqual(pcorr.now('value'), np.corrcoef(x, y)[0, 1])
+        # self.assertEqual(pcorr.now('value'), np.corrcoef(x, y))
+        self.__np_assert_almost_equal(pcorr.now('value'), np.corrcoef(x, y))
+
+    def test_with_pair_corr_with_vec(self):
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+        bar2 = self.app_context.inst_data_mgr.get_series("bar2")
+        bar3 = self.app_context.inst_data_mgr.get_series("bar3")
+
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
+        bar2.start(self.app_context)
+        bar3.start(self.app_context)
+
+        vec0 = MakeVector([bar0, bar1], input_key='close')
+        vec1 = MakeVector([bar2, bar3], input_key='close')
+
+        vec0.start(self.app_context)
+        vec1.start(self.app_context)
+
+        pcorr = PairCorrelation(vec0, vec1, length=4, input_key=PipeLine.VALUE)
+        pcorr.start(self.app_context)
+
+
+        now = datetime.datetime.now()
+        x0 = np.array([80.0, 102.0, 101.0, 99.0 ])
+        x1 = np.array([102.0, 101.5, 99.0, 97.0])
+        x2 = np.array([94.0, 98.5, 91.0, 87.0])
+        x3 = np.array([104.5, 107.5, 97.0, 91.0])
+        ts = [now + datetime.timedelta(0, i*3) for i in range(4)]
+
+        for i in range(4):
+            bar0.add({"timestamp": ts[i], "close": x0[i], "open": 0})
+            bar1.add({"timestamp": ts[i], "close": x1[i], "open": 0})
+            bar2.add({"timestamp": ts[i], "close": x2[i], "open": 0})
+            bar3.add({"timestamp": ts[i], "close": x3[i], "open": 0})
+
+        x = np.vstack([x0, x1])
+        y = np.vstack([x2, x3])
+        self.__np_assert_almost_equal(pcorr.now('value'), np.corrcoef(x, y))
+
+    def __np_assert_almost_equal(self, target, output, precision=10):
+        try:
+            np.testing.assert_almost_equal(target, output, precision)
+        except AssertionError as e:
+            self.fail(e.message)

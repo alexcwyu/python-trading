@@ -1,16 +1,24 @@
+"""
+Created on 11/5/16
+Author = jchan
+"""
+__author__ = 'jchan'
+
 from algotrader.event.order import OrdAction
 from algotrader.strategy.strategy import Strategy
 from algotrader.technical.roc import ROC
+from algotrader.technical.pipeline import PipeLine
 from algotrader.technical.pipeline.pairwise import PairCorrelation
 from algotrader.technical.pipeline.make_vector import MakeVector
 from algotrader.technical.pipeline.rank import Rank
+from algotrader.technical.pipeline.cross_sessional_apply import Delta, Log
+from algotrader.technical.pipeline.pairwise import Minus, Divides
 from algotrader.utils import logger
 import numpy as np
 
-
-class AlphaFormula3(Strategy):
+class VIXFuture(Strategy):
     def __init__(self, stg_id=None, stg_configs=None):
-        super(AlphaFormula3, self).__init__(stg_id=stg_id, stg_configs=stg_configs)
+        super(VIXFuture, self).__init__(stg_id=stg_id, stg_configs=stg_configs)
         self.day_count = 0
         self.order = None
 
@@ -48,7 +56,6 @@ class AlphaFormula3(Strategy):
         if np.any(np.isnan(corr)):
             return
 
-
         weight = [corr[i, i+2] for i in range(len(self.bars))]
         # weight = rank
         weight = -1*weight[0]
@@ -62,5 +69,4 @@ class AlphaFormula3(Strategy):
         # logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
         self.order = self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=qty) if qty > 0 else \
             self.market_order(inst_id=bar.inst_id, action=OrdAction.SELL, qty=-qty)
-
 

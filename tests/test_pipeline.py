@@ -283,19 +283,76 @@ class PipelineTest(TestCase):
         t = datetime.datetime.now()
         bar0.add({"timestamp": t, "close": 80.0, "open": 0})
         bar1.add({"timestamp": t, "close": 95.0, "open": 0})
-        print rank.now(keys=PipeLine.VALUE)
+
+        nan_arr = np.empty([1,3])
+        nan_arr[:] = np.nan
+        self.__np_assert_almost_equal(nan_arr, rank.now()["value"])
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 85.0, "open": 0})
         bar1.add({"timestamp": t, "close": 93.0, "open": 0})
-        print rank.now(keys=PipeLine.VALUE)
+        target = nan_arr
+        target[0, 0] = 0.
+        self.__np_assert_almost_equal(target, rank.now()["value"])
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 86.0, "open": 0})
         bar1.add({"timestamp": t, "close": 91.0, "open": 0})
-        print rank.now(keys=PipeLine.VALUE)
+        target[0, 1] = 0.5
+        self.__np_assert_almost_equal(target, rank.now()["value"])
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 90.0, "open": 0})
         bar1.add({"timestamp": t, "close": 95.0, "open": 0})
-        print rank.now(keys=PipeLine.VALUE)
+        target = np.array([[0.5, 1.0, 0.]])
+
+        self.__np_assert_almost_equal(target, rank.now()["value"])
+
+    def test_with_multi_bar_multi_indicator_with_tail_start(self):
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
+
+        # sma_2_bar0 = SMA(bar0, "close", 2)
+        # sma_4_bar0 = SMA(bar0, "close", 4)
+        # sma_3_bar1 = SMA(bar1, "close", 3)
+
+        #
+        # sma_2_bar0.start(self.app_context)
+        # sma_4_bar0.start(self.app_context)
+        # sma_3_bar1.start(self.app_context)
+
+        # rank = Rank([sma_2_bar0, sma_3_bar1, sma_4_bar0], input_key=Indicator.VALUE)
+        rank = Rank([SMA(bar0, "close", 2), SMA(bar1, "close", 3), SMA(bar0, "close", 4)], input_key=Indicator.VALUE)
+        rank.start(self.app_context) # only start at the tail is enough
+
+        t = datetime.datetime.now()
+        bar0.add({"timestamp": t, "close": 80.0, "open": 0})
+        bar1.add({"timestamp": t, "close": 95.0, "open": 0})
+
+        nan_arr = np.empty([1,3])
+        nan_arr[:] = np.nan
+        self.__np_assert_almost_equal(nan_arr, rank.now()["value"])
+
+        t = t + datetime.timedelta(0, 3)
+        bar0.add({"timestamp": t, "close": 85.0, "open": 0})
+        bar1.add({"timestamp": t, "close": 93.0, "open": 0})
+        target = nan_arr
+        target[0, 0] = 0.
+        self.__np_assert_almost_equal(target, rank.now()["value"])
+
+        t = t + datetime.timedelta(0, 3)
+        bar0.add({"timestamp": t, "close": 86.0, "open": 0})
+        bar1.add({"timestamp": t, "close": 91.0, "open": 0})
+        target[0, 1] = 0.5
+        self.__np_assert_almost_equal(target, rank.now()["value"])
+
+        t = t + datetime.timedelta(0, 3)
+        bar0.add({"timestamp": t, "close": 90.0, "open": 0})
+        bar1.add({"timestamp": t, "close": 95.0, "open": 0})
+        target = np.array([[0.5, 1.0, 0.]])
+
+        self.__np_assert_almost_equal(target, rank.now()["value"])
+

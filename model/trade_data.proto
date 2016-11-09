@@ -1,1 +1,4 @@
 syntax = "proto3";
+
+package algotrader.model.trade_data;
+

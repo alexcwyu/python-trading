@@ -5,7 +5,7 @@ from unittest import TestCase
 
 import generated.ref_data_pb2 as ref_data
 from algotrader.utils.date_utils import DateUtils
-
+from protobuf_to_dict import *
 
 class RefDataTest(TestCase):
     def test_instrument(self):
@@ -35,15 +35,16 @@ class RefDataTest(TestCase):
 
         print(inst)
 
-        # dict = protobuf_to_dict(inst)
-        # inst2 = dict_to_protobuf(ref_data.Instrument, dict)
-        #
-        # self.assertEqual(inst, inst2)
 
         b = inst.SerializeToString()
         inst2 = ref_data.Instrument()
         inst2.ParseFromString(b)
         self.assertEqual(inst, inst2)
+
+
+        dict = protobuf_to_dict(inst)
+        inst3 = dict_to_protobuf(ref_data.Instrument, dict)
+        self.assertEqual(inst, inst3)
 
     def test_currency(self):
         currency = ref_data.Currency(id=1, code="HKD", name="Hong Kong Dollar", alt_codes={1: "HK", 2: "HKDD"})

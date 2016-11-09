@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-//package algotrader.model.ref_data;
+package algotrader.model.ref_data;
 
 message Instrument {
 
@@ -21,6 +21,17 @@ message Instrument {
         CBO = 7;
     }
 
+    enum Idtype{
+        CUSIP = 0;
+        ISIN = 1;
+        SEDOL = 2;
+        RIC = 3;
+        BBG = 4;
+        VALOREN = 5;
+        WKN = 6;
+        CINS = 7;
+    }
+
     int64 id = 1;
     string symbol = 2;
     string name = 3;
@@ -29,19 +40,23 @@ message Instrument {
     int64 primary_exch_id = 6;
     repeated int64 exch_ids = 7;
     int64 ccy_id = 8;
-    map<int64, string> alt_symbols = 9;
-    string sector = 10;
-    string industry = 11;
-    int64 und_inst_id = 12;
-    int64 exp_date = 13;
-    CallPut call_put = 14;
-    double factor = 15;
-    double strike = 16;
-    double margin = 17;
-    double tick_size = 18;
-    int64 trading_hours_id = 19;
-    int64 trading_holidays_id = 20;
+    string sector = 9;
+    string industry = 10;
+    int64 und_inst_id = 11;
+    int64 exp_date = 12;
+    CallPut call_put = 13;
+    double factor = 14;
+    double strike = 15;
+    double margin = 16;
+    double tick_size = 17;
 
+    int64 trading_hours_id = 18;
+    int64 trading_holidays_id = 19;
+
+    map<int64, string> alt_symbols = 20;
+    map<int64, string> alt_ids = 21;
+    map<int64, string> alt_sectors = 22;
+    map<int64, string> alt_industries = 23;
 }
 
 message Exchange {
@@ -49,9 +64,10 @@ message Exchange {
     string code = 2;
     string name = 3;
     int64 country_id = 4;
-    map<int64, string> alt_codes = 5;
-    int64 trading_hours_id = 6;
-    int64 trading_holidays_id = 7;
+    int64 trading_hours_id = 5;
+    int64 trading_holidays_id = 6;
+
+    map<int64, string> alt_codes = 7;
 }
 
 message Country {
@@ -64,6 +80,7 @@ message Currency {
     int64 id = 1;
     string code = 2;
     string name = 3;
+
     map<int64, string> alt_codes = 4;
 }
 

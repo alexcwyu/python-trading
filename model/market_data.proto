@@ -15,31 +15,42 @@ message Bar{
     int32 size = 3;
     int32 provider_id = 4;
     int64 timestamp = 5;
-    int64 begin_time = 6;
-    double open = 7;
-    double high = 8;
-    double low = 9;
-    double close = 10;
-    double vol = 11;
-    double adj_close = 12;
+    int64 begin_time = 7;
+    int64 utc_time = 8;
+
+
+    double open = 9;
+    double high = 10;
+    double low = 11;
+    double close = 12;
+    double vol = 13;
+    double adj_close = 14;
+    double open_int = 15;
 }
 
 message Quote{
+
+
     int64 inst_id = 1;
     int32 provider_id = 2;
     int64 timestamp = 3;
-    double bid = 4;
-    int64 bid_size = 5;
-    double ask = 6;
-    int64 ask_size = 7;
+    int64 utc_time = 4;
+
+    double bid = 5;
+    int64 bid_size = 6;
+    double ask = 7;
+    int64 ask_size = 8;
 }
 
 message Trade{
+
     int64 inst_id = 1;
     int32 provider_id = 2;
     int64 timestamp = 3;
-    double price = 4;
-    int64 size = 5;
+    int64 utc_time = 4;
+
+    double price = 5;
+    int64 size = 6;
 }
 
 message MarketDepth{
@@ -57,27 +68,32 @@ message MarketDepth{
     int64 inst_id = 1;
     int32 provider_id = 2;
     int64 timestamp = 3;
-    string provider = 4;
-    int64 position = 5;
-    Operation operation = 6;
-    Side side = 7;
-    double price = 8;
-    int64 size = 9;
+    int64 utc_time = 4;
+
+    string provider = 5;
+    int64 position = 6;
+    Operation operation = 7;
+    Side side = 8;
+    double price = 9;
+    int64 size = 10;
 }
 
 
 message DataSeriesItem{
-    map<string, double> data = 1;
+    int64 timestamp = 1;
+    map<string, double> data = 2;
 }
 
 message DataSeries{
     int64 id = 1;
     string name = 2;
     string desc = 3;
-    double missing_value_replace = 4;
+    repeated string inputs = 4;
     repeated string keys = 5;
-    int64 start_time = 6;
-    int64 end_time = 7;
-    map<int64, DataSeriesItem> items = 8;
+    string default_output_key = 6;
+    double missing_value_replace = 7;
+    int64 start_time = 8;
+    int64 end_time = 9;
+    repeated DataSeriesItem items = 10;
 }
 

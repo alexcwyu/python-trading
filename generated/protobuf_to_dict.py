@@ -40,6 +40,7 @@ def protobuf_to_dict(pb, type_callable_map=TYPE_CALLABLE_MAP, use_enum_labels=Fa
     result_dict = {}
     extensions = {}
     for field, value in pb.ListFields():
+        print(field, value)
         type_callable = _get_field_value_adaptor(pb, field, type_callable_map, use_enum_labels)
         if field.label == FieldDescriptor.LABEL_REPEATED:
             type_callable = repeated(type_callable)

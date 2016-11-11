@@ -1,4 +1,133 @@
 syntax = "proto3";
-
+import "google/protobuf/any.proto";
 package algotrader.model.trade_data;
+
+
+enum OrderAcion {
+    Buy = 0;
+    Sell = 1;
+    //SellShort = 2;
+}
+
+enum OrderType {
+    Market = 0;
+    Limit = 1;
+    Stop = 2;
+    StopLimit = 3;
+    TrailingStop = 4;
+    MarketOnClose = 5;
+    LimitOnClose = 6;
+    MarketToLimit = 7;
+    MarketIfPriceTouched = 8;
+    MarketOnOpen = 9;
+}
+
+enum TIF {
+    DAY = 0;
+    GTC = 1;
+    FOK = 2;
+    GTD = 3;
+}
+
+enum OrderStatus {
+    UnknownStatus = 0;
+    New = 1;
+    PendingSubmit = 2;
+    Submitted = 3;
+    PendingCancel = 4;
+    Cancelled = 5;
+    PendingReplace = 6;
+    Replaced = 7;
+    PartiallyFilled = 8;
+    Filled = 9;
+    Rejected = 10;
+}
+
+message NewOrderRequest {
+    int64 cl_id = 1;
+    int64 cl_ord_id = 2;
+    int64 portf_id = 3;
+    int64 broker_id = 4;
+    int64 inst_id = 5;
+    OrderAcion action = 6;
+    OrderType type = 7;
+    double qty = 8;
+    double limit_price = 9;
+    double stop_price = 10;
+    TIF tif = 11;
+    string oca_tag = 12;
+    map<string, google.protobuf.Any> params = 13;
+}
+
+
+message OrderReplaceRequest {
+    int64 cl_id = 1;
+    int64 cl_ord_id = 2;
+    OrderType type = 3;
+    double qty = 4;
+    double limit_price = 5;
+    double stop_price = 6;
+    TIF tif = 7;
+    string oca_tag = 8;
+    map<string, google.protobuf.Any> params = 9;
+
+}
+
+message OrderCancelRequest {
+    int64 cl_id = 1;
+    int64 cl_ord_id = 2;
+    map<string, google.protobuf.Any> params = 9;
+
+}
+
+message OrderStatusUpdate {
+    int64 id = 1;
+    int64 broker_id = 2;
+    int64 ord_id = 3;
+    int64 cl_id = 4;
+    int64 cl_ord_id = 5;
+    int64 inst_id = 6;
+    double filled_qty = 7;
+    double avg_price = 8;
+    OrderStatus status = 9;
+}
+
+
+message ExecutionReport {
+    int64 id = 1;
+    int64 broker_id = 2;
+    int64 ord_id = 3;
+    int64 cl_id = 4;
+    int64 cl_ord_id = 5;
+    int64 inst_id = 6;
+
+    double last_qty = 7;
+    double last_price = 8;
+    double commission = 9;
+    double filled_qty = 10;
+    double avg_oprice = 11;
+    OrderStatus status = 12;
+}
+
+
+message AccountUpdate {
+    int64 id = 1;
+    string account_name = 2;
+    string key = 3;
+    string ccy = 4;
+    double value = 5;
+
+}
+
+message PortfolioUpdate {
+    int64 id = 1;
+    int64 port_id = 2;
+    int64 inst_id = 3;
+    double position = 4;
+    double mkt_price = 5;
+    double mkt_value = 6;
+    double avg_cost = 7;
+    double unrealized_pnl = 8;
+    double realized_pnl = 9;
+}
 

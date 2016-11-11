@@ -4,12 +4,6 @@ package algotrader.model.ref_data;
 
 message Instrument {
 
-
-    enum CallPut{
-        Call = 0;
-        Put = 1;
-    }
-
     enum InstType {
         STK = 0;
         FUT = 1;
@@ -32,6 +26,23 @@ message Instrument {
         CINS = 7;
     }
 
+    enum OptionType{
+        Call = 0;
+        Put = 1;
+    }
+
+    enum OptionStyle {
+        European = 0;
+        American = 1;
+    }
+
+
+    message Underlying{
+        int64 inst_id = 1;
+        double weight = 2;
+
+    }
+
     int64 id = 1;
     string symbol = 2;
     string name = 3;
@@ -42,21 +53,26 @@ message Instrument {
     int64 ccy_id = 8;
     string sector = 9;
     string industry = 10;
-    int64 und_inst_id = 11;
-    int64 exp_date = 12;
-    CallPut call_put = 13;
-    double factor = 14;
-    double strike = 15;
-    double margin = 16;
-    double tick_size = 17;
+    double margin = 11;
+    double tick_size = 12;
 
-    int64 trading_hours_id = 18;
-    int64 trading_holidays_id = 19;
+    //derivatives
+    repeated Underlying underlyings = 21;  //TODO basket, index, ETF.. multiple und relationship
+    OptionType option_type=22;
+    OptionStyle option_style =23;
+    double strike = 24;
+    int64 exp_date = 25;
+    double multiplier = 26;
 
-    map<int64, string> alt_symbols = 20;
-    map<int64, string> alt_ids = 21;
-    map<int64, string> alt_sectors = 22;
-    map<int64, string> alt_industries = 23;
+    //trading hours override
+    int64 trading_hours_id = 30;
+    int64 trading_holidays_id = 31;
+
+    //alt sym / ids
+    map<int64, string> alt_symbols = 41;  //map<provider_id, alt_symbol>, e.g. IB -> 5
+    map<int64, string> alt_ids = 42;      //e.g. RIC -> 0005.HK
+    map<int64, string> alt_sectors = 43;
+    map<int64, string> alt_industries = 44;
 }
 
 message Exchange {

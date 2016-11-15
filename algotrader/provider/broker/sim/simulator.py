@@ -44,7 +44,7 @@ class Simulator(Broker, MarketDataEventHandler):
         return Broker.Simulator
 
     def next_ord_id(self):
-        return self.app_context.seq_mgr.get_next_sequence("%s.order" % self.id())
+        return str(self.app_context.seq_mgr.get_next_sequence("%s.order" % self.id()))
 
     def next_exec_id(self):
         return self.app_context.seq_mgr.get_next_sequence("%s.exec" % self.id())
@@ -62,6 +62,7 @@ class Simulator(Broker, MarketDataEventHandler):
         self.__process_event(trade)
 
     def __process_event(self, event):
+        # SerializerTest.ser_deser(name, serializer, basket)
         logger.debug("[%s] %s" % (self.__class__.__name__, event))
         if event.inst_id in self.ord_req_map:
             for cl_ord_map in self.ord_req_map[event.inst_id].values():

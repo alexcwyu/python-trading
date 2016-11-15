@@ -6,11 +6,11 @@ from algotrader.utils import logger
 
 
 class Rank(PipeLine):
-    _slots__ = (
+    __slots__ = (
         'ascending'
     )
 
-    def __init__(self, inputs, ascending=True, input_key='close', desc="Rank"):
+    def __init__(self, inputs=None, ascending=True, input_key='close', desc="Rank"):
         self.ascending = ascending
         super(Rank, self).__init__(PipeLine.get_name(Rank.__name__, inputs, input_key),
                                    inputs, input_key, length=1, desc=desc)
@@ -22,7 +22,7 @@ class Rank(PipeLine):
         result['timestamp'] = data['timestamp']
         if self.all_filled():
             df = pd.DataFrame(self.cache)
-            result[PipeLine.VALUE] = ((df.rank(axis=1, ascending=self.ascending) - 1)/(df.shape[1]-1)).tail(1).values
+            result[PipeLine.VALUE] = ((df.rank(axis=1, ascending=self.ascending) - 1)/(df.shape[1]-1)).tail(1).values.tolist()
         else:
             result[PipeLine.VALUE] = self._default_output()
 
@@ -31,7 +31,7 @@ class Rank(PipeLine):
     def _default_output(self):
         na_array = np.empty(shape=self.shape())
         na_array[:] = np.nan
-        return na_array
+        return na_array.tolist()
 
     def shape(self):
-        return np.array([1, self.numPipes])
+        return [1, self.numPipes]

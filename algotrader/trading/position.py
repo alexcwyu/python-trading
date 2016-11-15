@@ -35,7 +35,7 @@ class Position(Persistable):
     def add_position(self, cl_id, cl_ord_id, filled_qty):
         if cl_id not in self.filled_qty_dict:
             self.filled_qty_dict[cl_id] = {}
-        existing_filled_qty = self.filled_qty_dict[cl_id].get(cl_ord_id, 0)
+        existing_filled_qty = self.filled_qty_dict[str(cl_id)].get(cl_ord_id, 0)
         updated_filled_qty = existing_filled_qty + filled_qty
         self.filled_qty_dict[cl_id][cl_ord_id] = updated_filled_qty
 

@@ -39,16 +39,18 @@ class PandasMemoryDataFeed(Feed):
     def id(self):
         return Feed.PandasMemory
 
-    def subscribe_mktdata(self, *sub_keys):
-        self.sub_keys.extend(sub_keys)
+    def subscribe_mktdata(self, sub_keys):
+        # logger.debug("[%s] subscrib_mktdata with subkeys type %s" % (self.__class__.__name__, type(sub_keys)))
+        # self.sub_keys.extend(sub_keys)
+        self.__load_data(sub_keys)
 
-        self.__load_data(self.sub_keys)
         for index, row in self.df.iterrows():
             ## TODO support bar filtering // from date, to date
             bar = self.process_row(index, row)
             self.data_event_bus.on_next(bar)
 
     def process_row(self, index, row):
+        logger.debug("[%s] process_row with index %s, symbol %s" % (self.__class__.__name__, index, row['Symbol']))
         inst = self.ref_data_mgr.get_inst(symbol=row['Symbol'])
         return Bar(inst_id=inst.inst_id,
                    timestamp=DateUtils.datetime_to_unixtimemillis(index),
@@ -66,14 +68,14 @@ class PandasMemoryDataFeed(Feed):
             if not isinstance(sub_key, HistDataSubscriptionKey):
                 raise RuntimeError("only HistDataSubscriptionKey is supported!")
             if isinstance(sub_key.subscription_type,
-                          BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
+                          BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time: #and sub_key.subscription_type.bar_size == BarSize.D1:
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.id())
 
                 # df = web.DataReader("F", self.system, sub_key.from_date, sub_key.to_date)
                 df = self.dict_of_df[symbol]
                 df['Symbol'] = symbol
-                df['BarSize'] = int(BarSize.D1)
+                df['BarSize'] = int(BarSize.M5)
 
                 self.dfs.append(df)
 

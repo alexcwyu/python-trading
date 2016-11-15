@@ -28,7 +28,7 @@ class CrossSessionalApply(PipeLine):
                 if len(packed_matrix.shape) == 3:
                     packed_matrix = packed_matrix[:,0,:]
                 # TODO what if the cache value is a higher dimension matrix?
-                result[PipeLine.VALUE] = self.np_func(packed_matrix)
+                result[PipeLine.VALUE] = self.np_func(packed_matrix).tolist()
             else:
                 result[PipeLine.VALUE] = self._default_output()
         else:
@@ -39,10 +39,10 @@ class CrossSessionalApply(PipeLine):
     def _default_output(self):
         na_array = np.empty(shape=self.shape())
         na_array[:] = np.nan
-        return na_array
+        return na_array.tolist()
 
     def shape(self):
-        return np.array([self.numPipes, self.numPipes])
+        return [self.numPipes, self.numPipes]
 
 
 
@@ -67,7 +67,7 @@ class CrossSessionalApplyScala(PipeLine):
                 if len(packed_matrix.shape) == 3:
                     packed_matrix = packed_matrix[:,0,:]
                 # TODO what if the cache value is a higher dimension matrix?
-                result[PipeLine.VALUE] = self.np_func(packed_matrix)
+                result[PipeLine.VALUE] = self.np_func(packed_matrix).tolist()
                 # result[PipeLine.VALUE] = self.np_func(self.df.values)
             else:
                 result[PipeLine.VALUE] = self._default_output()
@@ -79,10 +79,10 @@ class CrossSessionalApplyScala(PipeLine):
     def _default_output(self):
         na_array = np.empty(shape=self.shape())
         na_array[:] = np.nan
-        return na_array
+        return na_array.tolist()
 
     def shape(self):
-        return np.array([1,1])
+        return [1, 1]
 
 class Average(CrossSessionalApplyScala):
     def __init__(self, inputs, input_key='close', desc="Cross Sessional Average"):

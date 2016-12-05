@@ -148,7 +148,7 @@ class OrderReplaceRequest(OrderEvent):
 
 class OrderCancelRequest(OrderEvent):
     __slots__ = (
-        'params'
+        'params',
     )
 
     def __init__(self, timestamp=None, cl_id=None, cl_ord_id=None, params=None):

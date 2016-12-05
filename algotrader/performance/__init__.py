@@ -3,7 +3,7 @@ from algotrader.provider.persistence import Persistable
 
 class PortfolioAnalyzer(Persistable):
     __slots__ = (
-        'portfolio'
+        'portfolio', #TODO: review this, portfolio is belongs to slots and transient at the same time?
     )
 
     __transient__ = (

@@ -58,3 +58,30 @@ def euler2d(drift0, drift1, diffusion0, diffusion1, rho, x0, y0, T, Tstep, Nsim)
                  + diffusion1(x[:,i-1], y[:,i-1], t[i-1])*dWy[:,i-1]
 
     return x, y
+
+def euler_states(drift, diffusion, x0, T, Tstep, Nsim, states):
+    """
+    Simulate solution of Stochastic Differential Equation by discretization using
+    Euler's method
+    :param drift: lambda function with signature x, t
+    :param diffusion: lambda function with signature x, t
+    :param x0: initial position
+    :param T: terminal time in double
+    :param Tstep: number of time steps
+    :param Nsim: number of path simulated
+    :return: np array of simulated stochastic process
+    """
+    assert Tstep == len(states)
+    dt = T/(Tstep-1)
+    dW = np.random.normal(0, math.sqrt(dt), Nsim*Tstep).reshape(Nsim, Tstep)
+
+    x = np.zeros([Nsim, Tstep])
+    t = np.linspace(0, T, Tstep)
+    x[:,0] = x0
+
+    for i in xrange(1, Tstep):
+        x[:,i] = x[:, i-1] + drift[states[i]](x[:, i-1], t[i-1])*dt + \
+                 diffusion[states[i]](x[:, i-1], t[i-1]) *dW[:, i-1]
+    return x
+
+

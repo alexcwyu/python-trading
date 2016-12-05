@@ -6,7 +6,7 @@ from algotrader.provider.persistence import Persistable
 class Config(Persistable):
     __metaclass__ = abc.ABCMeta
     __slots__ = (
-        'config_id'
+        'config_id',
     )
 
     def __init__(self, config_id):

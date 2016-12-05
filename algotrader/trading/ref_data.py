@@ -44,7 +44,7 @@ class Instrument(ReferenceData):
         'factor',
         'strike',
         'put_call',
-        'margin'
+        'margin',
 
     )
 
@@ -88,7 +88,7 @@ class Instrument(ReferenceData):
 class Exchange(ReferenceData):
     __slots__ = (
         'exch_id',
-        'name'
+        'name',
     )
 
     def __init__(self, exch_id=None, name=None):
@@ -102,7 +102,7 @@ class Exchange(ReferenceData):
 class Currency(ReferenceData):
     __slots__ = (
         'ccy_id',
-        'name'
+        'name',
     )
 
     def __init__(self, ccy_id=None, name=None):

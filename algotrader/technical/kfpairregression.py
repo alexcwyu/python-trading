@@ -15,7 +15,7 @@ class KalmanFilteringPairRegression(Indicator):
     INTERCEPT = 'intercept'
 
     __slots__ = (
-        'length'
+        'length',
     )
 
     @staticmethod

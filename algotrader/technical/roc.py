@@ -11,7 +11,7 @@ def roc(prev_value, curr_value):
 
 class ROC(Indicator):
     __slots__ = (
-        'length'
+        'length',
     )
 
     def __init__(self, input=None, input_key=None, length=1, desc="Rate Of Change"):

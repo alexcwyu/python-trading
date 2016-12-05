@@ -128,7 +128,7 @@ class KDBConfig(DataStoreConfig):
 
 class InMemoryStoreConfig(DataStoreConfig):
     __slots__ = (
-        'file'
+        'file',
     )
 
     def __init__(self, id='InMemory', file='algotrader_db.p', create_at_start=False,

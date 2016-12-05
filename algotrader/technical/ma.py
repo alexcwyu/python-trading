@@ -5,7 +5,7 @@ from algotrader.technical import Indicator
 
 class SMA(Indicator):
     __slots__ = (
-        'length'
+        'length',
     )
 
     def __init__(self, input=None, input_key=None, length=0, desc="Simple Moving Average", **kwargs):

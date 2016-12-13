@@ -44,11 +44,11 @@ enum OrderStatus {
 }
 
 message NewOrderRequest {
-    int64 cl_id = 1;
-    int64 cl_ord_id = 2;
-    int64 portf_id = 3;
-    int64 broker_id = 4;
-    int64 inst_id = 5;
+    string cl_id = 1;
+    string cl_ord_id = 2;
+    string portf_id = 3;
+    string broker_id = 4;
+    string inst_id = 5;
     OrderAcion action = 6;
     OrderType type = 7;
     double qty = 8;
@@ -61,8 +61,8 @@ message NewOrderRequest {
 
 
 message OrderReplaceRequest {
-    int64 cl_id = 1;
-    int64 cl_ord_id = 2;
+    string cl_id = 1;
+    string cl_ord_id = 2;
     OrderType type = 3;
     double qty = 4;
     double limit_price = 5;
@@ -74,19 +74,19 @@ message OrderReplaceRequest {
 }
 
 message OrderCancelRequest {
-    int64 cl_id = 1;
-    int64 cl_ord_id = 2;
+    string cl_id = 1;
+    string cl_ord_id = 2;
     map<string, google.protobuf.Any> params = 9;
 
 }
 
 message OrderStatusUpdate {
-    int64 id = 1;
-    int64 broker_id = 2;
-    int64 ord_id = 3;
-    int64 cl_id = 4;
-    int64 cl_ord_id = 5;
-    int64 inst_id = 6;
+    string id = 1;
+    string broker_id = 2;
+    string ord_id = 3;
+    string cl_id = 4;
+    string cl_ord_id = 5;
+    string inst_id = 6;
     double filled_qty = 7;
     double avg_price = 8;
     OrderStatus status = 9;
@@ -94,12 +94,12 @@ message OrderStatusUpdate {
 
 
 message ExecutionReport {
-    int64 id = 1;
-    int64 broker_id = 2;
-    int64 ord_id = 3;
-    int64 cl_id = 4;
-    int64 cl_ord_id = 5;
-    int64 inst_id = 6;
+    string id = 1;
+    string broker_id = 2;
+    string ord_id = 3;
+    string cl_id = 4;
+    string cl_ord_id = 5;
+    string inst_id = 6;
 
     double last_qty = 7;
     double last_price = 8;
@@ -111,7 +111,7 @@ message ExecutionReport {
 
 
 message AccountUpdate {
-    int64 id = 1;
+    string id = 1;
     string account_name = 2;
     string key = 3;
     string ccy = 4;
@@ -120,9 +120,9 @@ message AccountUpdate {
 }
 
 message PortfolioUpdate {
-    int64 id = 1;
-    int64 port_id = 2;
-    int64 inst_id = 3;
+    string id = 1;
+    string port_id = 2;
+    string inst_id = 3;
     double position = 4;
     double mkt_price = 5;
     double mkt_value = 6;

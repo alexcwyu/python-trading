@@ -43,14 +43,14 @@ message Instrument {
 
     }
 
-    int64 id = 1;
+    string id = 1;
     string symbol = 2;
     string name = 3;
     string long_name = 4;
     InstType type = 5;
-    int64 primary_exch_id = 6;
-    repeated int64 exch_ids = 7;
-    int64 ccy_id = 8;
+    string primary_exch_id = 6;
+    repeated string exch_ids = 7;
+    string ccy_id = 8;
     string sector = 9;
     string industry = 10;
     double margin = 11;
@@ -65,39 +65,36 @@ message Instrument {
     double multiplier = 26;
 
     //trading hours override
-    int64 trading_hours_id = 30;
-    int64 trading_holidays_id = 31;
+    string trading_hours_id = 30;
+    string trading_holidays_id = 31;
 
     //alt sym / ids
-    map<int64, string> alt_symbols = 41;  //map<provider_id, alt_symbol>, e.g. IB -> 5
-    map<int64, string> alt_ids = 42;      //e.g. RIC -> 0005.HK
-    map<int64, string> alt_sectors = 43;
-    map<int64, string> alt_industries = 44;
+    map<string, string> alt_symbols = 41;  //map<provider_id, alt_symbol>, e.g. IB -> 5
+    map<string, string> alt_ids = 42;      //e.g. RIC -> 0005.HK
+    map<string, string> alt_sectors = 43;
+    map<string, string> alt_industries = 44;
 }
 
 message Exchange {
-    int64 id = 1;
-    string code = 2;
-    string name = 3;
-    int64 country_id = 4;
-    int64 trading_hours_id = 5;
-    int64 trading_holidays_id = 6;
+    string id = 1;
+    string name = 2;
+    int64 country_id = 3;
+    int64 trading_hours_id = 4;
+    int64 trading_holidays_id = 5;
 
-    map<int64, string> alt_codes = 7;
+    map<string, string> alt_codes = 6;
 }
 
 message Country {
-    int64 id = 1;
-    string code = 2;
-    string name = 3;
+    string id = 1;
+    string name = 2;
 }
 
 message Currency {
-    int64 id = 1;
-    string code = 2;
-    string name = 3;
+    string id = 1;
+    string name = 2;
 
-    map<int64, string> alt_codes = 4;
+    map<string, string> alt_codes = 4;
 }
 
 

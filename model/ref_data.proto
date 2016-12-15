@@ -38,7 +38,7 @@ message Instrument {
 
 
     message Underlying{
-        int64 inst_id = 1;
+        string inst_id = 1;
         double weight = 2;
 
     }
@@ -78,9 +78,9 @@ message Instrument {
 message Exchange {
     string id = 1;
     string name = 2;
-    int64 country_id = 3;
-    int64 trading_hours_id = 4;
-    int64 trading_holidays_id = 5;
+    string country_id = 3;
+    string trading_hours_id = 4;
+    string trading_holidays_id = 5;
 
     map<string, string> alt_codes = 6;
 }
@@ -117,9 +117,8 @@ message TradingHolidays{
         }
     }
 
-    int64 id = 1;
-    string name = 2;
-    repeated Holiday holidays=3;
+    string id = 1;
+    repeated Holiday holidays=2;
 }
 
 message TradingHours{
@@ -142,8 +141,7 @@ message TradingHours{
         }
     }
 
-    int64 id = 1;
-    string name = 2;
-    string timezone = 3;
-    repeated Session sessions = 4;
+    string id = 1;
+    string timezone = 2;
+    repeated Session sessions = 3;
 }

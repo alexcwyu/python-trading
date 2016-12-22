@@ -1,5 +1,7 @@
 syntax = "proto3";
 import "google/protobuf/any.proto";
+import "market_data.proto";
+
 package algotrader.model.trade_data;
 
 
@@ -44,44 +46,54 @@ enum OrderStatus {
 }
 
 message NewOrderRequest {
-    string cl_id = 1;
-    string cl_ord_id = 2;
-    string portf_id = 3;
-    string broker_id = 4;
-    string inst_id = 5;
-    OrderAcion action = 6;
-    OrderType type = 7;
-    double qty = 8;
-    double limit_price = 9;
-    double stop_price = 10;
-    TIF tif = 11;
-    string oca_tag = 12;
-    map<string, google.protobuf.Any> params = 13;
+    int64 timestamp = 1;
+
+    string cl_id = 2;
+    string cl_ord_id = 3;
+    string portf_id = 4;
+    string broker_id = 5;
+    string inst_id = 6;
+
+    OrderAcion action = 10;
+    OrderType type = 11;
+    double qty = 12;
+    double limit_price = 13;
+    double stop_price = 14;
+    TIF tif = 15;
+
+    string oca_tag = 20;
+    map<string, google.protobuf.Any> params = 21;
 }
 
 
 message OrderReplaceRequest {
-    string cl_id = 1;
-    string cl_ord_id = 2;
-    OrderType type = 3;
-    double qty = 4;
-    double limit_price = 5;
-    double stop_price = 6;
-    TIF tif = 7;
-    string oca_tag = 8;
-    map<string, google.protobuf.Any> params = 9;
+    int64 timestamp = 1;
+
+    string cl_id = 2;
+    string cl_ord_id = 3;
+
+    OrderType type = 10;
+    double qty = 11;
+    double limit_price = 12;
+    double stop_price = 13;
+    TIF tif = 14;
+
+    string oca_tag = 20;
+    map<string, google.protobuf.Any> params = 21;
 
 }
 
 message OrderCancelRequest {
-    string cl_id = 1;
-    string cl_ord_id = 2;
-    map<string, google.protobuf.Any> params = 9;
+    int64 timestamp = 1;
+    string cl_id = 2;
+    string cl_ord_id = 3;
+
+    map<string, google.protobuf.Any> params = 10;
 
 }
 
 message OrderStatusUpdate {
-    string id = 1;
+    string event_id = 1;
     string broker_id = 2;
     string ord_id = 3;
     string cl_id = 4;
@@ -94,33 +106,35 @@ message OrderStatusUpdate {
 
 
 message ExecutionReport {
-    string id = 1;
+    string event_id = 1;
     string broker_id = 2;
-    string ord_id = 3;
-    string cl_id = 4;
-    string cl_ord_id = 5;
-    string inst_id = 6;
+    string er_id = 3;
 
-    double last_qty = 7;
-    double last_price = 8;
-    double commission = 9;
-    double filled_qty = 10;
-    double avg_oprice = 11;
-    OrderStatus status = 12;
+    string ord_id = 4;
+    string cl_id = 5;
+    string cl_ord_id = 6;
+    string inst_id = 7;
+
+    double last_qty = 10;
+    double last_price = 11;
+    double commission = 12;
+    double filled_qty = 13;
+    double avg_oprice = 14;
+    OrderStatus status = 15;
 }
 
 
 message AccountUpdate {
-    string id = 1;
+    string event_id = 1;
     string account_name = 2;
     string key = 3;
-    string ccy = 4;
+    string ccy_id = 4;
     double value = 5;
 
 }
 
 message PortfolioUpdate {
-    string id = 1;
+    string event_id = 1;
     string port_id = 2;
     string inst_id = 3;
     double position = 4;
@@ -131,3 +145,95 @@ message PortfolioUpdate {
     double realized_pnl = 9;
 }
 
+
+message Amount {
+    string ccy_id = 1;
+    double value = 2;
+}
+
+message Account {
+    string acct_id = 1;
+    map<string, Amount> values = 2;
+    map<string, Position> positions = 3;
+}
+
+message Portfolio {
+    string port_id = 1;
+    map<string, Position> positions = 2;
+
+    DataSeries performance = 5;
+    double total_equity = 6;
+    double cash = 7;
+    double stock_value = 8;
+    Pnl pnl = 9;
+    DrawDown drawDown = 10;
+}
+
+message Pnl {
+    double pnl = 1;
+    DataSeries pnl_series = 2;
+}
+
+message DrawDown {
+    double drawdown = 1;
+    double drawdown_pct = 2;
+    double high_equity = 3;
+    double low_equity = 4;
+    double current_run_up = 5;
+    double current_drawdown = 6;
+    DataSeries drawdown_series = 7;
+}
+
+
+message Config {
+    string config_id = 1;
+    map<string, string> values = 2;
+}
+
+message Strategy {
+    string stg_id = 1;
+    string config_id = 2;
+    map<string, Position> positions = 3;
+}
+
+
+message Order {
+    int64 timestamp = 1;
+
+    string cl_id = 2;
+    string cl_ord_id = 3;
+    string portf_id = 4;
+    string broker_id = 5;
+    string inst_id = 6;
+
+    OrderAcion action = 10;
+    OrderType type = 11;
+    double qty = 12;
+    double limit_price = 13;
+    double stop_price = 14;
+    TIF tif = 15;
+
+    string oca_tag = 20;
+    map<string, google.protobuf.Any> params = 21;
+
+    OrderStatus status = 30;
+    double filled_qty = 31;
+    double avg_price = 32;
+    double last_qty = 33;
+    double last_price = 34;
+    bool stop_limit_ready = 35;
+    double trailing_stop_exec_price = 36;
+}
+
+
+message ClientOrder {
+    map<string, Order> orders = 1;
+}
+
+message Position {
+    string inst_id = 1;
+    map<string, ClientOrder> cl_orders = 2;
+    double last_price = 3;
+    double total_qty = 4;
+
+}

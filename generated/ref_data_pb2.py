@@ -19,33 +19,11 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='ref_data.proto',
   package='algotrader.model.ref_data',
   syntax='proto3',
-  serialized_pb=_b('\n\x0eref_data.proto\x12\x19\x61lgotrader.model.ref_data\"\xb8\x05\n\nInstrument\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x11\n\tlong_name\x18\x04 \x01(\t\x12<\n\x04type\x18\x05 \x01(\x0e\x32..algotrader.model.ref_data.Instrument.InstType\x12\x17\n\x0fprimary_exch_id\x18\x06 \x01(\x03\x12\x10\n\x08\x65xch_ids\x18\x07 \x03(\x03\x12\x0e\n\x06\x63\x63y_id\x18\x08 \x01(\x03\x12J\n\x0b\x61lt_symbols\x18\t \x03(\x0b\x32\x35.algotrader.model.ref_data.Instrument.AltSymbolsEntry\x12\x0e\n\x06sector\x18\n \x01(\t\x12\x10\n\x08industry\x18\x0b \x01(\t\x12\x13\n\x0bund_inst_id\x18\x0c \x01(\x03\x12\x10\n\x08\x65xp_date\x18\r \x01(\x03\x12?\n\x08\x63\x61ll_put\x18\x0e \x01(\x0e\x32-.algotrader.model.ref_data.Instrument.CallPut\x12\x0e\n\x06\x66\x61\x63tor\x18\x0f \x01(\x01\x12\x0e\n\x06strike\x18\x10 \x01(\x01\x12\x0e\n\x06margin\x18\x11 \x01(\x01\x12\x11\n\ttick_size\x18\x12 \x01(\x01\x12\x18\n\x10trading_hours_id\x18\x13 \x01(\x03\x12\x1b\n\x13trading_holidays_id\x18\x14 \x01(\x03\x1a\x31\n\x0f\x41ltSymbolsEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x1c\n\x07\x43\x61llPut\x12\x08\n\x04\x43\x61ll\x10\x00\x12\x07\n\x03Put\x10\x01\"S\n\x08InstType\x12\x07\n\x03STK\x10\x00\x12\x07\n\x03\x46UT\x10\x01\x12\x07\n\x03OPT\x10\x02\x12\x07\n\x03\x46OT\x10\x03\x12\x07\n\x03IDX\x10\x04\x12\x08\n\x04\x43\x41SH\x10\x05\x12\x07\n\x03\x45TF\x10\x06\x12\x07\n\x03\x43\x42O\x10\x07\"\xf4\x01\n\x08\x45xchange\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x12\n\ncountry_id\x18\x04 \x01(\x03\x12\x44\n\talt_codes\x18\x05 \x03(\x0b\x32\x31.algotrader.model.ref_data.Exchange.AltCodesEntry\x12\x18\n\x10trading_hours_id\x18\x06 \x01(\x03\x12\x1b\n\x13trading_holidays_id\x18\x07 \x01(\x03\x1a/\n\rAltCodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"1\n\x07\x43ountry\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\"\xa9\x01\n\x08\x43urrency\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x44\n\talt_codes\x18\x04 \x03(\x0b\x32\x31.algotrader.model.ref_data.Currency.AltCodesEntry\x1a/\n\rAltCodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x80\x03\n\x0fTradingHolidays\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x44\n\x08holidays\x18\x03 \x03(\x0b\x32\x32.algotrader.model.ref_data.TradingHolidays.Holiday\x1a\x8c\x02\n\x07Holiday\x12\x14\n\x0ctrading_date\x18\x01 \x01(\x03\x12\x12\n\nstart_date\x18\x02 \x01(\x03\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x10\n\x08\x65nd_date\x18\x04 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\x05 \x01(\x03\x12\x45\n\x04type\x18\x06 \x01(\x0e\x32\x37.algotrader.model.ref_data.TradingHolidays.Holiday.Type\x12\x0c\n\x04\x64\x65sc\x18\x07 \x01(\t\"J\n\x04Type\x12\x0b\n\x07\x46ullDay\x10\x00\x12\x0c\n\x08LateOpen\x10\x01\x12\x0e\n\nEarlyClose\x10\x02\x12\x0b\n\x07Replace\x10\x03\x12\n\n\x06Modify\x10\x04\"\xc3\x03\n\x0cTradingHours\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08timezone\x18\x03 \x01(\t\x12\x41\n\x08sessions\x18\x04 \x03(\x0b\x32/.algotrader.model.ref_data.TradingHours.Session\x1a\xc3\x02\n\x07Session\x12O\n\x0estart_weekdate\x18\x01 \x01(\x0e\x32\x37.algotrader.model.ref_data.TradingHours.Session.WeekDay\x12\x12\n\nstart_time\x18\x02 \x01(\x03\x12M\n\x0c\x65nd_weekdate\x18\x03 \x01(\x0e\x32\x37.algotrader.model.ref_data.TradingHours.Session.WeekDay\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\x03\x12\x0b\n\x03\x65od\x18\x05 \x01(\x08\"e\n\x07WeekDay\x12\n\n\x06Sunday\x10\x00\x12\n\n\x06Monday\x10\x01\x12\x0b\n\x07Tuesday\x10\x02\x12\r\n\tWednesday\x10\x03\x12\x0c\n\x08Thursday\x10\x04\x12\n\n\x06\x46riday\x10\x05\x12\x0c\n\x08Saturday\x10\x06\x62\x06proto3')
+  serialized_pb=_b('\n\x0eref_data.proto\x12\x19\x61lgotrader.model.ref_data\"\xbe\n\n\nInstrument\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x11\n\tlong_name\x18\x04 \x01(\t\x12<\n\x04type\x18\x05 \x01(\x0e\x32..algotrader.model.ref_data.Instrument.InstType\x12\x17\n\x0fprimary_exch_id\x18\x06 \x01(\t\x12\x10\n\x08\x65xch_ids\x18\x07 \x03(\t\x12\x0e\n\x06\x63\x63y_id\x18\x08 \x01(\t\x12\x0e\n\x06sector\x18\t \x01(\t\x12\x10\n\x08industry\x18\n \x01(\t\x12\x0e\n\x06margin\x18\x0b \x01(\x01\x12\x11\n\ttick_size\x18\x0c \x01(\x01\x12\x45\n\x0bunderlyings\x18\x15 \x03(\x0b\x32\x30.algotrader.model.ref_data.Instrument.Underlying\x12\x45\n\x0boption_type\x18\x16 \x01(\x0e\x32\x30.algotrader.model.ref_data.Instrument.OptionType\x12G\n\x0coption_style\x18\x17 \x01(\x0e\x32\x31.algotrader.model.ref_data.Instrument.OptionStyle\x12\x0e\n\x06strike\x18\x18 \x01(\x01\x12\x10\n\x08\x65xp_date\x18\x19 \x01(\x03\x12\x12\n\nmultiplier\x18\x1a \x01(\x01\x12J\n\x0b\x61lt_symbols\x18) \x03(\x0b\x32\x35.algotrader.model.ref_data.Instrument.AltSymbolsEntry\x12\x42\n\x07\x61lt_ids\x18* \x03(\x0b\x32\x31.algotrader.model.ref_data.Instrument.AltIdsEntry\x12J\n\x0b\x61lt_sectors\x18+ \x03(\x0b\x32\x35.algotrader.model.ref_data.Instrument.AltSectorsEntry\x12P\n\x0e\x61lt_industries\x18, \x03(\x0b\x32\x38.algotrader.model.ref_data.Instrument.AltIndustriesEntry\x1a-\n\nUnderlying\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x01\x1a\x31\n\x0f\x41ltSymbolsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a-\n\x0b\x41ltIdsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x31\n\x0f\x41ltSectorsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x34\n\x12\x41ltIndustriesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"S\n\x08InstType\x12\x07\n\x03STK\x10\x00\x12\x07\n\x03\x46UT\x10\x01\x12\x07\n\x03OPT\x10\x02\x12\x07\n\x03\x46OT\x10\x03\x12\x07\n\x03IDX\x10\x04\x12\x08\n\x04\x43\x41SH\x10\x05\x12\x07\n\x03\x45TF\x10\x06\x12\x07\n\x03\x43\x42O\x10\x07\"Z\n\x06Idtype\x12\t\n\x05\x43USIP\x10\x00\x12\x08\n\x04ISIN\x10\x01\x12\t\n\x05SEDOL\x10\x02\x12\x07\n\x03RIC\x10\x03\x12\x07\n\x03\x42\x42G\x10\x04\x12\x0b\n\x07VALOREN\x10\x05\x12\x07\n\x03WKN\x10\x06\x12\x08\n\x04\x43INS\x10\x07\"\x1f\n\nOptionType\x12\x08\n\x04\x43\x61ll\x10\x00\x12\x07\n\x03Put\x10\x01\")\n\x0bOptionStyle\x12\x0c\n\x08\x45uropean\x10\x00\x12\x0c\n\x08\x41merican\x10\x01\"\xeb\x01\n\x08\x45xchange\x12\x0f\n\x07\x65xch_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\ncountry_id\x18\x03 \x01(\t\x12\x18\n\x10trading_hours_id\x18\x04 \x01(\t\x12\x1b\n\x13trading_holidays_id\x18\x05 \x01(\t\x12\x44\n\talt_codes\x18\x06 \x03(\x0b\x32\x31.algotrader.model.ref_data.Exchange.AltCodesEntry\x1a/\n\rAltCodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"H\n\x07\x43ountry\x12\x12\n\ncountry_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x1b\n\x13trading_holidays_id\x18\x04 \x01(\t\"\x9f\x01\n\x08\x43urrency\x12\x0e\n\x06\x63\x63y_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x44\n\talt_codes\x18\x04 \x03(\x0b\x32\x31.algotrader.model.ref_data.Currency.AltCodesEntry\x1a/\n\rAltCodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xfa\x02\n\x0fTradingHolidays\x12\x12\n\nholiday_id\x18\x01 \x01(\t\x12\x44\n\x08holidays\x18\x02 \x03(\x0b\x32\x32.algotrader.model.ref_data.TradingHolidays.Holiday\x1a\x8c\x02\n\x07Holiday\x12\x14\n\x0ctrading_date\x18\x01 \x01(\x03\x12\x12\n\nstart_date\x18\x02 \x01(\x03\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x10\n\x08\x65nd_date\x18\x04 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\x05 \x01(\x03\x12\x45\n\x04type\x18\x06 \x01(\x0e\x32\x37.algotrader.model.ref_data.TradingHolidays.Holiday.Type\x12\x0c\n\x04\x64\x65sc\x18\x07 \x01(\t\"J\n\x04Type\x12\x0b\n\x07\x46ullDay\x10\x00\x12\x0c\n\x08LateOpen\x10\x01\x12\x0e\n\nEarlyClose\x10\x02\x12\x0b\n\x07Replace\x10\x03\x12\n\n\x06Modify\x10\x04\"\xc3\x03\n\x0cTradingHours\x12\x15\n\rtrading_hr_id\x18\x01 \x01(\t\x12\x13\n\x0btimezone_id\x18\x02 \x01(\t\x12\x41\n\x08sessions\x18\x03 \x03(\x0b\x32/.algotrader.model.ref_data.TradingHours.Session\x1a\xc3\x02\n\x07Session\x12O\n\x0estart_weekdate\x18\x01 \x01(\x0e\x32\x37.algotrader.model.ref_data.TradingHours.Session.WeekDay\x12\x12\n\nstart_time\x18\x02 \x01(\x03\x12M\n\x0c\x65nd_weekdate\x18\x03 \x01(\x0e\x32\x37.algotrader.model.ref_data.TradingHours.Session.WeekDay\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\x03\x12\x0b\n\x03\x65od\x18\x05 \x01(\x08\"e\n\x07WeekDay\x12\n\n\x06Sunday\x10\x00\x12\n\n\x06Monday\x10\x01\x12\x0b\n\x07Tuesday\x10\x02\x12\r\n\tWednesday\x10\x03\x12\x0c\n\x08Thursday\x10\x04\x12\n\n\x06\x46riday\x10\x05\x12\x0c\n\x08Saturday\x10\x06\"\x1f\n\x08TimeZone\x12\x13\n\x0btimezone_id\x18\x01 \x01(\tb\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
-
-_INSTRUMENT_CALLPUT = _descriptor.EnumDescriptor(
-  name='CallPut',
-  full_name='algotrader.model.ref_data.Instrument.CallPut',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='Call', index=0, number=0,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='Put', index=1, number=1,
-      options=None,
-      type=None),
-  ],
-  containing_type=None,
-  options=None,
-  serialized_start=629,
-  serialized_end=657,
-)
-_sym_db.RegisterEnumDescriptor(_INSTRUMENT_CALLPUT)
 
 _INSTRUMENT_INSTTYPE = _descriptor.EnumDescriptor(
   name='InstType',
@@ -88,10 +66,100 @@ _INSTRUMENT_INSTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=659,
-  serialized_end=742,
+  serialized_start=1137,
+  serialized_end=1220,
 )
 _sym_db.RegisterEnumDescriptor(_INSTRUMENT_INSTTYPE)
+
+_INSTRUMENT_IDTYPE = _descriptor.EnumDescriptor(
+  name='Idtype',
+  full_name='algotrader.model.ref_data.Instrument.Idtype',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='CUSIP', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ISIN', index=1, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SEDOL', index=2, number=2,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='RIC', index=3, number=3,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='BBG', index=4, number=4,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='VALOREN', index=5, number=5,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='WKN', index=6, number=6,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CINS', index=7, number=7,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=1222,
+  serialized_end=1312,
+)
+_sym_db.RegisterEnumDescriptor(_INSTRUMENT_IDTYPE)
+
+_INSTRUMENT_OPTIONTYPE = _descriptor.EnumDescriptor(
+  name='OptionType',
+  full_name='algotrader.model.ref_data.Instrument.OptionType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='Call', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Put', index=1, number=1,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=1314,
+  serialized_end=1345,
+)
+_sym_db.RegisterEnumDescriptor(_INSTRUMENT_OPTIONTYPE)
+
+_INSTRUMENT_OPTIONSTYLE = _descriptor.EnumDescriptor(
+  name='OptionStyle',
+  full_name='algotrader.model.ref_data.Instrument.OptionStyle',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='European', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='American', index=1, number=1,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=1347,
+  serialized_end=1388,
+)
+_sym_db.RegisterEnumDescriptor(_INSTRUMENT_OPTIONSTYLE)
 
 _TRADINGHOLIDAYS_HOLIDAY_TYPE = _descriptor.EnumDescriptor(
   name='Type',
@@ -122,8 +190,8 @@ _TRADINGHOLIDAYS_HOLIDAY_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1525,
-  serialized_end=1599,
+  serialized_start=2169,
+  serialized_end=2243,
 )
 _sym_db.RegisterEnumDescriptor(_TRADINGHOLIDAYS_HOLIDAY_TYPE)
 
@@ -164,11 +232,48 @@ _TRADINGHOURS_SESSION_WEEKDAY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1952,
-  serialized_end=2053,
+  serialized_start=2596,
+  serialized_end=2697,
 )
 _sym_db.RegisterEnumDescriptor(_TRADINGHOURS_SESSION_WEEKDAY)
 
+
+_INSTRUMENT_UNDERLYING = _descriptor.Descriptor(
+  name='Underlying',
+  full_name='algotrader.model.ref_data.Instrument.Underlying',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='inst_id', full_name='algotrader.model.ref_data.Instrument.Underlying.inst_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='weight', full_name='algotrader.model.ref_data.Instrument.Underlying.weight', index=1,
+      number=2, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=887,
+  serialized_end=932,
+)
 
 _INSTRUMENT_ALTSYMBOLSENTRY = _descriptor.Descriptor(
   name='AltSymbolsEntry',
@@ -179,8 +284,8 @@ _INSTRUMENT_ALTSYMBOLSENTRY = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='key', full_name='algotrader.model.ref_data.Instrument.AltSymbolsEntry.key', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -203,8 +308,119 @@ _INSTRUMENT_ALTSYMBOLSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=578,
-  serialized_end=627,
+  serialized_start=934,
+  serialized_end=983,
+)
+
+_INSTRUMENT_ALTIDSENTRY = _descriptor.Descriptor(
+  name='AltIdsEntry',
+  full_name='algotrader.model.ref_data.Instrument.AltIdsEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='algotrader.model.ref_data.Instrument.AltIdsEntry.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='algotrader.model.ref_data.Instrument.AltIdsEntry.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001')),
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=985,
+  serialized_end=1030,
+)
+
+_INSTRUMENT_ALTSECTORSENTRY = _descriptor.Descriptor(
+  name='AltSectorsEntry',
+  full_name='algotrader.model.ref_data.Instrument.AltSectorsEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='algotrader.model.ref_data.Instrument.AltSectorsEntry.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='algotrader.model.ref_data.Instrument.AltSectorsEntry.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001')),
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1032,
+  serialized_end=1081,
+)
+
+_INSTRUMENT_ALTINDUSTRIESENTRY = _descriptor.Descriptor(
+  name='AltIndustriesEntry',
+  full_name='algotrader.model.ref_data.Instrument.AltIndustriesEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='algotrader.model.ref_data.Instrument.AltIndustriesEntry.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='algotrader.model.ref_data.Instrument.AltIndustriesEntry.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001')),
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1083,
+  serialized_end=1135,
 )
 
 _INSTRUMENT = _descriptor.Descriptor(
@@ -215,9 +431,9 @@ _INSTRUMENT = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='algotrader.model.ref_data.Instrument.id', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      name='inst_id', full_name='algotrader.model.ref_data.Instrument.inst_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -251,116 +467,132 @@ _INSTRUMENT = _descriptor.Descriptor(
       options=None),
     _descriptor.FieldDescriptor(
       name='primary_exch_id', full_name='algotrader.model.ref_data.Instrument.primary_exch_id', index=5,
-      number=6, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='exch_ids', full_name='algotrader.model.ref_data.Instrument.exch_ids', index=6,
-      number=7, type=3, cpp_type=2, label=3,
+      number=7, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='ccy_id', full_name='algotrader.model.ref_data.Instrument.ccy_id', index=7,
-      number=8, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      number=8, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='alt_symbols', full_name='algotrader.model.ref_data.Instrument.alt_symbols', index=8,
-      number=9, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      name='sector', full_name='algotrader.model.ref_data.Instrument.sector', index=8,
+      number=9, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='sector', full_name='algotrader.model.ref_data.Instrument.sector', index=9,
+      name='industry', full_name='algotrader.model.ref_data.Instrument.industry', index=9,
       number=10, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='industry', full_name='algotrader.model.ref_data.Instrument.industry', index=10,
-      number=11, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='und_inst_id', full_name='algotrader.model.ref_data.Instrument.und_inst_id', index=11,
-      number=12, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='exp_date', full_name='algotrader.model.ref_data.Instrument.exp_date', index=12,
-      number=13, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='call_put', full_name='algotrader.model.ref_data.Instrument.call_put', index=13,
-      number=14, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='factor', full_name='algotrader.model.ref_data.Instrument.factor', index=14,
-      number=15, type=1, cpp_type=5, label=1,
+      name='margin', full_name='algotrader.model.ref_data.Instrument.margin', index=10,
+      number=11, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='tick_size', full_name='algotrader.model.ref_data.Instrument.tick_size', index=11,
+      number=12, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='underlyings', full_name='algotrader.model.ref_data.Instrument.underlyings', index=12,
+      number=21, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='option_type', full_name='algotrader.model.ref_data.Instrument.option_type', index=13,
+      number=22, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='option_style', full_name='algotrader.model.ref_data.Instrument.option_style', index=14,
+      number=23, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='strike', full_name='algotrader.model.ref_data.Instrument.strike', index=15,
-      number=16, type=1, cpp_type=5, label=1,
+      number=24, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='margin', full_name='algotrader.model.ref_data.Instrument.margin', index=16,
-      number=17, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='tick_size', full_name='algotrader.model.ref_data.Instrument.tick_size', index=17,
-      number=18, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='trading_hours_id', full_name='algotrader.model.ref_data.Instrument.trading_hours_id', index=18,
-      number=19, type=3, cpp_type=2, label=1,
+      name='exp_date', full_name='algotrader.model.ref_data.Instrument.exp_date', index=16,
+      number=25, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='trading_holidays_id', full_name='algotrader.model.ref_data.Instrument.trading_holidays_id', index=19,
-      number=20, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      name='multiplier', full_name='algotrader.model.ref_data.Instrument.multiplier', index=17,
+      number=26, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='alt_symbols', full_name='algotrader.model.ref_data.Instrument.alt_symbols', index=18,
+      number=41, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='alt_ids', full_name='algotrader.model.ref_data.Instrument.alt_ids', index=19,
+      number=42, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='alt_sectors', full_name='algotrader.model.ref_data.Instrument.alt_sectors', index=20,
+      number=43, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='alt_industries', full_name='algotrader.model.ref_data.Instrument.alt_industries', index=21,
+      number=44, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
   ],
   extensions=[
   ],
-  nested_types=[_INSTRUMENT_ALTSYMBOLSENTRY, ],
+  nested_types=[_INSTRUMENT_UNDERLYING, _INSTRUMENT_ALTSYMBOLSENTRY, _INSTRUMENT_ALTIDSENTRY, _INSTRUMENT_ALTSECTORSENTRY, _INSTRUMENT_ALTINDUSTRIESENTRY, ],
   enum_types=[
-    _INSTRUMENT_CALLPUT,
     _INSTRUMENT_INSTTYPE,
+    _INSTRUMENT_IDTYPE,
+    _INSTRUMENT_OPTIONTYPE,
+    _INSTRUMENT_OPTIONSTYLE,
   ],
   options=None,
   is_extendable=False,
@@ -369,7 +601,7 @@ _INSTRUMENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=46,
-  serialized_end=742,
+  serialized_end=1388,
 )
 
 
@@ -382,8 +614,8 @@ _EXCHANGE_ALTCODESENTRY = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='key', full_name='algotrader.model.ref_data.Exchange.AltCodesEntry.key', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -406,8 +638,8 @@ _EXCHANGE_ALTCODESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=942,
-  serialized_end=989,
+  serialized_start=1579,
+  serialized_end=1626,
 )
 
 _EXCHANGE = _descriptor.Descriptor(
@@ -418,51 +650,44 @@ _EXCHANGE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='algotrader.model.ref_data.Exchange.id', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      name='exch_id', full_name='algotrader.model.ref_data.Exchange.exch_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='code', full_name='algotrader.model.ref_data.Exchange.code', index=1,
+      name='name', full_name='algotrader.model.ref_data.Exchange.name', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='name', full_name='algotrader.model.ref_data.Exchange.name', index=2,
+      name='country_id', full_name='algotrader.model.ref_data.Exchange.country_id', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='country_id', full_name='algotrader.model.ref_data.Exchange.country_id', index=3,
-      number=4, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      name='trading_hours_id', full_name='algotrader.model.ref_data.Exchange.trading_hours_id', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='alt_codes', full_name='algotrader.model.ref_data.Exchange.alt_codes', index=4,
-      number=5, type=11, cpp_type=10, label=3,
+      name='trading_holidays_id', full_name='algotrader.model.ref_data.Exchange.trading_holidays_id', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='alt_codes', full_name='algotrader.model.ref_data.Exchange.alt_codes', index=5,
+      number=6, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='trading_hours_id', full_name='algotrader.model.ref_data.Exchange.trading_hours_id', index=5,
-      number=6, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='trading_holidays_id', full_name='algotrader.model.ref_data.Exchange.trading_holidays_id', index=6,
-      number=7, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -478,8 +703,8 @@ _EXCHANGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=745,
-  serialized_end=989,
+  serialized_start=1391,
+  serialized_end=1626,
 )
 
 
@@ -491,22 +716,22 @@ _COUNTRY = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='algotrader.model.ref_data.Country.id', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      name='country_id', full_name='algotrader.model.ref_data.Country.country_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='code', full_name='algotrader.model.ref_data.Country.code', index=1,
+      name='name', full_name='algotrader.model.ref_data.Country.name', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='name', full_name='algotrader.model.ref_data.Country.name', index=2,
-      number=3, type=9, cpp_type=9, label=1,
+      name='trading_holidays_id', full_name='algotrader.model.ref_data.Country.trading_holidays_id', index=2,
+      number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -523,8 +748,8 @@ _COUNTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=991,
-  serialized_end=1040,
+  serialized_start=1628,
+  serialized_end=1700,
 )
 
 
@@ -537,8 +762,8 @@ _CURRENCY_ALTCODESENTRY = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='key', full_name='algotrader.model.ref_data.Currency.AltCodesEntry.key', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -561,8 +786,8 @@ _CURRENCY_ALTCODESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=942,
-  serialized_end=989,
+  serialized_start=1579,
+  serialized_end=1626,
 )
 
 _CURRENCY = _descriptor.Descriptor(
@@ -573,28 +798,21 @@ _CURRENCY = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='algotrader.model.ref_data.Currency.id', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      name='ccy_id', full_name='algotrader.model.ref_data.Currency.ccy_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='code', full_name='algotrader.model.ref_data.Currency.code', index=1,
+      name='name', full_name='algotrader.model.ref_data.Currency.name', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='name', full_name='algotrader.model.ref_data.Currency.name', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='alt_codes', full_name='algotrader.model.ref_data.Currency.alt_codes', index=3,
+      name='alt_codes', full_name='algotrader.model.ref_data.Currency.alt_codes', index=2,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -612,8 +830,8 @@ _CURRENCY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1043,
-  serialized_end=1212,
+  serialized_start=1703,
+  serialized_end=1862,
 )
 
 
@@ -686,8 +904,8 @@ _TRADINGHOLIDAYS_HOLIDAY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1331,
-  serialized_end=1599,
+  serialized_start=1975,
+  serialized_end=2243,
 )
 
 _TRADINGHOLIDAYS = _descriptor.Descriptor(
@@ -698,22 +916,15 @@ _TRADINGHOLIDAYS = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='algotrader.model.ref_data.TradingHolidays.id', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='algotrader.model.ref_data.TradingHolidays.name', index=1,
-      number=2, type=9, cpp_type=9, label=1,
+      name='holiday_id', full_name='algotrader.model.ref_data.TradingHolidays.holiday_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='holidays', full_name='algotrader.model.ref_data.TradingHolidays.holidays', index=2,
-      number=3, type=11, cpp_type=10, label=3,
+      name='holidays', full_name='algotrader.model.ref_data.TradingHolidays.holidays', index=1,
+      number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -730,8 +941,8 @@ _TRADINGHOLIDAYS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1215,
-  serialized_end=1599,
+  serialized_start=1865,
+  serialized_end=2243,
 )
 
 
@@ -790,8 +1001,8 @@ _TRADINGHOURS_SESSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1730,
-  serialized_end=2053,
+  serialized_start=2374,
+  serialized_end=2697,
 )
 
 _TRADINGHOURS = _descriptor.Descriptor(
@@ -802,29 +1013,22 @@ _TRADINGHOURS = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='algotrader.model.ref_data.TradingHours.id', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
+      name='trading_hr_id', full_name='algotrader.model.ref_data.TradingHours.trading_hr_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='name', full_name='algotrader.model.ref_data.TradingHours.name', index=1,
+      name='timezone_id', full_name='algotrader.model.ref_data.TradingHours.timezone_id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='timezone', full_name='algotrader.model.ref_data.TradingHours.timezone', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='sessions', full_name='algotrader.model.ref_data.TradingHours.sessions', index=3,
-      number=4, type=11, cpp_type=10, label=3,
+      name='sessions', full_name='algotrader.model.ref_data.TradingHours.sessions', index=2,
+      number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -841,16 +1045,58 @@ _TRADINGHOURS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1602,
-  serialized_end=2053,
+  serialized_start=2246,
+  serialized_end=2697,
 )
 
+
+_TIMEZONE = _descriptor.Descriptor(
+  name='TimeZone',
+  full_name='algotrader.model.ref_data.TimeZone',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='timezone_id', full_name='algotrader.model.ref_data.TimeZone.timezone_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2699,
+  serialized_end=2730,
+)
+
+_INSTRUMENT_UNDERLYING.containing_type = _INSTRUMENT
 _INSTRUMENT_ALTSYMBOLSENTRY.containing_type = _INSTRUMENT
+_INSTRUMENT_ALTIDSENTRY.containing_type = _INSTRUMENT
+_INSTRUMENT_ALTSECTORSENTRY.containing_type = _INSTRUMENT
+_INSTRUMENT_ALTINDUSTRIESENTRY.containing_type = _INSTRUMENT
 _INSTRUMENT.fields_by_name['type'].enum_type = _INSTRUMENT_INSTTYPE
+_INSTRUMENT.fields_by_name['underlyings'].message_type = _INSTRUMENT_UNDERLYING
+_INSTRUMENT.fields_by_name['option_type'].enum_type = _INSTRUMENT_OPTIONTYPE
+_INSTRUMENT.fields_by_name['option_style'].enum_type = _INSTRUMENT_OPTIONSTYLE
 _INSTRUMENT.fields_by_name['alt_symbols'].message_type = _INSTRUMENT_ALTSYMBOLSENTRY
-_INSTRUMENT.fields_by_name['call_put'].enum_type = _INSTRUMENT_CALLPUT
-_INSTRUMENT_CALLPUT.containing_type = _INSTRUMENT
+_INSTRUMENT.fields_by_name['alt_ids'].message_type = _INSTRUMENT_ALTIDSENTRY
+_INSTRUMENT.fields_by_name['alt_sectors'].message_type = _INSTRUMENT_ALTSECTORSENTRY
+_INSTRUMENT.fields_by_name['alt_industries'].message_type = _INSTRUMENT_ALTINDUSTRIESENTRY
 _INSTRUMENT_INSTTYPE.containing_type = _INSTRUMENT
+_INSTRUMENT_IDTYPE.containing_type = _INSTRUMENT
+_INSTRUMENT_OPTIONTYPE.containing_type = _INSTRUMENT
+_INSTRUMENT_OPTIONSTYLE.containing_type = _INSTRUMENT
 _EXCHANGE_ALTCODESENTRY.containing_type = _EXCHANGE
 _EXCHANGE.fields_by_name['alt_codes'].message_type = _EXCHANGE_ALTCODESENTRY
 _CURRENCY_ALTCODESENTRY.containing_type = _CURRENCY
@@ -870,8 +1116,16 @@ DESCRIPTOR.message_types_by_name['Country'] = _COUNTRY
 DESCRIPTOR.message_types_by_name['Currency'] = _CURRENCY
 DESCRIPTOR.message_types_by_name['TradingHolidays'] = _TRADINGHOLIDAYS
 DESCRIPTOR.message_types_by_name['TradingHours'] = _TRADINGHOURS
+DESCRIPTOR.message_types_by_name['TimeZone'] = _TIMEZONE
 
 Instrument = _reflection.GeneratedProtocolMessageType('Instrument', (_message.Message,), dict(
+
+  Underlying = _reflection.GeneratedProtocolMessageType('Underlying', (_message.Message,), dict(
+    DESCRIPTOR = _INSTRUMENT_UNDERLYING,
+    __module__ = 'ref_data_pb2'
+    # @@protoc_insertion_point(class_scope:algotrader.model.ref_data.Instrument.Underlying)
+    ))
+  ,
 
   AltSymbolsEntry = _reflection.GeneratedProtocolMessageType('AltSymbolsEntry', (_message.Message,), dict(
     DESCRIPTOR = _INSTRUMENT_ALTSYMBOLSENTRY,
@@ -879,12 +1133,37 @@ Instrument = _reflection.GeneratedProtocolMessageType('Instrument', (_message.Me
     # @@protoc_insertion_point(class_scope:algotrader.model.ref_data.Instrument.AltSymbolsEntry)
     ))
   ,
+
+  AltIdsEntry = _reflection.GeneratedProtocolMessageType('AltIdsEntry', (_message.Message,), dict(
+    DESCRIPTOR = _INSTRUMENT_ALTIDSENTRY,
+    __module__ = 'ref_data_pb2'
+    # @@protoc_insertion_point(class_scope:algotrader.model.ref_data.Instrument.AltIdsEntry)
+    ))
+  ,
+
+  AltSectorsEntry = _reflection.GeneratedProtocolMessageType('AltSectorsEntry', (_message.Message,), dict(
+    DESCRIPTOR = _INSTRUMENT_ALTSECTORSENTRY,
+    __module__ = 'ref_data_pb2'
+    # @@protoc_insertion_point(class_scope:algotrader.model.ref_data.Instrument.AltSectorsEntry)
+    ))
+  ,
+
+  AltIndustriesEntry = _reflection.GeneratedProtocolMessageType('AltIndustriesEntry', (_message.Message,), dict(
+    DESCRIPTOR = _INSTRUMENT_ALTINDUSTRIESENTRY,
+    __module__ = 'ref_data_pb2'
+    # @@protoc_insertion_point(class_scope:algotrader.model.ref_data.Instrument.AltIndustriesEntry)
+    ))
+  ,
   DESCRIPTOR = _INSTRUMENT,
   __module__ = 'ref_data_pb2'
   # @@protoc_insertion_point(class_scope:algotrader.model.ref_data.Instrument)
   ))
 _sym_db.RegisterMessage(Instrument)
+_sym_db.RegisterMessage(Instrument.Underlying)
 _sym_db.RegisterMessage(Instrument.AltSymbolsEntry)
+_sym_db.RegisterMessage(Instrument.AltIdsEntry)
+_sym_db.RegisterMessage(Instrument.AltSectorsEntry)
+_sym_db.RegisterMessage(Instrument.AltIndustriesEntry)
 
 Exchange = _reflection.GeneratedProtocolMessageType('Exchange', (_message.Message,), dict(
 
@@ -953,9 +1232,22 @@ TradingHours = _reflection.GeneratedProtocolMessageType('TradingHours', (_messag
 _sym_db.RegisterMessage(TradingHours)
 _sym_db.RegisterMessage(TradingHours.Session)
 
+TimeZone = _reflection.GeneratedProtocolMessageType('TimeZone', (_message.Message,), dict(
+  DESCRIPTOR = _TIMEZONE,
+  __module__ = 'ref_data_pb2'
+  # @@protoc_insertion_point(class_scope:algotrader.model.ref_data.TimeZone)
+  ))
+_sym_db.RegisterMessage(TimeZone)
+
 
 _INSTRUMENT_ALTSYMBOLSENTRY.has_options = True
 _INSTRUMENT_ALTSYMBOLSENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
+_INSTRUMENT_ALTIDSENTRY.has_options = True
+_INSTRUMENT_ALTIDSENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
+_INSTRUMENT_ALTSECTORSENTRY.has_options = True
+_INSTRUMENT_ALTSECTORSENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
+_INSTRUMENT_ALTINDUSTRIESENTRY.has_options = True
+_INSTRUMENT_ALTINDUSTRIESENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
 _EXCHANGE_ALTCODESENTRY.has_options = True
 _EXCHANGE_ALTCODESENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
 _CURRENCY_ALTCODESENTRY.has_options = True

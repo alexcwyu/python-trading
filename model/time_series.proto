@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package algotrader.model.time_series;
+
+
+message DataSeriesItem{
+    int64 timestamp = 1;
+    map<string, double> data = 2;
+}
+
+message DataSeries{
+    int64 id = 1;  // change to String???
+    string name = 2;
+    string desc = 3;
+    repeated string inputs = 4;
+    repeated string keys = 5;
+    string default_output_key = 6;
+    double missing_value_replace = 7;
+    int64 start_time = 8;
+    int64 end_time = 9;
+    repeated DataSeriesItem items = 10;
+}
+

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='market_data.proto',
   package='algotrader.model.market_data',
   syntax='proto3',
-  serialized_pb=_b('\n\x11market_data.proto\x12\x1c\x61lgotrader.model.market_data\"\xa3\x02\n\x03\x42\x61r\x12\x0f\n\x07inst_id\x18\x01 \x01(\x03\x12\x34\n\x04type\x18\x02 \x01(\x0e\x32&.algotrader.model.market_data.Bar.Type\x12\x0c\n\x04size\x18\x03 \x01(\x05\x12\x13\n\x0bprovider_id\x18\x04 \x01(\x05\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\x12\x12\n\nbegin_time\x18\x06 \x01(\x03\x12\x0c\n\x04open\x18\x07 \x01(\x01\x12\x0c\n\x04high\x18\x08 \x01(\x01\x12\x0b\n\x03low\x18\t \x01(\x01\x12\r\n\x05\x63lose\x18\n \x01(\x01\x12\x0b\n\x03vol\x18\x0b \x01(\x01\x12\x11\n\tadj_close\x18\x0c \x01(\x01\"3\n\x04Type\x12\x08\n\x04Time\x10\x00\x12\x08\n\x04Tick\x10\x01\x12\n\n\x06Volume\x10\x02\x12\x0b\n\x07\x44ynamic\x10\x03\"~\n\x05Quote\x12\x0f\n\x07inst_id\x18\x01 \x01(\x03\x12\x13\n\x0bprovider_id\x18\x02 \x01(\x05\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x0b\n\x03\x62id\x18\x04 \x01(\x01\x12\x10\n\x08\x62id_size\x18\x05 \x01(\x03\x12\x0b\n\x03\x61sk\x18\x06 \x01(\x01\x12\x10\n\x08\x61sk_size\x18\x07 \x01(\x03\"]\n\x05Trade\x12\x0f\n\x07inst_id\x18\x01 \x01(\x03\x12\x13\n\x0bprovider_id\x18\x02 \x01(\x05\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\r\n\x05price\x18\x04 \x01(\x01\x12\x0c\n\x04size\x18\x05 \x01(\x03\"\xd8\x02\n\x0bMarketDepth\x12\x0f\n\x07inst_id\x18\x01 \x01(\x03\x12\x13\n\x0bprovider_id\x18\x02 \x01(\x05\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08provider\x18\x04 \x01(\t\x12\x10\n\x08position\x18\x05 \x01(\x03\x12\x46\n\toperation\x18\x06 \x01(\x0e\x32\x33.algotrader.model.market_data.MarketDepth.Operation\x12<\n\x04side\x18\x07 \x01(\x0e\x32..algotrader.model.market_data.MarketDepth.Side\x12\r\n\x05price\x18\x08 \x01(\x01\x12\x0c\n\x04size\x18\t \x01(\x03\"\x18\n\x04Side\x12\x07\n\x03\x41sk\x10\x00\x12\x07\n\x03\x62id\x10\x01\"/\n\tOperation\x12\n\n\x06Insert\x10\x00\x12\n\n\x06Update\x10\x01\x12\n\n\x06\x44\x65lete\x10\x02\"\x83\x01\n\x0e\x44\x61taSeriesItem\x12\x44\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x36.algotrader.model.market_data.DataSeriesItem.DataEntry\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"\xa7\x02\n\nDataSeries\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\x1d\n\x15missing_value_replace\x18\x04 \x01(\x01\x12\x0c\n\x04keys\x18\x05 \x03(\t\x12\x12\n\nstart_time\x18\x06 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\x07 \x01(\x03\x12\x42\n\x05items\x18\x08 \x03(\x0b\x32\x33.algotrader.model.market_data.DataSeries.ItemsEntry\x1aZ\n\nItemsEntry\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12;\n\x05value\x18\x02 \x01(\x0b\x32,.algotrader.model.market_data.DataSeriesItem:\x02\x38\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x11market_data.proto\x12\x1c\x61lgotrader.model.market_data\"\xc7\x02\n\x03\x42\x61r\x12\x0f\n\x07inst_id\x18\x01 \x01(\x03\x12\x34\n\x04type\x18\x02 \x01(\x0e\x32&.algotrader.model.market_data.Bar.Type\x12\x0c\n\x04size\x18\x03 \x01(\x05\x12\x13\n\x0bprovider_id\x18\x04 \x01(\x05\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\x12\x10\n\x08utc_time\x18\x06 \x01(\x03\x12\x12\n\nbegin_time\x18\x07 \x01(\x03\x12\x0c\n\x04open\x18\t \x01(\x01\x12\x0c\n\x04high\x18\n \x01(\x01\x12\x0b\n\x03low\x18\x0b \x01(\x01\x12\r\n\x05\x63lose\x18\x0c \x01(\x01\x12\x0b\n\x03vol\x18\r \x01(\x01\x12\x11\n\tadj_close\x18\x0e \x01(\x01\x12\x10\n\x08open_int\x18\x0f \x01(\x01\"3\n\x04Type\x12\x08\n\x04Time\x10\x00\x12\x08\n\x04Tick\x10\x01\x12\n\n\x06Volume\x10\x02\x12\x0b\n\x07\x44ynamic\x10\x03\"\x90\x01\n\x05Quote\x12\x0f\n\x07inst_id\x18\x01 \x01(\x03\x12\x13\n\x0bprovider_id\x18\x02 \x01(\x05\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08utc_time\x18\x04 \x01(\x03\x12\x0b\n\x03\x62id\x18\x05 \x01(\x01\x12\x10\n\x08\x62id_size\x18\x06 \x01(\x03\x12\x0b\n\x03\x61sk\x18\x07 \x01(\x01\x12\x10\n\x08\x61sk_size\x18\x08 \x01(\x03\"o\n\x05Trade\x12\x0f\n\x07inst_id\x18\x01 \x01(\x03\x12\x13\n\x0bprovider_id\x18\x02 \x01(\x05\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08utc_time\x18\x04 \x01(\x03\x12\r\n\x05price\x18\x05 \x01(\x01\x12\x0c\n\x04size\x18\x06 \x01(\x03\"\xea\x02\n\x0bMarketDepth\x12\x0f\n\x07inst_id\x18\x01 \x01(\x03\x12\x13\n\x0bprovider_id\x18\x02 \x01(\x05\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08utc_time\x18\x04 \x01(\x03\x12\x10\n\x08provider\x18\x05 \x01(\t\x12\x10\n\x08position\x18\x06 \x01(\x03\x12\x46\n\toperation\x18\x07 \x01(\x0e\x32\x33.algotrader.model.market_data.MarketDepth.Operation\x12<\n\x04side\x18\x08 \x01(\x0e\x32..algotrader.model.market_data.MarketDepth.Side\x12\r\n\x05price\x18\t \x01(\x01\x12\x0c\n\x04size\x18\n \x01(\x03\"\x18\n\x04Side\x12\x07\n\x03\x41sk\x10\x00\x12\x07\n\x03\x62id\x10\x01\"/\n\tOperation\x12\n\n\x06Insert\x10\x00\x12\n\n\x06Update\x10\x01\x12\n\n\x06\x44\x65lete\x10\x02\x62\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -50,8 +50,8 @@ _BAR_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=292,
-  serialized_end=343,
+  serialized_start=328,
+  serialized_end=379,
 )
 _sym_db.RegisterEnumDescriptor(_BAR_TYPE)
 
@@ -72,8 +72,8 @@ _MARKETDEPTH_SIDE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=840,
-  serialized_end=864,
+  serialized_start=931,
+  serialized_end=955,
 )
 _sym_db.RegisterEnumDescriptor(_MARKETDEPTH_SIDE)
 
@@ -98,8 +98,8 @@ _MARKETDEPTH_OPERATION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=866,
-  serialized_end=913,
+  serialized_start=957,
+  serialized_end=1004,
 )
 _sym_db.RegisterEnumDescriptor(_MARKETDEPTH_OPERATION)
 
@@ -147,50 +147,64 @@ _BAR = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='begin_time', full_name='algotrader.model.market_data.Bar.begin_time', index=5,
+      name='utc_time', full_name='algotrader.model.market_data.Bar.utc_time', index=5,
       number=6, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='open', full_name='algotrader.model.market_data.Bar.open', index=6,
-      number=7, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
+      name='begin_time', full_name='algotrader.model.market_data.Bar.begin_time', index=6,
+      number=7, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='high', full_name='algotrader.model.market_data.Bar.high', index=7,
-      number=8, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='low', full_name='algotrader.model.market_data.Bar.low', index=8,
+      name='open', full_name='algotrader.model.market_data.Bar.open', index=7,
       number=9, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='close', full_name='algotrader.model.market_data.Bar.close', index=9,
+      name='high', full_name='algotrader.model.market_data.Bar.high', index=8,
       number=10, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='vol', full_name='algotrader.model.market_data.Bar.vol', index=10,
+      name='low', full_name='algotrader.model.market_data.Bar.low', index=9,
       number=11, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='adj_close', full_name='algotrader.model.market_data.Bar.adj_close', index=11,
+      name='close', full_name='algotrader.model.market_data.Bar.close', index=10,
       number=12, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='vol', full_name='algotrader.model.market_data.Bar.vol', index=11,
+      number=13, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='adj_close', full_name='algotrader.model.market_data.Bar.adj_close', index=12,
+      number=14, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='open_int', full_name='algotrader.model.market_data.Bar.open_int', index=13,
+      number=15, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -209,7 +223,7 @@ _BAR = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=52,
-  serialized_end=343,
+  serialized_end=379,
 )
 
 
@@ -242,29 +256,36 @@ _QUOTE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='bid', full_name='algotrader.model.market_data.Quote.bid', index=3,
-      number=4, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='bid_size', full_name='algotrader.model.market_data.Quote.bid_size', index=4,
-      number=5, type=3, cpp_type=2, label=1,
+      name='utc_time', full_name='algotrader.model.market_data.Quote.utc_time', index=3,
+      number=4, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='ask', full_name='algotrader.model.market_data.Quote.ask', index=5,
-      number=6, type=1, cpp_type=5, label=1,
+      name='bid', full_name='algotrader.model.market_data.Quote.bid', index=4,
+      number=5, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='ask_size', full_name='algotrader.model.market_data.Quote.ask_size', index=6,
-      number=7, type=3, cpp_type=2, label=1,
+      name='bid_size', full_name='algotrader.model.market_data.Quote.bid_size', index=5,
+      number=6, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='ask', full_name='algotrader.model.market_data.Quote.ask', index=6,
+      number=7, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='ask_size', full_name='algotrader.model.market_data.Quote.ask_size', index=7,
+      number=8, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -281,8 +302,8 @@ _QUOTE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=345,
-  serialized_end=471,
+  serialized_start=382,
+  serialized_end=526,
 )
 
 
@@ -315,15 +336,22 @@ _TRADE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='price', full_name='algotrader.model.market_data.Trade.price', index=3,
-      number=4, type=1, cpp_type=5, label=1,
+      name='utc_time', full_name='algotrader.model.market_data.Trade.utc_time', index=3,
+      number=4, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='price', full_name='algotrader.model.market_data.Trade.price', index=4,
+      number=5, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='size', full_name='algotrader.model.market_data.Trade.size', index=4,
-      number=5, type=3, cpp_type=2, label=1,
+      name='size', full_name='algotrader.model.market_data.Trade.size', index=5,
+      number=6, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -340,8 +368,8 @@ _TRADE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=473,
-  serialized_end=566,
+  serialized_start=528,
+  serialized_end=639,
 )
 
 
@@ -374,43 +402,50 @@ _MARKETDEPTH = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='provider', full_name='algotrader.model.market_data.MarketDepth.provider', index=3,
-      number=4, type=9, cpp_type=9, label=1,
+      name='utc_time', full_name='algotrader.model.market_data.MarketDepth.utc_time', index=3,
+      number=4, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='provider', full_name='algotrader.model.market_data.MarketDepth.provider', index=4,
+      number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='position', full_name='algotrader.model.market_data.MarketDepth.position', index=4,
-      number=5, type=3, cpp_type=2, label=1,
+      name='position', full_name='algotrader.model.market_data.MarketDepth.position', index=5,
+      number=6, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='operation', full_name='algotrader.model.market_data.MarketDepth.operation', index=5,
-      number=6, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='side', full_name='algotrader.model.market_data.MarketDepth.side', index=6,
+      name='operation', full_name='algotrader.model.market_data.MarketDepth.operation', index=6,
       number=7, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='price', full_name='algotrader.model.market_data.MarketDepth.price', index=7,
-      number=8, type=1, cpp_type=5, label=1,
+      name='side', full_name='algotrader.model.market_data.MarketDepth.side', index=7,
+      number=8, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='price', full_name='algotrader.model.market_data.MarketDepth.price', index=8,
+      number=9, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='size', full_name='algotrader.model.market_data.MarketDepth.size', index=8,
-      number=9, type=3, cpp_type=2, label=1,
+      name='size', full_name='algotrader.model.market_data.MarketDepth.size', index=9,
+      number=10, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -429,193 +464,8 @@ _MARKETDEPTH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=569,
-  serialized_end=913,
-)
-
-
-_DATASERIESITEM_DATAENTRY = _descriptor.Descriptor(
-  name='DataEntry',
-  full_name='algotrader.model.market_data.DataSeriesItem.DataEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='algotrader.model.market_data.DataSeriesItem.DataEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='algotrader.model.market_data.DataSeriesItem.DataEntry.value', index=1,
-      number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001')),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1004,
-  serialized_end=1047,
-)
-
-_DATASERIESITEM = _descriptor.Descriptor(
-  name='DataSeriesItem',
-  full_name='algotrader.model.market_data.DataSeriesItem',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='data', full_name='algotrader.model.market_data.DataSeriesItem.data', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[_DATASERIESITEM_DATAENTRY, ],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=916,
-  serialized_end=1047,
-)
-
-
-_DATASERIES_ITEMSENTRY = _descriptor.Descriptor(
-  name='ItemsEntry',
-  full_name='algotrader.model.market_data.DataSeries.ItemsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='algotrader.model.market_data.DataSeries.ItemsEntry.key', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='algotrader.model.market_data.DataSeries.ItemsEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001')),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1255,
-  serialized_end=1345,
-)
-
-_DATASERIES = _descriptor.Descriptor(
-  name='DataSeries',
-  full_name='algotrader.model.market_data.DataSeries',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='algotrader.model.market_data.DataSeries.id', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='algotrader.model.market_data.DataSeries.name', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='desc', full_name='algotrader.model.market_data.DataSeries.desc', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='missing_value_replace', full_name='algotrader.model.market_data.DataSeries.missing_value_replace', index=3,
-      number=4, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='keys', full_name='algotrader.model.market_data.DataSeries.keys', index=4,
-      number=5, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='start_time', full_name='algotrader.model.market_data.DataSeries.start_time', index=5,
-      number=6, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='end_time', full_name='algotrader.model.market_data.DataSeries.end_time', index=6,
-      number=7, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='items', full_name='algotrader.model.market_data.DataSeries.items', index=7,
-      number=8, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[_DATASERIES_ITEMSENTRY, ],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1050,
-  serialized_end=1345,
+  serialized_start=642,
+  serialized_end=1004,
 )
 
 _BAR.fields_by_name['type'].enum_type = _BAR_TYPE
@@ -624,17 +474,10 @@ _MARKETDEPTH.fields_by_name['operation'].enum_type = _MARKETDEPTH_OPERATION
 _MARKETDEPTH.fields_by_name['side'].enum_type = _MARKETDEPTH_SIDE
 _MARKETDEPTH_SIDE.containing_type = _MARKETDEPTH
 _MARKETDEPTH_OPERATION.containing_type = _MARKETDEPTH
-_DATASERIESITEM_DATAENTRY.containing_type = _DATASERIESITEM
-_DATASERIESITEM.fields_by_name['data'].message_type = _DATASERIESITEM_DATAENTRY
-_DATASERIES_ITEMSENTRY.fields_by_name['value'].message_type = _DATASERIESITEM
-_DATASERIES_ITEMSENTRY.containing_type = _DATASERIES
-_DATASERIES.fields_by_name['items'].message_type = _DATASERIES_ITEMSENTRY
 DESCRIPTOR.message_types_by_name['Bar'] = _BAR
 DESCRIPTOR.message_types_by_name['Quote'] = _QUOTE
 DESCRIPTOR.message_types_by_name['Trade'] = _TRADE
 DESCRIPTOR.message_types_by_name['MarketDepth'] = _MARKETDEPTH
-DESCRIPTOR.message_types_by_name['DataSeriesItem'] = _DATASERIESITEM
-DESCRIPTOR.message_types_by_name['DataSeries'] = _DATASERIES
 
 Bar = _reflection.GeneratedProtocolMessageType('Bar', (_message.Message,), dict(
   DESCRIPTOR = _BAR,
@@ -664,39 +507,5 @@ MarketDepth = _reflection.GeneratedProtocolMessageType('MarketDepth', (_message.
   ))
 _sym_db.RegisterMessage(MarketDepth)
 
-DataSeriesItem = _reflection.GeneratedProtocolMessageType('DataSeriesItem', (_message.Message,), dict(
 
-  DataEntry = _reflection.GeneratedProtocolMessageType('DataEntry', (_message.Message,), dict(
-    DESCRIPTOR = _DATASERIESITEM_DATAENTRY,
-    __module__ = 'market_data_pb2'
-    # @@protoc_insertion_point(class_scope:algotrader.model.market_data.DataSeriesItem.DataEntry)
-    ))
-  ,
-  DESCRIPTOR = _DATASERIESITEM,
-  __module__ = 'market_data_pb2'
-  # @@protoc_insertion_point(class_scope:algotrader.model.market_data.DataSeriesItem)
-  ))
-_sym_db.RegisterMessage(DataSeriesItem)
-_sym_db.RegisterMessage(DataSeriesItem.DataEntry)
-
-DataSeries = _reflection.GeneratedProtocolMessageType('DataSeries', (_message.Message,), dict(
-
-  ItemsEntry = _reflection.GeneratedProtocolMessageType('ItemsEntry', (_message.Message,), dict(
-    DESCRIPTOR = _DATASERIES_ITEMSENTRY,
-    __module__ = 'market_data_pb2'
-    # @@protoc_insertion_point(class_scope:algotrader.model.market_data.DataSeries.ItemsEntry)
-    ))
-  ,
-  DESCRIPTOR = _DATASERIES,
-  __module__ = 'market_data_pb2'
-  # @@protoc_insertion_point(class_scope:algotrader.model.market_data.DataSeries)
-  ))
-_sym_db.RegisterMessage(DataSeries)
-_sym_db.RegisterMessage(DataSeries.ItemsEntry)
-
-
-_DATASERIESITEM_DATAENTRY.has_options = True
-_DATASERIESITEM_DATAENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
-_DATASERIES_ITEMSENTRY.has_options = True
-_DATASERIES_ITEMSENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
 # @@protoc_insertion_point(module_scope)

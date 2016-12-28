@@ -1,6 +1,6 @@
 syntax = "proto3";
 import "google/protobuf/any.proto";
-import "market_data.proto";
+import "time_series.proto";
 
 package algotrader.model.trade_data;
 
@@ -93,9 +93,10 @@ message OrderCancelRequest {
 }
 
 message OrderStatusUpdate {
-    string event_id = 1;
-    string broker_id = 2;
-    string ord_id = 3;
+    string broker_id = 1;
+    string event_id = 2;
+    string broker_ord_id = 3;
+
     string cl_id = 4;
     string cl_ord_id = 5;
     string inst_id = 6;
@@ -106,11 +107,11 @@ message OrderStatusUpdate {
 
 
 message ExecutionReport {
-    string event_id = 1;
-    string broker_id = 2;
-    string er_id = 3;
+    string broker_id = 1;
+    //string event_id = 2;
+    string broker_ord_id = 3;
+    string er_id = 4;
 
-    string ord_id = 4;
     string cl_id = 5;
     string cl_ord_id = 6;
     string inst_id = 7;
@@ -125,35 +126,40 @@ message ExecutionReport {
 
 
 message AccountUpdate {
-    string event_id = 1;
-    string account_name = 2;
-    string key = 3;
-    string ccy_id = 4;
-    double value = 5;
+    string broker_id = 1;
+    string event_id = 2;
+
+    string account_name = 10;
+    string key = 11;
+    string ccy_id = 12;
+    double value = 13;
 
 }
 
 message PortfolioUpdate {
-    string event_id = 1;
-    string port_id = 2;
-    string inst_id = 3;
-    double position = 4;
-    double mkt_price = 5;
-    double mkt_value = 6;
-    double avg_cost = 7;
-    double unrealized_pnl = 8;
-    double realized_pnl = 9;
+    string broker_id = 1;
+    string event_id = 2;
+
+    string port_id = 3;
+    string inst_id = 4;
+
+    double position = 10;
+    double mkt_price = 11;
+    double mkt_value = 12;
+    double avg_cost = 13;
+    double unrealized_pnl = 14;
+    double realized_pnl = 15;
 }
 
 
-message Amount {
-    string ccy_id = 1;
-    double value = 2;
+message AccountValue {
+    string key = 1;
+    map<string, double> ccy_values = 2;
 }
 
 message Account {
     string acct_id = 1;
-    map<string, Amount> values = 2;
+    map<string, AccountValue> values = 2;
     map<string, Position> positions = 3;
 }
 
@@ -161,7 +167,7 @@ message Portfolio {
     string port_id = 1;
     map<string, Position> positions = 2;
 
-    DataSeries performance = 5;
+    algotrader.model.time_series.DataSeries performance = 5;
     double total_equity = 6;
     double cash = 7;
     double stock_value = 8;
@@ -171,7 +177,7 @@ message Portfolio {
 
 message Pnl {
     double pnl = 1;
-    DataSeries pnl_series = 2;
+    algotrader.model.time_series.DataSeries pnl_series = 2;
 }
 
 message DrawDown {
@@ -181,13 +187,13 @@ message DrawDown {
     double low_equity = 4;
     double current_run_up = 5;
     double current_drawdown = 6;
-    DataSeries drawdown_series = 7;
+    algotrader.model.time_series.DataSeries drawdown_series = 7;
 }
 
 
 message Config {
     string config_id = 1;
-    map<string, string> values = 2;
+    map<string, google.protobuf.Any> values = 2;
 }
 
 message Strategy {
@@ -204,7 +210,9 @@ message Order {
     string cl_ord_id = 3;
     string portf_id = 4;
     string broker_id = 5;
-    string inst_id = 6;
+    string broker_ord_id = 6;
+
+    string inst_id = 7;
 
     OrderAcion action = 10;
     OrderType type = 11;
@@ -214,7 +222,7 @@ message Order {
     TIF tif = 15;
 
     string oca_tag = 20;
-    map<string, google.protobuf.Any> params = 21;
+    map<string, string> params = 21;
 
     OrderStatus status = 30;
     double filled_qty = 31;
@@ -227,13 +235,14 @@ message Order {
 
 
 message ClientOrder {
-    map<string, Order> orders = 1;
+    string cl_id = 1;
+    string cl_ord_id = 2;
 }
 
 message Position {
     string inst_id = 1;
-    map<string, ClientOrder> cl_orders = 2;
-    double last_price = 3;
-    double total_qty = 4;
+    double ordered_qty = 2;
+    double filled_qty = 3;
 
+    repeated ClientOrder cl_orders = 4;
 }

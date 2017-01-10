@@ -2,7 +2,7 @@ syntax = "proto3";
 import "google/protobuf/any.proto";
 import "time_series.proto";
 
-package algotrader.model.trade_data;
+package algotrader.model;
 
 
 enum OrderAcion {
@@ -62,7 +62,7 @@ message NewOrderRequest {
     TIF tif = 15;
 
     string oca_tag = 20;
-    map<string, google.protobuf.Any> params = 21;
+    map<string, string> params = 21;
 }
 
 
@@ -79,7 +79,7 @@ message OrderReplaceRequest {
     TIF tif = 14;
 
     string oca_tag = 20;
-    map<string, google.protobuf.Any> params = 21;
+    map<string, string> params = 21;
 
 }
 
@@ -88,7 +88,7 @@ message OrderCancelRequest {
     string cl_id = 2;
     string cl_ord_id = 3;
 
-    map<string, google.protobuf.Any> params = 10;
+    map<string, string> params = 10;
 
 }
 
@@ -100,15 +100,16 @@ message OrderStatusUpdate {
     string cl_id = 4;
     string cl_ord_id = 5;
     string inst_id = 6;
-    double filled_qty = 7;
-    double avg_price = 8;
-    OrderStatus status = 9;
+
+    double filled_qty = 10;
+    double avg_price = 11;
+    OrderStatus status = 12;
 }
 
 
 message ExecutionReport {
     string broker_id = 1;
-    //string event_id = 2;
+    string event_id = 2;
     string broker_ord_id = 3;
     string er_id = 4;
 
@@ -152,12 +153,11 @@ message PortfolioUpdate {
 }
 
 
-message AccountValue {
-    string key = 1;
-    map<string, double> ccy_values = 2;
-}
-
 message Account {
+    message AccountValue {
+        string key = 1;
+        map<string, double> ccy_values = 2;
+    }
     string acct_id = 1;
     map<string, AccountValue> values = 2;
     map<string, Position> positions = 3;
@@ -167,17 +167,22 @@ message Portfolio {
     string port_id = 1;
     map<string, Position> positions = 2;
 
-    algotrader.model.time_series.DataSeries performance = 5;
-    double total_equity = 6;
-    double cash = 7;
-    double stock_value = 8;
-    Pnl pnl = 9;
-    DrawDown drawDown = 10;
+    Performance performance = 3;
+    Pnl pnl = 4;
+    DrawDown drawDown = 5;
 }
+
+message Performance {
+    double total_equity = 1;
+    double cash = 2;
+    double stock_value = 3;
+    algotrader.model.DataSeries performance_series = 4;
+}
+
 
 message Pnl {
     double pnl = 1;
-    algotrader.model.time_series.DataSeries pnl_series = 2;
+    algotrader.model.DataSeries pnl_series = 2;
 }
 
 message DrawDown {
@@ -187,13 +192,13 @@ message DrawDown {
     double low_equity = 4;
     double current_run_up = 5;
     double current_drawdown = 6;
-    algotrader.model.time_series.DataSeries drawdown_series = 7;
+    algotrader.model.DataSeries drawdown_series = 7;
 }
 
 
 message Config {
     string config_id = 1;
-    map<string, google.protobuf.Any> values = 2;
+    map<string, string> values = 2;
 }
 
 message Strategy {

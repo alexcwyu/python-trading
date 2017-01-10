@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package algotrader.model.market_data;
+package algotrader.model;
 
 message Bar{
     enum Type{
@@ -10,15 +10,14 @@ message Bar{
         Dynamic = 3;
     }
 
-    int64 inst_id = 1;
+    string inst_id = 1;
     Type type = 2;
     int32 size = 3;
     int32 provider_id = 4;
-
     int64 timestamp = 5;
+
     int64 utc_time = 6;
     int64 begin_time = 7;
-
 
     double open = 9;
     double high = 10;
@@ -26,16 +25,15 @@ message Bar{
     double close = 12;
     double vol = 13;
     double adj_close = 14;
-    double open_int = 15;
+    double open_interest = 15;
 }
 
 message Quote{
 
-
-    int64 inst_id = 1;
+    string inst_id = 1;
     int32 provider_id = 2;
-
     int64 timestamp = 3;
+
     int64 utc_time = 4;
 
     double bid = 5;
@@ -46,10 +44,10 @@ message Quote{
 
 message Trade{
 
-    int64 inst_id = 1;
+    string inst_id = 1;
     int32 provider_id = 2;
-
     int64 timestamp = 3;
+
     int64 utc_time = 4;
 
     double price = 5;
@@ -68,9 +66,10 @@ message MarketDepth{
         Delete = 2;
     }
 
-    int64 inst_id = 1;
+    string inst_id = 1;
     int32 provider_id = 2;
     int64 timestamp = 3;
+
     int64 utc_time = 4;
 
     string provider = 5;

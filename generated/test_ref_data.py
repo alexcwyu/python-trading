@@ -3,51 +3,59 @@
 from datetime import date
 from unittest import TestCase
 
-import generated.ref_data_pb2 as ref_data
-from algotrader.utils.date_utils import DateUtils
+from google.protobuf import json_format
 from protobuf_to_dict import *
+
+import algotrader.model.ref_data_pb2 as ref_data
+from algotrader.utils.date_utils import DateUtils
+
 
 class RefDataTest(TestCase):
     def test_instrument(self):
         inst = ref_data.Instrument()
 
-        inst.id = 10
-        inst.symbol = '0005.HK'
+        inst.inst_id = 10
         inst.name = 'HSBC'
+        inst.symbol = '0005.HK'
         inst.long_name = 'The Hongkong and Shanghai Banking Corporation'
         inst.type = ref_data.Instrument.CBO
-        inst.primary_exch_id = 1
-        inst.exch_ids.append(2)
-        inst.exch_ids.append(3)
-        inst.alt_symbols[1] = "5.HK"
-        inst.alt_symbols[2] = "5"
-        inst.alt_symbols[3] = "0005"
+        inst.primary_exch_id = "SEHK"
+        inst.exch_ids.append("NYSE")
+        inst.alt_symbols["IB"] = "5.HK"
+        inst.alt_symbols["BBG"] = "5"
         inst.sector = 'finance'
         inst.industry = 'bank'
         inst.exp_date = DateUtils.date_to_unixtimemillis(date(2099, 12, 31))
-        inst.call_put = ref_data.Instrument.Call
-        inst.factor = 1.0
+        inst.option_type = ref_data.Instrument.Call
+        inst.multiplier = 1.0
         inst.strike = 0.0
         inst.margin = 0.0
         inst.tick_size = 0.01
-        inst.trading_hours_id = 1
-        inst.trading_holidays_id = 1
-
+        print("##########")
         print(inst)
 
 
-        b = inst.SerializeToString()
+        string = inst.SerializeToString()
+        print("##########")
+        print(string)
         inst2 = ref_data.Instrument()
-        inst2.ParseFromString(b)
+        inst2.ParseFromString(string)
         self.assertEqual(inst, inst2)
 
 
-        dict = protobuf_to_dict(inst)
-        inst3 = dict_to_protobuf(ref_data.Instrument, dict)
+        json_string = json_format.MessageToJson(inst)
+        print("##########")
+        print(json_string)
+
+        d = protobuf_to_dict(inst)
+        print("##########")
+        print(d)
+        inst3 = dict_to_protobuf(ref_data.Instrument, d)
         self.assertEqual(inst, inst3)
 
+
     def test_currency(self):
-        currency = ref_data.Currency(id=1, code="HKD", name="Hong Kong Dollar", alt_codes={1: "HK", 2: "HKDD"})
+        currency = ref_data.Currency(ccy_id="HKD", name="Hong Kong Dollar", alt_codes={1: "HK", 2: "HKDD"})
 
         print(currency)
 
@@ -58,7 +66,7 @@ class RefDataTest(TestCase):
         self.assertEqual(currency, currency2)
 
     def test_exchange(self):
-        exchange = ref_data.Exchange(id=1, code="SEHK", name="The Stock Exchange of Hong Kong Limited"
+        exchange = ref_data.Exchange(exch_id="SEHK", name="The Stock Exchange of Hong Kong Limited"
                                      , alt_codes={1: "HKEX", 2: "HKX"})
 
         print(exchange)
@@ -70,7 +78,7 @@ class RefDataTest(TestCase):
         self.assertEqual(exchange, exchange2)
 
     def test_country(self):
-        country = ref_data.Country(id=1, code="HK", name="Hong Kong")
+        country = ref_data.Country(country_id="HK", name="Hong Kong")
 
         print(country)
 

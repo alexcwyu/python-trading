@@ -3,11 +3,10 @@ from typing import Dict, List,Callable, Union
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.protobuf_to_dict import *
 from algotrader.model.ref_data_pb2 import *
-from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 
 
-class RefDataModelFactory(object):
+class ModelFactory(object):
     def __add_to_dict(self, attribute: Callable, dict: Dict[str, str]):
         if dict:
             for key, value in dict.items():
@@ -26,9 +25,7 @@ class RefDataModelFactory(object):
                 else:
                     attribute.add(**protobuf_to_dict(item))
 
-
-                    ### ref data
-
+    ### ref data
     def build_instrument(self, symbol: str, type: int, primary_exch_id: str, ccy_id: str,
                          name: str = None, exch_ids: List[str] = None, sector: str = None, industry: str = None,
                          margin: float = None, tick_size: float = None,
@@ -111,7 +108,7 @@ class RefDataModelFactory(object):
         country.holidays_id = holidays_id
         return country
 
-    def build_trading_holidays(self, holidays_id, holidays) -> HolidaySeries:
+    def build_holiday_series(self, holidays_id, holidays) -> HolidaySeries:
         holiday_series = HolidaySeries()
         holiday_series.holidays_id = holidays_id
         self.__add_to_list(holiday_series.holidays, holidays)
@@ -158,3 +155,148 @@ class RefDataModelFactory(object):
         timezone = TimeZone()
         timezone.timezone_id = timezone_id
         return timezone
+
+    # time series
+    def build_data_series_item(self, timestamp: int, data: Dict[str, float]) -> DataSeries.Item:
+        item = DataSeries.Item()
+        item.timestamp = timestamp
+        self.__add_to_dict(item.data, data)
+
+        return item
+
+    def build_data_series(self, series_id: str, name: str = None, desc: str = None,
+                          inputs: Union[str, List[str]] = None, keys: Union[str, List[str]] = None,
+                          default_output_key: str = 'value', missing_value_replace: float = 0.0, start_time: int = 0,
+                          end_time: int = 0, items: List[DataSeries.Item] = None) -> DataSeries:
+        data_series = DataSeries()
+        data_series.series_id = series_id
+        data_series.name = name
+        data_series.desc = desc
+        self.__add_to_list(data_series.inputs, inputs)
+        self.__add_to_list(data_series.keys, keys)
+        data_series.default_output_key = default_output_key
+        data_series.missing_value_replace = missing_value_replace
+        data_series.start_time = start_time
+        data_series.end_time = end_time
+        self.__add_to_list(data_series.items, items)
+
+        return data_series
+
+    # Market data
+    def build_bar(self, inst_id: str, type: int, size: int, provider_id: str, timestamp: int,
+                  open: float, high: float, low: float, close: float, vol: float, adj_close: float = None,
+                  open_interest: float = None,
+                  utc_time: int = None, begin_time: int = None) -> Bar:
+        bar = Bar()
+        bar.inst_id = inst_id
+        bar.type = type
+        bar.size = size
+        bar.provider_id = provider_id
+        bar.timestamp = timestamp
+        bar.open = open
+        bar.high = high
+        bar.low = low
+        bar.close = close
+        bar.vol = vol
+        bar.adj_close = adj_close
+        bar.open_interest = open_interest
+        bar.utc_time = utc_time
+        bar.begin_time = begin_time
+
+        return bar
+
+    def build_quote(self, inst_id: str, provider_id: str, timestamp: int, bid: float, bid_size: int, ask: float,
+                    ask_size: int, utc_time: int = None) -> Quote:
+        quote = Quote()
+        quote.inst_id = inst_id
+        quote.provider_id = provider_id
+        quote.timestamp = timestamp
+        quote.utc_time = utc_time
+        quote.bid = bid
+        quote.bid_size = bid_size
+        quote.ask = ask
+        quote.ask_size = ask_size
+
+        return quote
+
+    def build_trade(self, inst_id: str, provider_id: str, timestamp: int, price: float, size: int,
+                    utc_time: int = None) -> Trade:
+        trade = Trade()
+        trade.inst_id = inst_id
+        trade.provider_id = provider_id
+        trade.timestamp = timestamp
+        trade.price = price
+        trade.size = size
+        trade.utc_time = utc_time
+
+        return trade
+
+    def build_market_depth(self, inst_id: str, provider_id: str, timestamp: int, event_provider: str, position: int,
+                           operation: int, side: int, price: float, size: int,
+                           utc_time: int = None) -> MarketDepth:
+        md = MarketDepth()
+        md.inst_id = inst_id
+        md.provider_id = provider_id
+        md.timestamp = timestamp
+        md.event_provider = event_provider
+        md.position = position
+        md.operation = operation
+        md.side = side
+        md.price = price
+        md.size = size
+        md.utc_time = utc_time
+        return md
+
+    def build_new_order_request(self):
+        pass
+
+    def build_order_replace_request(self):
+        pass
+
+    def build_order_cancel_request(self):
+        pass
+
+    def build_order_status_update(self):
+        pass
+
+    def build_execution_report(self):
+        pass
+
+    def build_account_update(self):
+        pass
+
+    def build_portfolio_update(self):
+        pass
+
+    def build_account(self):
+        pass
+
+    def build_account_value(self):
+        pass
+
+    def build_portfolio(self):
+        pass
+
+    def build_pnl(self):
+        pass
+
+    def build_performance(self):
+        pass
+
+    def build_drawdown(self):
+        pass
+
+    def build_config(self):
+        pass
+
+    def build_strategy(self):
+        pass
+
+    def build_order(self):
+        pass
+
+    def build_position(self):
+        pass
+
+    def build_client_order_id(self):
+        pass

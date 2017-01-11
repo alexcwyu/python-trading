@@ -19,29 +19,29 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='time_series.proto',
   package='algotrader.model',
   syntax='proto3',
-  serialized_pb=_b('\n\x11time_series.proto\x12\x10\x61lgotrader.model\"\x8a\x01\n\x0e\x44\x61taSeriesItem\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x38\n\x04\x64\x61ta\x18\x03 \x03(\x0b\x32*.algotrader.model.DataSeriesItem.DataEntry\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"\xeb\x01\n\nDataSeries\x12\x11\n\tseries_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\x0e\n\x06inputs\x18\x04 \x03(\t\x12\x0c\n\x04keys\x18\x05 \x03(\t\x12\x1a\n\x12\x64\x65\x66\x61ult_output_key\x18\x06 \x01(\t\x12\x1d\n\x15missing_value_replace\x18\x07 \x01(\x01\x12\x12\n\nstart_time\x18\x08 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\t \x01(\x03\x12/\n\x05items\x18\n \x03(\x0b\x32 .algotrader.model.DataSeriesItemb\x06proto3')
+  serialized_pb=_b('\n\x11time_series.proto\x12\x10\x61lgotrader.model\"\xf0\x02\n\nDataSeries\x12\x11\n\tseries_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x65sc\x18\x03 \x01(\t\x12\x0e\n\x06inputs\x18\x04 \x03(\t\x12\x0c\n\x04keys\x18\x05 \x03(\t\x12\x1a\n\x12\x64\x65\x66\x61ult_output_key\x18\x06 \x01(\t\x12\x1d\n\x15missing_value_replace\x18\x07 \x01(\x01\x12\x12\n\nstart_time\x18\x08 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\t \x01(\x03\x12\x30\n\x05items\x18\n \x03(\x0b\x32!.algotrader.model.DataSeries.Item\x1a\x81\x01\n\x04Item\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x39\n\x04\x64\x61ta\x18\x03 \x03(\x0b\x32+.algotrader.model.DataSeries.Item.DataEntry\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\x62\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
 
-_DATASERIESITEM_DATAENTRY = _descriptor.Descriptor(
+_DATASERIES_ITEM_DATAENTRY = _descriptor.Descriptor(
   name='DataEntry',
-  full_name='algotrader.model.DataSeriesItem.DataEntry',
+  full_name='algotrader.model.DataSeries.Item.DataEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='algotrader.model.DataSeriesItem.DataEntry.key', index=0,
+      name='key', full_name='algotrader.model.DataSeries.Item.DataEntry.key', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='value', full_name='algotrader.model.DataSeriesItem.DataEntry.value', index=1,
+      name='value', full_name='algotrader.model.DataSeries.Item.DataEntry.value', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -59,26 +59,26 @@ _DATASERIESITEM_DATAENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=135,
-  serialized_end=178,
+  serialized_start=365,
+  serialized_end=408,
 )
 
-_DATASERIESITEM = _descriptor.Descriptor(
-  name='DataSeriesItem',
-  full_name='algotrader.model.DataSeriesItem',
+_DATASERIES_ITEM = _descriptor.Descriptor(
+  name='Item',
+  full_name='algotrader.model.DataSeries.Item',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='timestamp', full_name='algotrader.model.DataSeriesItem.timestamp', index=0,
+      name='timestamp', full_name='algotrader.model.DataSeries.Item.timestamp', index=0,
       number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='data', full_name='algotrader.model.DataSeriesItem.data', index=1,
+      name='data', full_name='algotrader.model.DataSeries.Item.data', index=1,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -87,7 +87,7 @@ _DATASERIESITEM = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_DATASERIESITEM_DATAENTRY, ],
+  nested_types=[_DATASERIES_ITEM_DATAENTRY, ],
   enum_types=[
   ],
   options=None,
@@ -96,10 +96,9 @@ _DATASERIESITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=40,
-  serialized_end=178,
+  serialized_start=279,
+  serialized_end=408,
 )
-
 
 _DATASERIES = _descriptor.Descriptor(
   name='DataSeries',
@@ -181,7 +180,7 @@ _DATASERIES = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[],
+  nested_types=[_DATASERIES_ITEM, ],
   enum_types=[
   ],
   options=None,
@@ -190,39 +189,40 @@ _DATASERIES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=181,
-  serialized_end=416,
+  serialized_start=40,
+  serialized_end=408,
 )
 
-_DATASERIESITEM_DATAENTRY.containing_type = _DATASERIESITEM
-_DATASERIESITEM.fields_by_name['data'].message_type = _DATASERIESITEM_DATAENTRY
-_DATASERIES.fields_by_name['items'].message_type = _DATASERIESITEM
-DESCRIPTOR.message_types_by_name['DataSeriesItem'] = _DATASERIESITEM
+_DATASERIES_ITEM_DATAENTRY.containing_type = _DATASERIES_ITEM
+_DATASERIES_ITEM.fields_by_name['data'].message_type = _DATASERIES_ITEM_DATAENTRY
+_DATASERIES_ITEM.containing_type = _DATASERIES
+_DATASERIES.fields_by_name['items'].message_type = _DATASERIES_ITEM
 DESCRIPTOR.message_types_by_name['DataSeries'] = _DATASERIES
 
-DataSeriesItem = _reflection.GeneratedProtocolMessageType('DataSeriesItem', (_message.Message,), dict(
+DataSeries = _reflection.GeneratedProtocolMessageType('DataSeries', (_message.Message,), dict(
 
-  DataEntry = _reflection.GeneratedProtocolMessageType('DataEntry', (_message.Message,), dict(
-    DESCRIPTOR = _DATASERIESITEM_DATAENTRY,
+  Item = _reflection.GeneratedProtocolMessageType('Item', (_message.Message,), dict(
+
+    DataEntry = _reflection.GeneratedProtocolMessageType('DataEntry', (_message.Message,), dict(
+      DESCRIPTOR = _DATASERIES_ITEM_DATAENTRY,
+      __module__ = 'time_series_pb2'
+      # @@protoc_insertion_point(class_scope:algotrader.model.DataSeries.Item.DataEntry)
+      ))
+    ,
+    DESCRIPTOR = _DATASERIES_ITEM,
     __module__ = 'time_series_pb2'
-    # @@protoc_insertion_point(class_scope:algotrader.model.DataSeriesItem.DataEntry)
+    # @@protoc_insertion_point(class_scope:algotrader.model.DataSeries.Item)
     ))
   ,
-  DESCRIPTOR = _DATASERIESITEM,
-  __module__ = 'time_series_pb2'
-  # @@protoc_insertion_point(class_scope:algotrader.model.DataSeriesItem)
-  ))
-_sym_db.RegisterMessage(DataSeriesItem)
-_sym_db.RegisterMessage(DataSeriesItem.DataEntry)
-
-DataSeries = _reflection.GeneratedProtocolMessageType('DataSeries', (_message.Message,), dict(
   DESCRIPTOR = _DATASERIES,
   __module__ = 'time_series_pb2'
   # @@protoc_insertion_point(class_scope:algotrader.model.DataSeries)
   ))
 _sym_db.RegisterMessage(DataSeries)
+_sym_db.RegisterMessage(DataSeries.Item)
+_sym_db.RegisterMessage(DataSeries.Item.DataEntry)
 
 
-_DATASERIESITEM_DATAENTRY.has_options = True
-_DATASERIESITEM_DATAENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
+_DATASERIES_ITEM_DATAENTRY.has_options = True
+_DATASERIES_ITEM_DATAENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
 # @@protoc_insertion_point(module_scope)

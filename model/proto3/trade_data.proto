@@ -239,7 +239,7 @@ message Order {
 }
 
 
-message ClientOrder {
+message ClientOrderId {
     string cl_id = 1;
     string cl_ord_id = 2;
 }
@@ -249,5 +249,5 @@ message Position {
     double ordered_qty = 2;
     double filled_qty = 3;
 
-    repeated ClientOrder cl_orders = 4;
+    repeated ClientOrderId cl_orders = 4;
 }

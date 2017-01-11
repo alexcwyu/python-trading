@@ -3,13 +3,13 @@ syntax = "proto3";
 package algotrader.model;
 
 
-message DataSeriesItem{
-    int64 timestamp = 1;
-    //int64 utc_time = 2;
-    map<string, double> data = 3;
-}
 
 message DataSeries{
+
+    message Item{
+        int64 timestamp = 1;
+        map<string, double> data = 3;
+    }
     string series_id = 1;
     string name = 2;
     string desc = 3;
@@ -19,6 +19,6 @@ message DataSeries{
     double missing_value_replace = 7;
     int64 start_time = 8;
     int64 end_time = 9;
-    repeated DataSeriesItem items = 10;
+    repeated Item items = 10;
 }
 

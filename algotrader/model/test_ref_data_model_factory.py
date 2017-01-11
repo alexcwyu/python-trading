@@ -53,8 +53,8 @@ class ModelFactoryTest(TestCase):
         self.__test_serializaion(HolidaySeries.Holiday, holiday)
 
     def test_trading_holidays(self):
-        trading_holiday = self.factory.build_trading_holidays("HK holiday",
-                                                              [self.factory.build_holiday(20161102,
+        trading_holiday = self.factory.build_holiday_series("HK holiday",
+                                                            [self.factory.build_holiday(20161102,
                                                                                           HolidaySeries.Holiday.FullDay,
                                                                                           20161102, 20161103),
                                                                self.factory.build_holiday(20161223,
@@ -69,7 +69,7 @@ class ModelFactoryTest(TestCase):
 
     def test_trading_hours(self):
         trading_hours = self.factory.build_trading_hours('SEHK_trdinghr', 'HK timezone',
-                                                         self.factory.build_trading_session(TradingHours.Session.Monday,
+                                                         self.factory.build_trading_session(TradingHours.Session.Sunday,
                                                                                             9000,
                                                                                             TradingHours.Session.Monday,
                                                                                             1600, True))

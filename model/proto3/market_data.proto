@@ -13,7 +13,7 @@ message Bar{
     string inst_id = 1;
     Type type = 2;
     int32 size = 3;
-    int32 provider_id = 4;
+    string provider_id = 4;
     int64 timestamp = 5;
 
     int64 utc_time = 6;
@@ -31,7 +31,7 @@ message Bar{
 message Quote{
 
     string inst_id = 1;
-    int32 provider_id = 2;
+    string provider_id = 2;
     int64 timestamp = 3;
 
     int64 utc_time = 4;
@@ -45,7 +45,7 @@ message Quote{
 message Trade{
 
     string inst_id = 1;
-    int32 provider_id = 2;
+    string provider_id = 2;
     int64 timestamp = 3;
 
     int64 utc_time = 4;
@@ -67,12 +67,12 @@ message MarketDepth{
     }
 
     string inst_id = 1;
-    int32 provider_id = 2;
+    string provider_id = 2;
     int64 timestamp = 3;
 
     int64 utc_time = 4;
 
-    string provider = 5;
+    string event_provider = 5;
     int64 position = 6;
     Operation operation = 7;
     Side side = 8;

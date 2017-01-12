@@ -93,78 +93,80 @@ message OrderCancelRequest {
 }
 
 message OrderStatusUpdate {
-    string broker_id = 1;
-    string event_id = 2;
-    string broker_ord_id = 3;
+    int64 timestamp = 1;
+    string broker_id = 2;
+    string event_id = 3;
+    string broker_ord_id = 4;
 
-    string cl_id = 4;
-    string cl_ord_id = 5;
-    string inst_id = 6;
+    string cl_id = 11;
+    string cl_ord_id = 12;
+    string inst_id = 13;
 
-    double filled_qty = 10;
-    double avg_price = 11;
-    OrderStatus status = 12;
+    double filled_qty = 21;
+    double avg_price = 22;
+    OrderStatus status = 23;
 }
 
 
 message ExecutionReport {
-    string broker_id = 1;
-    string event_id = 2;
-    string broker_ord_id = 3;
-    string er_id = 4;
+    int64 timestamp = 1;
+    string broker_id = 2;
+    string event_id = 3;
+    string broker_ord_id = 4;
+    string er_id = 5;
 
-    string cl_id = 5;
-    string cl_ord_id = 6;
-    string inst_id = 7;
+    string cl_id = 11;
+    string cl_ord_id = 12;
+    string inst_id = 13;
 
-    double last_qty = 10;
-    double last_price = 11;
-    double commission = 12;
-    double filled_qty = 13;
-    double avg_oprice = 14;
-    OrderStatus status = 15;
+    double last_qty = 21;
+    double last_price = 22;
+    double commission = 23;
+    double filled_qty = 24;
+    double avg_price = 25;
+    OrderStatus status = 26;
 }
 
 
-message AccountUpdate {
-    string broker_id = 1;
-    string event_id = 2;
+message AccountValue {
+    string key = 1;
+    map<string, double> ccy_values = 2;
+}
 
-    string account_name = 10;
-    string key = 11;
-    string ccy_id = 12;
-    double value = 13;
+message AccountUpdate {
+    int64 timestamp = 1;
+    string broker_id = 2;
+    string event_id = 3;
+
+    string account_name = 11;
+    map<string, AccountValue> values = 12;
 
 }
 
 message PortfolioUpdate {
-    string broker_id = 1;
-    string event_id = 2;
+    int64 timestamp = 1;
+    string broker_id = 2;
+    string event_id = 3;
 
-    string port_id = 3;
-    string inst_id = 4;
+    string portf_id = 4;
+    string inst_id = 5;
 
-    double position = 10;
-    double mkt_price = 11;
-    double mkt_value = 12;
-    double avg_cost = 13;
-    double unrealized_pnl = 14;
-    double realized_pnl = 15;
+    double position = 20;
+    double mkt_price = 21;
+    double mkt_value = 22;
+    double avg_cost = 23;
+    double unrealized_pnl = 24;
+    double realized_pnl = 25;
 }
 
-
 message Account {
-    message AccountValue {
-        string key = 1;
-        map<string, double> ccy_values = 2;
-    }
     string acct_id = 1;
     map<string, AccountValue> values = 2;
     map<string, Position> positions = 3;
 }
 
 message Portfolio {
-    string port_id = 1;
+    string portf_id = 1;
     map<string, Position> positions = 2;
 
     Performance performance = 3;
@@ -181,13 +183,13 @@ message Performance {
 
 
 message Pnl {
-    double pnl = 1;
+    double last_pnl = 1;
     algotrader.model.DataSeries pnl_series = 2;
 }
 
 message DrawDown {
-    double drawdown = 1;
-    double drawdown_pct = 2;
+    double last_drawdown = 1;
+    double last_drawdown_pct = 2;
     double high_equity = 3;
     double low_equity = 4;
     double current_run_up = 5;
@@ -209,15 +211,16 @@ message Strategy {
 
 
 message Order {
-    int64 timestamp = 1;
+    string cl_id = 1;
+    string cl_ord_id = 2;
+    string portf_id = 3;
+    string broker_id = 4;
+    string broker_ord_id = 5;
 
-    string cl_id = 2;
-    string cl_ord_id = 3;
-    string portf_id = 4;
-    string broker_id = 5;
-    string broker_ord_id = 6;
+    string inst_id = 6;
 
-    string inst_id = 7;
+    int64 creation_timestamp = 7;
+    int64 update_timestamp = 8;
 
     OrderAcion action = 10;
     OrderType type = 11;
@@ -236,6 +239,7 @@ message Order {
     double last_price = 34;
     bool stop_limit_ready = 35;
     double trailing_stop_exec_price = 36;
+
 }
 
 

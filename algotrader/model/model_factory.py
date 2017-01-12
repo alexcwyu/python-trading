@@ -1,9 +1,10 @@
-from typing import Dict, List,Callable, Union
+from typing import Dict, List, Callable, Union
 
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.protobuf_to_dict import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
+from algotrader.model.trade_data_pb2 import *
 
 
 class ModelFactory(object):
@@ -25,7 +26,7 @@ class ModelFactory(object):
                 else:
                     attribute.add(**protobuf_to_dict(item))
 
-    ### ref data
+    # ref data
     def build_instrument(self, symbol: str, type: int, primary_exch_id: str, ccy_id: str,
                          name: str = None, exch_ids: List[str] = None, sector: str = None, industry: str = None,
                          margin: float = None, tick_size: float = None,
@@ -205,7 +206,7 @@ class ModelFactory(object):
 
         return bar
 
-    def build_quote(self, inst_id: str, provider_id: str, timestamp: int, bid: float, bid_size: int, ask: float,
+    def build_quote(self, inst_id: str, provider_id: str, timestamp: float, bid: float, bid_size: float, ask: float,
                     ask_size: int, utc_time: int = None) -> Quote:
         quote = Quote()
         quote.inst_id = inst_id
@@ -219,7 +220,7 @@ class ModelFactory(object):
 
         return quote
 
-    def build_trade(self, inst_id: str, provider_id: str, timestamp: int, price: float, size: int,
+    def build_trade(self, inst_id: str, provider_id: str, timestamp: int, price: float, size: float,
                     utc_time: int = None) -> Trade:
         trade = Trade()
         trade.inst_id = inst_id
@@ -232,7 +233,7 @@ class ModelFactory(object):
         return trade
 
     def build_market_depth(self, inst_id: str, provider_id: str, timestamp: int, event_provider: str, position: int,
-                           operation: int, side: int, price: float, size: int,
+                           operation: int, side: int, price: float, size: float,
                            utc_time: int = None) -> MarketDepth:
         md = MarketDepth()
         md.inst_id = inst_id
@@ -247,56 +248,246 @@ class ModelFactory(object):
         md.utc_time = utc_time
         return md
 
-    def build_new_order_request(self):
-        pass
+    # trade data
+    def build_new_order_request(self, timestamp: int, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str,
+                                inst_id: str,
+                                action: int, type: int, qty: float, limit_price: float, stop_price: float = None,
+                                tif: int = TIF.DAY, oca_tag: str = None,
+                                params: Dict[str, str] = None) -> NewOrderRequest:
+        req = NewOrderRequest()
 
-    def build_order_replace_request(self):
-        pass
+        req.timestamp = timestamp
+        req.cl_id = cl_id
+        req.cl_ord_id = cl_ord_id
+        req.portf_id = portf_id
+        req.broker_id = broker_id
+        req.inst_id = inst_id
+        req.action = action
+        req.type = type
+        req.qty = qty
+        req.limit_price = limit_price
+        req.stop_price = stop_price
+        req.tif = tif
+        req.oca_tag = oca_tag
+        self.__add_to_dict(req.params, params)
 
-    def build_order_cancel_request(self):
-        pass
+        return req
 
-    def build_order_status_update(self):
-        pass
+    def build_order_replace_request(self, timestamp: int, cl_id: str, cl_ord_id: str, type: OrderType, qty: float,
+                                    limit_price: float, stop_price: float = None,
+                                    tif: TIF = TIF.DAY, oca_tag: str = None,
+                                    params: Dict[str, str] = None) -> OrderReplaceRequest:
+        req = OrderReplaceRequest()
 
-    def build_execution_report(self):
-        pass
+        req.timestamp = timestamp
+        req.cl_id = cl_id
+        req.cl_ord_id = cl_ord_id
+        req.type = type
+        req.qty = qty
+        req.limit_price = limit_price
+        req.stop_price = stop_price
+        req.tif = tif
+        req.oca_tag = oca_tag
+        self.__add_to_dict(req.params, params)
 
-    def build_account_update(self):
-        pass
+        return req
 
-    def build_portfolio_update(self):
-        pass
+    def build_order_cancel_request(self, timestamp: int, cl_id: str, cl_ord_id: str,
+                                   params: Dict[str, str] = None) -> OrderCancelRequest:
+        req = OrderCancelRequest()
+        req.timestamp = timestamp
+        req.cl_id = cl_id
+        req.cl_ord_id = cl_ord_id
+        self.__add_to_dict(req.params, params)
 
-    def build_account(self):
-        pass
+        return req
 
-    def build_account_value(self):
-        pass
+    def build_order_status_update(self, timestamp: int, broker_id: str, event_id: str, broker_ord_id: str, cl_id: str,
+                                  cl_ord_id: str, inst_id: str, filled_qty: float, avg_price: float,
+                                  status: OrderStatus) -> OrderStatusUpdate:
+        event = OrderStatusUpdate()
+        event.timestamp = timestamp
+        event.broker_id = broker_id
+        event.event_id = event_id
+        event.broker_ord_id = broker_ord_id
+        event.cl_id = cl_id
+        event.cl_ord_id = cl_ord_id
+        event.inst_id = inst_id
+        event.filled_qty = filled_qty
+        event.avg_price = avg_price
+        event.status = status
 
-    def build_portfolio(self):
-        pass
+        return event
 
-    def build_pnl(self):
-        pass
+    def build_execution_report(self, timestamp: int, broker_id: str, event_id: str, broker_ord_id: str, er_id: str,
+                               cl_id: str,
+                               cl_ord_id: str, inst_id: str, last_qty: float, last_price: float, commission: float,
+                               filled_qty: float, avg_price: float,
+                               status: OrderStatus) -> ExecutionReport:
+        event = ExecutionReport()
+        event.timestamp = timestamp
+        event.broker_id = broker_id
+        event.event_id = event_id
+        event.broker_ord_id = broker_ord_id
+        event.er_id = er_id
+        event.cl_id = cl_id
+        event.cl_ord_id = cl_ord_id
+        event.inst_id = inst_id
+        event.last_price = last_price
+        event.last_price = last_price
+        event.commission = commission
+        event.filled_qty = filled_qty
+        event.avg_price = avg_price
+        event.status = status
 
-    def build_performance(self):
-        pass
+        return event
 
-    def build_drawdown(self):
-        pass
+    def build_account_value(self, key: str, ccy_values: Dict[str, float]) -> AccountValue:
+        value = AccountValue()
+        value.key = key
+        self.__add_to_dict(value.ccy_values, ccy_values)
+        return value
 
-    def build_config(self):
-        pass
+    def build_account_update(self, timestamp: int, broker_id: str, event_id: str, account_name,
+                             values: AccountValue) -> AccountUpdate:
+        event = AccountUpdate()
 
-    def build_strategy(self):
-        pass
+        event.timestamp = timestamp
+        event.broker_id = broker_id
+        event.event_id = event_id
+        event.account_name = account_name
+        self.__add_to_dict(event.values, values)
 
-    def build_order(self):
-        pass
+        return event
 
-    def build_position(self):
-        pass
+    def build_portfolio_update(self, timestamp: int, broker_id: str, event_id: str, portf_id: str, inst_id: str,
+                               position: float, mkt_price: float, mkt_value: float, avg_cost: float,
+                               unrealized_pnl: float, realized_pnl: float) -> PortfolioUpdate:
+        event = PortfolioUpdate()
 
-    def build_client_order_id(self):
-        pass
+        event.timestamp = timestamp
+        event.broker_id = broker_id
+        event.event_id = event_id
+        event.portf_id = portf_id
+        event.inst_id = inst_id
+        event.position = position
+        event.mkt_price = mkt_price
+        event.mkt_value = mkt_value
+        event.avg_cost = avg_cost
+        event.unrealized_pnl = unrealized_pnl
+        event.realized_pnl = realized_pnl
+
+        return event
+
+    def build_account(self, acct_id: str, values: Dict[str, AccountValue] = None,
+                      positions: Dict[str, Position] = None) -> Account:
+        account = Account()
+
+        account.acct_id = acct_id
+        self.__add_to_dict(account.values, values)
+        self.__add_to_dict(account.positions, positions)
+
+        return account
+
+    def build_portfolio(self, portf_id: str, positions: Dict[str, Position] = None, performance: Performance = None,
+                        pnl: Pnl = None, drawdown: DrawDown = None) -> Portfolio:
+        portfolio = Portfolio()
+        portfolio.portf_id = portf_id
+
+        self.__add_to_dict(portfolio.positions, positions)
+        portfolio.performance = performance if performance else Performance()
+        portfolio.pnl = pnl if pnl else Pnl()
+        portfolio.drawdown = drawdown if drawdown else DrawDown()
+
+        return portfolio
+
+    def build_performance(self, total_equity: float, cash: float, stock_value: float,
+                          performance_series: DataSeries = None) -> Performance:
+        performance = Performance()
+        performance.total_equity = total_equity
+        performance.cash = cash
+        performance.stock_value = stock_value
+        performance.performance_series = performance_series if performance_series else DataSeries()
+        return performance
+
+    def build_pnl(self, last_pnl: float, pnl_series: DataSeries = None) -> Pnl:
+        pnl = Pnl()
+        pnl.last_pnl = last_pnl
+        pnl.pnl_series = pnl_series if pnl_series else DataSeries()
+        return pnl
+
+    def build_drawdown(self, last_drawdown: float, last_drawdown_pct: float, high_equity: float, low_equity: float,
+                       current_run_up: float, current_drawdown: float, drawdown_series: DataSeries = None) -> DrawDown:
+        dd = DrawDown()
+        dd.last_drawdown = last_drawdown
+        dd.last_drawdown_pct = last_drawdown_pct
+        dd.high_equity = high_equity
+        dd.low_equity = low_equity
+        dd.current_run_up = current_run_up
+        dd.current_drawdown = current_drawdown
+        dd.drawdown_series = drawdown_series if drawdown_series else DataSeries()
+        return dd
+
+    def build_config(self, config_id: str, values: Dict[str, str]) -> Config:
+        config = Config()
+
+        config.config_id = config_id
+        self.__add_to_dict(config.values, values)
+        return Config
+
+    def build_strategy(self, stg_id: str, config_id: str, values: Dict[str, str]) -> Strategy:
+        stg = Strategy()
+        stg.stg_id = stg_id
+        stg.config_id = config_id
+        self.__add_to_dict(stg.values, values)
+        return stg
+
+    def build_order(self, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str, inst_id: str,
+                    creation_timestamp: int, action: int, type: int, qty: float, limit_price: float,
+                    stop_price: float = None, tif: int = TIF.DAY, oca_tag: str = None, params: Dict[str, str] = None,
+                    broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = None,
+                    filled_qty: float = 0, avg_price: float = 0, last_qty: float = 0, last_price: float = 0,
+                    stop_limit_ready: bool = False, trailing_stop_exec_price: float = None) -> Order:
+        order = Order()
+        order.cl_id = cl_id
+        order.cl_ord_id = cl_ord_id
+        order.portf_id = portf_id
+        order.broker_id = broker_id
+        order.broker_ord_id = broker_ord_id
+        order.inst_id = inst_id
+
+        order.creation_timestamp = creation_timestamp
+        order.update_timestamp = update_timestamp
+
+        order.action = action
+        order.type = type
+        order.qty = qty
+        order.limit_price = limit_price
+        order.stop_price = stop_price
+        order.tif = tif
+        order.oca_tag = oca_tag
+        self.__add_to_dict(order.params, params)
+
+        order.status = status
+        order.filled_qty = filled_qty
+        order.avg_price = avg_price
+        order.last_qty = last_qty
+        order.last_price = last_price
+        order.stop_limit_ready = stop_limit_ready
+        order.trailing_stop_exec_price = trailing_stop_exec_price
+
+        return order
+
+    def build_position(self, inst_id: str, ordered_qty: float = 0, filled_qty: float = 0,
+                       cl_orders: List[ClientOrderId] = None) -> Position:
+        position = Position()
+
+        position.inst_id = inst_id
+        position.ordered_qty = ordered_qty
+        position.filled_qty = filled_qty
+        self.__add_to_list(position.cl_orders, cl_orders)
+        return position
+
+    def build_client_order_id(self, cl_id: str, cl_ord_id: str) -> ClientOrderId:
+        id = ClientOrderId()
+        return id

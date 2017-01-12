@@ -37,9 +37,9 @@ message Quote{
     int64 utc_time = 4;
 
     double bid = 5;
-    int64 bid_size = 6;
+    double bid_size = 6;
     double ask = 7;
-    int64 ask_size = 8;
+    double ask_size = 8;
 }
 
 message Trade{
@@ -51,7 +51,7 @@ message Trade{
     int64 utc_time = 4;
 
     double price = 5;
-    int64 size = 6;
+    double size = 6;
 }
 
 message MarketDepth{
@@ -77,5 +77,5 @@ message MarketDepth{
     Operation operation = 7;
     Side side = 8;
     double price = 9;
-    int64 size = 10;
+    double size = 10;
 }

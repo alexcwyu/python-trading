@@ -407,9 +407,9 @@ class ModelFactory(object):
         portfolio.portf_id = portf_id
 
         self.__add_to_dict_value(portfolio.positions, positions)
-        # portfolio.performance.CopyFrom(performance if performance else Performance())
-        # portfolio.pnl.CopyFrom(pnl if pnl else Pnl())
-        #       portfolio.drawdown.CopyFrom(drawdown if drawdown else DrawDown())
+        portfolio.performance.CopyFrom(performance if performance else Performance())
+        portfolio.pnl.CopyFrom(pnl if pnl else Pnl())
+        portfolio.drawdown.CopyFrom(drawdown if drawdown else DrawDown())
 
         return portfolio
 
@@ -419,14 +419,13 @@ class ModelFactory(object):
         performance.total_equity = total_equity
         performance.cash = cash
         performance.stock_value = stock_value
-        # performance.performance_series.CopyFrom(performance_series if performance_series else DataSeries())
+        performance.performance_series.CopyFrom(performance_series if performance_series else DataSeries())
         return performance
 
     def build_pnl(self, last_pnl: float, pnl_series: DataSeries = None) -> Pnl:
         pnl = Pnl()
         pnl.last_pnl = last_pnl
-
-        # pnl.pnl_series.CopyFrom(pnl_series if pnl_series else DataSeries())
+        pnl.pnl_series.CopyFrom(pnl_series if pnl_series else DataSeries())
         return pnl
 
     def build_drawdown(self, last_drawdown: float, last_drawdown_pct: float, high_equity: float, low_equity: float,
@@ -438,8 +437,8 @@ class ModelFactory(object):
         dd.low_equity = low_equity
         dd.current_run_up = current_run_up
         dd.current_drawdown = current_drawdown
-        if drawdown_series:
-            dd.drawdown_series.CopyFrom(drawdown_series)
+        dd.drawdown_series.CopyFrom(drawdown_series if drawdown_series else DataSeries())
+
         return dd
 
     def build_config(self, config_id: str, values: Dict[str, str]) -> Config:

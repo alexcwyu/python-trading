@@ -211,20 +211,9 @@ class SampleFactory(object):
         return pnl
 
     def sample_drawdown(self):
-        ds2 = self.factory.build_data_series("HSI.BAR.86400", name="HSI.BAR.86400", desc="HSI", inputs=["HSI.BAR.1"],
-                                             keys=["high", "low", "close"], default_output_key="close",
-                                             missing_value_replace=0, start_time=0, end_time=999,
-                                             items=[self.factory.build_data_series_item(0,
-                                                                                        {"high": 350.00, "low": 200.45,
-                                                                                         "close": 250.1}),
-                                                    self.factory.build_data_series_item(1,
-                                                                                        {"high": 1350.00,
-                                                                                         "low": 1200.45,
-                                                                                         "close": 1250.1})]
-                                             )
         drawdown = self.factory.build_drawdown(last_drawdown=-12, last_drawdown_pct=-0.5, high_equity=1231,
                                                low_equity=29, current_run_up=10, current_drawdown=-123,
-                                               drawdown_series=ds2)
+                                               drawdown_series=self.sample_data_series())
         return drawdown
 
     def sample_config(self):

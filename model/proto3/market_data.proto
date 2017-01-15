@@ -72,7 +72,7 @@ message MarketDepth{
 
     int64 utc_time = 4;
 
-    string event_provider = 5;
+    string md_provider = 5;
     int64 position = 6;
     Operation operation = 7;
     Side side = 8;

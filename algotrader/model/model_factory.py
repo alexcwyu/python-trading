@@ -8,6 +8,15 @@ from algotrader.model.trade_data_pb2 import *
 
 
 class ModelFactory(object):
+    def __add_to_dict_value(self, attribute: Callable, dict: Dict[str, object]):
+        if dict:
+            for key, value in dict.items():
+                v = attribute[key]
+                if v:
+                    v.CopyFrom(value)
+                else:
+                    attribute[key] = value
+
     def __add_to_dict(self, attribute: Callable, dict: Dict[str, str]):
         if dict:
             for key, value in dict.items():
@@ -27,7 +36,7 @@ class ModelFactory(object):
                     attribute.add(**protobuf_to_dict(item))
 
     # ref data
-    def build_instrument(self, symbol: str, type: int, primary_exch_id: str, ccy_id: str,
+    def build_instrument(self, symbol: str, type: Instrument.InstType, primary_exch_id: str, ccy_id: str,
                          name: str = None, exch_ids: List[str] = None, sector: str = None, industry: str = None,
                          margin: float = None, tick_size: float = None,
                          underlying: Underlying = None, derivative: DrivativeTraits = None,
@@ -58,7 +67,8 @@ class ModelFactory(object):
 
         return inst
 
-    def build_derivative_traits(self, option_type: int = None, option_style: int = None, strike: float = None,
+    def build_derivative_traits(self, option_type: DrivativeTraits.OptionType = None,
+                                option_style: DrivativeTraits.OptionStyle = None, strike: float = None,
                                 exp_date: int = None,
                                 multiplier: float = None) -> DrivativeTraits:
         deriv = DrivativeTraits()
@@ -70,7 +80,7 @@ class ModelFactory(object):
 
         return deriv
 
-    def build_underlying(self, type: int, assets: List[Underlying.Asset]) -> Underlying:
+    def build_underlying(self, type: Instrument.InstType, assets: List[Underlying.Asset]) -> Underlying:
         underlying = Underlying()
         underlying.type = type
         self.__add_to_list(underlying.assets, assets)
@@ -115,7 +125,8 @@ class ModelFactory(object):
         self.__add_to_list(holiday_series.holidays, holidays)
         return holiday_series
 
-    def build_holiday(self, trading_date: int, type: int, start_date: int, end_date: int, start_time: int = None,
+    def build_holiday(self, trading_date: int, type: HolidaySeries.Holiday.Type, start_date: int, end_date: int,
+                      start_time: int = None,
                       end_time: int = None,
                       desc: str = None) -> HolidaySeries.Holiday:
         holiday = HolidaySeries.Holiday()
@@ -184,7 +195,7 @@ class ModelFactory(object):
         return data_series
 
     # Market data
-    def build_bar(self, inst_id: str, type: int, size: int, provider_id: str, timestamp: int,
+    def build_bar(self, inst_id: str, type: Bar.Type, size: int, provider_id: str, timestamp: int,
                   open: float, high: float, low: float, close: float, vol: float, adj_close: float = None,
                   open_interest: float = None,
                   utc_time: int = None, begin_time: int = None) -> Bar:
@@ -207,7 +218,7 @@ class ModelFactory(object):
         return bar
 
     def build_quote(self, inst_id: str, provider_id: str, timestamp: float, bid: float, bid_size: float, ask: float,
-                    ask_size: int, utc_time: int = None) -> Quote:
+                    ask_size: float, utc_time: int = None) -> Quote:
         quote = Quote()
         quote.inst_id = inst_id
         quote.provider_id = provider_id
@@ -232,14 +243,14 @@ class ModelFactory(object):
 
         return trade
 
-    def build_market_depth(self, inst_id: str, provider_id: str, timestamp: int, event_provider: str, position: int,
-                           operation: int, side: int, price: float, size: float,
+    def build_market_depth(self, inst_id: str, provider_id: str, timestamp: int, md_provider: str, position: int,
+                           operation: MarketDepth.Operation, side: MarketDepth.Side, price: float, size: float,
                            utc_time: int = None) -> MarketDepth:
         md = MarketDepth()
         md.inst_id = inst_id
         md.provider_id = provider_id
         md.timestamp = timestamp
-        md.event_provider = event_provider
+        md.md_provider = md_provider
         md.position = position
         md.operation = operation
         md.side = side
@@ -251,8 +262,9 @@ class ModelFactory(object):
     # trade data
     def build_new_order_request(self, timestamp: int, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str,
                                 inst_id: str,
-                                action: int, type: int, qty: float, limit_price: float, stop_price: float = None,
-                                tif: int = TIF.DAY, oca_tag: str = None,
+                                action: OrderAcion, type: OrderType, qty: float, limit_price: float,
+                                stop_price: float = None,
+                                tif: TIF = DAY, oca_tag: str = None,
                                 params: Dict[str, str] = None) -> NewOrderRequest:
         req = NewOrderRequest()
 
@@ -275,7 +287,7 @@ class ModelFactory(object):
 
     def build_order_replace_request(self, timestamp: int, cl_id: str, cl_ord_id: str, type: OrderType, qty: float,
                                     limit_price: float, stop_price: float = None,
-                                    tif: TIF = TIF.DAY, oca_tag: str = None,
+                                    tif: TIF = DAY, oca_tag: str = None,
                                     params: Dict[str, str] = None) -> OrderReplaceRequest:
         req = OrderReplaceRequest()
 
@@ -356,7 +368,7 @@ class ModelFactory(object):
         event.broker_id = broker_id
         event.event_id = event_id
         event.account_name = account_name
-        self.__add_to_dict(event.values, values)
+        self.__add_to_dict_value(event.values, values)
 
         return event
 
@@ -384,8 +396,8 @@ class ModelFactory(object):
         account = Account()
 
         account.acct_id = acct_id
-        self.__add_to_dict(account.values, values)
-        self.__add_to_dict(account.positions, positions)
+        self.__add_to_dict_value(account.values, values)
+        self.__add_to_dict_value(account.positions, positions)
 
         return account
 
@@ -394,10 +406,10 @@ class ModelFactory(object):
         portfolio = Portfolio()
         portfolio.portf_id = portf_id
 
-        self.__add_to_dict(portfolio.positions, positions)
-        portfolio.performance = performance if performance else Performance()
-        portfolio.pnl = pnl if pnl else Pnl()
-        portfolio.drawdown = drawdown if drawdown else DrawDown()
+        self.__add_to_dict_value(portfolio.positions, positions)
+        # portfolio.performance.CopyFrom(performance if performance else Performance())
+        # portfolio.pnl.CopyFrom(pnl if pnl else Pnl())
+        #       portfolio.drawdown.CopyFrom(drawdown if drawdown else DrawDown())
 
         return portfolio
 
@@ -407,13 +419,14 @@ class ModelFactory(object):
         performance.total_equity = total_equity
         performance.cash = cash
         performance.stock_value = stock_value
-        performance.performance_series = performance_series if performance_series else DataSeries()
+        # performance.performance_series.CopyFrom(performance_series if performance_series else DataSeries())
         return performance
 
     def build_pnl(self, last_pnl: float, pnl_series: DataSeries = None) -> Pnl:
         pnl = Pnl()
         pnl.last_pnl = last_pnl
-        pnl.pnl_series = pnl_series if pnl_series else DataSeries()
+
+        # pnl.pnl_series.CopyFrom(pnl_series if pnl_series else DataSeries())
         return pnl
 
     def build_drawdown(self, last_drawdown: float, last_drawdown_pct: float, high_equity: float, low_equity: float,
@@ -425,7 +438,8 @@ class ModelFactory(object):
         dd.low_equity = low_equity
         dd.current_run_up = current_run_up
         dd.current_drawdown = current_drawdown
-        dd.drawdown_series = drawdown_series if drawdown_series else DataSeries()
+        if drawdown_series:
+            dd.drawdown_series.CopyFrom(drawdown_series)
         return dd
 
     def build_config(self, config_id: str, values: Dict[str, str]) -> Config:
@@ -433,18 +447,18 @@ class ModelFactory(object):
 
         config.config_id = config_id
         self.__add_to_dict(config.values, values)
-        return Config
+        return config
 
-    def build_strategy(self, stg_id: str, config_id: str, values: Dict[str, str]) -> Strategy:
+    def build_strategy(self, stg_id: str, config_id: str, positions: Dict[str, Position] = None) -> Strategy:
         stg = Strategy()
         stg.stg_id = stg_id
         stg.config_id = config_id
-        self.__add_to_dict(stg.values, values)
+        self.__add_to_dict_value(stg.positions, positions)
         return stg
 
     def build_order(self, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str, inst_id: str,
-                    creation_timestamp: int, action: int, type: int, qty: float, limit_price: float,
-                    stop_price: float = None, tif: int = TIF.DAY, oca_tag: str = None, params: Dict[str, str] = None,
+                    creation_timestamp: int, action: OrderAcion, type: OrderType, qty: float, limit_price: float,
+                    stop_price: float = None, tif: TIF = DAY, oca_tag: str = None, params: Dict[str, str] = None,
                     broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = None,
                     filled_qty: float = 0, avg_price: float = 0, last_qty: float = 0, last_price: float = 0,
                     stop_limit_ready: bool = False, trailing_stop_exec_price: float = None) -> Order:

@@ -169,30 +169,30 @@ class ModelFactory(object):
         return timezone
 
     # time series
-    def build_data_series_item(self, timestamp: int, data: Dict[str, float]) -> DataSeries.Item:
-        item = DataSeries.Item()
+    def build_time_series_item(self, timestamp: int, data: Dict[str, float]) -> TimeSeries.Item:
+        item = TimeSeries.Item()
         item.timestamp = timestamp
         self.__add_to_dict(item.data, data)
 
         return item
 
-    def build_data_series(self, series_id: str, name: str = None, desc: str = None,
+    def build_time_series(self, series_id: str, name: str = None, desc: str = None,
                           inputs: Union[str, List[str]] = None, keys: Union[str, List[str]] = None,
                           default_output_key: str = 'value', missing_value_replace: float = 0.0, start_time: int = 0,
-                          end_time: int = 0, items: List[DataSeries.Item] = None) -> DataSeries:
-        data_series = DataSeries()
-        data_series.series_id = series_id
-        data_series.name = name
-        data_series.desc = desc
-        self.__add_to_list(data_series.inputs, inputs)
-        self.__add_to_list(data_series.keys, keys)
-        data_series.default_output_key = default_output_key
-        data_series.missing_value_replace = missing_value_replace
-        data_series.start_time = start_time
-        data_series.end_time = end_time
-        self.__add_to_list(data_series.items, items)
+                          end_time: int = 0, items: List[TimeSeries.Item] = None) -> TimeSeries:
+        time_series = TimeSeries()
+        time_series.series_id = series_id
+        time_series.name = name
+        time_series.desc = desc
+        self.__add_to_list(time_series.inputs, inputs)
+        self.__add_to_list(time_series.keys, keys)
+        time_series.default_output_key = default_output_key
+        time_series.missing_value_replace = missing_value_replace
+        time_series.start_time = start_time
+        time_series.end_time = end_time
+        self.__add_to_list(time_series.items, items)
 
-        return data_series
+        return time_series
 
     # Market data
     def build_bar(self, inst_id: str, type: Bar.Type, size: int, provider_id: str, timestamp: int,
@@ -260,7 +260,7 @@ class ModelFactory(object):
         return md
 
     # trade data
-    def build_new_order_request(self, timestamp: int, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str,
+    def build_new_order_request(self, timestamp: int, cl_id: str, cl_req_id: str, portf_id: str, broker_id: str,
                                 inst_id: str,
                                 action: OrderAcion, type: OrderType, qty: float, limit_price: float,
                                 stop_price: float = None,
@@ -270,7 +270,7 @@ class ModelFactory(object):
 
         req.timestamp = timestamp
         req.cl_id = cl_id
-        req.cl_ord_id = cl_ord_id
+        req.cl_req_id = cl_req_id
         req.portf_id = portf_id
         req.broker_id = broker_id
         req.inst_id = inst_id
@@ -285,7 +285,7 @@ class ModelFactory(object):
 
         return req
 
-    def build_order_replace_request(self, timestamp: int, cl_id: str, cl_ord_id: str, type: OrderType, qty: float,
+    def build_order_replace_request(self, timestamp: int, cl_id: str, cl_req_id: str, cl_orig_req_id: str, type: OrderType, qty: float,
                                     limit_price: float, stop_price: float = None,
                                     tif: TIF = DAY, oca_tag: str = None,
                                     params: Dict[str, str] = None) -> OrderReplaceRequest:
@@ -293,7 +293,8 @@ class ModelFactory(object):
 
         req.timestamp = timestamp
         req.cl_id = cl_id
-        req.cl_ord_id = cl_ord_id
+        req.cl_req_id = cl_req_id
+        req.cl_orig_req_id = cl_orig_req_id
         req.type = type
         req.qty = qty
         req.limit_price = limit_price
@@ -304,26 +305,26 @@ class ModelFactory(object):
 
         return req
 
-    def build_order_cancel_request(self, timestamp: int, cl_id: str, cl_ord_id: str,
+    def build_order_cancel_request(self, timestamp: int, cl_id: str, cl_req_id: str,
                                    params: Dict[str, str] = None) -> OrderCancelRequest:
         req = OrderCancelRequest()
         req.timestamp = timestamp
         req.cl_id = cl_id
-        req.cl_ord_id = cl_ord_id
+        req.cl_req_id = cl_req_id
         self.__add_to_dict(req.params, params)
 
         return req
 
-    def build_order_status_update(self, timestamp: int, broker_id: str, event_id: str, broker_ord_id: str, cl_id: str,
-                                  cl_ord_id: str, inst_id: str, filled_qty: float, avg_price: float,
+    def build_order_status_update(self, timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str, cl_id: str,
+                                  cl_req_id: str, inst_id: str, filled_qty: float, avg_price: float,
                                   status: OrderStatus) -> OrderStatusUpdate:
         event = OrderStatusUpdate()
         event.timestamp = timestamp
         event.broker_id = broker_id
-        event.event_id = event_id
+        event.broker_event_id = broker_event_id
         event.broker_ord_id = broker_ord_id
         event.cl_id = cl_id
-        event.cl_ord_id = cl_ord_id
+        event.cl_req_id = cl_req_id
         event.inst_id = inst_id
         event.filled_qty = filled_qty
         event.avg_price = avg_price
@@ -331,19 +332,19 @@ class ModelFactory(object):
 
         return event
 
-    def build_execution_report(self, timestamp: int, broker_id: str, event_id: str, broker_ord_id: str, er_id: str,
+    def build_execution_report(self, timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str, broker_er_id: str,
                                cl_id: str,
-                               cl_ord_id: str, inst_id: str, last_qty: float, last_price: float, commission: float,
+                               cl_req_id: str, inst_id: str, last_qty: float, last_price: float, commission: float,
                                filled_qty: float, avg_price: float,
                                status: OrderStatus) -> ExecutionReport:
         event = ExecutionReport()
         event.timestamp = timestamp
         event.broker_id = broker_id
-        event.event_id = event_id
+        event.broker_event_id = broker_event_id
         event.broker_ord_id = broker_ord_id
-        event.er_id = er_id
+        event.broker_er_id = broker_er_id
         event.cl_id = cl_id
-        event.cl_ord_id = cl_ord_id
+        event.cl_req_id = cl_req_id
         event.inst_id = inst_id
         event.last_price = last_price
         event.last_price = last_price
@@ -360,26 +361,26 @@ class ModelFactory(object):
         self.__add_to_dict(value.ccy_values, ccy_values)
         return value
 
-    def build_account_update(self, timestamp: int, broker_id: str, event_id: str, account_name,
+    def build_account_update(self, timestamp: int, broker_id: str, broker_event_id: str, account_name,
                              values: AccountValue) -> AccountUpdate:
         event = AccountUpdate()
 
         event.timestamp = timestamp
         event.broker_id = broker_id
-        event.event_id = event_id
+        event.broker_event_id = broker_event_id
         event.account_name = account_name
         self.__add_to_dict_value(event.values, values)
 
         return event
 
-    def build_portfolio_update(self, timestamp: int, broker_id: str, event_id: str, portf_id: str, inst_id: str,
+    def build_portfolio_update(self, timestamp: int, broker_id: str, broker_event_id: str, portf_id: str, inst_id: str,
                                position: float, mkt_price: float, mkt_value: float, avg_cost: float,
                                unrealized_pnl: float, realized_pnl: float) -> PortfolioUpdate:
         event = PortfolioUpdate()
 
         event.timestamp = timestamp
         event.broker_id = broker_id
-        event.event_id = event_id
+        event.broker_event_id = broker_event_id
         event.portf_id = portf_id
         event.inst_id = inst_id
         event.position = position
@@ -391,9 +392,9 @@ class ModelFactory(object):
 
         return event
 
-    def build_account(self, acct_id: str, values: Dict[str, AccountValue] = None,
-                      positions: Dict[str, Position] = None) -> Account:
-        account = Account()
+    def build_account_state(self, acct_id: str, values: Dict[str, AccountValue] = None,
+                      positions: Dict[str, Position] = None) -> AccountState:
+        account = AccountState()
 
         account.acct_id = acct_id
         self.__add_to_dict_value(account.values, values)
@@ -401,9 +402,9 @@ class ModelFactory(object):
 
         return account
 
-    def build_portfolio(self, portf_id: str, positions: Dict[str, Position] = None, performance: Performance = None,
-                        pnl: Pnl = None, drawdown: DrawDown = None) -> Portfolio:
-        portfolio = Portfolio()
+    def build_portfolio_state(self, portf_id: str, positions: Dict[str, Position] = None, performance: Performance = None,
+                        pnl: Pnl = None, drawdown: DrawDown = None) -> PortfolioState:
+        portfolio = PortfolioState()
         portfolio.portf_id = portf_id
 
         self.__add_to_dict_value(portfolio.positions, positions)
@@ -414,22 +415,22 @@ class ModelFactory(object):
         return portfolio
 
     def build_performance(self, total_equity: float, cash: float, stock_value: float,
-                          performance_series: DataSeries = None) -> Performance:
+                          performance_series: TimeSeries = None) -> Performance:
         performance = Performance()
         performance.total_equity = total_equity
         performance.cash = cash
         performance.stock_value = stock_value
-        performance.performance_series.CopyFrom(performance_series if performance_series else DataSeries())
+        performance.performance_series.CopyFrom(performance_series if performance_series else TimeSeries())
         return performance
 
-    def build_pnl(self, last_pnl: float, pnl_series: DataSeries = None) -> Pnl:
+    def build_pnl(self, last_pnl: float, pnl_series: TimeSeries = None) -> Pnl:
         pnl = Pnl()
         pnl.last_pnl = last_pnl
-        pnl.pnl_series.CopyFrom(pnl_series if pnl_series else DataSeries())
+        pnl.pnl_series.CopyFrom(pnl_series if pnl_series else TimeSeries())
         return pnl
 
     def build_drawdown(self, last_drawdown: float, last_drawdown_pct: float, high_equity: float, low_equity: float,
-                       current_run_up: float, current_drawdown: float, drawdown_series: DataSeries = None) -> DrawDown:
+                       current_run_up: float, current_drawdown: float, drawdown_series: TimeSeries = None) -> DrawDown:
         dd = DrawDown()
         dd.last_drawdown = last_drawdown
         dd.last_drawdown_pct = last_drawdown_pct
@@ -437,7 +438,7 @@ class ModelFactory(object):
         dd.low_equity = low_equity
         dd.current_run_up = current_run_up
         dd.current_drawdown = current_drawdown
-        dd.drawdown_series.CopyFrom(drawdown_series if drawdown_series else DataSeries())
+        dd.drawdown_series.CopyFrom(drawdown_series if drawdown_series else TimeSeries())
 
         return dd
 
@@ -448,22 +449,22 @@ class ModelFactory(object):
         self.__add_to_dict(config.values, values)
         return config
 
-    def build_strategy(self, stg_id: str, config_id: str, positions: Dict[str, Position] = None) -> Strategy:
-        stg = Strategy()
+    def build_strategy_state(self, stg_id: str, config_id: str, positions: Dict[str, Position] = None) -> StrategyState:
+        stg = StrategyState()
         stg.stg_id = stg_id
         stg.config_id = config_id
         self.__add_to_dict_value(stg.positions, positions)
         return stg
 
-    def build_order(self, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str, inst_id: str,
+    def build_order_state(self, cl_id: str, cl_req_id: str, portf_id: str, broker_id: str, inst_id: str,
                     creation_timestamp: int, action: OrderAcion, type: OrderType, qty: float, limit_price: float,
                     stop_price: float = None, tif: TIF = DAY, oca_tag: str = None, params: Dict[str, str] = None,
                     broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = None,
                     filled_qty: float = 0, avg_price: float = 0, last_qty: float = 0, last_price: float = 0,
-                    stop_limit_ready: bool = False, trailing_stop_exec_price: float = None) -> Order:
-        order = Order()
+                    stop_limit_ready: bool = False, trailing_stop_exec_price: float = None) -> OrderState:
+        order = OrderState()
         order.cl_id = cl_id
-        order.cl_ord_id = cl_ord_id
+        order.cl_req_id = cl_req_id
         order.portf_id = portf_id
         order.broker_id = broker_id
         order.broker_ord_id = broker_ord_id
@@ -501,6 +502,6 @@ class ModelFactory(object):
         self.__add_to_list(position.cl_orders, cl_orders)
         return position
 
-    def build_client_order_id(self, cl_id: str, cl_ord_id: str) -> ClientOrderId:
+    def build_client_order_id(self, cl_id: str, cl_req_id: str) -> ClientOrderId:
         id = ClientOrderId()
         return id

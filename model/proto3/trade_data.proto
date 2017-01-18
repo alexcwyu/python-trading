@@ -46,13 +46,13 @@ enum OrderStatus {
 }
 
 message NewOrderRequest {
-    int64 timestamp = 1;
+    string cl_id = 1;
+    string cl_req_id = 2;
+    int64 timestamp = 3;
 
-    string cl_id = 2;
-    string cl_ord_id = 3;
-    string portf_id = 4;
-    string broker_id = 5;
-    string inst_id = 6;
+    string portf_id = 5;
+    string broker_id = 6;
+    string inst_id = 7;
 
     OrderAcion action = 10;
     OrderType type = 11;
@@ -67,10 +67,11 @@ message NewOrderRequest {
 
 
 message OrderReplaceRequest {
-    int64 timestamp = 1;
+    string cl_id = 1;
+    string cl_req_id = 2;
+    int64 timestamp = 3;
 
-    string cl_id = 2;
-    string cl_ord_id = 3;
+    string cl_orig_req_id = 4;
 
     OrderType type = 10;
     double qty = 11;
@@ -84,22 +85,25 @@ message OrderReplaceRequest {
 }
 
 message OrderCancelRequest {
-    int64 timestamp = 1;
-    string cl_id = 2;
-    string cl_ord_id = 3;
+    string cl_id = 1;
+    string cl_req_id = 2;
+    int64 timestamp = 3;
+
+    string cl_orig_req_id = 4;
 
     map<string, string> params = 10;
 
 }
 
 message OrderStatusUpdate {
-    int64 timestamp = 1;
-    string broker_id = 2;
-    string event_id = 3;
+    string broker_id = 1;
+    string broker_event_id = 2;
+    int64 timestamp = 3;
+
     string broker_ord_id = 4;
 
     string cl_id = 11;
-    string cl_ord_id = 12;
+    string cl_req_id = 12;
     string inst_id = 13;
 
     double filled_qty = 21;
@@ -109,14 +113,16 @@ message OrderStatusUpdate {
 
 
 message ExecutionReport {
-    int64 timestamp = 1;
-    string broker_id = 2;
-    string event_id = 3;
+    string broker_id = 1;
+    string broker_event_id = 2;
+    int64 timestamp = 3;
+
     string broker_ord_id = 4;
-    string er_id = 5;
+    string broker_er_id = 5;
+
 
     string cl_id = 11;
-    string cl_ord_id = 12;
+    string cl_req_id = 12;
     string inst_id = 13;
 
     double last_qty = 21;
@@ -134,9 +140,9 @@ message AccountValue {
 }
 
 message AccountUpdate {
-    int64 timestamp = 1;
-    string broker_id = 2;
-    string event_id = 3;
+    string broker_id = 1;
+    string broker_event_id = 2;
+    int64 timestamp = 3;
 
     string account_name = 11;
     map<string, AccountValue> values = 12;
@@ -144,9 +150,9 @@ message AccountUpdate {
 }
 
 message PortfolioUpdate {
-    int64 timestamp = 1;
-    string broker_id = 2;
-    string event_id = 3;
+    string broker_id = 1;
+    string broker_event_id = 2;
+    int64 timestamp = 3;
 
     string portf_id = 4;
     string inst_id = 5;
@@ -159,13 +165,13 @@ message PortfolioUpdate {
     double realized_pnl = 25;
 }
 
-message Account {
+message AccountState {
     string acct_id = 1;
     map<string, AccountValue> values = 2;
     map<string, Position> positions = 3;
 }
 
-message Portfolio {
+message PortfolioState {
     string portf_id = 1;
     map<string, Position> positions = 2;
 
@@ -178,13 +184,13 @@ message Performance {
     double total_equity = 1;
     double cash = 2;
     double stock_value = 3;
-    algotrader.model.DataSeries performance_series = 4;
+    algotrader.model.TimeSeries performance_series = 4;
 }
 
 
 message Pnl {
     double last_pnl = 1;
-    algotrader.model.DataSeries pnl_series = 2;
+    algotrader.model.TimeSeries pnl_series = 2;
 }
 
 message DrawDown {
@@ -194,7 +200,7 @@ message DrawDown {
     double low_equity = 4;
     double current_run_up = 5;
     double current_drawdown = 6;
-    algotrader.model.DataSeries drawdown_series = 7;
+    algotrader.model.TimeSeries drawdown_series = 7;
 }
 
 
@@ -203,16 +209,16 @@ message Config {
     map<string, string> values = 2;
 }
 
-message Strategy {
+message StrategyState {
     string stg_id = 1;
     string config_id = 2;
     map<string, Position> positions = 3;
 }
 
 
-message Order {
+message OrderState {
     string cl_id = 1;
-    string cl_ord_id = 2;
+    string cl_req_id = 2;
     string portf_id = 3;
     string broker_id = 4;
     string broker_ord_id = 5;
@@ -245,7 +251,12 @@ message Order {
 
 message ClientOrderId {
     string cl_id = 1;
-    string cl_ord_id = 2;
+    string cl_req_id = 2;
+}
+
+message BrokerOrderId {
+    string broker_id = 1;
+    string broker_ord_id = 2;
 }
 
 message Position {

@@ -55,13 +55,13 @@ class ModelFactoryTest(TestCase):
         timezone = self.factory.sample_timezone()
         self.__test_serializaion(TimeZone, timezone)
 
-    def test_data_series_item(self):
-        item = self.factory.sample_data_series_item()
-        self.__test_serializaion(DataSeries.Item, item)
+    def test_time_series_item(self):
+        item = self.factory.sample_time_series_item()
+        self.__test_serializaion(TimeSeries.Item, item)
 
-    def test_data_series(self):
-        ds = self.factory.sample_data_series()
-        self.__test_serializaion(DataSeries, ds)
+    def test_time_series(self):
+        ds = self.factory.sample_time_series()
+        self.__test_serializaion(TimeSeries, ds)
 
     def test_bar(self):
         self.__test_serializaion(Bar, self.factory.sample_bar())
@@ -99,11 +99,11 @@ class ModelFactoryTest(TestCase):
     def test_portfolio_update(self):
         self.__test_serializaion(PortfolioUpdate, self.factory.sample_portfolio_update())
 
-    def test_account(self):
-        self.__test_serializaion(Account, self.factory.sample_account())
+    def test_account_state(self):
+        self.__test_serializaion(AccountState, self.factory.sample_account_state())
 
-    def test_portfolio(self):
-        self.__test_serializaion(Portfolio, self.factory.sample_portfolio())
+    def test_portfolio_state(self):
+        self.__test_serializaion(PortfolioState, self.factory.sample_portfolio_state())
 
     def test_performance(self):
         self.__test_serializaion(Performance, self.factory.sample_performance())
@@ -117,11 +117,11 @@ class ModelFactoryTest(TestCase):
     def test_config(self):
         self.__test_serializaion(Config, self.factory.sample_config())
 
-    def test_strategy(self):
-        self.__test_serializaion(Strategy, self.factory.sample_strategy())
+    def test_strategy_state(self):
+        self.__test_serializaion(StrategyState, self.factory.sample_strategy_state())
 
-    def test_order(self):
-        self.__test_serializaion(Order, self.factory.sample_order())
+    def test_order_state(self):
+        self.__test_serializaion(OrderState, self.factory.sample_order_state())
 
     def test_position(self):
         self.__test_serializaion(Position, self.factory.sample_position())

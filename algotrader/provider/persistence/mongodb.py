@@ -1,14 +1,17 @@
 from pymongo import MongoClient
 
 from algotrader.config.persistence import MongoDBConfig
-from algotrader.provider.persistence.data_store import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
-    SequenceDataStore
+from algotrader.model.model_helper import *
+from algotrader.model.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
+from algotrader.model.ref_data_pb2 import *
+from algotrader.model.time_series_pb2 import *
+from algotrader.model.trade_data_pb2 import *
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.ser_deser import MapSerializer
 
 
-class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
+class MongoDBDataStore(object):
     def __init__(self):
         super(MongoDBDataStore, self).__init__()
 
@@ -17,32 +20,39 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         self.client = MongoClient(host=self.mongo_config.host, port=self.mongo_config.port)
         self.db = self.client[self.mongo_config.dbname]
 
-        self.bars = self.db['bars']
-        self.trades = self.db['trades']
-        self.quotes = self.db['quotes']
-        self.trades = self.db['trades']
-        self.market_depths = self.db['market_depths']
-        self.time_series = self.db['time_series']
+        self.db_map = {
+            Instrument: self.db['instruments'],
+            Exchange: self.db['exchanges'],
+            Currency: self.db['currencies'],
+            Country: self.db['countries'],
+            HolidaySeries: self.db['trading_holidays'],
+            TradingHours: self.db['trading_hours'],
+            TimeZone: self.db['timezones'],
 
-        self.instruments = self.db['instruments']
-        self.currencies = self.db['currencies']
-        self.exchanges = self.db['exchanges']
+            TimeSeries: self.db['time_series'],
 
-        self.accounts = self.db['accounts']
-        self.portfolios = self.db['portfolios']
-        self.orders = self.db['orders']
-        self.strategies = self.db['strategies']
-        self.configs = self.db['configs']
+            Bar: self.db['bars'],
+            Trade: self.db['trades'],
+            Quote: self.db['quotes'],
+            MarketDepth: self.db['market_depths'],
 
-        self.account_updates = self.db['account_updates']
-        self.portfolio_updates = self.db['portfolio_updates']
+            NewOrderRequest: self.db['new_order_requests'],
+            OrderReplaceRequest: self.db['order_replace_requests'],
+            OrderCancelRequest: self.db['order_cancel_requests'],
 
-        self.new_order_reqs = self.db['new_order_reqs']
-        self.ord_cancel_reqs = self.db['ord_cancel_reqs']
-        self.ord_replace_reqs = self.db['ord_replace_reqs']
+            OrderStatusUpdate: self.db['order_status_updates'],
+            ExecutionReport: self.db['execution_reports'],
+            AccountUpdate: self.db['account_updates'],
+            PortfolioUpdate: self.db['portfolio_updates'],
 
-        self.exec_reports = self.db['exec_reports']
-        self.ord_status_upds = self.db['ord_status_upds']
+            AccountState: self.db['account_states'],
+            PortfolioState: self.db['portfolio_states'],
+            StrategyState: self.db['strategy_states'],
+            OrderState: self.db['order_states'],
+
+            Config: self.db['configs']
+
+        }
 
         self.sequences = self.db['sequences']
         self.serializer = MapSerializer
@@ -60,151 +70,140 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
             pass
 
     def id(self):
-        return DataStore.Mongo
+        return "Mongo"
+
+    def _save(self, obj):
+        logger.info("[%s] saving %s" % (self.__class__.__name__, obj))
+        id = ModelHelper.get_id(obj)
+        packed_data = protobuf_to_dict(obj)
+        t = type(object)
+        self.db_map[t].update({'_id': id}, packed_data, upsert=True)
+
+    # RefDataStore
+    def save_instrument(self, inst: Instrument):
+        self._save(inst)
+
+    def save_exchange(self, exchange: Exchange):
+        self._save(exchange)
+
+    def save_currency(self, currency: Currency):
+        self._save(currency)
+
+    def save_country(self, country: Country):
+        self._save(country)
+
+    def save_trading_holidays(self, trading_holidays: HolidaySeries):
+        self._save(trading_holidays)
+
+    def save_trading_hours(self, trading_hours: TradingHours):
+        self._save(trading_hours)
+
+    def save_timezone(self, timezone: TimeZone):
+        self._save(timezone)
+
+    # TimeSeriesDataStore
+    def save_time_series(self, time_series: TimeSeries):
+        self._save(time_series)
+
+    def save_bar(self, bar: Bar):
+        self._save(bar)
+
+    def save_quote(self, quote: Quote):
+        self._save(quote)
+
+    def save_trade(self, trade: Trade):
+        self._save(trade)
+
+    def save_market_depth(self, market_depth: MarketDepth):
+        self._save(market_depth)
+
+    # TradeDataStore
+    def save_new_order_requests(self, new_order_request: NewOrderRequest):
+        self._save(new_order_request)
+
+    def save_order_replace_requests(self, order_replace_request: OrderReplaceRequest):
+        self._save(order_replace_request)
+
+    def save_order_cancel_request(self, order_cancel_request: OrderCancelRequest):
+        self._save(order_cancel_request)
+
+    def save_execution_report(self, execution_report: ExecutionReport):
+        self._save(execution_report)
+
+    def save_order_status_update(self, order_status_update: OrderStatusUpdate):
+        self._save(order_status_update)
+
+    def save_account_update(self, account_update: AccountUpdate):
+        self._save(account_update)
+
+    def save_portfolio_update(self, portfolio_update: PortfolioUpdate):
+        self._save(portfolio_update)
+
+    def save_account_state(self, account_state: AccountState):
+        self._save(account_state)
+
+    def save_portfolio_state(self, portfolio_state: PortfolioState):
+        self._save(portfolio_state)
+
+    def save_strategy_state(self, strategy_state: StrategyState):
+        self._save(strategy_state)
+
+    def save_order_state(self, order_state: OrderState):
+        self._save(order_state)
+
+    def save_config(self, config):
+        self._save(config)
+
+    # SequenceDataStore
+    def save_sequence(self, key, seq):
+        self.sequences.update({'_id': key}, {'seq': seq}, upsert=True)
+
+    def _deserialize(self, clazz, data):
+        del data['_id']
+        obj = dict_to_protobuf(clazz, data)
+        return obj
 
     def load_all(self, clazz):
         if clazz == 'sequences':
             return {data['_id']: data['seq'] for data in self.db[clazz].find()}
 
         result = []
-        for data in self.db[clazz].find():
-            obj = self.serializer.deserialize(data)
-            # obj = clazz()
-            # obj.deserialize(result)
-            result.append(obj)
+        for data in self.db_map[clazz].find():
+            result.append(self._deserialize(clazz, data))
         return result
-
-    def _serialize(self, serializable):
-        # return serializable.id(), serializable.serialize()
-        return serializable.id(), self.serializer.serialize(serializable)
-
-    # RefDataStore
-    def save_instrument(self, instrument):
-        id, packed = self._serialize(instrument)
-        self.instruments.update({'_id': id}, packed, upsert=True)
-
-    def save_exchange(self, exchange):
-        logger.info("[%s] saving %s" % (self.__class__.__name__, exchange))
-        id, packed = self._serialize(exchange)
-        self.exchanges.update({'_id': id}, packed, upsert=True)
-
-    def save_currency(self, currency):
-        logger.info("[%s] saving %s" % (self.__class__.__name__, currency))
-        id, packed = self._serialize(currency)
-        self.currencies.update({'_id': id}, packed, upsert=True)
-
-    # TimeSeriesDataStore
-    def save_bar(self, bar):
-        logger.info("[%s] saving %s" % (self.__class__.__name__, bar))
-        id, packed = self._serialize(bar)
-        self.bars.update({'_id': id}, packed, upsert=True)
-
-    def save_quote(self, quote):
-        logger.info("[%s] saving %s" % (self.__class__.__name__, quote))
-        id, packed = self._serialize(quote)
-        self.quotes.update({'_id': id}, packed, upsert=True)
-
-    def save_trade(self, trade):
-        logger.info("[%s] saving %s" % (self.__class__.__name__, trade))
-        id, packed = self._serialize(trade)
-        self.trades.update({'_id': id}, packed, upsert=True)
-
-    def save_market_depth(self, market_depth):
-        id, packed = self._serialize(market_depth)
-        self.market_depths.update({'_id': id}, packed, upsert=True)
-
-    def save_time_series(self, timeseries):
-        id, packed = self._serialize(timeseries)
-        self.time_series.update({'_id': id}, packed, upsert=True)
 
     def load_bars(self, sub_key):
         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
-        return [self.serializer.deserialize(data)
-                for data in self.bars.find({"__slots__.inst_id": sub_key.inst_id,
-                                            "__slots__.type": sub_key.subscription_type.bar_type,
-                                            "__slots__.size": sub_key.subscription_type.bar_size,
-                                            "__slots__.timestamp": {"$gte": from_timestamp,
-                                                          "$lt": to_timestamp}
-                                            })]
+        return [self._deserialize(Bar, data)
+                for data in self.bars.find(self._build_bar_query(sub_key))]
+
+    def _build_bar_query(self, sub_key):
+        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+        return {"__slots__.inst_id": sub_key.inst_id,
+                "__slots__.type": sub_key.subscription_type.bar_type,
+                "__slots__.size": sub_key.subscription_type.bar_size,
+                "__slots__.timestamp": {"$gte": from_timestamp,
+                                        "$lt": to_timestamp}
+                }
+
+    def _build_query(self, sub_key):
+        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+        return {"__slots__.inst_id": sub_key.inst_id,
+                "__slots__.timestamp": {"$gte": from_timestamp,
+                                        "$lt": to_timestamp}
+                }
 
     def load_quotes(self, sub_key):
-        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
-        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
-        return [self.serializer.deserialize(data)
-                for data in self.quotes.find({"__slots__.inst_id": sub_key.inst_id,
-                                              "__slots__.timestamp": {"$gte": from_timestamp,
-                                                            "$lt": to_timestamp}
-                                              })]
+        return [self._deserialize(Quote, data)
+                for data in self.quotes.find(self._build_query(sub_key))]
 
     def load_trades(self, sub_key):
-        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
-        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
-        return [self.serializer.deserialize(data)
-                for data in self.trades.find({"__slots__.inst_id": sub_key.inst_id,
-                                              "__slots__.timestamp": {"$gte": from_timestamp,
-                                                            "$lt": to_timestamp}
-                                              })]
+        return [self._deserialize(Trade, data)
+                for data in self.trades.find(self._build_query(sub_key))]
 
     def load_market_depths(self, sub_key):
-        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
-        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
-        return [self.serializer.deserialize(data)
-                for data in self.market_depths.find({"__slots__.inst_id": sub_key.inst_id,
-                                                     "__slots__.timestamp": {
-                                                         "$gte": from_timestamp,
-                                                         "$lt": to_timestamp}
-                                                     })]
-
-    # TradeDataStore
-    def save_account(self, account):
-        id, packed = self._serialize(account)
-        self.accounts.update({'_id': id}, packed, upsert=True)
-
-    def save_portfolio(self, portfolio):
-        id, packed = self._serialize(portfolio)
-        self.portfolios.update({'_id': id}, packed, upsert=True)
-
-    def save_order(self, order):
-        id, packed = self._serialize(order)
-        self.orders.update({'_id': id}, packed, upsert=True)
-
-    def save_strategy(self, strategy):
-        id, packed = self._serialize(strategy)
-        self.strategies.update({'_id': id}, packed, upsert=True)
-
-    def save_config(self, config):
-        id, packed = self._serialize(config)
-        self.configs.update({'_id': id}, packed, upsert=True)
-
-    def save_account_update(self, account_update):
-        id, packed = self._serialize(account_update)
-        self.account_updates.update({'_id': id}, packed, upsert=True)
-
-    def save_portfolio_update(self, portfolio_update):
-        id, packed = self._serialize(portfolio_update)
-        self.portfolio_updates.update({'_id': id}, packed, upsert=True)
-
-    def save_new_order_req(self, new_order_req):
-        id, packed = self._serialize(new_order_req)
-        self.new_order_reqs.update({'_id': id}, packed, upsert=True)
-
-    def save_ord_cancel_req(self, ord_cancel_req):
-        id, packed = self._serialize(ord_cancel_req)
-        self.ord_cancel_reqs.update({'_id': id}, packed, upsert=True)
-
-    def save_ord_replace_req(self, ord_replace_req):
-        id, packed = self._serialize(ord_replace_req)
-        self.ord_replace_reqs.update({'_id': id}, packed, upsert=True)
-
-    def save_exec_report(self, exec_report):
-        id, packed = self._serialize(exec_report)
-        self.exec_reports.update({'_id': id}, packed, upsert=True)
-
-    def save_ord_status_upd(self, ord_status_upd):
-        id, packed = self._serialize(ord_status_upd)
-        self.ord_status_upds.update({'_id': id}, packed, upsert=True)
-
-    # SequenceDataStore
-    def save_sequence(self, key, seq):
-        self.sequences.update({'_id': key}, {'seq': seq}, upsert=True)
+        return [self._deserialize(MarketDepth, data)
+                for data in self.market_depths.find(self._build_query(sub_key))]

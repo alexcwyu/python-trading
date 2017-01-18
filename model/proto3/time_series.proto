@@ -4,7 +4,7 @@ package algotrader.model;
 
 
 
-message DataSeries{
+message TimeSeries{
 
     message Item{
         int64 timestamp = 1;

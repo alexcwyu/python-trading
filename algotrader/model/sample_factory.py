@@ -79,18 +79,18 @@ class SampleFactory(object):
         timezone = self.factory.build_timezone("Venezuela Standard Time")
         return timezone
 
-    def sample_data_series_item(self):
-        ds_item = self.factory.build_data_series_item(0, {"high": 350.00, "low": 200.45, "close": 250.1})
+    def sample_time_series_item(self):
+        ds_item = self.factory.build_time_series_item(0, {"high": 350.00, "low": 200.45, "close": 250.1})
         return ds_item
 
-    def sample_data_series(self):
-        ds = self.factory.build_data_series("HSI.BAR.86400", name="HSI.BAR.86400", desc="HSI", inputs=["HSI.BAR.1"],
+    def sample_time_series(self):
+        ds = self.factory.build_time_series("HSI.BAR.86400", name="HSI.BAR.86400", desc="HSI", inputs=["HSI.BAR.1"],
                                             keys=["high", "low", "close"], default_output_key="close",
                                             missing_value_replace=0, start_time=0, end_time=999,
-                                            items=[self.factory.build_data_series_item(0,
+                                            items=[self.factory.build_time_series_item(0,
                                                                                        {"high": 350.00, "low": 200.45,
                                                                                         "close": 250.1}),
-                                                   self.factory.build_data_series_item(1,
+                                                   self.factory.build_time_series_item(1,
                                                                                        {"high": 1350.00, "low": 1200.45,
                                                                                         "close": 1250.1})]
                                             )
@@ -129,7 +129,7 @@ class SampleFactory(object):
         return req
 
     def sample_order_replace_request(self):
-        req = self.factory.build_order_replace_request(0, "BuyLowSellHigh", "1", type=Limit, qty=4954.1,
+        req = self.factory.build_order_replace_request(0, "BuyLowSellHigh", "1", "2", type=Limit, qty=4954.1,
                                                        limit_price=123.2, stop_price=123.2, tif=DAY, oca_tag="23",
                                                        params={"testparam1": "1", "testparam2": "2"})
         return req
@@ -142,14 +142,14 @@ class SampleFactory(object):
 
     def sample_order_status_update(self):
         event = self.factory.build_order_status_update(0, "IB", "event_123", broker_ord_id="broker_1234",
-                                                       cl_id="BuyLowSellHigh", cl_ord_id="clOrdId_1",
+                                                       cl_id="BuyLowSellHigh", cl_req_id="clOrdId_1",
                                                        inst_id="HSI@SEHK", filled_qty=1231.0, avg_price=123.1,
                                                        status=New)
         return event
 
     def sample_execution_report(self):
-        event = self.factory.build_execution_report(1, "IB", "event_123", broker_ord_id="broker_1234", er_id="er+1231",
-                                                    cl_id="BuyLowSellHigh", cl_ord_id="clOrdId_1", inst_id="HSI@SEHK",
+        event = self.factory.build_execution_report(1, "IB", "event_123", broker_ord_id="broker_1234", broker_er_id="er+1231",
+                                                    cl_id="BuyLowSellHigh", cl_req_id="clOrdId_1", inst_id="HSI@SEHK",
                                                     last_qty=100.1, last_price=21.1,
                                                     commission=0.8, filled_qty=1231.0, avg_price=123.1,
                                                     status=New)
@@ -161,7 +161,7 @@ class SampleFactory(object):
         return value
 
     def sample_account_update(self):
-        event = self.factory.build_account_update(0, "IB", event_id="e_123", account_name="account1", values={
+        event = self.factory.build_account_update(0, "IB", broker_event_id="e_123", account_name="account1", values={
             "equity": self.factory.build_account_value("equity", {"HKD": 1231, "USD": 28.8}),
             "pnl": self.factory.build_account_value("pnl", {"HKD": 1231, "USD": 28.8})
         })
@@ -169,7 +169,7 @@ class SampleFactory(object):
         return event
 
     def sample_portfolio_update(self):
-        event = self.factory.build_portfolio_update(0, "IB", event_id="e_456", portf_id="BLSH", inst_id="HSI@SEHK",
+        event = self.factory.build_portfolio_update(0, "IB", broker_event_id="e_456", portf_id="BLSH", inst_id="HSI@SEHK",
                                                     position=10, mkt_price=123.1, mkt_value=1231, avg_cost=12.8,
                                                     unrealized_pnl=1230, realized_pnl=0.8)
 
@@ -186,15 +186,15 @@ class SampleFactory(object):
 
         return position
 
-    def sample_account(self):
-        account = self.factory.build_account("test_acct", values={
+    def sample_account_state(self):
+        account = self.factory.build_account_state("test_acct", values={
             "equity": self.factory.build_account_value("equity", {"HKD": 1231, "USD": 28.8}),
             "pnl": self.factory.build_account_value("pnl", {"HKD": 1231, "USD": 28.8})},
                                              positions={"HSI@SEHK": self.sample_position()})
         return account
 
-    def sample_portfolio(self):
-        portfolio = self.factory.build_portfolio("test_portf", positions={"HSI@SEHK": self.sample_position()},
+    def sample_portfolio_state(self):
+        portfolio = self.factory.build_portfolio_state("test_portf", positions={"HSI@SEHK": self.sample_position()},
                                                  performance=self.sample_performance(),
                                                  pnl=self.sample_pnl(),
                                                  drawdown=self.sample_drawdown())
@@ -203,30 +203,30 @@ class SampleFactory(object):
 
     def sample_performance(self):
         performance = self.factory.build_performance(total_equity=100, cash=23, stock_value=68.8,
-                                                     performance_series=self.sample_data_series())
+                                                     performance_series=self.sample_time_series())
         return performance
 
     def sample_pnl(self):
-        pnl = self.factory.build_pnl(18.8, pnl_series=self.sample_data_series())
+        pnl = self.factory.build_pnl(18.8, pnl_series=self.sample_time_series())
         return pnl
 
     def sample_drawdown(self):
         drawdown = self.factory.build_drawdown(last_drawdown=-12, last_drawdown_pct=-0.5, high_equity=1231,
                                                low_equity=29, current_run_up=10, current_drawdown=-123,
-                                               drawdown_series=self.sample_data_series())
+                                               drawdown_series=self.sample_time_series())
         return drawdown
 
     def sample_config(self):
         config = self.factory.build_config(config_id="testConfig", values={"k1": "v1", "k2": "v2"})
         return config
 
-    def sample_strategy(self):
-        strategy = self.factory.build_strategy("BLSH", config_id="Config1",
+    def sample_strategy_state(self):
+        strategy = self.factory.build_strategy_state("BLSH", config_id="Config1",
                                                positions={"HSI@SEHK": self.sample_position()})
         return strategy
 
-    def sample_order(self):
-        order = self.factory.build_order("BuyLowSellHigh", "1", portf_id="TestPortf",
+    def sample_order_state(self):
+        order = self.factory.build_order_state("BuyLowSellHigh", "1", portf_id="TestPortf",
                                          broker_id="Simulator", inst_id="HSI@SEHK", creation_timestamp=1,
                                          action=Buy, type=Limit, qty=4954.1,
                                          limit_price=123.2, stop_price=123.2, tif=DAY, oca_tag="23",

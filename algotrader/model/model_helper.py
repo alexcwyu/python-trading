@@ -2,7 +2,8 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.trade_data_pb2 import *
-
+from typing import Dict, List, Callable, Union
+from algotrader.model.protobuf_to_dict import *
 
 class ModelHelper(object):
     id_map = {
@@ -35,6 +36,7 @@ class ModelHelper(object):
         StrategyState: lambda strategy: strategy.stg_id,
         OrderState: lambda order: '{}.{}'.format(order.cl_id, order.cl_req_id),
         Config: lambda config: config.config_id,
+        Sequence: lambda seq: seq.id,
 
     }
 
@@ -45,9 +47,41 @@ class ModelHelper(object):
 
 
     @staticmethod
-    def object_to_dict(self):
+    def object_to_dict(obj):
         pass
 
     @staticmethod
     def dict_to_object(data):
         pass
+
+
+
+    @staticmethod
+    def add_to_dict_value(attribute: Callable, dict: Dict[str, object]):
+        if dict:
+            for key, value in dict.items():
+                v = attribute[key]
+                if v:
+                    v.CopyFrom(value)
+                else:
+                    attribute[key] = value
+
+    @staticmethod
+    def add_to_dict(attribute: Callable, dict: Dict[str, str]):
+        if dict:
+            for key, value in dict.items():
+                attribute[key] = value
+
+    @staticmethod
+    def add_to_list(attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]):
+        if list_item:
+            if not isinstance(list_item, (list, tuple)):
+                list_item = [list_item]
+
+            for item in list_item:
+                if isinstance(item, (int, str, bool, float)):
+                    attribute.append(item)
+                elif item is dict:
+                    attribute.add(**item)
+                else:
+                    attribute.add(**protobuf_to_dict(item))

@@ -152,6 +152,12 @@ class PersistenceTest(TestCase):
     def test_client_order_id(self):
         self.__test_persistence(ClientOrderId, self.factory.sample_client_order_id())
 
+    def test_broker_order_id(self):
+        self.__test_persistence(ClientOrderId, self.factory.sample_client_order_id())
+
+    def test_sequence(self):
+        self.__test_persistence(Sequence, self.factory.sample_sequence())
+
     def __test_persistence(self, cls, obj):
         data = protobuf_to_dict(obj)
         PersistenceTest.tests.update({'_id': 1}, data, upsert=True)

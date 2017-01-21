@@ -178,6 +178,9 @@ class SampleFactory(object):
     def sample_client_order_id(self):
         return self.factory.build_client_order_id("BLSH", "O1")
 
+    def sample_broker_order_id(self):
+        return self.factory.build_broker_order_id("IB", "O1")
+
     def sample_position(self):
         position = self.factory.build_position("HSI@SEHK", 1000, filled_qty=20, cl_orders=[
             self.factory.build_client_order_id("BLSH", "O1"),
@@ -235,3 +238,7 @@ class SampleFactory(object):
                                          filled_qty=12312, avg_price=12, last_qty=12, last_price=2.8,
                                          stop_limit_ready=True, trailing_stop_exec_price=12)
         return order
+
+    def sample_sequence(self):
+        seq = self.factory.build_sequence("test_seq", 999)
+        return seq

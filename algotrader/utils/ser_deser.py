@@ -41,7 +41,7 @@ class Serializable(object):
 
 
 class Serializer(object):
-    primitive = (int, str, bool, float, long, complex, basestring)
+    primitive = (int, str, bool, float, complex)
     cls_cache = {}
     __metaclass__ = abc.ABCMeta
 
@@ -144,7 +144,7 @@ class MapSerializer(Serializer):
                 if (module, cls) not in Serializer.cls_cache:
                     m = importlib.import_module(module)
                     if not hasattr(m, cls):
-                        print data
+                        print(data)
                     c = getattr(m, cls)
                     Serializer.cls_cache[(module, cls)] = c
                 c = Serializer.cls_cache[(module, cls)]
@@ -159,7 +159,7 @@ class MapSerializer(Serializer):
             return tuple([MapSerializer.deserialize(i) for i in data])
         elif isinstance(data, set):
             return set([MapSerializer.deserialize(i) for i in data])
-        elif isinstance(data, basestring):
+        elif isinstance(data, str):
             return str(data)
         return data
 

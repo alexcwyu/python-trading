@@ -129,6 +129,12 @@ class ModelFactoryTest(TestCase):
     def test_client_order_id(self):
         self.__test_serializaion(ClientOrderId, self.factory.sample_client_order_id())
 
+    def test_broker_order_id(self):
+        self.__test_serializaion(BrokerOrderId, self.factory.sample_broker_order_id())
+
+    def test_sequence(self):
+        self.__test_serializaion(Sequence, self.factory.sample_sequence())
+
     def __test_serializaion(self, cls, obj):
         print(obj)
 

@@ -1,24 +1,18 @@
 from pymongo import MongoClient
 
-from algotrader.config.persistence import MongoDBConfig
 from algotrader.model.model_helper import *
 from algotrader.model.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
-from algotrader.model.ref_data_pb2 import *
-from algotrader.model.time_series_pb2 import *
-from algotrader.model.trade_data_pb2 import *
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
-from algotrader.utils.ser_deser import MapSerializer
 
 
 class MongoDBDataStore(object):
     def __init__(self):
         super(MongoDBDataStore, self).__init__()
 
-    def _start(self, app_context, **kwargs):
-        self.mongo_config = app_context.app_config.get_config(MongoDBConfig)
-        self.client = MongoClient(host=self.mongo_config.host, port=self.mongo_config.port)
-        self.db = self.client[self.mongo_config.dbname]
+    def _start(self, host, port, dbname):
+        self.client = MongoClient(host=host, port=port)
+        self.db = self.client[dbname]
 
         self.db_map = {
             Instrument: self.db['instruments'],
@@ -50,12 +44,9 @@ class MongoDBDataStore(object):
             StrategyState: self.db['strategy_states'],
             OrderState: self.db['order_states'],
 
-            Config: self.db['configs']
-
+            Config: self.db['configs'],
+            Sequence: self.db['sequences']
         }
-
-        self.sequences = self.db['sequences']
-        self.serializer = MapSerializer
 
     def _stop(self):
         if self.client:
@@ -72,87 +63,87 @@ class MongoDBDataStore(object):
     def id(self):
         return "Mongo"
 
-    def _save(self, obj):
+    def save(self, obj):
         logger.info("[%s] saving %s" % (self.__class__.__name__, obj))
         id = ModelHelper.get_id(obj)
         packed_data = protobuf_to_dict(obj)
-        t = type(object)
+        t = type(obj)
         self.db_map[t].update({'_id': id}, packed_data, upsert=True)
 
     # RefDataStore
     def save_instrument(self, inst: Instrument):
-        self._save(inst)
+        self.save(inst)
 
     def save_exchange(self, exchange: Exchange):
-        self._save(exchange)
+        self.save(exchange)
 
     def save_currency(self, currency: Currency):
-        self._save(currency)
+        self.save(currency)
 
     def save_country(self, country: Country):
-        self._save(country)
+        self.save(country)
 
     def save_trading_holidays(self, trading_holidays: HolidaySeries):
-        self._save(trading_holidays)
+        self.save(trading_holidays)
 
     def save_trading_hours(self, trading_hours: TradingHours):
-        self._save(trading_hours)
+        self.save(trading_hours)
 
     def save_timezone(self, timezone: TimeZone):
-        self._save(timezone)
+        self.save(timezone)
 
     # TimeSeriesDataStore
     def save_time_series(self, time_series: TimeSeries):
-        self._save(time_series)
+        self.save(time_series)
 
     def save_bar(self, bar: Bar):
-        self._save(bar)
+        self.save(bar)
 
     def save_quote(self, quote: Quote):
-        self._save(quote)
+        self.save(quote)
 
     def save_trade(self, trade: Trade):
-        self._save(trade)
+        self.save(trade)
 
     def save_market_depth(self, market_depth: MarketDepth):
-        self._save(market_depth)
+        self.save(market_depth)
 
     # TradeDataStore
     def save_new_order_requests(self, new_order_request: NewOrderRequest):
-        self._save(new_order_request)
+        self.save(new_order_request)
 
     def save_order_replace_requests(self, order_replace_request: OrderReplaceRequest):
-        self._save(order_replace_request)
+        self.save(order_replace_request)
 
     def save_order_cancel_request(self, order_cancel_request: OrderCancelRequest):
-        self._save(order_cancel_request)
+        self.save(order_cancel_request)
 
     def save_execution_report(self, execution_report: ExecutionReport):
-        self._save(execution_report)
+        self.save(execution_report)
 
     def save_order_status_update(self, order_status_update: OrderStatusUpdate):
-        self._save(order_status_update)
+        self.save(order_status_update)
 
     def save_account_update(self, account_update: AccountUpdate):
-        self._save(account_update)
+        self.save(account_update)
 
     def save_portfolio_update(self, portfolio_update: PortfolioUpdate):
-        self._save(portfolio_update)
+        self.save(portfolio_update)
 
     def save_account_state(self, account_state: AccountState):
-        self._save(account_state)
+        self.save(account_state)
 
     def save_portfolio_state(self, portfolio_state: PortfolioState):
-        self._save(portfolio_state)
+        self.save(portfolio_state)
 
     def save_strategy_state(self, strategy_state: StrategyState):
-        self._save(strategy_state)
+        self.save(strategy_state)
 
     def save_order_state(self, order_state: OrderState):
-        self._save(order_state)
+        self.save(order_state)
 
     def save_config(self, config):
-        self._save(config)
+        self.save(config)
 
     # SequenceDataStore
     def save_sequence(self, key, seq):
@@ -164,9 +155,6 @@ class MongoDBDataStore(object):
         return obj
 
     def load_all(self, clazz):
-        if clazz == 'sequences':
-            return {data['_id']: data['seq'] for data in self.db[clazz].find()}
-
         result = []
         for data in self.db_map[clazz].find():
             result.append(self._deserialize(clazz, data))

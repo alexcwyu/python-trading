@@ -5,35 +5,10 @@ from algotrader.model.protobuf_to_dict import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.trade_data_pb2 import *
+from algotrader.model.model_helper import ModelHelper
 
 
 class ModelFactory(object):
-    def __add_to_dict_value(self, attribute: Callable, dict: Dict[str, object]):
-        if dict:
-            for key, value in dict.items():
-                v = attribute[key]
-                if v:
-                    v.CopyFrom(value)
-                else:
-                    attribute[key] = value
-
-    def __add_to_dict(self, attribute: Callable, dict: Dict[str, str]):
-        if dict:
-            for key, value in dict.items():
-                attribute[key] = value
-
-    def __add_to_list(self, attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]):
-        if list_item:
-            if not isinstance(list_item, (list, tuple)):
-                list_item = [list_item]
-
-            for item in list_item:
-                if isinstance(item, (int, str, bool, float)):
-                    attribute.append(item)
-                elif item is dict:
-                    attribute.add(**item)
-                else:
-                    attribute.add(**protobuf_to_dict(item))
 
     # ref data
     def build_instrument(self, symbol: str, type: Instrument.InstType, primary_exch_id: str, ccy_id: str,
@@ -49,7 +24,7 @@ class ModelFactory(object):
         inst.name = name
         inst.type = type
         inst.primary_exch_id = primary_exch_id
-        self.__add_to_list(inst.exch_ids, exch_ids)
+        ModelHelper.add_to_list(inst.exch_ids, exch_ids)
         inst.ccy_id = ccy_id
 
         inst.sector = sector
@@ -60,10 +35,10 @@ class ModelFactory(object):
             inst.underlying.CopyFrom(underlying)
         if derivative:
             inst.derivative.CopyFrom(derivative)
-        self.__add_to_dict(inst.alt_symbols, alt_symbols)
-        self.__add_to_dict(inst.alt_ids, alt_ids)
-        self.__add_to_dict(inst.alt_sectors, alt_sectors)
-        self.__add_to_dict(inst.alt_industries, alt_industries)
+        ModelHelper.add_to_dict(inst.alt_symbols, alt_symbols)
+        ModelHelper.add_to_dict(inst.alt_ids, alt_ids)
+        ModelHelper.add_to_dict(inst.alt_sectors, alt_sectors)
+        ModelHelper.add_to_dict(inst.alt_industries, alt_industries)
 
         return inst
 
@@ -83,7 +58,7 @@ class ModelFactory(object):
     def build_underlying(self, type: Instrument.InstType, assets: List[Underlying.Asset]) -> Underlying:
         underlying = Underlying()
         underlying.type = type
-        self.__add_to_list(underlying.assets, assets)
+        ModelHelper.add_to_list(underlying.assets, assets)
 
         return underlying
 
@@ -103,7 +78,7 @@ class ModelFactory(object):
         exchange.country_id = country_id
         exchange.trading_hours_id = trading_hours_id
         exchange.holidays_id = holidays_id
-        self.__add_to_dict(exchange.alt_ids, alt_ids)
+        ModelHelper.add_to_dict(exchange.alt_ids, alt_ids)
         return exchange
 
     def build_currency(self, ccy_id: str, name: str) -> Currency:
@@ -122,7 +97,7 @@ class ModelFactory(object):
     def build_holiday_series(self, holidays_id, holidays) -> HolidaySeries:
         holiday_series = HolidaySeries()
         holiday_series.holidays_id = holidays_id
-        self.__add_to_list(holiday_series.holidays, holidays)
+        ModelHelper.add_to_list(holiday_series.holidays, holidays)
         return holiday_series
 
     def build_holiday(self, trading_date: int, type: HolidaySeries.Holiday.Type, start_date: int, end_date: int,
@@ -149,7 +124,7 @@ class ModelFactory(object):
         trading_hour = TradingHours()
         trading_hour.trading_hours_id = trading_hours_id
         trading_hour.timezone_id = timezone_id
-        self.__add_to_list(trading_hour.sessions, sessions)
+        ModelHelper.add_to_list(trading_hour.sessions, sessions)
         return trading_hour
 
     def build_trading_session(self, start_weekdate: int, start_time: int, end_weekdate: int, end_time: int,
@@ -172,7 +147,7 @@ class ModelFactory(object):
     def build_time_series_item(self, timestamp: int, data: Dict[str, float]) -> TimeSeries.Item:
         item = TimeSeries.Item()
         item.timestamp = timestamp
-        self.__add_to_dict(item.data, data)
+        ModelHelper.add_to_dict(item.data, data)
 
         return item
 
@@ -184,13 +159,13 @@ class ModelFactory(object):
         time_series.series_id = series_id
         time_series.name = name
         time_series.desc = desc
-        self.__add_to_list(time_series.inputs, inputs)
-        self.__add_to_list(time_series.keys, keys)
+        ModelHelper.add_to_list(time_series.inputs, inputs)
+        ModelHelper.add_to_list(time_series.keys, keys)
         time_series.default_output_key = default_output_key
         time_series.missing_value_replace = missing_value_replace
         time_series.start_time = start_time
         time_series.end_time = end_time
-        self.__add_to_list(time_series.items, items)
+        ModelHelper.add_to_list(time_series.items, items)
 
         return time_series
 
@@ -281,11 +256,12 @@ class ModelFactory(object):
         req.stop_price = stop_price
         req.tif = tif
         req.oca_tag = oca_tag
-        self.__add_to_dict(req.params, params)
+        ModelHelper.add_to_dict(req.params, params)
 
         return req
 
-    def build_order_replace_request(self, timestamp: int, cl_id: str, cl_req_id: str, cl_orig_req_id: str, type: OrderType, qty: float,
+    def build_order_replace_request(self, timestamp: int, cl_id: str, cl_req_id: str, cl_orig_req_id: str,
+                                    type: OrderType, qty: float,
                                     limit_price: float, stop_price: float = None,
                                     tif: TIF = DAY, oca_tag: str = None,
                                     params: Dict[str, str] = None) -> OrderReplaceRequest:
@@ -301,7 +277,7 @@ class ModelFactory(object):
         req.stop_price = stop_price
         req.tif = tif
         req.oca_tag = oca_tag
-        self.__add_to_dict(req.params, params)
+        ModelHelper.add_to_dict(req.params, params)
 
         return req
 
@@ -311,11 +287,12 @@ class ModelFactory(object):
         req.timestamp = timestamp
         req.cl_id = cl_id
         req.cl_req_id = cl_req_id
-        self.__add_to_dict(req.params, params)
+        ModelHelper.add_to_dict(req.params, params)
 
         return req
 
-    def build_order_status_update(self, timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str, cl_id: str,
+    def build_order_status_update(self, timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str,
+                                  cl_id: str,
                                   cl_req_id: str, inst_id: str, filled_qty: float, avg_price: float,
                                   status: OrderStatus) -> OrderStatusUpdate:
         event = OrderStatusUpdate()
@@ -332,7 +309,8 @@ class ModelFactory(object):
 
         return event
 
-    def build_execution_report(self, timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str, broker_er_id: str,
+    def build_execution_report(self, timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str,
+                               broker_er_id: str,
                                cl_id: str,
                                cl_req_id: str, inst_id: str, last_qty: float, last_price: float, commission: float,
                                filled_qty: float, avg_price: float,
@@ -358,7 +336,7 @@ class ModelFactory(object):
     def build_account_value(self, key: str, ccy_values: Dict[str, float]) -> AccountValue:
         value = AccountValue()
         value.key = key
-        self.__add_to_dict(value.ccy_values, ccy_values)
+        ModelHelper.add_to_dict(value.ccy_values, ccy_values)
         return value
 
     def build_account_update(self, timestamp: int, broker_id: str, broker_event_id: str, account_name,
@@ -369,7 +347,7 @@ class ModelFactory(object):
         event.broker_id = broker_id
         event.broker_event_id = broker_event_id
         event.account_name = account_name
-        self.__add_to_dict_value(event.values, values)
+        ModelHelper.add_to_dict_value(event.values, values)
 
         return event
 
@@ -393,21 +371,22 @@ class ModelFactory(object):
         return event
 
     def build_account_state(self, acct_id: str, values: Dict[str, AccountValue] = None,
-                      positions: Dict[str, Position] = None) -> AccountState:
+                            positions: Dict[str, Position] = None) -> AccountState:
         account = AccountState()
 
         account.acct_id = acct_id
-        self.__add_to_dict_value(account.values, values)
-        self.__add_to_dict_value(account.positions, positions)
+        ModelHelper.add_to_dict_value(account.values, values)
+        ModelHelper.add_to_dict_value(account.positions, positions)
 
         return account
 
-    def build_portfolio_state(self, portf_id: str, positions: Dict[str, Position] = None, performance: Performance = None,
-                        pnl: Pnl = None, drawdown: DrawDown = None) -> PortfolioState:
+    def build_portfolio_state(self, portf_id: str, positions: Dict[str, Position] = None,
+                              performance: Performance = None,
+                              pnl: Pnl = None, drawdown: DrawDown = None) -> PortfolioState:
         portfolio = PortfolioState()
         portfolio.portf_id = portf_id
 
-        self.__add_to_dict_value(portfolio.positions, positions)
+        ModelHelper.add_to_dict_value(portfolio.positions, positions)
         portfolio.performance.CopyFrom(performance if performance else Performance())
         portfolio.pnl.CopyFrom(pnl if pnl else Pnl())
         portfolio.drawdown.CopyFrom(drawdown if drawdown else DrawDown())
@@ -446,22 +425,22 @@ class ModelFactory(object):
         config = Config()
 
         config.config_id = config_id
-        self.__add_to_dict(config.values, values)
+        ModelHelper.add_to_dict(config.values, values)
         return config
 
     def build_strategy_state(self, stg_id: str, config_id: str, positions: Dict[str, Position] = None) -> StrategyState:
         stg = StrategyState()
         stg.stg_id = stg_id
         stg.config_id = config_id
-        self.__add_to_dict_value(stg.positions, positions)
+        ModelHelper.add_to_dict_value(stg.positions, positions)
         return stg
 
     def build_order_state(self, cl_id: str, cl_req_id: str, portf_id: str, broker_id: str, inst_id: str,
-                    creation_timestamp: int, action: OrderAcion, type: OrderType, qty: float, limit_price: float,
-                    stop_price: float = None, tif: TIF = DAY, oca_tag: str = None, params: Dict[str, str] = None,
-                    broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = None,
-                    filled_qty: float = 0, avg_price: float = 0, last_qty: float = 0, last_price: float = 0,
-                    stop_limit_ready: bool = False, trailing_stop_exec_price: float = None) -> OrderState:
+                          creation_timestamp: int, action: OrderAcion, type: OrderType, qty: float, limit_price: float,
+                          stop_price: float = None, tif: TIF = DAY, oca_tag: str = None, params: Dict[str, str] = None,
+                          broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = None,
+                          filled_qty: float = 0, avg_price: float = 0, last_qty: float = 0, last_price: float = 0,
+                          stop_limit_ready: bool = False, trailing_stop_exec_price: float = None) -> OrderState:
         order = OrderState()
         order.cl_id = cl_id
         order.cl_req_id = cl_req_id
@@ -480,7 +459,7 @@ class ModelFactory(object):
         order.stop_price = stop_price
         order.tif = tif
         order.oca_tag = oca_tag
-        self.__add_to_dict(order.params, params)
+        ModelHelper.add_to_dict(order.params, params)
 
         order.status = status
         order.filled_qty = filled_qty
@@ -499,9 +478,23 @@ class ModelFactory(object):
         position.inst_id = inst_id
         position.ordered_qty = ordered_qty
         position.filled_qty = filled_qty
-        self.__add_to_list(position.cl_orders, cl_orders)
+        ModelHelper.add_to_list(position.cl_orders, cl_orders)
         return position
 
     def build_client_order_id(self, cl_id: str, cl_req_id: str) -> ClientOrderId:
         id = ClientOrderId()
+        id.cl_id = cl_id
+        id.cl_req_id = cl_req_id
         return id
+
+    def build_broker_order_id(self, broker_id: str, broker_ord_id: str) -> BrokerOrderId:
+        id = BrokerOrderId()
+        id.broker_id = broker_id
+        id.broker_ord_id = broker_ord_id
+        return id
+
+    def build_sequence(self, id: str, seq: int) -> Sequence:
+        sequence = Sequence()
+        sequence.id = id
+        sequence.seq = seq
+        return sequence

@@ -237,7 +237,7 @@ class ModelFactory(object):
     # trade data
     def build_new_order_request(self, timestamp: int, cl_id: str, cl_req_id: str, portf_id: str, broker_id: str,
                                 inst_id: str,
-                                action: OrderAcion, type: OrderType, qty: float, limit_price: float,
+                                action: OrderAction, type: OrderType, qty: float, limit_price: float,
                                 stop_price: float = None,
                                 tif: TIF = DAY, oca_tag: str = None,
                                 params: Dict[str, str] = None) -> NewOrderRequest:
@@ -436,7 +436,7 @@ class ModelFactory(object):
         return stg
 
     def build_order_state(self, cl_id: str, cl_req_id: str, portf_id: str, broker_id: str, inst_id: str,
-                          creation_timestamp: int, action: OrderAcion, type: OrderType, qty: float, limit_price: float,
+                          creation_timestamp: int, action: OrderAction, type: OrderType, qty: float, limit_price: float,
                           stop_price: float = None, tif: TIF = DAY, oca_tag: str = None, params: Dict[str, str] = None,
                           broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = None,
                           filled_qty: float = 0, avg_price: float = 0, last_qty: float = 0, last_price: float = 0,
@@ -470,6 +470,24 @@ class ModelFactory(object):
         order.trailing_stop_exec_price = trailing_stop_exec_price
 
         return order
+
+    def build_order_state_from_nos(self, req : NewOrderRequest):
+        return self.build_order_state(
+            cl_id=req.cl_id,
+            cl_req_id=req.cl_req_id,
+            portf_id=req.portf_id,
+            broker_id = req.broker_id,
+            inst_id = req.inst_id,
+            creation_timestamp = req.timestamp,
+            action = req.action,
+            type = req.type,
+            qty = req.qty,
+            limit_price = req.limit_price,
+            stop_price=req.stop_price,
+            tif = req.tif,
+            oca_tag = req.oca_tag,
+            params = req.params
+        )
 
     def build_position(self, inst_id: str, ordered_qty: float = 0, filled_qty: float = 0,
                        cl_orders: List[ClientOrderId] = None) -> Position:

@@ -5,7 +5,7 @@ import "time_series.proto";
 package algotrader.model;
 
 
-enum OrderAcion {
+enum OrderAction {
     Buy = 0;
     Sell = 1;
     //SellShort = 2;
@@ -54,7 +54,7 @@ message NewOrderRequest {
     string broker_id = 6;
     string inst_id = 7;
 
-    OrderAcion action = 10;
+    OrderAction action = 10;
     OrderType type = 11;
     double qty = 12;
     double limit_price = 13;
@@ -213,6 +213,8 @@ message StrategyState {
     string stg_id = 1;
     string config_id = 2;
     map<string, Position> positions = 3;
+    string portf_id = 4;
+    int64 next_ord_id = 5;
 }
 
 
@@ -228,7 +230,7 @@ message OrderState {
     int64 creation_timestamp = 7;
     int64 update_timestamp = 8;
 
-    OrderAcion action = 10;
+    OrderAction action = 10;
     OrderType type = 11;
     double qty = 12;
     double limit_price = 13;

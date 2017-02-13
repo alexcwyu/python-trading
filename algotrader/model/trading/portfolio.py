@@ -1,39 +1,38 @@
-from typing import List, Any
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
-from algotrader.model.model_factory import ModelFactory
+from builtins import *
+
+from future import standard_library
+
+standard_library.install_aliases()
+
+from algotrader.event.event_bus import EventBus
 from algotrader.model.trade_data_pb2 import *
-from algotrader.model.trading.order import Order
+from algotrader.model.trading.position import HasPositions
+from algotrader.utils import logger
 
 
-class Portfolio(object):
+class Portfolio(HasPositions):
     def __init__(self, state: PortfolioState = None):
+        super().__init__()
         self.state = state
 
     def _start(self, app_context, **kwargs):
         self.app_context.portf_mgr.add(self)
-        self.model_factory =  app_context.model_factory
+        self.model_factory = app_context.model_factory
 
-        for order in self.app_context.order_mgr.get_portf_orders(self.id()):
-            self._add_order(order)
+        self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
-        for order_req in self.app_context.order_mgr.get_strategy_order_reqs(self.id()):
-            self._add_order_req(order_req)
-
-        self.__event_subscription = EventBus.data_subject.subscribe(self.on_next)
+        for order_req in self.app_context.order_mgr.get_portf_order_reqs(self.id()):
+            self.ord_reqs[self.model_factory.build_client_order_id(cl_id=order_req.cl_id,
+                                                                   cl_req_id=order_req.cl_req_id)] = order_req
 
     def _stop(self):
-        self.__event_subscription.dispose()
+        self.event_subscription.dispose()
 
     def id(self):
         return self.portf_id
-
-    def all_orders(self):
-        return [order for cl_orders in self.orders.values() for order in cl_orders.values()]
-
-    def get_order(self, cl_id, cl_ord_id):
-        if cl_id not in self.orders:
-            return None
-        return self.orders[cl_id].get(cl_ord_id, None)
 
     def on_bar(self, bar):
         super(Portfolio, self).on_bar(bar)
@@ -47,51 +46,39 @@ class Portfolio(object):
         super(Portfolio, self).on_trade(trade)
         self.__update_equity(trade.timestamp, trade.inst_id, trade.price)
 
-    def _add_order(self, order):
-        if order.cl_id not in self.orders:
-            self.orders[order.cl_id] = {}
-        self.orders[order.cl_id][order.cl_ord_id] = order
+    def send_order(self, req: NewOrderRequest) -> None:
+        logger.debug("[%s] %s" % (self.__class__.__name__, req))
 
-    def _add_order_req(self, order_req):
-        if order_req.cl_id not in self.ord_reqs:
-            self.ord_reqs[order_req.cl_id] = {}
-        self.ord_reqs[order_req.cl_id][order_req.cl_ord_id] = order_req
+        # TODO check
+        # if new_ord_req.cl_id in self.ord_reqs and new_ord_req.cl_ord_id in self.ord_reqs[new_ord_req.cl_id]:
+        #     raise RuntimeError("ord_reqs[%s][%s] already exist" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
 
-    def send_order(self, new_ord_req):
-        logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))
+        self.ord_reqs[self.model_factory.build_client_order_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.add_order(inst_id=req.inst_id, cl_id=req.cl_id, cl_req_id=req.cl_req_id,
+                       ordered_qty=req.qty)
+        self.app_context.order_mgr.send_order(req)
 
-        if new_ord_req.cl_id in self.ord_reqs and new_ord_req.cl_ord_id in self.ord_reqs[new_ord_req.cl_id]:
-            raise RuntimeError("ord_reqs[%s][%s] already exist" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
+    def cancel_order(self, req: OrderCancelRequest) -> None:
+        logger.debug("[%s] %s" % (self.__class__.__name__, req))
+        self.ord_reqs[self.model_factory.build_client_order_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.app_context.order_mgr.cancel_order(req)
 
-        self._add_order_req(new_ord_req)
+    def replace_order(self, req: OrderReplaceRequest) -> None:
+        logger.debug("[%s] %s" % (self.__class__.__name__, req))
+        self.ord_reqs[self.model_factory.build_client_order_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.app_context.order_mgr.replace_order(req)
 
-        order = self.app_context.order_mgr.send_order(new_ord_req)
+    def on_new_ord_req(self, req):
+        if req.portf_id == self.portf_id:
+            self.send_order(req)
 
-        self._add_order(order)
-        self.get_position(order.inst_id).add_order(order)
-        return order
+    def on_ord_cancel_req(self, req):
+        if req.portf_id == self.portf_id:
+            self.cancel_order(req)
 
-    def cancel_order(self, ord_cancel_req):
-        logger.debug("[%s] %s" % (self.__class__.__name__, ord_cancel_req))
-        order = self.app_context.order_mgr.cancel_order(ord_cancel_req)
-        return order
-
-    def replace_order(self, ord_replace_req):
-        logger.debug("[%s] %s" % (self.__class__.__name__, ord_replace_req))
-        order = self.app_context.order_mgr.replace_order(ord_replace_req)
-        return order
-
-    def on_new_ord_req(self, new_ord_req):
-        if new_ord_req.portf_id == self.portf_id:
-            self.send_order(new_ord_req)
-
-    def on_ord_cancel_req(self, ord_cancel_req):
-        if ord_cancel_req.portf_id == self.portf_id:
-            self.cancel_order(ord_cancel_req)
-
-    def on_ord_replace_req(self, ord_replace_req):
-        if ord_replace_req.portf_id == self.portf_id:
-            self.replace_order(ord_replace_req)
+    def on_ord_replace_req(self, req):
+        if req.portf_id == self.portf_id:
+            self.replace_order(req)
 
     def on_ord_upd(self, ord_upd):
         if ord_upd.portf_id == self.portf_id:
@@ -100,31 +87,35 @@ class Portfolio(object):
     def on_exec_report(self, exec_report):
         logger.debug("[%s] %s" % (self.__class__.__name__, exec_report))
 
-        if exec_report.cl_id not in self.ord_reqs and exec_report.cl_ord_id not in self.ord_reqs[exec_report.cl_id]:
-            raise Exception("Order not found, ord_reqs[%s][%s]" % (exec_report.cl_id, exec_report.cl_ord_id))
+        # TODO check
+        # if exec_report.cl_id not in self.ord_reqs and exec_report.cl_ord_id not in self.ord_reqs[exec_report.cl_id]:
+        #     raise Exception("Order not found, ord_reqs[%s][%s]" % (exec_report.cl_id, exec_report.cl_ord_id))
 
-        new_ord_req = self.ord_reqs[exec_report.cl_id][exec_report.cl_ord_id]
-        direction = 1 if new_ord_req.action == OrdAction.BUY else -1
+        new_ord_req = self.ord_reqs[
+            self.model_factory.build_client_order_id(cl_id=exec_report.cl_id, cl_req_id=exec_report.cl_req_id)]
+
+        if not new_ord_req:
+            raise Exception("request not found")
+        direction = 1 if new_ord_req.action == OrderAction.BUY else -1
         if exec_report.last_qty > 0:
             self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
-            self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id,
+            self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_req_id,
                               direction * exec_report.last_qty)
             self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
-    def update_position_price(self, timestamp, inst_id, price):
+    def update_position_price(self, timestamp: int, inst_id: str, price: float) -> None:
         super(Portfolio, self).update_position_price(timestamp, inst_id, price)
         self.__update_equity(timestamp, inst_id, price)
         for analyzer in self.analyzers:
             analyzer.update(timestamp)
 
-    def __update_equity(self, time, inst_id, price):
-        self.stock_value = 0
-        for position in self.positions.itervalues():
-            self.stock_value += position.current_value()
+    def __update_equity(self, timestamp: int, inst_id: str, price: float) -> None:
+        self.stock_value = self.total_value()
         self.total_equity = self.stock_value + self.cash
 
         self.performance_series.add(
-            {"timestamp": time, "stock_value": self.stock_value, "cash": self.cash, "total_equity": self.total_equity})
+            {"timestamp": timestamp, "stock_value": self.stock_value, "cash": self.cash,
+             "total_equity": self.total_equity})
 
     def get_return(self):
         equity = self.performance_series.get_series("total_equity")

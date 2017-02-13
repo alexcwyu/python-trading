@@ -173,11 +173,11 @@ message AccountState {
 
 message PortfolioState {
     string portf_id = 1;
-    map<string, Position> positions = 2;
-
-    Performance performance = 3;
-    Pnl pnl = 4;
-    DrawDown drawdown = 5;
+    repeated ClientOrderId cl_orders = 2;
+    map<string, Position> positions = 3;
+    Performance performance = 4;
+    Pnl pnl = 5;
+    DrawDown drawdown = 6;
 }
 
 message Performance {
@@ -211,10 +211,11 @@ message Config {
 
 message StrategyState {
     string stg_id = 1;
-    string config_id = 2;
-    map<string, Position> positions = 3;
-    string portf_id = 4;
-    int64 next_ord_id = 5;
+    Config config = 2;
+    repeated ClientOrderId cl_orders = 3;
+    map<string, Position> positions = 4;
+    string portf_id = 5;
+    int64 next_ord_id = 6;
 }
 
 
@@ -250,26 +251,28 @@ message OrderState {
 
 }
 
-
-message ClientOrderId {
+message ClientOrderId{
     string cl_id = 1;
     string cl_req_id = 2;
 }
 
-message BrokerOrderId {
-    string broker_id = 1;
-    string broker_ord_id = 2;
+message OrderPosition{
+    ClientOrderId ord_id = 1;
+    double ordered_qty = 2;
+    double filled_qty = 3;
 }
+
 
 message Position {
     string inst_id = 1;
     double ordered_qty = 2;
     double filled_qty = 3;
+    double last_price = 4;
 
-    repeated ClientOrderId cl_orders = 4;
+    map<string, OrderPosition> orders = 5;
 }
 
-message Sequence{
+message Sequence {
     string id = 1;
     int64 seq = 2;
 }

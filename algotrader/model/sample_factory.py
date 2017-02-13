@@ -135,7 +135,7 @@ class SampleFactory(object):
         return req
 
     def sample_order_cancel_request(self):
-        req = self.factory.build_order_cancel_request(0, "BuyLowSellHigh", "1",
+        req = self.factory.build_order_cancel_request(0, "BuyLowSellHigh", "1", "2",
                                                       params={"testparam1": "1", "testparam2": "2"})
 
         return req
@@ -175,17 +175,14 @@ class SampleFactory(object):
 
         return event
 
-    def sample_client_order_id(self):
-        return self.factory.build_client_order_id("BLSH", "O1")
-
-    def sample_broker_order_id(self):
-        return self.factory.build_broker_order_id("IB", "O1")
+    def sample_order_position(self):
+        return self.factory.build_order_position("BLSH", "O1", 100, 100)
 
     def sample_position(self):
-        position = self.factory.build_position("HSI@SEHK", 1000, filled_qty=20, cl_orders=[
-            self.factory.build_client_order_id("BLSH", "O1"),
-            self.factory.build_client_order_id("BLSH", "O2")
-        ])
+        position = self.factory.build_position("HSI@SEHK", 1000, filled_qty=20, last_price=120.0, orders={
+            "BLSH@01":self.factory.build_order_position("BLSH", "O1", 100, 20),
+            "BLSH@02":self.factory.build_order_position("BLSH", "O2", 100, 50)
+        })
 
         return position
 

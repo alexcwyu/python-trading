@@ -89,6 +89,9 @@ class AccountEventHandler(EventHandler):
     def on_acc_upd(self, acc_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, acc_upd))
 
+
+class PortfolioEventHandler(EventHandler):
+    __metaclass__ = abc.ABCMeta
     def on_portf_upd(self, portf_upd):
         logger.debug("[%s] %s" % (self.__class__.__name__, portf_upd))
 

@@ -1,15 +1,13 @@
-from typing import Dict, List, Callable, Union
+from typing import Dict, List, Union
 
 from algotrader.model.market_data_pb2 import *
-from algotrader.model.protobuf_to_dict import *
+from algotrader.model.model_helper import ModelHelper
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.trade_data_pb2 import *
-from algotrader.model.model_helper import ModelHelper
 
 
 class ModelFactory(object):
-
     # ref data
     def build_instrument(self, symbol: str, type: Instrument.InstType, primary_exch_id: str, ccy_id: str,
                          name: str = None, exch_ids: List[str] = None, sector: str = None, industry: str = None,
@@ -151,7 +149,7 @@ class ModelFactory(object):
 
         return item
 
-    def build_time_series(self, series_id: str, name: str = None, desc: str = None,
+    def build_time_series(self, series_id: str, name: str = '', desc: str = '',
                           inputs: Union[str, List[str]] = None, keys: Union[str, List[str]] = None,
                           default_output_key: str = 'value', missing_value_replace: float = 0.0, start_time: int = 0,
                           end_time: int = 0, items: List[TimeSeries.Item] = None) -> TimeSeries:
@@ -281,12 +279,13 @@ class ModelFactory(object):
 
         return req
 
-    def build_order_cancel_request(self, timestamp: int, cl_id: str, cl_req_id: str,
+    def build_order_cancel_request(self, timestamp: int, cl_id: str, cl_req_id: str, cl_orig_req_id: str,
                                    params: Dict[str, str] = None) -> OrderCancelRequest:
         req = OrderCancelRequest()
         req.timestamp = timestamp
         req.cl_id = cl_id
         req.cl_req_id = cl_req_id
+        req.cl_orig_req_id = cl_orig_req_id
         ModelHelper.add_to_dict(req.params, params)
 
         return req
@@ -471,44 +470,46 @@ class ModelFactory(object):
 
         return order
 
-    def build_order_state_from_nos(self, req : NewOrderRequest):
+    def build_order_state_from_nos(self, req: NewOrderRequest):
         return self.build_order_state(
             cl_id=req.cl_id,
             cl_req_id=req.cl_req_id,
             portf_id=req.portf_id,
-            broker_id = req.broker_id,
-            inst_id = req.inst_id,
-            creation_timestamp = req.timestamp,
-            action = req.action,
-            type = req.type,
-            qty = req.qty,
-            limit_price = req.limit_price,
+            broker_id=req.broker_id,
+            inst_id=req.inst_id,
+            creation_timestamp=req.timestamp,
+            action=req.action,
+            type=req.type,
+            qty=req.qty,
+            limit_price=req.limit_price,
             stop_price=req.stop_price,
-            tif = req.tif,
-            oca_tag = req.oca_tag,
-            params = req.params
+            tif=req.tif,
+            oca_tag=req.oca_tag,
+            params=req.params
         )
 
-    def build_position(self, inst_id: str, ordered_qty: float = 0, filled_qty: float = 0,
-                       cl_orders: List[ClientOrderId] = None) -> Position:
+    def build_position(self, inst_id: str, ordered_qty: float = 0, filled_qty: float = 0, last_price: float = 0,
+                       orders: Dict[str, OrderPosition] = None) -> Position:
         position = Position()
 
         position.inst_id = inst_id
         position.ordered_qty = ordered_qty
         position.filled_qty = filled_qty
-        ModelHelper.add_to_list(position.cl_orders, cl_orders)
+        position.last_price = last_price
+        ModelHelper.add_to_dict_value(position.orders, orders)
         return position
+
+    def build_order_position(self, cl_id: str, cl_req_id: str, ordered_qty: float = 0, filled_qty: float = 0) -> OrderPosition:
+        pos = OrderPosition()
+        pos.ord_id = self.build_client_order_id(cl_id = cl_id, cl_req_id = cl_req_id)
+        pos.ordered_qty = ordered_qty
+        pos.filled_qty = filled_qty
+        return pos
 
     def build_client_order_id(self, cl_id: str, cl_req_id: str) -> ClientOrderId:
         id = ClientOrderId()
         id.cl_id = cl_id
         id.cl_req_id = cl_req_id
-        return id
-
-    def build_broker_order_id(self, broker_id: str, broker_ord_id: str) -> BrokerOrderId:
-        id = BrokerOrderId()
-        id.broker_id = broker_id
-        id.broker_ord_id = broker_ord_id
         return id
 
     def build_sequence(self, id: str, seq: int) -> Sequence:

@@ -76,7 +76,7 @@ class ModelHelper(object):
     def add_to_list(attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]):
         if list_item:
             if not isinstance(list_item, (list, tuple)):
-                list_item = [list_item]
+                list_item = list(list_item)
 
             for item in list_item:
                 if isinstance(item, (int, str, bool, float)):

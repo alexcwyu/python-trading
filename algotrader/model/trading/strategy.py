@@ -1,16 +1,32 @@
-from typing import List, Any
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
+from builtins import *
+
+from future import standard_library
+
+standard_library.install_aliases()
+
+from typing import Dict
+
+from algotrader import Startable
+from algotrader.config.app import BacktestingConfig
+from algotrader.event.event_bus import EventBus
+from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
+from algotrader.model.market_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
-from algotrader.model.trading.order import Order
+from algotrader.model.trading.position import HasPositions
+from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, MarketDataSubscriber
 
 
-class Strategy(object):
+class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscriber, Startable, HasPositions):
     def __init__(self, state: StrategyState = None):
+        super().__init__()
         self.state = state
 
-    def __get_next_ord_id(self):
-        id = self.state.next_ord_id
-        self.state.next_ord_id += 1
+    def __get_next_req_id(self):
+        id = self.state.next_ord_id if self.state.next_ord_id else 1
+        self.state.next_ord_id = id + 1
         return id
 
     def get_stg_config_value(self, key, default_value=None):
@@ -19,9 +35,11 @@ class Strategy(object):
         return default_value
 
     def _start(self, app_context, **kwargs):
+        self.app_context.stg_mgr.add(self)
         self.model_factory = self.app_context.model_factory
+        self.app_config = self.app_context.app_config
 
-        #TODO
+        # TODO
         self.config = None
 
         self.ref_data_mgr = self.app_context.ref_data_mgr
@@ -33,11 +51,9 @@ class Strategy(object):
         self.clock = self.app_context.clock
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
-        for order in self.app_context.order_mgr.get_strategy_orders(self.id()):
-            self.orders[order.cl_ord_id] = order
-
         for order_req in self.app_context.order_mgr.get_strategy_order_reqs(self.id()):
-            self.ord_reqs[order_req.cl_ord_id] = order_req
+            self.ord_reqs[self.model_factory.build_client_order_id(cl_id=order_req.cl_id,
+                                                                   cl_req_id=order_req.cl_req_id)] = order_req
 
         if self.portfolio:
             self.portfolio.start(app_context)
@@ -78,38 +94,39 @@ class Strategy(object):
     def id(self):
         return self.stg_id
 
-    def on_bar(self, bar):
-        super(Strategy, self).on_bar(bar)
+    def on_bar(self, bar: Bar):
+        super().on_bar(bar)
 
-    def on_quote(self, quote):
-        super(Strategy, self).on_quote(quote)
+    def on_quote(self, quote: Quote):
+        super().on_quote(quote)
 
-    def on_trade(self, trade):
-        super(Strategy, self).on_trade(trade)
+    def on_trade(self, trade: Trade):
+        super().on_trade(trade)
 
-    def on_market_depth(self, market_depth):
-        super(Strategy, self).on_market_depth(market_depth)
+    def on_market_depth(self, market_depth: MarketDepth):
+        super().on_market_depth(market_depth)
 
-    def on_ord_upd(self, ord_upd):
+    def on_ord_upd(self, ord_upd: OrderStatusUpdate):
         if ord_upd.cl_id == self.stg_id:
-            super(Strategy, self).on_ord_upd(ord_upd)
+            super().on_ord_upd(ord_upd)
 
-    def on_exec_report(self, exec_report):
+    def on_exec_report(self, exec_report: ExecutionReport):
         if exec_report.cl_id == self.stg_id:
-            super(Strategy, self).on_exec_report(exec_report)
-            ord_req = self.ord_reqs[exec_report.cl_ord_id]
-            direction = 1 if ord_req.action == OrdAction.BUY else -1
+            super().on_exec_report(exec_report)
+            ord_req = self.ord_reqs[
+                self.model_factory.build_client_order_id(cl_id=exec_report.cl_id, cl_req_id=exec_report.cl_req_id)]
+            direction = 1 if ord_req.action == OrderAction.BUY else -1
             if exec_report.last_qty > 0:
                 self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id,
                                   direction * exec_report.last_qty)
                 self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
     def market_order(self, inst_id, action, qty, tif=TIF.DAY, oca_tag=None, params=None):
-        return self.new_order(inst_id=inst_id, action=action, type=OrdType.MARKET, qty=qty, limit_price=0.0, tif=tif,
+        return self.new_order(inst_id=inst_id, action=action, type=OrderType.MARKET, qty=qty, limit_price=0.0, tif=tif,
                               oca_tag=oca_tag, params=params)
 
     def limit_order(self, inst_id, action, qty, price, tif=TIF.DAY, oca_tag=None, params=None):
-        return self.new_order(inst_id=inst_id, action=action, type=OrdType.LIMIT, qty=qty, limit_price=price, tif=tif,
+        return self.new_order(inst_id=inst_id, action=action, type=OrderType.LIMIT, qty=qty, limit_price=price, tif=tif,
                               oca_tag=oca_tag, params=params)
 
     def stop_order(self):
@@ -120,7 +137,7 @@ class Strategy(object):
         # TODO
         pass
 
-    def close_position(self, inst_id):
+    def close_position(self, inst_id: str):
         # TODO
         pass
 
@@ -129,42 +146,51 @@ class Strategy(object):
         pass
 
     def new_order(self,
-                  inst_id=None, action=None, type=None,
-                  qty=0, limit_price=0,
-                  stop_price=0, tif=TIF.DAY, oca_tag=None, params=None):
-        req = NewOrderRequest(timestamp=self.clock.now(),
-                              cl_id=self.stg_id,
-                              cl_ord_id=self.__get_next_ord_id(),
-                              portf_id=self.portfolio.portf_id,
-                              broker_id=self.app_config.broker_id,
-                              inst_id=inst_id,
-                              action=action,
-                              type=type,
-                              qty=qty,
-                              limit_price=limit_price,
-                              stop_price=stop_price,
-                              tif=tif,
-                              oca_tag=oca_tag,
-                              params=params)
-        self.ord_reqs[req.cl_ord_id] = req
-        order = self.portfolio.send_order(req)
-        self.orders[order.cl_ord_id] = order
-        self.get_position(order.inst_id).add_order(order)
-        return order
+                  inst_id: str, action: OrderAction, type: OrderType,
+                  qty: float, limit_price: float = 0,
+                  stop_price: float = 0, tif: TIF = TIF.DAY, oca_tag: str = None,
+                  params: Dict[str, str] = None) -> NewOrderRequest:
 
-    def cancel_order(self, cl_ord_id=None):
-        req = OrderCancelRequest(timestamp=self.clock.now(),
-                                 cl_id=self.stg_id, cl_ord_id=cl_ord_id)
-        order = self.portfolio.cancel_order(req)
-        return order
+        req = self.model_factory.build_new_order_request(timestamp=self.clock.now(),
+                                                         cl_id=self.stg_id,
+                                                         cl_req_id=self.__get_next_req_id(),
+                                                         portf_id=self.portfolio.portf_id,
+                                                         broker_id=self.app_config.broker_id,
+                                                         inst_id=inst_id,
+                                                         action=action,
+                                                         type=type,
+                                                         qty=qty,
+                                                         limit_price=limit_price,
+                                                         stop_price=stop_price,
+                                                         tif=tif,
+                                                         oca_tag=oca_tag,
+                                                         params=params)
+        self.ord_reqs[self.model_factory.build_client_order_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.add_order(inst_id=req.inst_id, cl_id=req.cl_id, cl_req_id=req.cl_req_id, ordered_qty=req.qty)
+        self.portfolio.send_order(req)
+        return req
 
-    def replace_order(self, cl_ord_id=None, type=None, qty=None, limit_price=None, stop_price=None, tif=None):
-        req = OrderReplaceRequest(timestamp=self.clock.now(),
-                                  cl_id=self.stg_id, cl_ord_id=cl_ord_id, type=type, qty=qty, limit_price=limit_price,
-                                  stop_price=stop_price, tif=tif)
-        order = self.portfolio.replace_order(req)
-        return order
+    def cancel_order(self, cl_orig_req_id: str, params: Dict[str, str] = None) -> OrderCancelRequest:
+        req = self.model_factory.build_order_cancel_request(timestamp=self.clock.now(),
+                                                            cl_id=self.stg_id, cl_req_id=self.__get_next_req_id(),
+                                                            cl_orig_req_id=cl_orig_req_id, params=params)
+        self.ord_reqs[self.model_factory.build_client_order_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.portfolio.cancel_order(req)
+        return req
+
+    def replace_order(self, cl_orig_req_id: str, type: OrderType = None, qty: float = None, limit_price: float = None,
+                      stop_price: float = None, tif: TIF = None, oca_tag: str = None,
+                      params: Dict[str, str] = None) -> OrderReplaceRequest:
+        req = self.model_factory.build_order_replace_request(timestamp=self.clock.now(),
+                                                             cl_id=self.stg_id, cl_req_id=self.__get_next_req_id(),
+                                                             cl_orig_req_id=cl_orig_req_id, type=type, qty=qty,
+                                                             limit_price=limit_price,
+                                                             stop_price=stop_price, tif=tif,
+                                                             oca_tag=oca_tag,
+                                                             params=params)
+        self.ord_reqs[self.model_factory.build_client_order_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.portfolio.replace_order(req)
+        return req
 
     def get_portfolio(self):
         return self.portfolio
-

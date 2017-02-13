@@ -1,10 +1,11 @@
 from typing import List, Any
 
-from algotrader.model.model_factory import ModelFactory
+from algotrader import Startable
+from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
 from algotrader.model.trade_data_pb2 import *
 
 
-class Order(object):
+class Order(Startable, MarketDataEventHandler, ExecutionEventHandler):
     def __init__(self, state: OrderState = None, events: List[Any] = None):
         self.state = state
         self.events = events if events else []

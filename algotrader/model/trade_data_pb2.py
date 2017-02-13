@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='trade_data.proto',
   package='algotrader.model',
   syntax='proto3',
-  serialized_pb=_b('\n\x10trade_data.proto\x12\x10\x61lgotrader.model\x1a\x19google/protobuf/any.proto\x1a\x11time_series.proto\"\xaf\x03\n\x0fNewOrderRequest\x12\r\n\x05\x63l_id\x18\x01 \x01(\t\x12\x11\n\tcl_req_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08portf_id\x18\x05 \x01(\t\x12\x11\n\tbroker_id\x18\x06 \x01(\t\x12\x0f\n\x07inst_id\x18\x07 \x01(\t\x12-\n\x06\x61\x63tion\x18\n \x01(\x0e\x32\x1d.algotrader.model.OrderAction\x12)\n\x04type\x18\x0b \x01(\x0e\x32\x1b.algotrader.model.OrderType\x12\x0b\n\x03qty\x18\x0c \x01(\x01\x12\x13\n\x0blimit_price\x18\r \x01(\x01\x12\x12\n\nstop_price\x18\x0e \x01(\x01\x12\"\n\x03tif\x18\x0f \x01(\x0e\x32\x15.algotrader.model.TIF\x12\x0f\n\x07oca_tag\x18\x14 \x01(\t\x12=\n\x06params\x18\x15 \x03(\x0b\x32-.algotrader.model.NewOrderRequest.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xea\x02\n\x13OrderReplaceRequest\x12\r\n\x05\x63l_id\x18\x01 \x01(\t\x12\x11\n\tcl_req_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x16\n\x0e\x63l_orig_req_id\x18\x04 \x01(\t\x12)\n\x04type\x18\n \x01(\x0e\x32\x1b.algotrader.model.OrderType\x12\x0b\n\x03qty\x18\x0b \x01(\x01\x12\x13\n\x0blimit_price\x18\x0c \x01(\x01\x12\x12\n\nstop_price\x18\r \x01(\x01\x12\"\n\x03tif\x18\x0e \x01(\x0e\x32\x15.algotrader.model.TIF\x12\x0f\n\x07oca_tag\x18\x14 \x01(\t\x12\x41\n\x06params\x18\x15 \x03(\x0b\x32\x31.algotrader.model.OrderReplaceRequest.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xd2\x01\n\x12OrderCancelRequest\x12\r\n\x05\x63l_id\x18\x01 \x01(\t\x12\x11\n\tcl_req_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x16\n\x0e\x63l_orig_req_id\x18\x04 \x01(\t\x12@\n\x06params\x18\n \x03(\x0b\x32\x30.algotrader.model.OrderCancelRequest.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xf2\x01\n\x11OrderStatusUpdate\x12\x11\n\tbroker_id\x18\x01 \x01(\t\x12\x17\n\x0f\x62roker_event_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x15\n\rbroker_ord_id\x18\x04 \x01(\t\x12\r\n\x05\x63l_id\x18\x0b \x01(\t\x12\x11\n\tcl_req_id\x18\x0c \x01(\t\x12\x0f\n\x07inst_id\x18\r \x01(\t\x12\x12\n\nfilled_qty\x18\x15 \x01(\x01\x12\x11\n\tavg_price\x18\x16 \x01(\x01\x12-\n\x06status\x18\x17 \x01(\x0e\x32\x1d.algotrader.model.OrderStatus\"\xc0\x02\n\x0f\x45xecutionReport\x12\x11\n\tbroker_id\x18\x01 \x01(\t\x12\x17\n\x0f\x62roker_event_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x15\n\rbroker_ord_id\x18\x04 \x01(\t\x12\x14\n\x0c\x62roker_er_id\x18\x05 \x01(\t\x12\r\n\x05\x63l_id\x18\x0b \x01(\t\x12\x11\n\tcl_req_id\x18\x0c \x01(\t\x12\x0f\n\x07inst_id\x18\r \x01(\t\x12\x10\n\x08last_qty\x18\x15 \x01(\x01\x12\x12\n\nlast_price\x18\x16 \x01(\x01\x12\x12\n\ncommission\x18\x17 \x01(\x01\x12\x12\n\nfilled_qty\x18\x18 \x01(\x01\x12\x11\n\tavg_price\x18\x19 \x01(\x01\x12-\n\x06status\x18\x1a \x01(\x0e\x32\x1d.algotrader.model.OrderStatus\"\x90\x01\n\x0c\x41\x63\x63ountValue\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x41\n\nccy_values\x18\x02 \x03(\x0b\x32-.algotrader.model.AccountValue.CcyValuesEntry\x1a\x30\n\x0e\x43\x63yValuesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"\xf0\x01\n\rAccountUpdate\x12\x11\n\tbroker_id\x18\x01 \x01(\t\x12\x17\n\x0f\x62roker_event_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x14\n\x0c\x61\x63\x63ount_name\x18\x0b \x01(\t\x12;\n\x06values\x18\x0c \x03(\x0b\x32+.algotrader.model.AccountUpdate.ValuesEntry\x1aM\n\x0bValuesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12-\n\x05value\x18\x02 \x01(\x0b\x32\x1e.algotrader.model.AccountValue:\x02\x38\x01\"\xeb\x01\n\x0fPortfolioUpdate\x12\x11\n\tbroker_id\x18\x01 \x01(\t\x12\x17\n\x0f\x62roker_event_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08portf_id\x18\x04 \x01(\t\x12\x0f\n\x07inst_id\x18\x05 \x01(\t\x12\x10\n\x08position\x18\x14 \x01(\x01\x12\x11\n\tmkt_price\x18\x15 \x01(\x01\x12\x11\n\tmkt_value\x18\x16 \x01(\x01\x12\x10\n\x08\x61vg_cost\x18\x17 \x01(\x01\x12\x16\n\x0eunrealized_pnl\x18\x18 \x01(\x01\x12\x14\n\x0crealized_pnl\x18\x19 \x01(\x01\"\xba\x02\n\x0c\x41\x63\x63ountState\x12\x0f\n\x07\x61\x63\x63t_id\x18\x01 \x01(\t\x12:\n\x06values\x18\x02 \x03(\x0b\x32*.algotrader.model.AccountState.ValuesEntry\x12@\n\tpositions\x18\x03 \x03(\x0b\x32-.algotrader.model.AccountState.PositionsEntry\x1aM\n\x0bValuesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12-\n\x05value\x18\x02 \x01(\x0b\x32\x1e.algotrader.model.AccountValue:\x02\x38\x01\x1aL\n\x0ePositionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.algotrader.model.Position:\x02\x38\x01\"\xba\x02\n\x0ePortfolioState\x12\x10\n\x08portf_id\x18\x01 \x01(\t\x12\x42\n\tpositions\x18\x02 \x03(\x0b\x32/.algotrader.model.PortfolioState.PositionsEntry\x12\x32\n\x0bperformance\x18\x03 \x01(\x0b\x32\x1d.algotrader.model.Performance\x12\"\n\x03pnl\x18\x04 \x01(\x0b\x32\x15.algotrader.model.Pnl\x12,\n\x08\x64rawdown\x18\x05 \x01(\x0b\x32\x1a.algotrader.model.DrawDown\x1aL\n\x0ePositionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.algotrader.model.Position:\x02\x38\x01\"\x80\x01\n\x0bPerformance\x12\x14\n\x0ctotal_equity\x18\x01 \x01(\x01\x12\x0c\n\x04\x63\x61sh\x18\x02 \x01(\x01\x12\x13\n\x0bstock_value\x18\x03 \x01(\x01\x12\x38\n\x12performance_series\x18\x04 \x01(\x0b\x32\x1c.algotrader.model.TimeSeries\"I\n\x03Pnl\x12\x10\n\x08last_pnl\x18\x01 \x01(\x01\x12\x30\n\npnl_series\x18\x02 \x01(\x0b\x32\x1c.algotrader.model.TimeSeries\"\xce\x01\n\x08\x44rawDown\x12\x15\n\rlast_drawdown\x18\x01 \x01(\x01\x12\x19\n\x11last_drawdown_pct\x18\x02 \x01(\x01\x12\x13\n\x0bhigh_equity\x18\x03 \x01(\x01\x12\x12\n\nlow_equity\x18\x04 \x01(\x01\x12\x16\n\x0e\x63urrent_run_up\x18\x05 \x01(\x01\x12\x18\n\x10\x63urrent_drawdown\x18\x06 \x01(\x01\x12\x35\n\x0f\x64rawdown_series\x18\x07 \x01(\x0b\x32\x1c.algotrader.model.TimeSeries\"\x80\x01\n\x06\x43onfig\x12\x11\n\tconfig_id\x18\x01 \x01(\t\x12\x34\n\x06values\x18\x02 \x03(\x0b\x32$.algotrader.model.Config.ValuesEntry\x1a-\n\x0bValuesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xc3\x01\n\rStrategyState\x12\x0e\n\x06stg_id\x18\x01 \x01(\t\x12\x11\n\tconfig_id\x18\x02 \x01(\t\x12\x41\n\tpositions\x18\x03 \x03(\x0b\x32..algotrader.model.StrategyState.PositionsEntry\x1aL\n\x0ePositionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.algotrader.model.Position:\x02\x38\x01\"\x97\x05\n\nOrderState\x12\r\n\x05\x63l_id\x18\x01 \x01(\t\x12\x11\n\tcl_req_id\x18\x02 \x01(\t\x12\x10\n\x08portf_id\x18\x03 \x01(\t\x12\x11\n\tbroker_id\x18\x04 \x01(\t\x12\x15\n\rbroker_ord_id\x18\x05 \x01(\t\x12\x0f\n\x07inst_id\x18\x06 \x01(\t\x12\x1a\n\x12\x63reation_timestamp\x18\x07 \x01(\x03\x12\x18\n\x10update_timestamp\x18\x08 \x01(\x03\x12-\n\x06\x61\x63tion\x18\n \x01(\x0e\x32\x1d.algotrader.model.OrderAction\x12)\n\x04type\x18\x0b \x01(\x0e\x32\x1b.algotrader.model.OrderType\x12\x0b\n\x03qty\x18\x0c \x01(\x01\x12\x13\n\x0blimit_price\x18\r \x01(\x01\x12\x12\n\nstop_price\x18\x0e \x01(\x01\x12\"\n\x03tif\x18\x0f \x01(\x0e\x32\x15.algotrader.model.TIF\x12\x0f\n\x07oca_tag\x18\x14 \x01(\t\x12\x38\n\x06params\x18\x15 \x03(\x0b\x32(.algotrader.model.OrderState.ParamsEntry\x12-\n\x06status\x18\x1e \x01(\x0e\x32\x1d.algotrader.model.OrderStatus\x12\x12\n\nfilled_qty\x18\x1f \x01(\x01\x12\x11\n\tavg_price\x18  \x01(\x01\x12\x10\n\x08last_qty\x18! \x01(\x01\x12\x12\n\nlast_price\x18\" \x01(\x01\x12\x18\n\x10stop_limit_ready\x18# \x01(\x08\x12 \n\x18trailing_stop_exec_price\x18$ \x01(\x01\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"1\n\rClientOrderId\x12\r\n\x05\x63l_id\x18\x01 \x01(\t\x12\x11\n\tcl_req_id\x18\x02 \x01(\t\"9\n\rBrokerOrderId\x12\x11\n\tbroker_id\x18\x01 \x01(\t\x12\x15\n\rbroker_ord_id\x18\x02 \x01(\t\"x\n\x08Position\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bordered_qty\x18\x02 \x01(\x01\x12\x12\n\nfilled_qty\x18\x03 \x01(\x01\x12\x32\n\tcl_orders\x18\x04 \x03(\x0b\x32\x1f.algotrader.model.ClientOrderId\"#\n\x08Sequence\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03seq\x18\x02 \x01(\x03* \n\x0bOrderAction\x12\x07\n\x03\x42uy\x10\x00\x12\x08\n\x04Sell\x10\x01*\xb1\x01\n\tOrderType\x12\n\n\x06Market\x10\x00\x12\t\n\x05Limit\x10\x01\x12\x08\n\x04Stop\x10\x02\x12\r\n\tStopLimit\x10\x03\x12\x10\n\x0cTrailingStop\x10\x04\x12\x11\n\rMarketOnClose\x10\x05\x12\x10\n\x0cLimitOnClose\x10\x06\x12\x11\n\rMarketToLimit\x10\x07\x12\x18\n\x14MarketIfPriceTouched\x10\x08\x12\x10\n\x0cMarketOnOpen\x10\t*)\n\x03TIF\x12\x07\n\x03\x44\x41Y\x10\x00\x12\x07\n\x03GTC\x10\x01\x12\x07\n\x03\x46OK\x10\x02\x12\x07\n\x03GTD\x10\x03*\xbe\x01\n\x0bOrderStatus\x12\x11\n\rUnknownStatus\x10\x00\x12\x07\n\x03New\x10\x01\x12\x11\n\rPendingSubmit\x10\x02\x12\r\n\tSubmitted\x10\x03\x12\x11\n\rPendingCancel\x10\x04\x12\r\n\tCancelled\x10\x05\x12\x12\n\x0ePendingReplace\x10\x06\x12\x0c\n\x08Replaced\x10\x07\x12\x13\n\x0fPartiallyFilled\x10\x08\x12\n\n\x06\x46illed\x10\t\x12\x0c\n\x08Rejected\x10\nb\x06proto3')
+  serialized_pb=_b('\n\x10trade_data.proto\x12\x10\x61lgotrader.model\x1a\x19google/protobuf/any.proto\x1a\x11time_series.proto\"\xaf\x03\n\x0fNewOrderRequest\x12\r\n\x05\x63l_id\x18\x01 \x01(\t\x12\x11\n\tcl_req_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08portf_id\x18\x05 \x01(\t\x12\x11\n\tbroker_id\x18\x06 \x01(\t\x12\x0f\n\x07inst_id\x18\x07 \x01(\t\x12-\n\x06\x61\x63tion\x18\n \x01(\x0e\x32\x1d.algotrader.model.OrderAction\x12)\n\x04type\x18\x0b \x01(\x0e\x32\x1b.algotrader.model.OrderType\x12\x0b\n\x03qty\x18\x0c \x01(\x01\x12\x13\n\x0blimit_price\x18\r \x01(\x01\x12\x12\n\nstop_price\x18\x0e \x01(\x01\x12\"\n\x03tif\x18\x0f \x01(\x0e\x32\x15.algotrader.model.TIF\x12\x0f\n\x07oca_tag\x18\x14 \x01(\t\x12=\n\x06params\x18\x15 \x03(\x0b\x32-.algotrader.model.NewOrderRequest.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xea\x02\n\x13OrderReplaceRequest\x12\r\n\x05\x63l_id\x18\x01 \x01(\t\x12\x11\n\tcl_req_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x16\n\x0e\x63l_orig_req_id\x18\x04 \x01(\t\x12)\n\x04type\x18\n \x01(\x0e\x32\x1b.algotrader.model.OrderType\x12\x0b\n\x03qty\x18\x0b \x01(\x01\x12\x13\n\x0blimit_price\x18\x0c \x01(\x01\x12\x12\n\nstop_price\x18\r \x01(\x01\x12\"\n\x03tif\x18\x0e \x01(\x0e\x32\x15.algotrader.model.TIF\x12\x0f\n\x07oca_tag\x18\x14 \x01(\t\x12\x41\n\x06params\x18\x15 \x03(\x0b\x32\x31.algotrader.model.OrderReplaceRequest.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xd2\x01\n\x12OrderCancelRequest\x12\r\n\x05\x63l_id\x18\x01 \x01(\t\x12\x11\n\tcl_req_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x16\n\x0e\x63l_orig_req_id\x18\x04 \x01(\t\x12@\n\x06params\x18\n \x03(\x0b\x32\x30.algotrader.model.OrderCancelRequest.ParamsEntry\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xf2\x01\n\x11OrderStatusUpdate\x12\x11\n\tbroker_id\x18\x01 \x01(\t\x12\x17\n\x0f\x62roker_event_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x15\n\rbroker_ord_id\x18\x04 \x01(\t\x12\r\n\x05\x63l_id\x18\x0b \x01(\t\x12\x11\n\tcl_req_id\x18\x0c \x01(\t\x12\x0f\n\x07inst_id\x18\r \x01(\t\x12\x12\n\nfilled_qty\x18\x15 \x01(\x01\x12\x11\n\tavg_price\x18\x16 \x01(\x01\x12-\n\x06status\x18\x17 \x01(\x0e\x32\x1d.algotrader.model.OrderStatus\"\xc0\x02\n\x0f\x45xecutionReport\x12\x11\n\tbroker_id\x18\x01 \x01(\t\x12\x17\n\x0f\x62roker_event_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x15\n\rbroker_ord_id\x18\x04 \x01(\t\x12\x14\n\x0c\x62roker_er_id\x18\x05 \x01(\t\x12\r\n\x05\x63l_id\x18\x0b \x01(\t\x12\x11\n\tcl_req_id\x18\x0c \x01(\t\x12\x0f\n\x07inst_id\x18\r \x01(\t\x12\x10\n\x08last_qty\x18\x15 \x01(\x01\x12\x12\n\nlast_price\x18\x16 \x01(\x01\x12\x12\n\ncommission\x18\x17 \x01(\x01\x12\x12\n\nfilled_qty\x18\x18 \x01(\x01\x12\x11\n\tavg_price\x18\x19 \x01(\x01\x12-\n\x06status\x18\x1a \x01(\x0e\x32\x1d.algotrader.model.OrderStatus\"\x90\x01\n\x0c\x41\x63\x63ountValue\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x41\n\nccy_values\x18\x02 \x03(\x0b\x32-.algotrader.model.AccountValue.CcyValuesEntry\x1a\x30\n\x0e\x43\x63yValuesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"\xf0\x01\n\rAccountUpdate\x12\x11\n\tbroker_id\x18\x01 \x01(\t\x12\x17\n\x0f\x62roker_event_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x14\n\x0c\x61\x63\x63ount_name\x18\x0b \x01(\t\x12;\n\x06values\x18\x0c \x03(\x0b\x32+.algotrader.model.AccountUpdate.ValuesEntry\x1aM\n\x0bValuesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12-\n\x05value\x18\x02 \x01(\x0b\x32\x1e.algotrader.model.AccountValue:\x02\x38\x01\"\xeb\x01\n\x0fPortfolioUpdate\x12\x11\n\tbroker_id\x18\x01 \x01(\t\x12\x17\n\x0f\x62roker_event_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08portf_id\x18\x04 \x01(\t\x12\x0f\n\x07inst_id\x18\x05 \x01(\t\x12\x10\n\x08position\x18\x14 \x01(\x01\x12\x11\n\tmkt_price\x18\x15 \x01(\x01\x12\x11\n\tmkt_value\x18\x16 \x01(\x01\x12\x10\n\x08\x61vg_cost\x18\x17 \x01(\x01\x12\x16\n\x0eunrealized_pnl\x18\x18 \x01(\x01\x12\x14\n\x0crealized_pnl\x18\x19 \x01(\x01\"\xba\x02\n\x0c\x41\x63\x63ountState\x12\x0f\n\x07\x61\x63\x63t_id\x18\x01 \x01(\t\x12:\n\x06values\x18\x02 \x03(\x0b\x32*.algotrader.model.AccountState.ValuesEntry\x12@\n\tpositions\x18\x03 \x03(\x0b\x32-.algotrader.model.AccountState.PositionsEntry\x1aM\n\x0bValuesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12-\n\x05value\x18\x02 \x01(\x0b\x32\x1e.algotrader.model.AccountValue:\x02\x38\x01\x1aL\n\x0ePositionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.algotrader.model.Position:\x02\x38\x01\"\xee\x02\n\x0ePortfolioState\x12\x10\n\x08portf_id\x18\x01 \x01(\t\x12\x32\n\tcl_orders\x18\x02 \x03(\x0b\x32\x1f.algotrader.model.ClientOrderId\x12\x42\n\tpositions\x18\x03 \x03(\x0b\x32/.algotrader.model.PortfolioState.PositionsEntry\x12\x32\n\x0bperformance\x18\x04 \x01(\x0b\x32\x1d.algotrader.model.Performance\x12\"\n\x03pnl\x18\x05 \x01(\x0b\x32\x15.algotrader.model.Pnl\x12,\n\x08\x64rawdown\x18\x06 \x01(\x0b\x32\x1a.algotrader.model.DrawDown\x1aL\n\x0ePositionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.algotrader.model.Position:\x02\x38\x01\"\x80\x01\n\x0bPerformance\x12\x14\n\x0ctotal_equity\x18\x01 \x01(\x01\x12\x0c\n\x04\x63\x61sh\x18\x02 \x01(\x01\x12\x13\n\x0bstock_value\x18\x03 \x01(\x01\x12\x38\n\x12performance_series\x18\x04 \x01(\x0b\x32\x1c.algotrader.model.TimeSeries\"I\n\x03Pnl\x12\x10\n\x08last_pnl\x18\x01 \x01(\x01\x12\x30\n\npnl_series\x18\x02 \x01(\x0b\x32\x1c.algotrader.model.TimeSeries\"\xce\x01\n\x08\x44rawDown\x12\x15\n\rlast_drawdown\x18\x01 \x01(\x01\x12\x19\n\x11last_drawdown_pct\x18\x02 \x01(\x01\x12\x13\n\x0bhigh_equity\x18\x03 \x01(\x01\x12\x12\n\nlow_equity\x18\x04 \x01(\x01\x12\x16\n\x0e\x63urrent_run_up\x18\x05 \x01(\x01\x12\x18\n\x10\x63urrent_drawdown\x18\x06 \x01(\x01\x12\x35\n\x0f\x64rawdown_series\x18\x07 \x01(\x0b\x32\x1c.algotrader.model.TimeSeries\"\x80\x01\n\x06\x43onfig\x12\x11\n\tconfig_id\x18\x01 \x01(\t\x12\x34\n\x06values\x18\x02 \x03(\x0b\x32$.algotrader.model.Config.ValuesEntry\x1a-\n\x0bValuesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xb5\x02\n\rStrategyState\x12\x0e\n\x06stg_id\x18\x01 \x01(\t\x12(\n\x06\x63onfig\x18\x02 \x01(\x0b\x32\x18.algotrader.model.Config\x12\x32\n\tcl_orders\x18\x03 \x03(\x0b\x32\x1f.algotrader.model.ClientOrderId\x12\x41\n\tpositions\x18\x04 \x03(\x0b\x32..algotrader.model.StrategyState.PositionsEntry\x12\x10\n\x08portf_id\x18\x05 \x01(\t\x12\x13\n\x0bnext_ord_id\x18\x06 \x01(\x03\x1aL\n\x0ePositionsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.algotrader.model.Position:\x02\x38\x01\"\x97\x05\n\nOrderState\x12\r\n\x05\x63l_id\x18\x01 \x01(\t\x12\x11\n\tcl_req_id\x18\x02 \x01(\t\x12\x10\n\x08portf_id\x18\x03 \x01(\t\x12\x11\n\tbroker_id\x18\x04 \x01(\t\x12\x15\n\rbroker_ord_id\x18\x05 \x01(\t\x12\x0f\n\x07inst_id\x18\x06 \x01(\t\x12\x1a\n\x12\x63reation_timestamp\x18\x07 \x01(\x03\x12\x18\n\x10update_timestamp\x18\x08 \x01(\x03\x12-\n\x06\x61\x63tion\x18\n \x01(\x0e\x32\x1d.algotrader.model.OrderAction\x12)\n\x04type\x18\x0b \x01(\x0e\x32\x1b.algotrader.model.OrderType\x12\x0b\n\x03qty\x18\x0c \x01(\x01\x12\x13\n\x0blimit_price\x18\r \x01(\x01\x12\x12\n\nstop_price\x18\x0e \x01(\x01\x12\"\n\x03tif\x18\x0f \x01(\x0e\x32\x15.algotrader.model.TIF\x12\x0f\n\x07oca_tag\x18\x14 \x01(\t\x12\x38\n\x06params\x18\x15 \x03(\x0b\x32(.algotrader.model.OrderState.ParamsEntry\x12-\n\x06status\x18\x1e \x01(\x0e\x32\x1d.algotrader.model.OrderStatus\x12\x12\n\nfilled_qty\x18\x1f \x01(\x01\x12\x11\n\tavg_price\x18  \x01(\x01\x12\x10\n\x08last_qty\x18! \x01(\x01\x12\x12\n\nlast_price\x18\" \x01(\x01\x12\x18\n\x10stop_limit_ready\x18# \x01(\x08\x12 \n\x18trailing_stop_exec_price\x18$ \x01(\x01\x1a-\n\x0bParamsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"1\n\rClientOrderId\x12\r\n\x05\x63l_id\x18\x01 \x01(\t\x12\x11\n\tcl_req_id\x18\x02 \x01(\t\"i\n\rOrderPosition\x12/\n\x06ord_id\x18\x01 \x01(\x0b\x32\x1f.algotrader.model.ClientOrderId\x12\x13\n\x0bordered_qty\x18\x02 \x01(\x01\x12\x12\n\nfilled_qty\x18\x03 \x01(\x01\"\xe0\x01\n\x08Position\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bordered_qty\x18\x02 \x01(\x01\x12\x12\n\nfilled_qty\x18\x03 \x01(\x01\x12\x12\n\nlast_price\x18\x04 \x01(\x01\x12\x36\n\x06orders\x18\x05 \x03(\x0b\x32&.algotrader.model.Position.OrdersEntry\x1aN\n\x0bOrdersEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12.\n\x05value\x18\x02 \x01(\x0b\x32\x1f.algotrader.model.OrderPosition:\x02\x38\x01\"#\n\x08Sequence\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03seq\x18\x02 \x01(\x03* \n\x0bOrderAction\x12\x07\n\x03\x42uy\x10\x00\x12\x08\n\x04Sell\x10\x01*\xb1\x01\n\tOrderType\x12\n\n\x06Market\x10\x00\x12\t\n\x05Limit\x10\x01\x12\x08\n\x04Stop\x10\x02\x12\r\n\tStopLimit\x10\x03\x12\x10\n\x0cTrailingStop\x10\x04\x12\x11\n\rMarketOnClose\x10\x05\x12\x10\n\x0cLimitOnClose\x10\x06\x12\x11\n\rMarketToLimit\x10\x07\x12\x18\n\x14MarketIfPriceTouched\x10\x08\x12\x10\n\x0cMarketOnOpen\x10\t*)\n\x03TIF\x12\x07\n\x03\x44\x41Y\x10\x00\x12\x07\n\x03GTC\x10\x01\x12\x07\n\x03\x46OK\x10\x02\x12\x07\n\x03GTD\x10\x03*\xbe\x01\n\x0bOrderStatus\x12\x11\n\rUnknownStatus\x10\x00\x12\x07\n\x03New\x10\x01\x12\x11\n\rPendingSubmit\x10\x02\x12\r\n\tSubmitted\x10\x03\x12\x11\n\rPendingCancel\x10\x04\x12\r\n\tCancelled\x10\x05\x12\x12\n\x0ePendingReplace\x10\x06\x12\x0c\n\x08Replaced\x10\x07\x12\x13\n\x0fPartiallyFilled\x10\x08\x12\n\n\x06\x46illed\x10\t\x12\x0c\n\x08Rejected\x10\nb\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_any__pb2.DESCRIPTOR,time__series__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -44,8 +44,8 @@ _ORDERACTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4605,
-  serialized_end=4637,
+  serialized_start=4924,
+  serialized_end=4956,
 )
 _sym_db.RegisterEnumDescriptor(_ORDERACTION)
 
@@ -99,8 +99,8 @@ _ORDERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4640,
-  serialized_end=4817,
+  serialized_start=4959,
+  serialized_end=5136,
 )
 _sym_db.RegisterEnumDescriptor(_ORDERTYPE)
 
@@ -130,8 +130,8 @@ _TIF = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4819,
-  serialized_end=4860,
+  serialized_start=5138,
+  serialized_end=5179,
 )
 _sym_db.RegisterEnumDescriptor(_TIF)
 
@@ -189,8 +189,8 @@ _ORDERSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4863,
-  serialized_end=5053,
+  serialized_start=5182,
+  serialized_end=5372,
 )
 _sym_db.RegisterEnumDescriptor(_ORDERSTATUS)
 
@@ -1277,29 +1277,36 @@ _PORTFOLIOSTATE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='positions', full_name='algotrader.model.PortfolioState.positions', index=1,
+      name='cl_orders', full_name='algotrader.model.PortfolioState.cl_orders', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='performance', full_name='algotrader.model.PortfolioState.performance', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      name='positions', full_name='algotrader.model.PortfolioState.positions', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='pnl', full_name='algotrader.model.PortfolioState.pnl', index=3,
+      name='performance', full_name='algotrader.model.PortfolioState.performance', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='drawdown', full_name='algotrader.model.PortfolioState.drawdown', index=4,
+      name='pnl', full_name='algotrader.model.PortfolioState.pnl', index=4,
       number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='drawdown', full_name='algotrader.model.PortfolioState.drawdown', index=5,
+      number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -1317,7 +1324,7 @@ _PORTFOLIOSTATE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=2610,
-  serialized_end=2924,
+  serialized_end=2976,
 )
 
 
@@ -1368,8 +1375,8 @@ _PERFORMANCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2927,
-  serialized_end=3055,
+  serialized_start=2979,
+  serialized_end=3107,
 )
 
 
@@ -1406,8 +1413,8 @@ _PNL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3057,
-  serialized_end=3130,
+  serialized_start=3109,
+  serialized_end=3182,
 )
 
 
@@ -1479,8 +1486,8 @@ _DRAWDOWN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3133,
-  serialized_end=3339,
+  serialized_start=3185,
+  serialized_end=3391,
 )
 
 
@@ -1517,8 +1524,8 @@ _CONFIG_VALUESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3425,
-  serialized_end=3470,
+  serialized_start=3477,
+  serialized_end=3522,
 )
 
 _CONFIG = _descriptor.Descriptor(
@@ -1554,8 +1561,8 @@ _CONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3342,
-  serialized_end=3470,
+  serialized_start=3394,
+  serialized_end=3522,
 )
 
 
@@ -1611,16 +1618,37 @@ _STRATEGYSTATE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='config_id', full_name='algotrader.model.StrategyState.config_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
+      name='config', full_name='algotrader.model.StrategyState.config', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='cl_orders', full_name='algotrader.model.StrategyState.cl_orders', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='positions', full_name='algotrader.model.StrategyState.positions', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='portf_id', full_name='algotrader.model.StrategyState.portf_id', index=4,
+      number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='positions', full_name='algotrader.model.StrategyState.positions', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
+      name='next_ord_id', full_name='algotrader.model.StrategyState.next_ord_id', index=5,
+      number=6, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -1636,8 +1664,8 @@ _STRATEGYSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3473,
-  serialized_end=3668,
+  serialized_start=3525,
+  serialized_end=3834,
 )
 
 
@@ -1858,8 +1886,8 @@ _ORDERSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3671,
-  serialized_end=4334,
+  serialized_start=3837,
+  serialized_end=4500,
 )
 
 
@@ -1896,29 +1924,36 @@ _CLIENTORDERID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4336,
-  serialized_end=4385,
+  serialized_start=4502,
+  serialized_end=4551,
 )
 
 
-_BROKERORDERID = _descriptor.Descriptor(
-  name='BrokerOrderId',
-  full_name='algotrader.model.BrokerOrderId',
+_ORDERPOSITION = _descriptor.Descriptor(
+  name='OrderPosition',
+  full_name='algotrader.model.OrderPosition',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='broker_id', full_name='algotrader.model.BrokerOrderId.broker_id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='ord_id', full_name='algotrader.model.OrderPosition.ord_id', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='broker_ord_id', full_name='algotrader.model.BrokerOrderId.broker_ord_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='ordered_qty', full_name='algotrader.model.OrderPosition.ordered_qty', index=1,
+      number=2, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='filled_qty', full_name='algotrader.model.OrderPosition.filled_qty', index=2,
+      number=3, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -1934,10 +1969,47 @@ _BROKERORDERID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4387,
-  serialized_end=4444,
+  serialized_start=4553,
+  serialized_end=4658,
 )
 
+
+_POSITION_ORDERSENTRY = _descriptor.Descriptor(
+  name='OrdersEntry',
+  full_name='algotrader.model.Position.OrdersEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='algotrader.model.Position.OrdersEntry.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='algotrader.model.Position.OrdersEntry.value', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001')),
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4807,
+  serialized_end=4885,
+)
 
 _POSITION = _descriptor.Descriptor(
   name='Position',
@@ -1968,8 +2040,15 @@ _POSITION = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='cl_orders', full_name='algotrader.model.Position.cl_orders', index=3,
-      number=4, type=11, cpp_type=10, label=3,
+      name='last_price', full_name='algotrader.model.Position.last_price', index=3,
+      number=4, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='orders', full_name='algotrader.model.Position.orders', index=4,
+      number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -1977,7 +2056,7 @@ _POSITION = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[],
+  nested_types=[_POSITION_ORDERSENTRY, ],
   enum_types=[
   ],
   options=None,
@@ -1986,8 +2065,8 @@ _POSITION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4446,
-  serialized_end=4566,
+  serialized_start=4661,
+  serialized_end=4885,
 )
 
 
@@ -2024,8 +2103,8 @@ _SEQUENCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4568,
-  serialized_end=4603,
+  serialized_start=4887,
+  serialized_end=4922,
 )
 
 _NEWORDERREQUEST_PARAMSENTRY.containing_type = _NEWORDERREQUEST
@@ -2054,6 +2133,7 @@ _ACCOUNTSTATE.fields_by_name['values'].message_type = _ACCOUNTSTATE_VALUESENTRY
 _ACCOUNTSTATE.fields_by_name['positions'].message_type = _ACCOUNTSTATE_POSITIONSENTRY
 _PORTFOLIOSTATE_POSITIONSENTRY.fields_by_name['value'].message_type = _POSITION
 _PORTFOLIOSTATE_POSITIONSENTRY.containing_type = _PORTFOLIOSTATE
+_PORTFOLIOSTATE.fields_by_name['cl_orders'].message_type = _CLIENTORDERID
 _PORTFOLIOSTATE.fields_by_name['positions'].message_type = _PORTFOLIOSTATE_POSITIONSENTRY
 _PORTFOLIOSTATE.fields_by_name['performance'].message_type = _PERFORMANCE
 _PORTFOLIOSTATE.fields_by_name['pnl'].message_type = _PNL
@@ -2065,6 +2145,8 @@ _CONFIG_VALUESENTRY.containing_type = _CONFIG
 _CONFIG.fields_by_name['values'].message_type = _CONFIG_VALUESENTRY
 _STRATEGYSTATE_POSITIONSENTRY.fields_by_name['value'].message_type = _POSITION
 _STRATEGYSTATE_POSITIONSENTRY.containing_type = _STRATEGYSTATE
+_STRATEGYSTATE.fields_by_name['config'].message_type = _CONFIG
+_STRATEGYSTATE.fields_by_name['cl_orders'].message_type = _CLIENTORDERID
 _STRATEGYSTATE.fields_by_name['positions'].message_type = _STRATEGYSTATE_POSITIONSENTRY
 _ORDERSTATE_PARAMSENTRY.containing_type = _ORDERSTATE
 _ORDERSTATE.fields_by_name['action'].enum_type = _ORDERACTION
@@ -2072,7 +2154,10 @@ _ORDERSTATE.fields_by_name['type'].enum_type = _ORDERTYPE
 _ORDERSTATE.fields_by_name['tif'].enum_type = _TIF
 _ORDERSTATE.fields_by_name['params'].message_type = _ORDERSTATE_PARAMSENTRY
 _ORDERSTATE.fields_by_name['status'].enum_type = _ORDERSTATUS
-_POSITION.fields_by_name['cl_orders'].message_type = _CLIENTORDERID
+_ORDERPOSITION.fields_by_name['ord_id'].message_type = _CLIENTORDERID
+_POSITION_ORDERSENTRY.fields_by_name['value'].message_type = _ORDERPOSITION
+_POSITION_ORDERSENTRY.containing_type = _POSITION
+_POSITION.fields_by_name['orders'].message_type = _POSITION_ORDERSENTRY
 DESCRIPTOR.message_types_by_name['NewOrderRequest'] = _NEWORDERREQUEST
 DESCRIPTOR.message_types_by_name['OrderReplaceRequest'] = _ORDERREPLACEREQUEST
 DESCRIPTOR.message_types_by_name['OrderCancelRequest'] = _ORDERCANCELREQUEST
@@ -2090,7 +2175,7 @@ DESCRIPTOR.message_types_by_name['Config'] = _CONFIG
 DESCRIPTOR.message_types_by_name['StrategyState'] = _STRATEGYSTATE
 DESCRIPTOR.message_types_by_name['OrderState'] = _ORDERSTATE
 DESCRIPTOR.message_types_by_name['ClientOrderId'] = _CLIENTORDERID
-DESCRIPTOR.message_types_by_name['BrokerOrderId'] = _BROKERORDERID
+DESCRIPTOR.message_types_by_name['OrderPosition'] = _ORDERPOSITION
 DESCRIPTOR.message_types_by_name['Position'] = _POSITION
 DESCRIPTOR.message_types_by_name['Sequence'] = _SEQUENCE
 DESCRIPTOR.enum_types_by_name['OrderAction'] = _ORDERACTION
@@ -2305,19 +2390,27 @@ ClientOrderId = _reflection.GeneratedProtocolMessageType('ClientOrderId', (_mess
   ))
 _sym_db.RegisterMessage(ClientOrderId)
 
-BrokerOrderId = _reflection.GeneratedProtocolMessageType('BrokerOrderId', (_message.Message,), dict(
-  DESCRIPTOR = _BROKERORDERID,
+OrderPosition = _reflection.GeneratedProtocolMessageType('OrderPosition', (_message.Message,), dict(
+  DESCRIPTOR = _ORDERPOSITION,
   __module__ = 'trade_data_pb2'
-  # @@protoc_insertion_point(class_scope:algotrader.model.BrokerOrderId)
+  # @@protoc_insertion_point(class_scope:algotrader.model.OrderPosition)
   ))
-_sym_db.RegisterMessage(BrokerOrderId)
+_sym_db.RegisterMessage(OrderPosition)
 
 Position = _reflection.GeneratedProtocolMessageType('Position', (_message.Message,), dict(
+
+  OrdersEntry = _reflection.GeneratedProtocolMessageType('OrdersEntry', (_message.Message,), dict(
+    DESCRIPTOR = _POSITION_ORDERSENTRY,
+    __module__ = 'trade_data_pb2'
+    # @@protoc_insertion_point(class_scope:algotrader.model.Position.OrdersEntry)
+    ))
+  ,
   DESCRIPTOR = _POSITION,
   __module__ = 'trade_data_pb2'
   # @@protoc_insertion_point(class_scope:algotrader.model.Position)
   ))
 _sym_db.RegisterMessage(Position)
+_sym_db.RegisterMessage(Position.OrdersEntry)
 
 Sequence = _reflection.GeneratedProtocolMessageType('Sequence', (_message.Message,), dict(
   DESCRIPTOR = _SEQUENCE,
@@ -2349,4 +2442,6 @@ _STRATEGYSTATE_POSITIONSENTRY.has_options = True
 _STRATEGYSTATE_POSITIONSENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
 _ORDERSTATE_PARAMSENTRY.has_options = True
 _ORDERSTATE_PARAMSENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
+_POSITION_ORDERSENTRY.has_options = True
+_POSITION_ORDERSENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
 # @@protoc_insertion_point(module_scope)

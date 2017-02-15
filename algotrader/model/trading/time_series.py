@@ -32,12 +32,19 @@ message TimeSeries{
 """
 
 
-class DataSeries(Startable):
+class TimeSeriesEvent(object):
+    def __init__(self, name: str, timestamp: int, data: Dict[str, float]):
+        self.name = name
+        self.timestamp = timestamp
+        self.data = data
+
+
+class PandasTimeSeries(Startable):
     TIMESTAMP = 'timestamp'
 
     @staticmethod
     def get_name(input):
-        if isinstance(input, DataSeries):
+        if isinstance(input, PandasTimeSeries):
             return "'%s'" % input.time_series.series_id
         return "'%s'" % input
 
@@ -62,7 +69,7 @@ class DataSeries(Startable):
         return self.time_series.name
 
     def add(self, data: Dict[str, float], timestamp: int = None, init: bool = False) -> None:
-        timestamp = timestamp if timestamp is not None else data.get(DataSeries.TIMESTAMP)
+        timestamp = timestamp if timestamp is not None else data.get(PandasTimeSeries.TIMESTAMP)
 
         if not self.time_series.keys:
             ModelHelper.add_to_list(self.time_series.keys, data.keys())
@@ -71,8 +78,9 @@ class DataSeries(Startable):
             self.time_series.start_time = timestamp
 
         enhanced_data = {}
-        if not self.time_series.end_time or timestamp > self.time_series.end_time:
-            self.time_series.end_time = timestamp
+        if not self.time_series.end_time \
+                or timestamp > self.time_series.end_time \
+                or len(self.data_list) == 0:
 
             self.time_list.append(timestamp)
 
@@ -83,15 +91,15 @@ class DataSeries(Startable):
                 self.data_time_dict[key][timestamp] = value
                 enhanced_data[key] = value
 
-            #self.data_list.append(enhanced_data)
+            # self.data_list.append(enhanced_data)
             if not init:
                 self.last_item = self.time_series.items.add()
                 ModelHelper.add_to_dict(self.last_item.data, enhanced_data)
 
-        elif timestamp == self.current_time():
+        elif timestamp == self.time_series.end_time:
 
             enhanced_data = self.data_list.pop()
-            for key in self.time_series.keys:
+            for key in list(self.time_series.keys):
                 if key in data:
                     value = data.get(key)
                     if key not in self.data_time_dict:
@@ -104,10 +112,9 @@ class DataSeries(Startable):
             raise AssertionError(
                 "Time for new Item %s cannot be earlier then previous item %s" % (timestamp, self.current_time()))
 
+        self.time_series.end_time = timestamp
         self.data_list.append(enhanced_data)
-        data["name"] = DataSeries.get_name(self)
-        data[DataSeries.TIMESTAMP] = timestamp
-        self.subject.on_next(data)
+        self.subject.on_next(TimeSeriesEvent(name=PandasTimeSeries.get_name(self), timestamp=timestamp, data=data))
 
     def current_time(self):
         return self.time_series.end_time
@@ -145,7 +152,7 @@ class DataSeries(Startable):
 
     def _get_key(self, keys=None, default_keys=None):
         keys = keys if keys else default_keys
-        return DataSeries.convert_to_list(keys)
+        return PandasTimeSeries.convert_to_list(keys)
 
     @staticmethod
     def convert_to_list(items=None):

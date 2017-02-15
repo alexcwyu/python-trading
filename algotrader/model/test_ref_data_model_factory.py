@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from algotrader.model.sample_factory import *
-
+from algotrader.model.protobuf_to_dict import *
 
 class ModelFactoryTest(TestCase):
     def setUp(self):

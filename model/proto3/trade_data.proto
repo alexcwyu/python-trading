@@ -173,24 +173,23 @@ message AccountState {
 
 message PortfolioState {
     string portf_id = 1;
-    repeated ClientOrderId cl_orders = 2;
+    double cash = 2;
     map<string, Position> positions = 3;
-    Performance performance = 4;
-    Pnl pnl = 5;
-    DrawDown drawdown = 6;
+    repeated ClientOrderId cl_orders = 4;
+    Performance performance = 5;
+    Pnl pnl = 6;
+    DrawDown drawdown = 7;
 }
 
 message Performance {
     double total_equity = 1;
-    double cash = 2;
-    double stock_value = 3;
-    algotrader.model.TimeSeries performance_series = 4;
+    double stock_value = 2;
+    algotrader.model.TimeSeries series = 3;
 }
-
 
 message Pnl {
     double last_pnl = 1;
-    algotrader.model.TimeSeries pnl_series = 2;
+    algotrader.model.TimeSeries series = 2;
 }
 
 message DrawDown {
@@ -200,7 +199,7 @@ message DrawDown {
     double low_equity = 4;
     double current_run_up = 5;
     double current_drawdown = 6;
-    algotrader.model.TimeSeries drawdown_series = 7;
+    algotrader.model.TimeSeries series = 7;
 }
 
 

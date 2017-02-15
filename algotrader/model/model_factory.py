@@ -118,11 +118,11 @@ class ModelFactory(object):
         return holiday
 
     def build_trading_hours(self, trading_hours_id: str, timezone_id: str,
-                            sessions: TradingHours.Session) -> TradingHours:
+                            sessions: List[TradingHours.Session]) -> TradingHours:
         trading_hour = TradingHours()
         trading_hour.trading_hours_id = trading_hours_id
         trading_hour.timezone_id = timezone_id
-        ModelHelper.add_to_list(trading_hour.sessions, sessions)
+        ModelHelper.add_to_list_value(trading_hour.sessions, sessions)
         return trading_hour
 
     def build_trading_session(self, start_weekdate: int, start_time: int, end_weekdate: int, end_time: int,
@@ -379,12 +379,12 @@ class ModelFactory(object):
 
         return account
 
-    def build_portfolio_state(self, portf_id: str, positions: Dict[str, Position] = None,
+    def build_portfolio_state(self, portf_id: str, cash:float, positions: Dict[str, Position] = None,
                               performance: Performance = None,
                               pnl: Pnl = None, drawdown: DrawDown = None) -> PortfolioState:
         portfolio = PortfolioState()
         portfolio.portf_id = portf_id
-
+        portfolio.cash = cash
         ModelHelper.add_to_dict_value(portfolio.positions, positions)
         portfolio.performance.CopyFrom(performance if performance else Performance())
         portfolio.pnl.CopyFrom(pnl if pnl else Pnl())
@@ -392,19 +392,18 @@ class ModelFactory(object):
 
         return portfolio
 
-    def build_performance(self, total_equity: float, cash: float, stock_value: float,
+    def build_performance(self, total_equity: float, stock_value: float,
                           performance_series: TimeSeries = None) -> Performance:
         performance = Performance()
         performance.total_equity = total_equity
-        performance.cash = cash
         performance.stock_value = stock_value
-        performance.performance_series.CopyFrom(performance_series if performance_series else TimeSeries())
+        performance.series.CopyFrom(performance_series if performance_series else TimeSeries())
         return performance
 
     def build_pnl(self, last_pnl: float, pnl_series: TimeSeries = None) -> Pnl:
         pnl = Pnl()
         pnl.last_pnl = last_pnl
-        pnl.pnl_series.CopyFrom(pnl_series if pnl_series else TimeSeries())
+        pnl.series.CopyFrom(pnl_series if pnl_series else TimeSeries())
         return pnl
 
     def build_drawdown(self, last_drawdown: float, last_drawdown_pct: float, high_equity: float, low_equity: float,
@@ -416,7 +415,7 @@ class ModelFactory(object):
         dd.low_equity = low_equity
         dd.current_run_up = current_run_up
         dd.current_drawdown = current_drawdown
-        dd.drawdown_series.CopyFrom(drawdown_series if drawdown_series else TimeSeries())
+        dd.series.CopyFrom(drawdown_series if drawdown_series else TimeSeries())
 
         return dd
 
@@ -427,10 +426,10 @@ class ModelFactory(object):
         ModelHelper.add_to_dict(config.values, values)
         return config
 
-    def build_strategy_state(self, stg_id: str, config_id: str, positions: Dict[str, Position] = None) -> StrategyState:
+    def build_strategy_state(self, stg_id: str, config: Config, positions: Dict[str, Position] = None) -> StrategyState:
         stg = StrategyState()
         stg.stg_id = stg_id
-        stg.config_id = config_id
+        stg.config.CopyFrom(config if config else Config())
         ModelHelper.add_to_dict_value(stg.positions, positions)
         return stg
 
@@ -499,18 +498,21 @@ class ModelFactory(object):
         ModelHelper.add_to_dict_value(position.orders, orders)
         return position
 
-    def build_order_position(self, cl_id: str, cl_req_id: str, ordered_qty: float = 0, filled_qty: float = 0) -> OrderPosition:
+    def build_order_position(self, cl_id: str, cl_req_id: str, ordered_qty: float = 0,
+                             filled_qty: float = 0) -> OrderPosition:
         pos = OrderPosition()
-        pos.ord_id = self.build_client_order_id(cl_id = cl_id, cl_req_id = cl_req_id)
+        ord_id = pos.ord_id
+        ord_id.cl_id = cl_id
+        ord_id.cl_req_id = cl_req_id
         pos.ordered_qty = ordered_qty
         pos.filled_qty = filled_qty
         return pos
-
-    def build_client_order_id(self, cl_id: str, cl_req_id: str) -> ClientOrderId:
-        id = ClientOrderId()
-        id.cl_id = cl_id
-        id.cl_req_id = cl_req_id
-        return id
+    #
+    # def build_client_order_id(self, cl_id: str, cl_req_id: str) -> ClientOrderId:
+    #     id = ClientOrderId()
+    #     id.cl_id = cl_id
+    #     id.cl_req_id = cl_req_id
+    #     return id
 
     def build_sequence(self, id: str, seq: int) -> Sequence:
         sequence = Sequence()

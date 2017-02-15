@@ -68,8 +68,8 @@ class SampleFactory(object):
         return session
 
     def sample_trading_hours(self):
-        trading_hours = self.factory.build_trading_hours('SEHK_trdinghr', 'HK timezone',
-                                                         self.factory.build_trading_session(TradingHours.Session.Sunday,
+        trading_hours = self.factory.build_trading_hours(trading_hours_id='SEHK_trdinghr', timezone_id='HK timezone',
+                                                         sessions=self.factory.build_trading_session(TradingHours.Session.Sunday,
                                                                                             9000,
                                                                                             TradingHours.Session.Monday,
                                                                                             1600, True))
@@ -179,7 +179,7 @@ class SampleFactory(object):
         return self.factory.build_order_position("BLSH", "O1", 100, 100)
 
     def sample_position(self):
-        position = self.factory.build_position("HSI@SEHK", 1000, filled_qty=20, last_price=120.0, orders={
+        position = self.factory.build_position(inst_id="HSI@SEHK", ordered_qty=1000, filled_qty=20, last_price=120.0, orders={
             "BLSH@01":self.factory.build_order_position("BLSH", "O1", 100, 20),
             "BLSH@02":self.factory.build_order_position("BLSH", "O2", 100, 50)
         })
@@ -194,7 +194,7 @@ class SampleFactory(object):
         return account
 
     def sample_portfolio_state(self):
-        portfolio = self.factory.build_portfolio_state("test_portf", positions={"HSI@SEHK": self.sample_position()},
+        portfolio = self.factory.build_portfolio_state("test_portf", cash=1000, positions={"HSI@SEHK": self.sample_position()},
                                                  performance=self.sample_performance(),
                                                  pnl=self.sample_pnl(),
                                                  drawdown=self.sample_drawdown())
@@ -202,7 +202,7 @@ class SampleFactory(object):
         return portfolio
 
     def sample_performance(self):
-        performance = self.factory.build_performance(total_equity=100, cash=23, stock_value=68.8,
+        performance = self.factory.build_performance(total_equity=100, stock_value=68.8,
                                                      performance_series=self.sample_time_series())
         return performance
 
@@ -221,7 +221,7 @@ class SampleFactory(object):
         return config
 
     def sample_strategy_state(self):
-        strategy = self.factory.build_strategy_state("BLSH", config_id="Config1",
+        strategy = self.factory.build_strategy_state("BLSH", config=self.sample_config(),
                                                positions={"HSI@SEHK": self.sample_position()})
         return strategy
 

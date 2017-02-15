@@ -5,8 +5,9 @@ from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEven
 from algotrader.model.trade_data_pb2 import *
 
 
-class Order(Startable, MarketDataEventHandler, ExecutionEventHandler):
+class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
     def __init__(self, state: OrderState = None, events: List[Any] = None):
+        super.__init__()
         self.state = state
         self.events = events if events else []
 

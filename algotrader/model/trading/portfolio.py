@@ -11,12 +11,18 @@ from algotrader.event.event_bus import EventBus
 from algotrader.model.trade_data_pb2 import *
 from algotrader.model.trading.position import HasPositions
 from algotrader.utils import logger
+from algotrader.model.trading.analyzer.performance import PerformanceAnalyzer
+from algotrader.model.trading.analyzer.pnl import PnlAnalyzer
+from algotrader.model.trading.analyzer.drawdown import DrawDownAnalyzer
 
 
 class Portfolio(HasPositions):
     def __init__(self, state: PortfolioState = None):
         super().__init__()
         self.state = state
+        self.performance = PerformanceAnalyzer(self)
+        self.pnl = PnlAnalyzer(self)
+        self.drawdown = DrawDownAnalyzer(self)
 
     def _start(self, app_context, **kwargs):
         self.app_context.portf_mgr.add(self)
@@ -113,31 +119,22 @@ class Portfolio(HasPositions):
         self.stock_value = self.total_value()
         self.total_equity = self.stock_value + self.cash
 
-        self.performance_series.add(
-            {"timestamp": timestamp, "stock_value": self.stock_value, "cash": self.cash,
-             "total_equity": self.total_equity})
-
     def get_return(self):
-        equity = self.performance_series.get_series("total_equity")
+        equity = self.performance.get_series("total_equity")
         equity.name = 'equity'
         rets = equity.pct_change().dropna()
         # rets.index = rets.index.tz_localize("UTC")
         return rets
 
     def get_series(self):
-        result = self.performance_series.get_series(['stock_value', 'cash', 'total_equity'])
+        result = self.performance.get_series(['stock_value', 'cash', 'total_equity'])
 
         for analyzer in self.analyzers:
             result.update(analyzer.get_series())
         return result
 
     def get_result(self):
-        result = {
-            "TotalEquity": self.total_equity,
-            "Cash": self.cash,
-            "StockValue": self.stock_value
-        }
-
+        result = {}
         for analyzer in self.analyzers:
             result.update(analyzer.get_result())
         return result

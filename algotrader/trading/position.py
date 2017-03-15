@@ -6,6 +6,8 @@ from algotrader.provider.persistence import Persistable
 
 from algotrader.utils.ser_deser import Serializable
 
+from algotrader.model.model_helper import ModelHelper
+
 class Position(Serializable):
     __slots__ = (
         'inst_id',

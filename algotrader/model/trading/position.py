@@ -5,13 +5,16 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
 from algotrader.model.trading.order import Order
 
+from algotrader.model.model_helper import ModelHelper
 
 class HasPositions(MarketDataEventHandler):
     __metaclass__ = abc.ABCMeta
 
     def get_position(self, inst_id: str) -> Position:
         if inst_id not in self.state.positions:
-            self.state.positions[inst_id] = self.factory.build_position(inst_id=inst_id)
+            #self.state.positions[inst_id] = self.model_factory.build_position(inst_id=inst_id)
+            position = self.state.positions[inst_id]
+            position.CopyFrom(self.model_factory.build_position(inst_id=inst_id))
         position = self.state.positions[inst_id]
         return position
 
@@ -28,7 +31,9 @@ class HasPositions(MarketDataEventHandler):
         position.filled_qty += qty
 
     def add_order(self, inst_id: str, cl_id: str, cl_req_id: str, ordered_qty: float) -> None:
-        self.state.cl_orders.extends([self.model_factory.build_client_order_id(cl_id = cl_id, cl_req_id = cl_req_id)])
+        #self.state.cl_orders.extends()
+        ModelHelper.add_to_list(self.state.cl_orders, [self.model_factory.build_client_order_id(cl_id = cl_id, cl_req_id = cl_req_id)])
+
 
         position = self.get_position(inst_id)
         order_position = self.__get_or_add_order(position=position, cl_id=cl_id,
@@ -39,9 +44,10 @@ class HasPositions(MarketDataEventHandler):
     def __get_or_add_order(self, position: Position, cl_id: str, cl_req_id: str) -> OrderPosition:
         id = cl_id + "@" + cl_req_id
         if id not in position.orders:
-            position.orders[id] = self.factory.build_order_position(cl_id=cl_id,
+            order = position.orders[id]
+            order.CopyFrom(self.model_factory.build_order_position(cl_id=cl_id,
                                                                     cl_req_id=cl_req_id,
-                                                                    ordered_qty=0, filled_qty=0)
+                                                                    ordered_qty=0, filled_qty=0))
         return position.orders[id]
 
     def on_bar(self, bar: Bar) -> None:

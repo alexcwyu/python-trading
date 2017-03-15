@@ -3,10 +3,6 @@ from __future__ import (absolute_import, division,
 
 from builtins import *
 
-from future import standard_library
-
-standard_library.install_aliases()
-
 from typing import Dict
 
 from algotrader import Startable

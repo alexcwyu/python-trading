@@ -3,9 +3,6 @@ from __future__ import (absolute_import, division,
 
 from builtins import *
 
-from future import standard_library
-
-standard_library.install_aliases()
 
 from algotrader.event.event_bus import EventBus
 from algotrader.model.trade_data_pb2 import *
@@ -17,12 +14,14 @@ from algotrader.model.trading.analyzer.drawdown import DrawDownAnalyzer
 
 
 class Portfolio(HasPositions):
-    def __init__(self, state: PortfolioState = None):
+    def __init__(self, state: PortfolioState = None, model_factory = None):
         super().__init__()
         self.state = state
         self.performance = PerformanceAnalyzer(self)
         self.pnl = PnlAnalyzer(self)
         self.drawdown = DrawDownAnalyzer(self)
+        self.model_factory = model_factory
+        self.ord_reqs = {}
 
     def _start(self, app_context, **kwargs):
         self.app_context.portf_mgr.add(self)
@@ -59,19 +58,19 @@ class Portfolio(HasPositions):
         # if new_ord_req.cl_id in self.ord_reqs and new_ord_req.cl_ord_id in self.ord_reqs[new_ord_req.cl_id]:
         #     raise RuntimeError("ord_reqs[%s][%s] already exist" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
 
-        self.ord_reqs[self.model_factory.build_client_order_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.ord_reqs[self.model_factory.build_client_order_id_str(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
         self.add_order(inst_id=req.inst_id, cl_id=req.cl_id, cl_req_id=req.cl_req_id,
                        ordered_qty=req.qty)
         self.app_context.order_mgr.send_order(req)
 
     def cancel_order(self, req: OrderCancelRequest) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, req))
-        self.ord_reqs[self.model_factory.build_client_order_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.ord_reqs[self.model_factory.build_client_order_id_str(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
         self.app_context.order_mgr.cancel_order(req)
 
     def replace_order(self, req: OrderReplaceRequest) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, req))
-        self.ord_reqs[self.model_factory.build_client_order_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.ord_reqs[self.model_factory.build_client_order_id_str(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
         self.app_context.order_mgr.replace_order(req)
 
     def on_new_ord_req(self, req):
@@ -98,7 +97,7 @@ class Portfolio(HasPositions):
         #     raise Exception("Order not found, ord_reqs[%s][%s]" % (exec_report.cl_id, exec_report.cl_ord_id))
 
         new_ord_req = self.ord_reqs[
-            self.model_factory.build_client_order_id(cl_id=exec_report.cl_id, cl_req_id=exec_report.cl_req_id)]
+            self.model_factory.build_client_order_id_str(cl_id=exec_report.cl_id, cl_req_id=exec_report.cl_req_id)]
 
         if not new_ord_req:
             raise Exception("request not found")
@@ -145,3 +144,4 @@ class Portfolio(HasPositions):
     def on_portf_upd(self, portf_upd):
         # TODO
         pass
+

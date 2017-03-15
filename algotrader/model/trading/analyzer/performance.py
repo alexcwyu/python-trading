@@ -17,7 +17,7 @@ class PerformanceAnalyzer(object):
         self.state.stock_value = self.portfolio.stock_value
         self.state.cash = self.portfolio.cash
         self.state.total_equity = self.portfolio.total_equity
-        self.state.add(
+        self.series.add(
             data={self.StockValue: self.state.stock_value,
                   self.Cash: self.state.cash,
                   self.TotalEquity: self.state.total_equity},
@@ -30,4 +30,8 @@ class PerformanceAnalyzer(object):
 
     def get_series(self, keys=None):
         keys = keys if keys else [self.StockValue, self.Cash, self.TotalEquity]
-        return self.series.get_series([self.StockValue, self.Cash, self.TotalEquity])
+        return self.series.get_series(keys)
+
+
+    def now(self, key):
+        return self.series.now(key)

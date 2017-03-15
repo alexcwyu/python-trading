@@ -236,7 +236,7 @@ class ModelFactory(object):
     def build_new_order_request(self, timestamp: int, cl_id: str, cl_req_id: str, portf_id: str, broker_id: str,
                                 inst_id: str,
                                 action: OrderAction, type: OrderType, qty: float, limit_price: float,
-                                stop_price: float = None,
+                                stop_price: float = 0.0,
                                 tif: TIF = DAY, oca_tag: str = None,
                                 params: Dict[str, str] = None) -> NewOrderRequest:
         req = NewOrderRequest()
@@ -253,7 +253,8 @@ class ModelFactory(object):
         req.limit_price = limit_price
         req.stop_price = stop_price
         req.tif = tif
-        req.oca_tag = oca_tag
+        if oca_tag:
+            req.oca_tag = oca_tag
         ModelHelper.add_to_dict(req.params, params)
 
         return req
@@ -507,12 +508,17 @@ class ModelFactory(object):
         pos.ordered_qty = ordered_qty
         pos.filled_qty = filled_qty
         return pos
-    #
-    # def build_client_order_id(self, cl_id: str, cl_req_id: str) -> ClientOrderId:
-    #     id = ClientOrderId()
-    #     id.cl_id = cl_id
-    #     id.cl_req_id = cl_req_id
-    #     return id
+
+    def build_client_order_id(self, cl_id: str, cl_req_id: str) -> ClientOrderId:
+        id = ClientOrderId()
+        id.cl_id = cl_id
+        id.cl_req_id = cl_req_id
+        return id
+
+
+
+    def build_client_order_id_str(self, cl_id: str, cl_req_id: str) -> str:
+        return "%s@%s"% (cl_id,cl_req_id)
 
     def build_sequence(self, id: str, seq: int) -> Sequence:
         sequence = Sequence()

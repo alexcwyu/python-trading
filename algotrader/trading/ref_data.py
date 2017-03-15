@@ -346,6 +346,7 @@ class RefDataManager(Manager):
         return self.exch_id
 
     def get_ccy_id(self, inst_id, provider_id):
+        pass
 
 
 class DBRefDataManager(RefDataManager):

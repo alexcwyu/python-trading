@@ -33,10 +33,10 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
                 "exec_report [%s] broker_id [%s] is not same as current broker_id [%s]" % (
                     exec_report.er_id, exec_report.broker_id, state.broker_id))
 
-        if exec_report.cl_id != state.cl_id or exec_report.cl_req_id != state.cl_req_id:
+        if exec_report.cl_id != state.cl_id or exec_report.cl_ord_id != state.cl_ord_id:
             raise Exception(
-                "exec_report [%s] cl_id [%s] cl_req_id [%s] is not same as current order cl_id [%s] cl_req_id [%s]" % (
-                    exec_report.er_id, exec_report.cl_id, exec_report.cl_req_id, state.cl_id, state.cl_req_id))
+                "exec_report [%s] cl_id [%s] cl_ord_id [%s] is not same as current order cl_id [%s] cl_ord_id [%s]" % (
+                    exec_report.er_id, exec_report.cl_id, exec_report.cl_ord_id, state.cl_id, state.cl_ord_id))
 
         if not state.broker_ord_id:
             state.broker_ord_id = exec_report.broker_ord_id

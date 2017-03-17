@@ -30,8 +30,7 @@ class Portfolio(HasPositions):
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
         for order_req in self.app_context.order_mgr.get_portf_order_reqs(self.id()):
-            self.ord_reqs[self.model_factory.build_cl_ord_id(cl_id=order_req.cl_id,
-                                                             cl_req_id=order_req.cl_req_id)] = order_req
+            self.ord_reqs[order_req.cl_ord_id] = order_req
 
     def _stop(self):
         self.event_subscription.dispose()
@@ -58,19 +57,19 @@ class Portfolio(HasPositions):
         # if new_ord_req.cl_id in self.ord_reqs and new_ord_req.cl_ord_id in self.ord_reqs[new_ord_req.cl_id]:
         #     raise RuntimeError("ord_reqs[%s][%s] already exist" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
 
-        self.ord_reqs[self.model_factory.build_client_order_id_str(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
-        self.add_order(inst_id=req.inst_id, cl_id=req.cl_id, cl_req_id=req.cl_req_id,
+        self.ord_reqs[req.cl_ord_id] = req
+        self.add_order(inst_id=req.inst_id, cl_id=req.cl_id, cl_ord_id=req.cl_ord_id,
                        ordered_qty=req.qty)
         self.app_context.order_mgr.send_order(req)
 
     def cancel_order(self, req: OrderCancelRequest) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, req))
-        self.ord_reqs[self.model_factory.build_client_order_id_str(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.ord_reqs[req.cl_ord_id] = req
         self.app_context.order_mgr.cancel_order(req)
 
     def replace_order(self, req: OrderReplaceRequest) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, req))
-        self.ord_reqs[self.model_factory.build_client_order_id_str(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.ord_reqs[req.cl_ord_id] = req
         self.app_context.order_mgr.replace_order(req)
 
     def on_new_ord_req(self, req):
@@ -96,15 +95,14 @@ class Portfolio(HasPositions):
         # if exec_report.cl_id not in self.ord_reqs and exec_report.cl_ord_id not in self.ord_reqs[exec_report.cl_id]:
         #     raise Exception("Order not found, ord_reqs[%s][%s]" % (exec_report.cl_id, exec_report.cl_ord_id))
 
-        new_ord_req = self.ord_reqs[
-            self.model_factory.build_client_order_id_str(cl_id=exec_report.cl_id, cl_req_id=exec_report.cl_req_id)]
+        new_ord_req = self.ord_reqs[exec_report.cl_ord_id]
 
         if not new_ord_req:
             raise Exception("request not found")
         direction = 1 if new_ord_req.action == OrderAction.BUY else -1
         if exec_report.last_qty > 0:
             self.cash -= (direction * exec_report.last_qty * exec_report.last_price + exec_report.commission)
-            self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_req_id,
+            self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id,
                               direction * exec_report.last_qty)
             self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 

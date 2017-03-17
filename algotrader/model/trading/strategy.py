@@ -48,8 +48,7 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
         for order_req in self.app_context.order_mgr.get_strategy_order_reqs(self.id()):
-            self.ord_reqs[self.model_factory.build_cl_ord_id(cl_id=order_req.cl_id,
-                                                             cl_req_id=order_req.cl_req_id)] = order_req
+            self.ord_reqs[order_req.cl_ord_id] = order_req
 
         if self.portfolio:
             self.portfolio.start(app_context)
@@ -109,8 +108,7 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
     def on_exec_report(self, exec_report: ExecutionReport):
         if exec_report.cl_id == self.stg_id:
             super().on_exec_report(exec_report)
-            ord_req = self.ord_reqs[
-                self.model_factory.build_cl_ord_id(cl_id=exec_report.cl_id, cl_req_id=exec_report.cl_req_id)]
+            ord_req = self.ord_reqs[exec_report.cl_ord_id]
             direction = 1 if ord_req.action == OrderAction.BUY else -1
             if exec_report.last_qty > 0:
                 self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id,
@@ -149,7 +147,7 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
 
         req = self.model_factory.build_new_order_request(timestamp=self.clock.now(),
                                                          cl_id=self.stg_id,
-                                                         cl_req_id=self.__get_next_req_id(),
+                                                         cl_ord_id=self.__get_next_req_id(),
                                                          portf_id=self.portfolio.portf_id,
                                                          broker_id=self.app_config.broker_id,
                                                          inst_id=inst_id,
@@ -161,16 +159,16 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
                                                          tif=tif,
                                                          oca_tag=oca_tag,
                                                          params=params)
-        self.ord_reqs[self.model_factory.build_cl_ord_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
-        self.add_order(inst_id=req.inst_id, cl_id=req.cl_id, cl_req_id=req.cl_req_id, ordered_qty=req.qty)
+        self.ord_reqs[req.cl_ord_id] = req
+        self.add_order(inst_id=req.inst_id, cl_id=req.cl_id, cl_ord_id=req.cl_ord_id, ordered_qty=req.qty)
         self.portfolio.send_order(req)
         return req
 
     def cancel_order(self, cl_orig_req_id: str, params: Dict[str, str] = None) -> OrderCancelRequest:
         req = self.model_factory.build_order_cancel_request(timestamp=self.clock.now(),
-                                                            cl_id=self.stg_id, cl_req_id=self.__get_next_req_id(),
+                                                            cl_id=self.stg_id, cl_ord_id=self.__get_next_req_id(),
                                                             cl_orig_req_id=cl_orig_req_id, params=params)
-        self.ord_reqs[self.model_factory.build_cl_ord_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.ord_reqs[req.cl_ord_id] = req
         self.portfolio.cancel_order(req)
         return req
 
@@ -178,13 +176,13 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
                       stop_price: float = None, tif: TIF = None, oca_tag: str = None,
                       params: Dict[str, str] = None) -> OrderReplaceRequest:
         req = self.model_factory.build_order_replace_request(timestamp=self.clock.now(),
-                                                             cl_id=self.stg_id, cl_req_id=self.__get_next_req_id(),
+                                                             cl_id=self.stg_id, cl_ord_id=self.__get_next_req_id(),
                                                              cl_orig_req_id=cl_orig_req_id, type=type, qty=qty,
                                                              limit_price=limit_price,
                                                              stop_price=stop_price, tif=tif,
                                                              oca_tag=oca_tag,
                                                              params=params)
-        self.ord_reqs[self.model_factory.build_cl_ord_id(cl_id=req.cl_id, cl_req_id=req.cl_req_id)] = req
+        self.ord_reqs[req.cl_ord_id] = req
         self.portfolio.replace_order(req)
         return req
 

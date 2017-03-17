@@ -24,9 +24,9 @@ class ModelHelper(object):
         Trade: lambda trade: 'Trade.{}.{}.{}'.format(trade.inst_id, trade.provider_id, trade.timestamp),
         MarketDepth: lambda md: 'MarketDepth.{}.{}.{}'.format(md.inst_id, md.provider_id, md.timestamp),
 
-        NewOrderRequest: lambda req: '{}.{}'.format(req.cl_id, req.cl_req_id),
-        OrderReplaceRequest: lambda req: '{}.{}'.format(req.cl_id, req.cl_req_id),
-        OrderCancelRequest: lambda req: '{}.{}'.format(req.cl_id, req.cl_req_id),
+        NewOrderRequest: lambda req: '{}.{}'.format(req.cl_id, req.cl_ord_id),
+        OrderReplaceRequest: lambda req: '{}.{}'.format(req.cl_id, req.cl_ord_id),
+        OrderCancelRequest: lambda req: '{}.{}'.format(req.cl_id, req.cl_ord_id),
 
         OrderStatusUpdate: lambda event: '{}.{}'.format(event.broker_id, event.broker_event_id),
         ExecutionReport: lambda event: '{}.{}'.format(event.broker_id, event.broker_event_id),
@@ -36,7 +36,7 @@ class ModelHelper(object):
         AccountState: lambda acct: acct.acct_id,
         PortfolioState: lambda portfolio: portfolio.portf_id,
         StrategyState: lambda strategy: strategy.stg_id,
-        OrderState: lambda order: '{}.{}'.format(order.cl_id, order.cl_req_id),
+        OrderState: lambda order: '{}.{}'.format(order.cl_id, order.cl_ord_id),
         Config: lambda config: config.config_id,
         Sequence: lambda seq: seq.id,
 

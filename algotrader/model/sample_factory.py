@@ -142,14 +142,14 @@ class SampleFactory(object):
 
     def sample_order_status_update(self):
         event = self.factory.build_order_status_update(0, "IB", "event_123", broker_ord_id="broker_1234",
-                                                       cl_id="BuyLowSellHigh", cl_req_id="clOrdId_1",
+                                                       cl_id="BuyLowSellHigh", cl_ord_id="clOrdId_1",
                                                        inst_id="HSI@SEHK", filled_qty=1231.0, avg_price=123.1,
                                                        status=New)
         return event
 
     def sample_execution_report(self):
         event = self.factory.build_execution_report(1, "IB", "event_123", broker_ord_id="broker_1234", broker_er_id="er+1231",
-                                                    cl_id="BuyLowSellHigh", cl_req_id="clOrdId_1", inst_id="HSI@SEHK",
+                                                    cl_id="BuyLowSellHigh", cl_ord_id="clOrdId_1", inst_id="HSI@SEHK",
                                                     last_qty=100.1, last_price=21.1,
                                                     commission=0.8, filled_qty=1231.0, avg_price=123.1,
                                                     status=New)

@@ -233,7 +233,7 @@ class ModelFactory(object):
         return md
 
     # trade data
-    def build_new_order_request(self, timestamp: int, cl_id: str, cl_req_id: str, portf_id: str, broker_id: str,
+    def build_new_order_request(self, timestamp: int, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str,
                                 inst_id: str,
                                 action: OrderAction, type: OrderType, qty: float, limit_price: float,
                                 stop_price: float = 0.0,
@@ -243,7 +243,7 @@ class ModelFactory(object):
 
         req.timestamp = timestamp
         req.cl_id = cl_id
-        req.cl_req_id = cl_req_id
+        req.cl_ord_id = cl_ord_id
         req.portf_id = portf_id
         req.broker_id = broker_id
         req.inst_id = inst_id
@@ -259,7 +259,7 @@ class ModelFactory(object):
 
         return req
 
-    def build_order_replace_request(self, timestamp: int, cl_id: str, cl_req_id: str, cl_orig_req_id: str,
+    def build_order_replace_request(self, timestamp: int, cl_id: str, cl_ord_id: str, cl_orig_req_id: str,
                                     type: OrderType, qty: float,
                                     limit_price: float, stop_price: float = None,
                                     tif: TIF = DAY, oca_tag: str = None,
@@ -268,7 +268,7 @@ class ModelFactory(object):
 
         req.timestamp = timestamp
         req.cl_id = cl_id
-        req.cl_req_id = cl_req_id
+        req.cl_ord_id = cl_ord_id
         req.cl_orig_req_id = cl_orig_req_id
         req.type = type
         req.qty = qty
@@ -280,12 +280,12 @@ class ModelFactory(object):
 
         return req
 
-    def build_order_cancel_request(self, timestamp: int, cl_id: str, cl_req_id: str, cl_orig_req_id: str,
+    def build_order_cancel_request(self, timestamp: int, cl_id: str, cl_ord_id: str, cl_orig_req_id: str,
                                    params: Dict[str, str] = None) -> OrderCancelRequest:
         req = OrderCancelRequest()
         req.timestamp = timestamp
         req.cl_id = cl_id
-        req.cl_req_id = cl_req_id
+        req.cl_ord_id = cl_ord_id
         req.cl_orig_req_id = cl_orig_req_id
         ModelHelper.add_to_dict(req.params, params)
 
@@ -293,7 +293,7 @@ class ModelFactory(object):
 
     def build_order_status_update(self, timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str,
                                   cl_id: str,
-                                  cl_req_id: str, inst_id: str, filled_qty: float, avg_price: float,
+                                  cl_ord_id: str, inst_id: str, filled_qty: float, avg_price: float,
                                   status: OrderStatus) -> OrderStatusUpdate:
         event = OrderStatusUpdate()
         event.timestamp = timestamp
@@ -301,7 +301,7 @@ class ModelFactory(object):
         event.broker_event_id = broker_event_id
         event.broker_ord_id = broker_ord_id
         event.cl_id = cl_id
-        event.cl_req_id = cl_req_id
+        event.cl_ord_id = cl_ord_id
         event.inst_id = inst_id
         event.filled_qty = filled_qty
         event.avg_price = avg_price
@@ -312,7 +312,7 @@ class ModelFactory(object):
     def build_execution_report(self, timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str,
                                broker_er_id: str,
                                cl_id: str,
-                               cl_req_id: str, inst_id: str, last_qty: float, last_price: float, commission: float,
+                               cl_ord_id: str, inst_id: str, last_qty: float, last_price: float, commission: float,
                                filled_qty: float, avg_price: float,
                                status: OrderStatus) -> ExecutionReport:
         event = ExecutionReport()
@@ -322,7 +322,7 @@ class ModelFactory(object):
         event.broker_ord_id = broker_ord_id
         event.broker_er_id = broker_er_id
         event.cl_id = cl_id
-        event.cl_req_id = cl_req_id
+        event.cl_ord_id = cl_ord_id
         event.inst_id = inst_id
         event.last_price = last_price
         event.last_price = last_price
@@ -434,7 +434,7 @@ class ModelFactory(object):
         ModelHelper.add_to_dict_value(stg.positions, positions)
         return stg
 
-    def build_order_state(self, cl_id: str, cl_req_id: str, portf_id: str, broker_id: str, inst_id: str,
+    def build_order_state(self, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str, inst_id: str,
                           creation_timestamp: int, action: OrderAction, type: OrderType, qty: float, limit_price: float,
                           stop_price: float = None, tif: TIF = DAY, oca_tag: str = None, params: Dict[str, str] = None,
                           broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = None,
@@ -442,7 +442,7 @@ class ModelFactory(object):
                           stop_limit_ready: bool = False, trailing_stop_exec_price: float = None) -> OrderState:
         order = OrderState()
         order.cl_id = cl_id
-        order.cl_req_id = cl_req_id
+        order.cl_ord_id = cl_ord_id
         order.portf_id = portf_id
         order.broker_id = broker_id
         order.broker_ord_id = broker_ord_id
@@ -473,7 +473,7 @@ class ModelFactory(object):
     def build_order_state_from_nos(self, req: NewOrderRequest):
         return self.build_order_state(
             cl_id=req.cl_id,
-            cl_req_id=req.cl_req_id,
+            cl_ord_id=req.cl_ord_id,
             portf_id=req.portf_id,
             broker_id=req.broker_id,
             inst_id=req.inst_id,
@@ -499,12 +499,11 @@ class ModelFactory(object):
         ModelHelper.add_to_dict_value(position.orders, orders)
         return position
 
-    def build_order_position(self, cl_id: str, cl_req_id: str, ordered_qty: float = 0,
+    def build_order_position(self, cl_id: str, cl_ord_id: str, ordered_qty: float = 0,
                              filled_qty: float = 0) -> OrderPosition:
         pos = OrderPosition()
-        ord_id = pos.ord_id
-        ord_id.cl_id = cl_id
-        ord_id.cl_req_id = cl_req_id
+        pos.cl_id = cl_id
+        pos.cl_ord_id = cl_ord_id
         pos.ordered_qty = ordered_qty
         pos.filled_qty = filled_qty
         return pos

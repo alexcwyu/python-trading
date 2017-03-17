@@ -23,30 +23,30 @@ class HasPositions(MarketDataEventHandler):
             position = self.state.positions[inst_id]
             position.last_price = price
 
-    def add_position(self, inst_id: str, cl_id: str, cl_req_id: str, qty: float) -> None:
+    def add_position(self, inst_id: str, cl_id: str, cl_ord_id: str, qty: float) -> None:
         position = self.get_position(inst_id)
         order_position = self.__get_or_add_order(position=position, cl_id=cl_id,
-                                                 cl_req_id=cl_req_id)
+                                                 cl_ord_id=cl_ord_id)
         order_position.filled_qty = qty
         position.filled_qty += qty
 
-    def add_order(self, inst_id: str, cl_id: str, cl_req_id: str, ordered_qty: float) -> None:
+    def add_order(self, inst_id: str, cl_id: str, cl_ord_id: str, ordered_qty: float) -> None:
         #self.state.cl_orders.extends()
-        ModelHelper.add_to_list(self.state.cl_orders, [self.model_factory.build_cl_ord_id(cl_id = cl_id, cl_req_id = cl_req_id)])
+        ModelHelper.add_to_list(self.state.cl_ord_ids, [cl_ord_id])
 
 
         position = self.get_position(inst_id)
         order_position = self.__get_or_add_order(position=position, cl_id=cl_id,
-                                                 cl_req_id=cl_req_id)
+                                                 cl_ord_id=cl_ord_id)
         order_position.ordered_qty = ordered_qty
         position.ordered_qty += ordered_qty
 
-    def __get_or_add_order(self, position: Position, cl_id: str, cl_req_id: str) -> OrderPosition:
-        id = cl_id + "@" + cl_req_id
+    def __get_or_add_order(self, position: Position, cl_id: str, cl_ord_id: str) -> OrderPosition:
+        id = cl_id + "@" + cl_ord_id
         if id not in position.orders:
             order = position.orders[id]
             order.CopyFrom(self.model_factory.build_order_position(cl_id=cl_id,
-                                                                    cl_req_id=cl_req_id,
+                                                                    cl_ord_id=cl_ord_id,
                                                                     ordered_qty=0, filled_qty=0))
         return position.orders[id]
 

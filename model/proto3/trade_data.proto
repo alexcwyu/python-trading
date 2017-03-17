@@ -251,9 +251,10 @@ message OrderState {
 }
 
 message OrderPosition{
-    string cl_ord_id = 1;
-    double ordered_qty = 2;
-    double filled_qty = 3;
+    string cl_id = 1;
+    string cl_ord_id = 2;
+    double ordered_qty = 3;
+    double filled_qty = 4;
 }
 
 

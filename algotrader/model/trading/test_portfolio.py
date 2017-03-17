@@ -20,11 +20,11 @@ class PortfolioTest(TestCase):
 
 
     def test_position(self):
-        ord_req1 = PortfolioTest.factory.build_new_order_request(timestamp=0, cl_id='test', cl_req_id='1', portf_id="test", broker_id="Dummy", inst_id='HSI@SEHK',
+        ord_req1 = PortfolioTest.factory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test", broker_id="Dummy", inst_id='HSI@SEHK',
                                    action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
 
 
-        ord_req2 = PortfolioTest.factory.build_new_order_request(timestamp=1, cl_id='test', cl_req_id='2', portf_id="test", broker_id="Dummy", inst_id='HSI@SEHK',
+        ord_req2 = PortfolioTest.factory.build_new_order_request(timestamp=1, cl_id='test', cl_ord_id='2', portf_id="test", broker_id="Dummy", inst_id='HSI@SEHK',
                                    action=OrdAction.BUY, type=OrdType.LIMIT, qty=1800, limit_price=18.2)
 
         self.assertEqual(0, len(self.portfolio.state.positions))

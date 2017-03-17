@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package algotrader;
+package algotrader.model;
 
 message Bar{
     enum Type{
@@ -14,11 +14,10 @@ message Bar{
     optional Type type = 2;
     optional int32 size = 3;
     optional int32 provider_id = 4;
-
     optional int64 timestamp = 5;
+
     optional int64 utc_time = 6;
     optional int64 begin_time = 7;
-
 
     optional double open = 9;
     optional double high = 10;
@@ -31,11 +30,10 @@ message Bar{
 
 message Quote{
 
-
     optional int64 inst_id = 1;
     optional int32 provider_id = 2;
-
     optional int64 timestamp = 3;
+
     optional int64 utc_time = 4;
 
     optional double bid = 5;
@@ -48,8 +46,8 @@ message Trade{
 
     optional int64 inst_id = 1;
     optional int32 provider_id = 2;
-
     optional int64 timestamp = 3;
+
     optional int64 utc_time = 4;
 
     optional double price = 5;
@@ -59,7 +57,7 @@ message Trade{
 message MarketDepth{
     enum Side {
         Ask = 0;
-        bid = 1;
+        Bid = 1;
     }
 
     enum Operation {
@@ -71,6 +69,7 @@ message MarketDepth{
     optional int64 inst_id = 1;
     optional int32 provider_id = 2;
     optional int64 timestamp = 3;
+
     optional int64 utc_time = 4;
 
     optional string provider = 5;

@@ -86,6 +86,5 @@ class ModelHelperTest(TestCase):
     def test_sequence(self):
         self.assertEqual("test_seq", ModelHelper.get_id(self.factory.sample_sequence()))
 
-
     def test_config(self):
         self.assertEqual("testConfig", ModelHelper.get_id(self.factory.sample_config()))

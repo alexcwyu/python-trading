@@ -47,7 +47,7 @@ enum OrderStatus {
 
 message NewOrderRequest {
     string cl_id = 1;
-    string cl_req_id = 2;
+    string cl_ord_id = 2;
     int64 timestamp = 3;
 
     string portf_id = 5;
@@ -68,7 +68,7 @@ message NewOrderRequest {
 
 message OrderReplaceRequest {
     string cl_id = 1;
-    string cl_req_id = 2;
+    string cl_ord_id = 2;
     int64 timestamp = 3;
 
     string cl_orig_req_id = 4;
@@ -86,7 +86,7 @@ message OrderReplaceRequest {
 
 message OrderCancelRequest {
     string cl_id = 1;
-    string cl_req_id = 2;
+    string cl_ord_id = 2;
     int64 timestamp = 3;
 
     string cl_orig_req_id = 4;
@@ -103,7 +103,7 @@ message OrderStatusUpdate {
     string broker_ord_id = 4;
 
     string cl_id = 11;
-    string cl_req_id = 12;
+    string cl_ord_id = 12;
     string inst_id = 13;
 
     double filled_qty = 21;
@@ -122,7 +122,7 @@ message ExecutionReport {
 
 
     string cl_id = 11;
-    string cl_req_id = 12;
+    string cl_ord_id = 12;
     string inst_id = 13;
 
     double last_qty = 21;
@@ -175,7 +175,7 @@ message PortfolioState {
     string portf_id = 1;
     double cash = 2;
     map<string, Position> positions = 3;
-    repeated ClientOrderId cl_orders = 4;
+    repeated string cl_ord_ids = 4;
     Performance performance = 5;
     Pnl pnl = 6;
     DrawDown drawdown = 7;
@@ -211,7 +211,7 @@ message Config {
 message StrategyState {
     string stg_id = 1;
     Config config = 2;
-    repeated ClientOrderId cl_orders = 3;
+    repeated string cl_ord_ids = 3;
     map<string, Position> positions = 4;
     string portf_id = 5;
     int64 next_ord_id = 6;
@@ -220,7 +220,7 @@ message StrategyState {
 
 message OrderState {
     string cl_id = 1;
-    string cl_req_id = 2;
+    string cl_ord_id = 2;
     string portf_id = 3;
     string broker_id = 4;
     string broker_ord_id = 5;
@@ -250,13 +250,8 @@ message OrderState {
 
 }
 
-message ClientOrderId{
-    string cl_id = 1;
-    string cl_req_id = 2;
-}
-
 message OrderPosition{
-    ClientOrderId ord_id = 1;
+    string cl_ord_id = 1;
     double ordered_qty = 2;
     double filled_qty = 3;
 }

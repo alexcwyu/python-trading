@@ -32,7 +32,7 @@ class HasPositions(MarketDataEventHandler):
 
     def add_order(self, inst_id: str, cl_id: str, cl_req_id: str, ordered_qty: float) -> None:
         #self.state.cl_orders.extends()
-        ModelHelper.add_to_list(self.state.cl_orders, [self.model_factory.build_client_order_id(cl_id = cl_id, cl_req_id = cl_req_id)])
+        ModelHelper.add_to_list(self.state.cl_orders, [self.model_factory.build_cl_ord_id(cl_id = cl_id, cl_req_id = cl_req_id)])
 
 
         position = self.get_position(inst_id)

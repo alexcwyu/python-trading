@@ -30,8 +30,8 @@ class Portfolio(HasPositions):
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
         for order_req in self.app_context.order_mgr.get_portf_order_reqs(self.id()):
-            self.ord_reqs[self.model_factory.build_client_order_id(cl_id=order_req.cl_id,
-                                                                   cl_req_id=order_req.cl_req_id)] = order_req
+            self.ord_reqs[self.model_factory.build_cl_ord_id(cl_id=order_req.cl_id,
+                                                             cl_req_id=order_req.cl_req_id)] = order_req
 
     def _stop(self):
         self.event_subscription.dispose()

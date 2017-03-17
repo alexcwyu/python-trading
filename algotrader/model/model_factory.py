@@ -380,7 +380,7 @@ class ModelFactory(object):
 
         return account
 
-    def build_portfolio_state(self, portf_id: str, cash:float, positions: Dict[str, Position] = None,
+    def build_portfolio_state(self, portf_id: str, cash: float, positions: Dict[str, Position] = None,
                               performance: Performance = None,
                               pnl: Pnl = None, drawdown: DrawDown = None) -> PortfolioState:
         portfolio = PortfolioState()
@@ -509,16 +509,11 @@ class ModelFactory(object):
         pos.filled_qty = filled_qty
         return pos
 
-    def build_client_order_id(self, cl_id: str, cl_req_id: str) -> ClientOrderId:
-        id = ClientOrderId()
-        id.cl_id = cl_id
-        id.cl_req_id = cl_req_id
-        return id
+    def build_cl_ord_id(self, cl_id: str, ord_id: str) -> str:
+        return "%s@%s" % (cl_id, ord_id)
 
-
-
-    def build_client_order_id_str(self, cl_id: str, cl_req_id: str) -> str:
-        return "%s@%s"% (cl_id,cl_req_id)
+    def build_inst_id(self, symbol: str, exch_id: str) -> str:
+        return "%s@%s" % (symbol, exch_id)
 
     def build_sequence(self, id: str, seq: int) -> Sequence:
         sequence = Sequence()

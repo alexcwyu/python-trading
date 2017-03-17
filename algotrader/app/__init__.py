@@ -1,5 +1,3 @@
-
-
 from algotrader import Startable
 
 

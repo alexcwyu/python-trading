@@ -38,7 +38,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         self.reset()
 
     def all_orders(self):
-        return [order for order in self.order_dict.itervalues()]
+        return [order for order in self.order_dict.values()]
 
     def load_all(self):
         if hasattr(self, "store") and self.store:
@@ -56,7 +56,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
             for order in self.all_orders():
                 self.store.save_order(order)
 
-            for new_order_req in self.ord_reqs_dict.itervalues():
+            for new_order_req in self.ord_reqs_dict.values():
                 self.store.save_new_order_req(new_order_req)
 
     def reset(self):
@@ -213,16 +213,16 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         return "OrderManager"
 
     def get_portf_orders(self, portf_id):
-        return [order for order in self.order_dict.itervalues() if order.portf_id == portf_id]
+        return [order for order in self.order_dict.values() if order.portf_id == portf_id]
 
     def get_strategy_orders(self, stg_id):
-        return [order for order in self.order_dict.itervalues() if order.cl_id == stg_id]
+        return [order for order in self.order_dict.values() if order.cl_id == stg_id]
 
     def get_portf_order_reqs(self, portf_id):
-        return [new_ord_req for new_ord_req in self.ord_reqs_dict.itervalues() if new_ord_req.portf_id == portf_id]
+        return [new_ord_req for new_ord_req in self.ord_reqs_dict.values() if new_ord_req.portf_id == portf_id]
 
     def get_strategy_order_reqs(self, stg_id):
-        return [new_ord_req for new_ord_req in self.ord_reqs_dict.itervalues() if new_ord_req.cl_id == stg_id]
+        return [new_ord_req for new_ord_req in self.ord_reqs_dict.values() if new_ord_req.cl_id == stg_id]
 
     def _save_order(self, order):
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:

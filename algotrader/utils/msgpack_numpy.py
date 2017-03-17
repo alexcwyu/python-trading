@@ -193,10 +193,6 @@ def patch():
 
 
 if __name__ == '__main__':
-    try:
-        range = xrange  # Python 2
-    except NameError:
-        pass  # Python 3
 
     from unittest import main, TestCase
 

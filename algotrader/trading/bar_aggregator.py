@@ -1,9 +1,10 @@
-from rx.observable import Observable
+from rx import Observable
 
 from algotrader.event.event_handler import MarketDataEventHandler
-from algotrader.event.market_data import BarType, BarSize, Quote, Trade, Bar
+from algotrader.model.model_factory import *
+from algotrader.provider.subscription import *
+from algotrader.trading.data_series import DataSeries
 from algotrader.utils import logger
-from algotrader.utils.time_series import DataSeries
 
 
 class BarInputType:
@@ -19,7 +20,7 @@ class BarInputType:
 class BarAggregator(MarketDataEventHandler):
     def __init__(self, data_bus, clock, inst_id, input,
                  input_type=BarInputType.Trade,
-                 output_bar_type=BarType.Time,
+                 output_bar_type=Bar.Time,
                  output_size=BarSize.M1):
         self.__data_bus = data_bus
         self.__clock = clock
@@ -40,9 +41,9 @@ class BarAggregator(MarketDataEventHandler):
 
     def _start(self, app_context, **kwargs):
         if self.__input is None:
-            self.__input = app_context.inst_data_mgr.get_series(self.input.name)
+            self.__input = app_context.inst_data_mgr.get_series(self.__input_name)
         self.__input.subject.subscribe(on_next=self.on_update)
-        if self.__output_bar_type == BarType.Time:
+        if self.__output_bar_type == Bar.Time:
             current_ts = self.__clock.now()
             next_ts = Bar.get_next_bar_start_time(current_ts, self.__output_size)
             diff = next_ts - current_ts
@@ -99,7 +100,7 @@ class BarAggregator(MarketDataEventHandler):
             return
         if self.__new_bar:
 
-            if self.__output_bar_type == BarType.Time:
+            if self.__output_bar_type == Bar.Time:
                 self.__start_time = Bar.get_current_bar_start_time(timestamp, self.__output_size)
                 self.__end_time = Bar.get_current_bar_end_time(timestamp, self.__output_size)
             else:
@@ -125,7 +126,7 @@ class BarAggregator(MarketDataEventHandler):
         self.__timestamp = data['timestamp']
 
         ## Time Bar, need to check if require publish existing before handling new update
-        if self.__output_bar_type == BarType.Time and self.__count > 0 and self.__timestamp > self.__end_time:
+        if self.__output_bar_type == Bar.Time and self.__count > 0 and self.__timestamp > self.__end_time:
             self.publish()
 
         if self.__input_type == BarInputType.Bar:
@@ -143,15 +144,15 @@ class BarAggregator(MarketDataEventHandler):
         func(data)
 
         ## Time Bar
-        if self.__output_bar_type == BarType.Time and self.__count > 0 and self.__timestamp >= self.__end_time:
+        if self.__output_bar_type == Bar.Time and self.__count > 0 and self.__timestamp >= self.__end_time:
             self.publish()
 
         ## Tick Bar
-        elif self.__output_bar_type == BarType.Tick and self.__count >= self.__output_size:
+        elif self.__output_bar_type == Bar.Tick and self.__count >= self.__output_size:
             self.publish()
 
         ## Vol Bar
-        elif self.__output_bar_type == BarType.Volume:
+        elif self.__output_bar_type == Bar.Volume:
             while self.__volume >= self.__output_size:
                 residual = self.__volume - self.__output_size
                 self.__volume = self.__output_size
@@ -164,7 +165,7 @@ class BarAggregator(MarketDataEventHandler):
 
         if self.__count > 0:
 
-            if self.__output_bar_type == BarType.Time:
+            if self.__output_bar_type == Bar.Time:
                 self.__timestamp = self.__end_time
 
             bar = Bar(inst_id=self.__inst_id,
@@ -186,4 +187,4 @@ class BarAggregator(MarketDataEventHandler):
 
     def id(self):
         return "%s.%s.%s.%s.%s" % (
-        self.__inst_id, self.__input_name, self.__input_type, self.__output_bar_type, self.__output_size)
+            self.__inst_id, self.__input_name, self.__input_type, self.__output_bar_type, self.__output_size)

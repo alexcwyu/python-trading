@@ -3,6 +3,8 @@ from algotrader.config.persistence import PersistenceMode
 
 
 class SequenceManager(SimpleManager):
+    ID = "SequenceManager"
+
     def __init__(self):
         super(SequenceManager, self).__init__()
 
@@ -20,7 +22,7 @@ class SequenceManager(SimpleManager):
 
     def save_all(self):
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
-            for key, value in self.item_dict.iteritems():
+            for key, value in self.item_dict.items():
                 self.store.save_sequence(key, value)
 
     def get(self, id):
@@ -46,4 +48,4 @@ class SequenceManager(SimpleManager):
         return id in self.item_dict
 
     def id(self):
-        return "SequenceManager"
+        return self.ID

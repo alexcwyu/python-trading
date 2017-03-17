@@ -1,4 +1,4 @@
-from algotrader.utils.time_series import DataSeries
+from algotrader.trading.data_series import DataSeries
 
 
 class Indicator(DataSeries):
@@ -9,7 +9,6 @@ class Indicator(DataSeries):
         'input_keys',
         'calculate',
     )
-
 
     __transient__ = (
         'app_context',
@@ -37,7 +36,7 @@ class Indicator(DataSeries):
         return "'%s'" % input
 
     def __init__(self, name, input, input_keys, desc=None, **kwargs):
-        super(Indicator, self).__init__(name=name, desc=desc, **kwargs)
+        Indicator.__init__(self, name=name, desc=desc, **kwargs)
 
         self.input_keys = self._get_key(input_keys, None)
         self.calculate = True
@@ -51,7 +50,7 @@ class Indicator(DataSeries):
                 self.input = None
 
     def _start(self, app_context, **kwargs):
-        super(Indicator, self)._start(self.app_context, **kwargs)
+        Indicator._start(self, self.app_context, **kwargs)
 
         if not hasattr(self, 'input') or not self.input:
             self.input = self.app_context.inst_data_mgr.get_series(self.input_name)

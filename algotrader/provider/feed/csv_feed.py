@@ -1,8 +1,9 @@
 import pandas as pd
 
 from algotrader.config.feed import CSVFeedConfig
-from algotrader.event.market_data import Bar, BarSize, BarType
+from algotrader.model.market_data_pb2 import Bar
 from algotrader.provider.feed import Feed
+from algotrader.provider.subscription import BarSize
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.utils.date_utils import DateUtils
 
@@ -39,14 +40,14 @@ class CSVDataFeed(Feed):
 
         dfs = []
         sub_key_range = {sub_key.inst_id: (
-        DateUtils.date_to_unixtimemillis(sub_key.from_date), DateUtils.date_to_unixtimemillis(sub_key.to_date)) for
+            DateUtils.date_to_unixtimemillis(sub_key.from_date), DateUtils.date_to_unixtimemillis(sub_key.to_date)) for
                          sub_key in sub_keys}
 
         for sub_key in sub_keys:
 
             ## TODO support different format, e.g. BAR, Quote, Trade csv files
             if isinstance(sub_key.subscription_type,
-                          BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
+                          BarSubscriptionType) and sub_key.subscription_type.bar_type == Bar.Time and sub_key.subscription_type.bar_size == BarSize.D1:
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.id())
                 df = self.read_csv(symbol, '%s/%s.csv' % (self.path, symbol.lower()))

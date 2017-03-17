@@ -1,14 +1,16 @@
-from algotrader.model.trading.analyzer.performance import PerformanceAnalyzer
-from algotrader.model.trading.time_series import PandasTimeSeries
+from algotrader.trading.analyzer import Analyzer
+from algotrader.trading.data_series import DataSeries
+
+from algotrader.trading.analyzer.performance import PerformanceAnalyzer
 
 
-class PnlAnalyzer(object):
+class PnlAnalyzer(Analyzer):
     Pnl = "Pnl"
 
     def __init__(self, portfolio):
         self.portfolio = portfolio
         self.state = portfolio.state.pnl
-        self.series = PandasTimeSeries(self.portfolio.state.pnl.series)
+        self.series = DataSeries(self.portfolio.state.pnl.series)
 
     def update(self, timestamp: int, current_value: float):
         performance_series = self.portfolio.performance.performance_series

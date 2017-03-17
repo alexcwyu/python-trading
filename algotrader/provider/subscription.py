@@ -1,8 +1,27 @@
 import abc
 
-from algotrader import HasId
-from algotrader.event.market_data import BarType, BarSize, MarketDataType
 from algotrader.utils.ser_deser import Serializable
+
+from algotrader.model.market_data_pb2 import Bar
+
+class MarketDataType(object):
+    Bar = 'Bar'
+    Quote = 'Quote'
+    Trade = 'Trade'
+    MarketDepth = 'MarketDepth'
+
+
+class BarSize(object):
+    S1 = 1
+    S5 = 5
+    S15 = 15
+    S30 = 30
+    M1 = 60
+    M5 = 5 * 60
+    M15 = 15 * 60
+    M30 = 30 * 60
+    H1 = 60 * 60
+    D1 = 24 * 60 * 60
 
 
 class DataSubscriptionType(Serializable):
@@ -26,7 +45,7 @@ class BarSubscriptionType(DataSubscriptionType):
         'bar_size'
     )
 
-    def __init__(self, bar_type=BarType.Time, bar_size=BarSize.D1):
+    def __init__(self, bar_type=Bar.Time, bar_size=BarSize.D1):
         self.bar_type = bar_type
         self.bar_size = bar_size
 
@@ -70,7 +89,7 @@ class MarketDepthSubscriptionType(DataSubscriptionType):
         if not isinstance(other, MarketDepthSubscriptionType):
             return False
         return (self.get_type(), self.num_rows, self.provider_id) == (
-        other.get_type(), other.num_rows, other.provider_id)
+            other.get_type(), other.num_rows, other.provider_id)
 
     def id(self):
         return "%s.%s" % (self.get_type(), self.num_rows)
@@ -86,7 +105,7 @@ class SubscriptionKey(object):
     def __init__(self, inst_id, provider_id='IB', subscription_type=None):
         self.provider_id = provider_id
         self.inst_id = inst_id
-        self.subscription_type = subscription_type if subscription_type else BarSubscriptionType(bar_type=BarType.Time,
+        self.subscription_type = subscription_type if subscription_type else BarSubscriptionType(bar_type=Bar.Time,
                                                                                                  bar_size=BarSize.D1)
 
     def __eq__(self, other):

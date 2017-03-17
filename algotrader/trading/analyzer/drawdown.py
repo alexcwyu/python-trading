@@ -1,8 +1,8 @@
+from algotrader.trading.analyzer import Analyzer
+from algotrader.trading.data_series import DataSeries
 
-from algotrader.model.trading.time_series import PandasTimeSeries
 
-
-class DrawDownAnalyzer(object):
+class DrawDownAnalyzer(Analyzer):
     DrawDown = "DrawDown"
     DrawDownPct = "DrawDown%"
     HighEquity = "HighEquity"
@@ -13,7 +13,7 @@ class DrawDownAnalyzer(object):
     def __init__(self, portfolio):
         self.portfolio = portfolio
         self.state = self.portfolio.state.drawdown
-        self.series = PandasTimeSeries(self.state.series)
+        self.series = DataSeries(self.state.series)
 
     def update(self, timestamp: int, current_value: float):
         total_equity = self.portfolio.total_equity
@@ -38,7 +38,7 @@ class DrawDownAnalyzer(object):
             if self.state.high_equity != 0:
                 self.state.drawdown_pct = abs(self.state.drawdown / self.state.high_equity)
             self.series.add(data={self.DrawDown: self.state.drawdown,
-                                           self.DrawDownPct: self.state.drawdown_pct}, timestamp=timestamp)
+                                  self.DrawDownPct: self.state.drawdown_pct}, timestamp=timestamp)
 
     def get_result(self):
         return {self.DrawDown: self.state.drawdown,

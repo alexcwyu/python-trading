@@ -59,9 +59,11 @@ class CassandraConfig(DataStoreConfig):
         'cql_script_path'
     )
 
-    def __init__(self, id='Cassandra', contact_points=["127.0.0.1"], port=9042, username=None, password=None,
+    def __init__(self, id='Cassandra', contact_points=None, port=9042, username=None, password=None,
                  keyspace='algotrader', cql_script_path='../../../scripts/cassandra/algotrader.cql',
                  create_at_start=False, delete_at_stop=False):
+        if not contact_points:
+            contact_points = ["127.0.0.1"]
         super(CassandraConfig, self).__init__(id, create_at_start, delete_at_stop)
         self.contact_points = contact_points
         self.port = port

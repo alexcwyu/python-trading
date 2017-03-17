@@ -1,8 +1,10 @@
-from algotrader.utils.time_series import DataSeries
-from algotrader.technical import Indicator
-import numpy as np
-import pandas as pd
 from collections import OrderedDict
+
+import numpy as np
+
+from algotrader.technical import Indicator
+from algotrader.trading.data_series import DataSeries
+
 
 class PipeLine(DataSeries):
     VALUE = 'value'
@@ -104,9 +106,9 @@ class PipeLine(DataSeries):
 
         # if not hasattr(self, 'inputs') or not self.inputs:
         #     self.inputs = [self.app_context.inst_data_mgr.get_series(name) for name in self.input_names]
-        missing_input_names = [k for k,v in self.input_names_and_series.iteritems() if v is None]
+        missing_input_names = [k for k, v in self.input_names_and_series.items() if v is None]
         for name in missing_input_names:
-            self.input_names_and_series[k] = self.app_context.inst_data_mgr.get_series(name)
+            self.input_names_and_series[name] = self.app_context.inst_data_mgr.get_series(name)
 
         self.inputs = self.input_names_and_series.values()
         self.app_context.inst_data_mgr.add_series(self)
@@ -164,9 +166,3 @@ class PipeLine(DataSeries):
 
     def shape(self):
         raise NotImplementedError()
-
-
-
-
-
-

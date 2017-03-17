@@ -1,7 +1,6 @@
 from unittest import TestCase
 
-from algotrader.model.model_helper import *
-from algotrader.model.sample_factory import *
+from algotrader.tests.sample_factory import *
 
 
 class ModelHelperTest(TestCase):

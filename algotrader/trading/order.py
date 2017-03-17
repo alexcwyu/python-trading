@@ -1,123 +1,96 @@
-from algotrader.event.event_handler import OrderEventHandler, ExecutionEventHandler
-from algotrader.event.order import OrdStatus, OrdAction
-from algotrader.provider.persistence import Persistable
-from algotrader import HasId
+from typing import List, Any
+
+from algotrader import Startable
+from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
+from algotrader.model.trade_data_pb2 import *
 
 
-class Order(OrderEventHandler, ExecutionEventHandler, Persistable):
-    __slots__ = (
-        'timestamp',
-        'cl_id',
-        'cl_ord_id',
-        'portf_id',
-        'broker_id',
-        'broker_ord_id',
-        'inst_id',
-        'action',
-        'type',
-        'qty',
-        'limit_price',
-        'stop_price',
-        'tif',
-        'oca_tag',
-        'params',
-        'status',
-        'filled_qty',
-        'avg_price',
-        'last_qty',
-        'last_price',
-        'stop_limit_ready',
-        'trailing_stop_exec_price',
-        'events'
-    )
+class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
+    def __init__(self, state: OrderState = None, events: List[Any] = None):
+        super.__init__()
+        self.state = state
+        self.events = events if events else []
 
-    def __init__(self, nos=None):
-        if nos:
-            self.on_new_ord_req(nos)
+    def _start(self, app_context, **kwargs):
+        self.model_factory = app_context.model_factory
 
-    def on_new_ord_req(self, nos):
-        self.timestamp = nos.timestamp
-        self.cl_id = nos.cl_id
-        self.cl_ord_id = nos.cl_ord_id
-        self.portf_id = nos.portf_id
-        self.broker_id = nos.broker_id
-        self.broker_ord_id = None
-        self.inst_id = nos.inst_id
-        self.action = nos.action
-        self.type = nos.type
-        self.qty = nos.qty
-        self.limit_price = nos.limit_price
-        self.stop_price = nos.stop_price
-        self.tif = nos.tif
-        self.oca_tag = nos.oca_tag
-        self.params = nos.params
-        self.status = OrdStatus.NEW
-        self.filled_qty = 0
-        self.avg_price = 0
-        self.last_qty = 0
-        self.last_price = 0
-        self.stop_limit_ready = False
-        self.trailing_stop_exec_price = 0
-        self.events = [nos]
+    def on_new_ord_req(self, req: NewOrderRequest):
+        if self.state or len(self.events) > 0:
+            raise Exception("NewOrderRequest cannot be added to already initialized order")
+        self.state = self.model_factory.build_order_state_from_nos(req)
+        self.events.append(req)
 
-    def on_ord_replace_req(self, ord_replace_req):
-        self.events.append(ord_replace_req)
+    def on_ord_replace_req(self, req: OrderReplaceRequest):
+        self.events.append(req)
 
-    def on_ord_cancel_req(self, ord_cancel_req):
-        self.events.append(ord_cancel_req)
+    def on_ord_cancel_req(self, req: OrderCancelRequest):
+        self.events.append(req)
 
-    def on_exec_report(self, exec_report):
-        if exec_report.cl_id != self.cl_id or exec_report.cl_ord_id != self.cl_ord_id:
+    def on_exec_report(self, exec_report: ExecutionReport):
+        state = self.state
+        if exec_report.broker_id != state.broker_id:
+            raise Exception(
+                "exec_report [%s] broker_id [%s] is not same as current broker_id [%s]" % (
+                    exec_report.er_id, exec_report.broker_id, state.broker_id))
+
+        if exec_report.cl_id != state.cl_id or exec_report.cl_ord_id != state.cl_ord_id:
             raise Exception(
                 "exec_report [%s] cl_id [%s] cl_ord_id [%s] is not same as current order cl_id [%s] cl_ord_id [%s]" % (
-                    exec_report.er_id, exec_report.cl_id, exec_report.cl_ord_id, self.cl_id, self.cl_ord_id))
+                    exec_report.er_id, exec_report.cl_id, exec_report.cl_ord_id, state.cl_id, state.cl_ord_id))
 
-        if not self.broker_ord_id:
-            self.broker_ord_id = exec_report.ord_id
-        elif self.broker_ord_id != exec_report.ord_id:
+        if not state.broker_ord_id:
+            state.broker_ord_id = exec_report.broker_ord_id
+        elif state.broker_ord_id != exec_report.broker_ord_id:
             raise Exception("exec_report [%s] ord_id [%s] is not same as current order ord_id [%s]" % (
-                exec_report.er_id, exec_report.ord_id, self.broker_ord_id))
+                exec_report.er_id, exec_report.broker_ord_id, state.broker_ord_id))
 
-        self.last_price = exec_report.last_price
-        self.last_qty = exec_report.last_qty
+        state.last_price = exec_report.last_price
+        state.last_qty = exec_report.last_qty
 
         avg_price = exec_report.avg_price
 
         if avg_price:
-            self.avg_price = avg_price
-        elif self.filled_qty + exec_report.last_qty != 0:
-            self.avg_price = ((self.avg_price * self.filled_qty) + (
-                self.last_price * self.last_qty)) / (
-                                 self.filled_qty + exec_report.last_qty)
+            state.avg_price = avg_price
+        elif state.filled_qty + exec_report.last_qty != 0:
+            state.avg_price = ((state.avg_price * state.filled_qty) + (
+                state.last_price * state.last_qty)) / (
+                                  state.filled_qty + exec_report.last_qty)
 
         filled_qty = exec_report.filled_qty
         if filled_qty:
-            self.filled_qty = filled_qty
+            state.filled_qty = filled_qty
         else:
-            self.filled_qty += exec_report.last_qty
+            state.filled_qty += exec_report.last_qty
 
-        if self.qty == self.filled_qty:
-            self.status = OrdStatus.FILLED
-        elif self.qty > self.filled_qty:
-            self.status = OrdStatus.PARTIALLY_FILLED
+        if state.qty == state.filled_qty:
+            state.status = OrderStatus.FILLED
+        elif state.qty > state.filled_qty:
+            state.status = OrderStatus.PARTIALLY_FILLED
         else:
-            raise Exception("filled qty %s is greater than ord qty %s" % (self.filled_qty, self.qty))
+            raise Exception("filled qty %s is greater than ord qty %s" % (state.filled_qty, state.qty))
 
         self.events.append(exec_report)
 
     def on_ord_upd(self, ord_upd):
-        if ord_upd.cl_id != self.cl_id or ord_upd.cl_ord_id != self.cl_ord_id:
+        state = self.state
+
+        if ord_upd.broker_id != state.broker_id:
+            raise Exception(
+                "ord_upd [%s] broker_id [%s] is not same as current broker_id [%s]" % (
+                    ord_upd.er_id, ord_upd.broker_id, state.broker_id))
+
+        if ord_upd.cl_id != state.cl_id or ord_upd.cl_ord_id != state.cl_ord_id:
             raise Exception(
                 "ord_upd ord_id [%s] cl_id [%s] cl_ord_id [%s] is not same as current order cl_id [%s] cl_ord_id [%s]" % (
-                    ord_upd.ord_id, ord_upd.cl_id, ord_upd.cl_ord_id, self.cl_id, self.cl_ord_id))
+                    ord_upd.ord_id, ord_upd.cl_id, ord_upd.cl_ord_id, state.cl_id, state.cl_ord_id))
 
-        if not self.broker_ord_id:
-            self.broker_ord_id = ord_upd.ord_id
-        elif self.broker_ord_id != ord_upd.ord_id:
+        if not state.broker_ord_id:
+            state.broker_ord_id = ord_upd.ord_id
+        elif state.broker_ord_id != ord_upd.ord_id:
             raise Exception(
-                "ord_upd [%s] is not same as current order ord_id [%s]" % (ord_upd.ord_id, self.broker_ord_id))
+                "ord_upd [%s] is not same as current order ord_id [%s]" % (ord_upd.ord_id, state.broker_ord_id))
 
-        self.status = ord_upd.status
+        state.status = ord_upd.status
 
         self.events.append(ord_upd)
 
@@ -127,20 +100,19 @@ class Order(OrderEventHandler, ExecutionEventHandler, Persistable):
         return [event for event in self.events if isinstance(event, type)]
 
     def is_done(self):
-        return self.status == OrdStatus.REJECTED or self.status == OrdStatus.CANCELLED or self.status == OrdStatus.FILLED
+        status = self.state.status
+        return status == OrderStatus.REJECTED or status == OrderStatus.CANCELLED or status == OrderStatus.FILLED
 
     def is_active(self):
-        return self.status == OrdStatus.NEW or self.status == OrdStatus.PENDING_SUBMIT or self.status == OrdStatus.SUBMITTED \
-               or self.status == OrdStatus.PARTIALLY_FILLED or self.status == OrdStatus.REPLACED
+        status = self.state.status
+        return status == OrderStatus.NEW or status == OrderStatus.PENDING_SUBMIT or status == OrderStatus.SUBMITTED \
+               or status == OrderStatus.PARTIALLY_FILLED or status == OrderStatus.REPLACED
 
     def leave_qty(self):
-        return self.qty - self.filled_qty
+        return self.state.qty - self.state.filled_qty
 
     def is_buy(self):
-        return self.action == OrdAction.BUY
+        return self.state.action == OrderAction.BUY
 
     def is_sell(self):
-        return self.action == OrdAction.SELL or self.action == OrdAction.SSHORT
-
-    def id(self):
-        return "%s.%s" % (self.cl_id, self.cl_ord_id)
+        return self.state.action == OrderAction.SELL or self.state.action == OrderAction.SSHORT

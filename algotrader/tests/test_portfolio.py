@@ -2,8 +2,9 @@ from collections import defaultdict
 from unittest import TestCase
 
 from algotrader.event.order import OrdAction, OrdType
+
 from algotrader.model.model_factory import ModelFactory
-from algotrader.model.trading.portfolio import Portfolio
+from algotrader.trading.portfolio import Portfolio
 
 
 class PortfolioTest(TestCase):
@@ -57,7 +58,7 @@ class PortfolioTest(TestCase):
         for order in orders:
             self.assertTrue(order in all_orders)
 
-        for inst, pos_orders in expected_positon.iteritems():
+        for inst, pos_orders in expected_positon.items():
             position = portfolio.positions[str(inst)]
 
             all_position_orders = position.all_orders()

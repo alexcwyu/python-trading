@@ -7,7 +7,7 @@ import talib
 
 from algotrader.technical.talib_wrapper import SMA
 from algotrader.trading.context import ApplicationContext
-from algotrader.utils.time_series import DataSeries
+from algotrader.trading.data_series import DataSeries
 
 
 class TALibSMATest(TestCase):

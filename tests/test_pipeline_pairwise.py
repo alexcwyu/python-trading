@@ -9,7 +9,7 @@ from algotrader.technical import Indicator
 from algotrader.technical.pipeline import PipeLine
 from algotrader.technical.pipeline.pairwise import Plus, Minus, Times, Divides, Greater, PairCorrelation
 from algotrader.technical.talib_wrapper import SMA
-from algotrader.utils.time_series import DataSeries
+from algotrader.trading.data_series import DataSeries
 from algotrader.config.app import ApplicationConfig
 from algotrader.trading.context import ApplicationContext
 

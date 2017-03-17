@@ -70,7 +70,7 @@ class MapSerializer(Serializer):
             slot_values = {s: getattr(obj, s) for s in attr_list if s not in transient_set and hasattr(obj, s)}
             map['__slots__'] = MapSerializer._deep_serialize(slot_values, include_slots, include_dict)
         if include_dict:
-            dict_values = {k: v for k, v in obj.__dict__.iteritems() if k not in transient_set}
+            dict_values = {k: v for k, v in obj.__dict__.items() if k not in transient_set}
             map['__dict__'] = MapSerializer._deep_serialize(obj.__dict__, include_slots, include_dict)
         return map
 
@@ -114,7 +114,7 @@ class MapSerializer(Serializer):
         elif isinstance(item, list):
             return [MapSerializer._deep_serialize(i) for i in item]
         elif isinstance(item, dict):
-            return {MapSerializer.deserialize(k): MapSerializer._deep_serialize(v) for k, v in item.iteritems()}
+            return {MapSerializer.deserialize(k): MapSerializer._deep_serialize(v) for k, v in item.items()}
         elif isinstance(item, tuple):
             return tuple([MapSerializer._deep_serialize(i) for i in item])
         elif isinstance(item, set):
@@ -152,7 +152,7 @@ class MapSerializer(Serializer):
                 MapSerializer._deserialize_obj(obj, data)
                 return obj
             else:
-                return {MapSerializer.deserialize(k): MapSerializer.deserialize(v) for k, v in data.iteritems()}
+                return {MapSerializer.deserialize(k): MapSerializer.deserialize(v) for k, v in data.items()}
         elif isinstance(data, list):
             return [MapSerializer.deserialize(i) for i in data]
         elif isinstance(data, tuple):

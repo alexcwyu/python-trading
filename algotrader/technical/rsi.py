@@ -91,11 +91,11 @@ class RSI(Indicator):
 
 if __name__ == "__main__":
     import datetime
-    from algotrader.utils.time_series import DataSeries
+    from algotrader.trading.data_series import DataSeries
 
     close = DataSeries("close")
     rsi = RSI(close, input_key='close', length=14)
-    print rsi.name
+    print(rsi.name)
     t = datetime.datetime.now()
 
     values = [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
@@ -105,4 +105,4 @@ if __name__ == "__main__":
         close.add({'timestamp': t, 'close': value})
         t = t + datetime.timedelta(0, 3)
 
-        print idx, rsi.now()
+        print(idx, rsi.now())

@@ -2,14 +2,13 @@
 Created on 4/16/16
 @author = 'jason'
 '''
-
 from algotrader.app import Application
-from algotrader.config.app import ApplicationConfig, LiveTradingConfig
+from algotrader.config.app import LiveTradingConfig
 from algotrader.config.broker import IBConfig
 from algotrader.config.persistence import PersistenceConfig
-from algotrader.event.market_data import BarSize, BarType
+from algotrader.model.market_data_pb2 import Bar
 from algotrader.provider.broker import Broker
-from algotrader.provider.subscription import BarSubscriptionType
+from algotrader.provider.subscription import BarSubscriptionType, BarSize
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils import logger
@@ -37,7 +36,6 @@ class ATSRunner(Application):
         logger.info("ATS started, presss Ctrl-C to stop")
 
 
-
 def main():
     broker_config = IBConfig(client_id=2)
     live_trading_config = LiveTradingConfig(id=None,
@@ -46,11 +44,12 @@ def main():
                                             portfolio_id='test',
                                             instrument_ids=[4],
                                             subscription_types=[
-                                                BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.M1)],
+                                                BarSubscriptionType(bar_type=Bar.Time, bar_size=BarSize.M1)],
                                             feed_id=Broker.IB,
                                             broker_id=Broker.IB,
-                                            ref_data_mgr_type = RefDataManager.DB, clock_type = Clock.RealTime, persistence_config =PersistenceConfig(),
-                                            configs = [broker_config])
+                                            ref_data_mgr_type=RefDataManager.DB, clock_type=Clock.RealTime,
+                                            persistence_config=PersistenceConfig(),
+                                            configs=[broker_config])
 
     app_context = ApplicationContext(app_config=live_trading_config)
     ATSRunner().start(app_context)

@@ -57,7 +57,7 @@ message Trade{
 message MarketDepth{
     enum Side {
         Ask = 0;
-        bid = 1;
+        Bid = 1;
     }
 
     enum Operation {

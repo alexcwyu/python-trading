@@ -1,7 +1,8 @@
 import pandas as pd
 
-from algotrader.trading.ref_data import Instrument, Currency, Exchange, RefDataManager
-
+from algotrader.trading.ref_data import RefDataManager
+from algotrader.model.model_factory import *
+from algotrader.utils.py2to3 import *
 
 class MockRefDataManager(RefDataManager):
     """
@@ -147,6 +148,6 @@ if __name__ == "__main__":
                                 "name": ["New York Stock Exchange"]})
 
     mgr = MockRefDataManager(inst_df, ccy_df, exchange_df)
-    print mgr.get_inst(symbol='VXX', exch_id='NYSE')
-    print mgr.get_inst(inst_id=0)
-    print mgr.get_inst(0)
+    print(mgr.get_inst(symbol='VXX', exch_id='NYSE'))
+    print(mgr.get_inst(inst_id=0))
+    print(mgr.get_inst(0))

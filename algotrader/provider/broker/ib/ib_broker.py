@@ -5,9 +5,9 @@ import gevent
 import swigibpy
 
 from algotrader.config.broker import IBConfig
-from algotrader.event.market_data import Bar, Quote, Trade, MarketDepth
-from algotrader.event.market_data import MarketDataType
-from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus
+from algotrader.model.market_data_pb2 import Bar, Quote, Trade, MarketDepth
+from algotrader.model.trade_data_pb2 import OrderStatusUpdate, ExecutionReport, OrderStatus
+from algotrader.provider.subscription import MarketDataType
 from algotrader.provider.broker import Broker
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket

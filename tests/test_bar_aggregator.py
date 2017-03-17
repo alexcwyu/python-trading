@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from algotrader.event.market_data import Trade, Bar, Quote
 from algotrader.trading.bar_aggregator import BarAggregator, BarInputType, BarType
-from algotrader.utils.time_series import DataSeries
+from algotrader.trading.data_series import DataSeries
 from algotrader.utils.clock import SimulationClock
 
 

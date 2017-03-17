@@ -1,12 +1,13 @@
 import logging
+from datetime import datetime
 
 import pandas as pd
 
 from algotrader.config.feed import PandasMemoryDataFeedConfig
 from algotrader.event.event_handler import EventLogger
-from algotrader.event.market_data import Bar, BarType, BarSize
+from algotrader.model.market_data_pb2 import Bar
 from algotrader.provider.feed import Feed
-from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
+from algotrader.provider.subscription import BarSubscriptionType,HistDataSubscriptionKey, BarSize
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
 
@@ -66,7 +67,7 @@ class PandasMemoryDataFeed(Feed):
             if not isinstance(sub_key, HistDataSubscriptionKey):
                 raise RuntimeError("only HistDataSubscriptionKey is supported!")
             if isinstance(sub_key.subscription_type,
-                          BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
+                          BarSubscriptionType) and sub_key.subscription_type.bar_type == Bar.Time and sub_key.subscription_type.bar_size == BarSize.D1:
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.id())
 
@@ -135,7 +136,7 @@ if __name__ == "__main__":
     x0 = 100
     dt = 1. / 252
 
-    from algotrader.models.sde_sim import euler
+    from algotrader.utils.sde_sim import euler
 
     drift0 = lambda x, t: 0.01 * x
     diffusion0 = lambda x, t: 0.05 * x

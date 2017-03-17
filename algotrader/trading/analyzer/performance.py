@@ -1,8 +1,8 @@
+from algotrader.trading.analyzer import Analyzer
+from algotrader.trading.data_series import DataSeries
 
-from algotrader.model.trading.time_series import PandasTimeSeries
 
-
-class PerformanceAnalyzer(object):
+class PerformanceAnalyzer(Analyzer):
     Performance = "Performance"
     StockValue = "stock_value"
     Cash = "cash"
@@ -11,7 +11,7 @@ class PerformanceAnalyzer(object):
     def __init__(self, portfolio):
         self.portfolio = portfolio
         self.state = self.portfolio.state.performance
-        self.series = PandasTimeSeries(self.state.series)
+        self.series = DataSeries(self.state.series)
 
     def update(self, timestamp: int, current_value: float):
         self.state.stock_value = self.portfolio.stock_value

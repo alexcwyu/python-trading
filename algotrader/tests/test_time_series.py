@@ -1,4 +1,3 @@
-import datetime
 from unittest import TestCase
 
 import numpy as np
@@ -6,17 +5,17 @@ import pandas as pd
 
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.time_series_pb2 import *
-from algotrader.model.trading.time_series import PandasTimeSeries
+from algotrader.trading.data_series import DataSeries
 
 
-class DataSeriesTest(TestCase):
+class TimeSeriesTest(TestCase):
     values = [np.nan, np.nan, 44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
               45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
 
     factory = ModelFactory()
 
     def __create_series(self):
-        close = PandasTimeSeries(TimeSeries())
+        close = TimeSeries(TimeSeries())
         t = 0
         for idx, value in enumerate(self.values):
             close.add({"timestamp": t, "v1": value, "v2": value})
@@ -26,7 +25,7 @@ class DataSeriesTest(TestCase):
 
     @staticmethod
     def create_random_walk_series():
-        close = PandasTimeSeries(TimeSeries())
+        close = TimeSeries(TimeSeries())
 
         t1 = 1
         t = t1
@@ -40,7 +39,7 @@ class DataSeriesTest(TestCase):
 
     @staticmethod
     def create_series_by_list(valuelist):
-        close = PandasTimeSeries(TimeSeries())
+        close = TimeSeries(TimeSeries())
 
         t = 0
 
@@ -50,15 +49,15 @@ class DataSeriesTest(TestCase):
         return close
 
     def test_init_w_data(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test",
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test",
                                                       keys=["v1"],
-                                                      items=[DataSeriesTest.factory.build_time_series_item(0,
+                                                      items=[TimeSeriesTest.factory.build_time_series_item(0,
                                                                                                            {"v1": 1}),
-                                                             DataSeriesTest.factory.build_time_series_item(1,
+                                                             TimeSeriesTest.factory.build_time_series_item(1,
                                                                                                            {"v1": 2})]
                                                       )
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
 
         self.assertEqual(2, series.size())
 
@@ -70,10 +69,10 @@ class DataSeriesTest(TestCase):
 
     def test_init_w_keys(self):
 
-        ts = DataSeriesTest.factory.build_time_series("test", name="test",
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test",
                                                       keys=["v1"])
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
 
         series.add({"timestamp": 0, "v1": 1, "v2": 1})
 
@@ -84,9 +83,9 @@ class DataSeriesTest(TestCase):
         self.assertFalse("v2" in result[0])
 
     def test_add(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test")
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test")
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
 
         self.assertTrue(len(series.get_data()) == 0)
 
@@ -108,9 +107,9 @@ class DataSeriesTest(TestCase):
                           {"timestamp": 2, "v1": 4, "v2": 4}], series.get_data())
 
     def test_current_time(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test")
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test")
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
 
         self.assertEqual(0, series.current_time())
 
@@ -124,9 +123,9 @@ class DataSeriesTest(TestCase):
         self.assertEqual(2, series.current_time())
 
     def test_get_data_dict(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test")
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test")
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
 
         series.add({"timestamp": 1, "v1": 1, "v2": 1})
         series.add({"timestamp": 2, "v1": 2, "v2": 2})
@@ -140,9 +139,9 @@ class DataSeriesTest(TestCase):
         self.assertEqual({1: 1, 2: 2}, series.get_data_dict('v1'))
 
     def test_get_data(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test")
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test")
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
 
         series.add({"timestamp": 1, "v1": 1, "v2": 1})
         series.add({"timestamp": 2, "v1": 2, "v2": 2})
@@ -189,9 +188,9 @@ class DataSeriesTest(TestCase):
         self.assertTrue(df2.equals(close.get_data_frame(['v1', 'v2'])))
 
     def test_size(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test")
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test")
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
         self.assertEqual(0, series.size())
 
         series.add({"timestamp": 0, "v1": 1})
@@ -201,9 +200,9 @@ class DataSeriesTest(TestCase):
         self.assertEqual(2, series.size())
 
     def test_now(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test")
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test")
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
         self.assertEqual(0.0, series.now())
 
         series.add({"timestamp": 0, "v1": 1, "v2": 2})
@@ -220,9 +219,9 @@ class DataSeriesTest(TestCase):
         self.assertEqual({"v1": 1.4, "v2": 2.4}, series.now(["v1", "v2"]))
 
     def test_ago(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test")
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test")
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
         self.assertEqual(0.0, series.now())
 
         series.add({"timestamp": 0, "v1": 1, "v2": 2})
@@ -248,9 +247,9 @@ class DataSeriesTest(TestCase):
         self.assertEqual(1.4, series.ago(0, ["v1"]))
 
     def test_get_by_idx(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test", keys=["timestamp", "v1", "v2"])
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test", keys=["timestamp", "v1", "v2"])
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
         
         series.add({"timestamp": 0, "v1": 2})
         series.add({"timestamp": 1, "v1": 2.4})
@@ -275,9 +274,9 @@ class DataSeriesTest(TestCase):
         self.assertEqual(endPoint[0], 99)
 
     def test_get_by_time(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test", keys=["timestamp", "v1", "v2"])
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test", keys=["timestamp", "v1", "v2"])
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
 
         # time and key
         series.add({"timestamp": 0, "v1": 2})
@@ -293,9 +292,9 @@ class DataSeriesTest(TestCase):
         self.assertEqual({"timestamp": 1, "v1": 2.4, "v2": 3.0}, series.get_by_time(time=1))
 
     def test_override_w_same_time(self):
-        ts = DataSeriesTest.factory.build_time_series("test", name="test", keys=["timestamp", "v1", "v2", "v3"])
+        ts = TimeSeriesTest.factory.build_time_series("test", name="test", keys=["timestamp", "v1", "v2", "v3"])
 
-        series = PandasTimeSeries(time_series=ts)
+        series = TimeSeries(time_series=ts)
 
 
         series.add({"timestamp": 1, "v1": 2, "v2": 3})

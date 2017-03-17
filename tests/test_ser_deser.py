@@ -21,7 +21,7 @@ from algotrader.trading.order import Order
 from algotrader.trading.position import Position
 from algotrader.trading.ref_data import Instrument, Exchange, Currency
 from algotrader.utils.ser_deser import MsgPackSerializer, JsonSerializer, MapSerializer
-from algotrader.utils.time_series import DataSeries
+from algotrader.trading.data_series import DataSeries
 
 from algotrader.config.app import ApplicationConfig
 from algotrader.trading.context import ApplicationContext

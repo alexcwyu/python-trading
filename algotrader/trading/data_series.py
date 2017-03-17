@@ -9,47 +9,26 @@ from algotrader import Startable
 from algotrader.model.model_helper import ModelHelper
 from algotrader.model.time_series_pb2 import TimeSeries
 
-"""
-message TimeSeries{
 
-    message Item{
-        int64 timestamp = 1;
-        map<string, double> data = 3;
-    }
-    string series_id = 1;
-    string name = 2;
-    string desc = 3;
-    repeated string inputs = 4;
-    repeated string keys = 5;
-    string default_output_key = 6;
-    double missing_value_replace = 7;
-    int64 start_time = 8;
-    int64 end_time = 9;
-    repeated Item items = 10;
-}
-
-
-"""
-
-
-class TimeSeriesEvent(object):
+class DataSeriesEvent(object):
     def __init__(self, name: str, timestamp: int, data: Dict[str, float]):
         self.name = name
         self.timestamp = timestamp
         self.data = data
 
 
-class PandasTimeSeries(Startable):
+class DataSeries(Startable):
     TIMESTAMP = 'timestamp'
 
     @staticmethod
     def get_name(input):
-        if isinstance(input, PandasTimeSeries):
+        if isinstance(input, DataSeries):
             return "'%s'" % input.time_series.series_id
         return "'%s'" % input
 
     def __init__(self, time_series: TimeSeries):
         self.time_series = time_series
+        self.name = time_series.name
         self.data_list = []
         self.time_list = []
         self.data_time_dict = {}
@@ -69,7 +48,7 @@ class PandasTimeSeries(Startable):
         return self.time_series.name
 
     def add(self, data: Dict[str, float], timestamp: int = None, init: bool = False) -> None:
-        timestamp = timestamp if timestamp is not None else data.get(PandasTimeSeries.TIMESTAMP)
+        timestamp = timestamp if timestamp is not None else data.get(DataSeries.TIMESTAMP)
 
         if not self.time_series.keys:
             ModelHelper.add_to_list(self.time_series.keys, data.keys())
@@ -114,7 +93,7 @@ class PandasTimeSeries(Startable):
 
         self.time_series.end_time = timestamp
         self.data_list.append(enhanced_data)
-        self.subject.on_next(TimeSeriesEvent(name=PandasTimeSeries.get_name(self), timestamp=timestamp, data=data))
+        self.subject.on_next(DataSeriesEvent(name=DataSeries.get_name(self), timestamp=timestamp, data=data))
 
     def current_time(self):
         return self.time_series.end_time
@@ -152,7 +131,7 @@ class PandasTimeSeries(Startable):
 
     def _get_key(self, keys=None, default_keys=None):
         keys = keys if keys else default_keys
-        return PandasTimeSeries.convert_to_list(keys)
+        return DataSeries.convert_to_list(keys)
 
     @staticmethod
     def convert_to_list(items=None):
@@ -247,20 +226,6 @@ class PandasTimeSeries(Startable):
             result[key] = func(np.array(data), *argv, **kwargs)
         return result if len(keys) > 1 else result[keys[0]]
 
-    #
-    # def __add__(self, other):
-    #     return Plus(self, other, self.time_series.keys)
-    #
-    # def __radd__(self, other):
-    #     return Plus(other, self, self.time_series.keys)
-    #
-    # def __mul__(self, other):
-    #     return Times(self, other, self.time_series.keys)
-    #
-    # def __rmul__(self, other):
-    #     return Times(other, self, self.time_series.keys)
-
-
     def __getitem__(self, pos):
         if isinstance(pos, tuple):
             index, keys = pos
@@ -272,14 +237,11 @@ class PandasTimeSeries(Startable):
             return self.get_by_time(index, keys)
         raise NotImplementedError("Unsupported index type %s, %s" % (index, type(index)))
 
+    def cross_above(value1, value2, look_up_period=1):
+        pass
 
-def cross_above(value1, value2, look_up_period=1):
-    pass
+    def cross_below(value1, value2, look_up_period=1):
+        pass
 
-
-def cross_below(value1, value2, look_up_period=1):
-    pass
-
-
-def __cross_impl(value1, value2, func, start=-2, end=-1):
-    pass
+    def __cross_impl(value1, value2, func, start=-2, end=-1):
+        pass

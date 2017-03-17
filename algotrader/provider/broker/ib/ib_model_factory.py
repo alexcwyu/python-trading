@@ -3,11 +3,12 @@ from datetime import datetime
 import swigibpy
 from dateutil.relativedelta import relativedelta
 
-from algotrader.event.market_data import Bar, Quote, Trade, BarSize, MDOperation, MDSide
-from algotrader.event.order import OrdAction, OrdType, TIF, OrdStatus
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.trade_data_pb2 import *
+
 from algotrader.utils.date_utils import DateUtils
 from algotrader.provider.broker import Broker
-from algotrader.event.market_data import BarType, BarSize, MarketDataType
+from algotrader.provider.subscription import BarSize, MarketDataType
 
 
 
@@ -23,22 +24,22 @@ class IBModelFactory:
     }
 
     ord_action_mapping = {
-        OrdAction.BUY: "BUY",
-        OrdAction.SELL: "SELL",
-        OrdAction.SSHORT: "SSHORT"
+        OrderAction.BUY: "BUY",
+        OrderAction.SELL: "SELL",
+        OrderAction.SSHORT: "SSHORT"
     }
 
     ord_type_mapping = {
-        OrdType.MARKET: "MKT",
-        OrdType.LIMIT: "LMT",
-        OrdType.STOP: "STP",
-        OrdType.STOP_LIMIT: "STPLMT",
-        OrdType.MARKET_ON_CLOSE: "MOC",
-        OrdType.LIMIT_ON_CLOSE: "LOC",
-        OrdType.TRAILING_STOP: "TRAIL",
-        OrdType.MARKET_TO_LIMIT: "MTL",
-        OrdType.MARKET_IF_PRICE_TOUCHED: "MIT",
-        OrdType.MARKET_ON_OPEN: "MOO"
+        OrderType.MARKET: "MKT",
+        OrderType.LIMIT: "LMT",
+        OrderType.STOP: "STP",
+        OrderType.STOP_LIMIT: "STPLMT",
+        OrderType.MARKET_ON_CLOSE: "MOC",
+        OrderType.LIMIT_ON_CLOSE: "LOC",
+        OrderType.TRAILING_STOP: "TRAIL",
+        OrderType.MARKET_TO_LIMIT: "MTL",
+        OrderType.MARKET_IF_PRICE_TOUCHED: "MIT",
+        OrderType.MARKET_ON_OPEN: "MOO"
     }
 
     tif_mapping = {
@@ -69,21 +70,21 @@ class IBModelFactory:
     }
 
     ib_md_operation_map = {
-        0: MDOperation.Insert,
-        1: MDOperation.Update,
-        2: MDOperation.Delete
+        0: MarketDepth.Insert,
+        1: MarketDepth.Update,
+        2: MarketDepth.Delete
     }
 
     ib_md_side_map = {
-        0: MDSide.Ask,
-        1: MDSide.Bid
+        0: MarketDepth.Ask,
+        1: MarketDepth.Bid
     }
 
     ib_ord_status_map = {
-        "Submitted": OrdStatus.NEW,
-        "PendingCancel": OrdStatus.PENDING_CANCEL,
-        "Cancelled": OrdStatus.CANCELLED,
-        "Inactive": OrdStatus.REJECTED
+        "Submitted": OrderStatus.NEW,
+        "PendingCancel": OrderStatus.PENDING_CANCEL,
+        "Cancelled": OrderStatus.CANCELLED,
+        "Inactive": OrderStatus.REJECTED
 
     }
 
@@ -251,4 +252,4 @@ class IBModelFactory:
         return self.ib_md_side_map[ib_md_side]
 
     def convert_ib_ord_status(self, ib_ord_status):
-        return self.ib_ord_status_map.get(ib_ord_status, OrdStatus.UNKNOWN)
+        return self.ib_ord_status_map.get(ib_ord_status, OrderStatus.UNKNOWN)

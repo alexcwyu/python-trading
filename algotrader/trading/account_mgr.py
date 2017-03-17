@@ -32,7 +32,9 @@ class AccountManager(SimpleManager):
     def id(self):
         return "AccountManager"
 
-    def new_account(self, name, values={}):
+    def new_account(self, name, values=None):
+        if not values:
+            values = {}
         account = Account(name, values=values)
         self.add(account)
         return account

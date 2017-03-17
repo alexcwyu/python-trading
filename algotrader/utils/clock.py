@@ -39,7 +39,7 @@ class Clock(Startable, HasId):
         self.scheduler.schedule_relative(time_delta, action, state)
 
     def schedule_absolute(self, datetime, action, state=None):
-        if isinstance(datetime, (long, int)):
+        if isinstance(datetime, (int)):
             datetime = DateUtils.unixtimemillis_to_datetime(datetime)
         self.scheduler.schedule_absolute(datetime, action, state)
 
@@ -87,7 +87,7 @@ class SimulationScheduler(HistoricalScheduler):
 
     @staticmethod
     def add(absolute, relative):
-        if isinstance(relative, (long, int)):
+        if isinstance(relative, (int)):
             return absolute + datetime.timedelta(milliseconds=relative)
         elif isinstance(relative, float):
             return absolute + datetime.timedelta(seconds=relative)

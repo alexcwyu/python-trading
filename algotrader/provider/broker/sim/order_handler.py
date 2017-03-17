@@ -2,7 +2,7 @@ import abc
 import sys
 from collections import defaultdict
 
-from algotrader.event.market_data import Bar, Quote, Trade
+from algotrader.model.market_data_pb2 import Bar, Quote, Trade
 from algotrader.provider.broker.sim.data_processor import BarProcessor, TradeProcessor, QuoteProcessor
 
 

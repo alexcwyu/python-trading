@@ -3,7 +3,7 @@ from collections import defaultdict
 from algotrader.config.broker import SimulatorConfig
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
-from algotrader.event.order import OrdStatus, OrderStatusUpdate, \
+from algotrader.model.trade_data_pb2 import OrderStatus, OrderStatusUpdate, \
     ExecutionReport
 from algotrader.provider.broker import Broker
 from algotrader.provider.broker.sim.commission import NoCommission
@@ -74,7 +74,7 @@ class Simulator(Broker, MarketDataEventHandler):
 
         self.clordid_ordid_map
         self.__add_order(new_ord_req)
-        self.__send_exec_report(new_ord_req, 0, 0, OrdStatus.SUBMITTED)
+        self.__send_exec_report(new_ord_req, 0, 0, OrderStatus.SUBMITTED)
 
         fill_info = self.fill_strategy.process_new_order(new_ord_req)
         executed = self.execute(new_ord_req, fill_info)

@@ -5,7 +5,7 @@ from algotrader.config.persistence import PersistenceMode
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
-from algotrader.utils.time_series import DataSeries
+from algotrader.trading.data_series import DataSeries
 
 
 class InstrumentDataManager(MarketDataEventHandler, Manager):

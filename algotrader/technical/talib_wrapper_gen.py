@@ -35,9 +35,9 @@ class {{IndicatorClass}}(Indicator):
         self.add(result)
 """)
 
-print indicatorTmp.render({"IndicatorClass": "APO",
+print(indicatorTmp.render({"IndicatorClass": "APO",
                            "description": "apo test",
-                           "params": ["fastperiod", "slowperiod", "matype"]})
+                           "params": ["fastperiod", "slowperiod", "matype"]}))
 
 single_ds_list = ["APO", "BBANDS", "CMO", "DEMA", "EMA", "HT_DCPERIOD", "HT_DCPHASE", "HT_PHASOR", "HT_SINE",
                   "HT_TRENDLINE", "HT_TRENDMODE", "KAMA", "LINEARREG", "LINEARREG_ANGLE", "LINEARREG_INTERCEPT"]

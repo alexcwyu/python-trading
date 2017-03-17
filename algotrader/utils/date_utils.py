@@ -20,15 +20,14 @@ class DateUtils:
     def timestamp_to_datetime(timestamp):
         return datetime.datetime.fromtimestamp(timestamp)
 
-
     @staticmethod
     def date_to_unixtimemillis(d):
-        return int((datetime.datetime.combine(d, datetime.datetime.min.time()) - DateUtils.epoch).total_seconds() * 1000)
+        return int(
+            (datetime.datetime.combine(d, datetime.datetime.min.time()) - DateUtils.epoch).total_seconds() * 1000)
 
     @staticmethod
     def unixtimemillis_to_date(timestamp):
-        return datetime.datetime.fromtimestamp(timestamp/1000).date()
-
+        return datetime.datetime.fromtimestamp(timestamp / 1000).date()
 
     @staticmethod
     def date_to_timestamp(d):

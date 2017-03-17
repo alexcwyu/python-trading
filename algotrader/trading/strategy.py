@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 from builtins import *
-
 from typing import Dict
 
 from algotrader import Startable
@@ -11,8 +10,8 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
-from algotrader.model.trading.position import HasPositions
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, MarketDataSubscriber
+from algotrader.trading.position import HasPositions
 
 
 class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscriber, Startable, HasPositions):

@@ -1,7 +1,7 @@
 import abc
 import math
 
-from algotrader.event.market_data import Trade
+from algotrader.model.market_data_pb2 import Trade
 from algotrader.provider.broker.sim.sim_config import SimConfig
 
 

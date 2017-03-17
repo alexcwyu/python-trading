@@ -4,7 +4,7 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
-from algotrader.utils.time_series import DataSeries
+from algotrader.trading.data_series import DataSeries
 
 
 class DataSeriesTest(TestCase):

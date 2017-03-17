@@ -1,7 +1,7 @@
 import abc
 
-from algotrader.event.market_data import Bar, Quote, Trade
-from algotrader.event.order import OrdType
+from algotrader.model.market_data_pb2 import Bar, Quote, Trade
+from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker.sim.order_handler import MarketOrderHandler, LimitOrderHandler, StopLimitOrderHandler, \
     StopOrderHandler, TrailingStopOrderHandler
 from algotrader.provider.broker.sim.sim_config import SimConfig
@@ -64,27 +64,27 @@ class DefaultFillStrategy(FillStrategy):
                 or (isinstance(event, Quote) and not config.fill_on_quote):
             return None
 
-        if new_ord_req.type == OrdType.MARKET:
+        if new_ord_req.type == OrderType.MARKET:
             return self.__market_ord_handler.process(new_ord_req, event, new_order)
-        elif new_ord_req.type == OrdType.LIMIT:
+        elif new_ord_req.type == OrderType.LIMIT:
             return self.__limit_ord_handler.process(new_ord_req, event, new_order)
-        elif new_ord_req.type == OrdType.STOP_LIMIT:
+        elif new_ord_req.type == OrderType.STOP_LIMIT:
             return self.__stop_limit_ord_handler.process(new_ord_req, event, new_order)
-        elif new_ord_req.type == OrdType.STOP:
+        elif new_ord_req.type == OrderType.STOP:
             return self.__stop_ord_handler.process(new_ord_req, event, new_order)
-        elif new_ord_req.type == OrdType.TRAILING_STOP:
+        elif new_ord_req.type == OrderType.TRAILING_STOP:
             return self.__trailing_stop_ord_handler.process(new_ord_req, event, new_order)
         assert False
 
     def process_w_price_qty(self, new_ord_req, price, qty):
-        if new_ord_req.type == OrdType.MARKET:
+        if new_ord_req.type == OrderType.MARKET:
             return self.__market_ord_handler.process_w_price_qty(new_ord_req, price, qty)
-        elif new_ord_req.type == OrdType.LIMIT:
+        elif new_ord_req.type == OrderType.LIMIT:
             return self.__limit_ord_handler.process_w_price_qty(new_ord_req, price, qty)
-        elif new_ord_req.type == OrdType.STOP_LIMIT:
+        elif new_ord_req.type == OrderType.STOP_LIMIT:
             return self.__stop_limit_ord_handler.process_w_price_qty(new_ord_req, price, qty)
-        elif new_ord_req.type == OrdType.STOP:
+        elif new_ord_req.type == OrderType.STOP:
             return self.__stop_ord_handler.process_w_price_qty(new_ord_req, price, qty)
-        elif new_ord_req.type == OrdType.TRAILING_STOP:
+        elif new_ord_req.type == OrderType.TRAILING_STOP:
             return self.__trailing_stop_ord_handler.process_w_price_qty(new_ord_req, price, qty)
         return None

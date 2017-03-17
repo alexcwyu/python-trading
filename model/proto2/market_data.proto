@@ -1,7 +1,5 @@
 syntax = "proto2";
 
-package algotrader.model;
-
 message Bar{
     enum Type{
         Time = 0;

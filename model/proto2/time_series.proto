@@ -1,24 +1,20 @@
-syntax = "proto3";
-
-package algotrader.model;
-
-
+syntax = "proto2";
 
 message TimeSeries{
 
     message Item{
         optional int64 timestamp = 1;
-        optional map<string, double> data = 3;
+        map<string, double> data = 3;
     }
     optional string series_id = 1;
     optional string name = 2;
     optional string desc = 3;
-    optional repeated string inputs = 4;
-    optional repeated string keys = 5;
+    repeated string inputs = 4;
+    repeated string keys = 5;
     optional string default_output_key = 6;
     optional double missing_value_replace = 7;
     optional int64 start_time = 8;
     optional int64 end_time = 9;
-    optional repeated Item items = 10;
+    repeated Item items = 10;
 }
 

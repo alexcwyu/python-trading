@@ -1,13 +1,10 @@
 syntax = "proto2";
 
-package algotrader.model;
-
-
 message Underlying {
 
     message Asset {
-        string inst_id = 1;
-        double weight = 2;
+        optional string inst_id = 1;
+        optional double weight = 2;
     }
 
     enum UnderlyingType {
@@ -18,7 +15,7 @@ message Underlying {
     }
 
     optional UnderlyingType type = 1;
-    optional repeated Asset assets = 2;
+    repeated Asset assets = 2;
 
 }
 
@@ -61,7 +58,7 @@ message Instrument {
     optional string name = 4;
     optional InstType type = 5;
     optional string primary_exch_id = 6;
-    optional repeated string exch_ids = 7;
+    repeated string exch_ids = 7;
     optional string ccy_id = 8;
     optional string sector = 9;
     optional string industry = 10;
@@ -73,10 +70,10 @@ message Instrument {
     optional DrivativeTraits derivative = 22;
 
     //alt sym / ids
-    optional map<string, string> alt_symbols = 31; //map<provider_id, alt_symbol>, e.g. IB -> 5
-    optional map<string, string> alt_ids = 32; //e.g. RIC -> 0005.HK
-    optional map<string, string> alt_sectors = 33;
-    optional map<string, string> alt_industries = 34;
+    map<string, string> alt_symbols = 31; //map<provider_id, alt_symbol>, e.g. IB -> 5
+    map<string, string> alt_ids = 32; //e.g. RIC -> 0005.HK
+    map<string, string> alt_sectors = 33;
+    map<string, string> alt_industries = 34;
 }
 
 message Exchange {
@@ -86,7 +83,7 @@ message Exchange {
     optional string trading_hours_id = 4;
     optional string holidays_id = 5;
 
-    optional map<string, string> alt_ids = 6;
+    map<string, string> alt_ids = 6;
 }
 
 message Country {
@@ -121,7 +118,7 @@ message HolidaySeries {
     }
 
     optional string holidays_id = 1;
-    optional repeated Holiday holidays = 2;
+    repeated Holiday holidays = 2;
 }
 
 message TradingHours {
@@ -145,7 +142,7 @@ message TradingHours {
 
     optional string trading_hours_id = 1;
     optional string timezone_id = 2;
-    optional repeated Session sessions = 3;
+    repeated Session sessions = 3;
 }
 
 message TimeZone {

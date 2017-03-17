@@ -1,9 +1,6 @@
-syntax = "proto3";
+syntax = "proto2";
 import "google/protobuf/any.proto";
 import "time_series.proto";
-
-package algotrader.model;
-
 
 enum OrderAction {
     Buy = 0;
@@ -62,7 +59,7 @@ message NewOrderRequest {
     optional TIF tif = 15;
 
     optional string oca_tag = 20;
-    optional map<string, string> params = 21;
+    map<string, string> params = 21;
 }
 
 
@@ -80,7 +77,7 @@ message OrderReplaceRequest {
     optional TIF tif = 14;
 
     optional string oca_tag = 20;
-    optional map<string, string> params = 21;
+    map<string, string> params = 21;
 
 }
 
@@ -91,7 +88,7 @@ message OrderCancelRequest {
 
     optional string cl_orig_req_id = 4;
 
-    optional map<string, string> params = 10;
+    map<string, string> params = 10;
 
 }
 
@@ -136,7 +133,7 @@ message ExecutionReport {
 
 message AccountValue {
     optional string key = 1;
-    optional map<string, double> ccy_values = 2;
+    map<string, double> ccy_values = 2;
 }
 
 message AccountUpdate {
@@ -145,7 +142,7 @@ message AccountUpdate {
     optional int64 timestamp = 3;
 
     optional string account_name = 11;
-    optional map<string, AccountValue> values = 12;
+    map<string, AccountValue> values = 12;
 
 }
 
@@ -167,15 +164,15 @@ message PortfolioUpdate {
 
 message AccountState {
     optional string acct_id = 1;
-    optional map<string, AccountValue> values = 2;
-    optional map<string, Position> positions = 3;
+    map<string, AccountValue> values = 2;
+    map<string, Position> positions = 3;
 }
 
 message PortfolioState {
     optional string portf_id = 1;
     optional double cash = 2;
-    optional map<string, Position> positions = 3;
-    optional repeated string cl_ord_ids = 4;
+    map<string, Position> positions = 3;
+    repeated string cl_ord_ids = 4;
     optional Performance performance = 5;
     optional Pnl pnl = 6;
     optional DrawDown drawdown = 7;
@@ -184,12 +181,12 @@ message PortfolioState {
 message Performance {
     optional double total_equity = 1;
     optional double stock_value = 2;
-    optional algotrader.model.TimeSeries series = 3;
+    optional TimeSeries series = 3;
 }
 
 message Pnl {
     optional double last_pnl = 1;
-    optional algotrader.model.TimeSeries series = 2;
+    optional TimeSeries series = 2;
 }
 
 message DrawDown {
@@ -199,20 +196,20 @@ message DrawDown {
     optional double low_equity = 4;
     optional double current_run_up = 5;
     optional double current_drawdown = 6;
-    optional algotrader.model.TimeSeries series = 7;
+    optional TimeSeries series = 7;
 }
 
 
 message Config {
     optional string config_id = 1;
-    optional map<string, string> values = 2;
+    map<string, string> values = 2;
 }
 
 message StrategyState {
     optional string stg_id = 1;
     optional Config config = 2;
-    optional repeated string cl_ord_ids = 3;
-    optional map<string, Position> positions = 4;
+    repeated string cl_ord_ids = 3;
+    map<string, Position> positions = 4;
     optional string portf_id = 5;
     optional int64 next_ord_id = 6;
 }
@@ -238,7 +235,7 @@ message OrderState {
     optional TIF tif = 15;
 
     optional string oca_tag = 20;
-    optional map<string, string> params = 21;
+    map<string, string> params = 21;
 
     optional OrderStatus status = 30;
     optional double filled_qty = 31;
@@ -264,7 +261,7 @@ message Position {
     optional double filled_qty = 3;
     optional double last_price = 4;
 
-    optional map<string, OrderPosition> orders = 5;
+    map<string, OrderPosition> orders = 5;
 }
 
 message Sequence {

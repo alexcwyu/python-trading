@@ -63,6 +63,42 @@ class MemoryBacktestRunner(Application):
         plotter.plot(instrument=self.app_context.app_config.instrument_ids[0])
 
 def main():
+    file = '../data/tradedata/SPY.csv'
+    dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
+    df = pd.read_csv(file, index_col='Date', parse_dates=['Date'], date_parser=dateparse)
+    df['Symbol'] = "SPY"
+    df['BarSize'] = int(BarSize.D1)
+    df = df.sort_index(ascending=True)
+
+    dict_df = {"SPY" : df}
+
+    instruments = [3348]
+
+    backtest_config = BacktestingConfig(id="sma", stg_id='test_sma1',
+                                    # stg_cls='algotrader.strategy.sma_strategy.SMAStrategy',
+                                    stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
+                                    portfolio_id='test2', portfolio_initial_cash=100000,
+                                    instrument_ids=instruments,
+                                    subscription_types=[
+                                        BarSubscriptionType(bar_type=BarType.Time,
+                                                            bar_size=BarSize.D1)],
+
+                                    from_date=date(2010, 1, 1), to_date=date.today(),
+                                    broker_id=Broker.Simulator,
+                                    feed_id=Feed.PandasMemory,
+                                    stg_configs={'qty': 1000},
+                                    ref_data_mgr_type=RefDataManager.DB,
+                                    persistence_config= backtest_mongo_persistance_config(),
+                                    provider_configs=PandasMemoryDataFeedConfig(dict_df=dict_df))
+
+    app_context = ApplicationContext(app_config=backtest_config)
+
+    BacktestRunner(True).start(app_context)
+
+
+
+
+def oldmain():
     symbols = ['SPY', 'VXX', 'XLV', 'XIV']
 
     inst_df = build_inst_dataframe_from_list(symbols)
@@ -71,9 +107,9 @@ def main():
 
     exchange_df = pd.DataFrame({"exch_id": ["NYSE"],
                                 "name": ["New York Stock Exchange"]})
-    mgr = MockRefDataManager(inst_df=inst_df, ccy_df=ccy_df, exch_df=exchange_df)
-
-    portfolio = Portfolio(portf_id='test', cash=100000)
+    # mgr = MockRefDataManager(inst_df=inst_df, ccy_df=ccy_df, exch_df=exchange_df)
+    #
+    # portfolio = Portfolio(portf_id='test', cash=100000)
 
     start_date = datetime(2000, 1, 1)
     num_days = 3000
@@ -97,6 +133,7 @@ def main():
                        "High": asset,
                        "Low": asset,
                        "Close": asset,
+                       "Adj Close": asset,
                        "Volume": 10000 * np.ones(num_days)})
 
     df = df.set_index(keys="dates")
@@ -107,16 +144,17 @@ def main():
                'XIV': df}
 
     # feed = PandasMemoryDataFeed(dict_df, ref_data_mgr=mgr)
-    feed = PandasMemoryDataFeed()
+    # feed = PandasMemoryDataFeed()
 
     broker = Simulator()
 
-    instrument = 0
+    instruments = [3348]
 
     backtest_config = BacktestingConfig(id="sma", stg_id='test',
-                               stg_cls='algotrader.strategy.sma_strategy.SMAStrategy',
-                               portfolio_id='test', portfolio_initial_cash=100000,
-                               instrument_ids=[instrument],
+                               # stg_cls='algotrader.strategy.sma_strategy.SMAStrategy',
+                               stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
+                               portfolio_id='test1', portfolio_initial_cash=100000,
+                               instrument_ids=instruments,
                                subscription_types=[
                                    BarSubscriptionType(bar_type=BarType.Time,
                                                        bar_size=BarSize.D1)],

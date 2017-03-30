@@ -7,8 +7,8 @@ from algotrader.technical import Indicator
 
 class HistoricalVolatility(Indicator):
     __slots__ = (
-        'length'
-        'ann_factor'
+        'length',
+        'ann_factor',
     )
 
     def __init__(self, input=None, input_key=None, length=0, ann_factor=252, desc="Historical Volatility"):

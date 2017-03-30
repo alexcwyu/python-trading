@@ -148,7 +148,7 @@ class OrderReplaceRequest(OrderEvent):
 
 class OrderCancelRequest(OrderEvent):
     __slots__ = (
-        'params'
+        'params',
     )
 
     def __init__(self, timestamp=None, cl_id=None, cl_ord_id=None, params=None):
@@ -201,14 +201,14 @@ class OrderStatusUpdate(ExecutionEvent):
         handler.on_ord_upd(self)
 
     def id(self):
-        return self.ord_status_id
+        return str(self.ord_status_id)
 
 
 class ExecutionReport(ExecutionEvent):
     __slots__ = (
         'er_id',
         'last_qty',
-        'last_price'
+        'last_price',
         'commission',
         'filled_qty',
         'avg_price',
@@ -235,4 +235,4 @@ class ExecutionReport(ExecutionEvent):
         handler.on_exec_report(self)
 
     def id(self):
-        return self.er_id
+        return str(self.er_id)

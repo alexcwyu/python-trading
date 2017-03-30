@@ -156,3 +156,30 @@ class PortfolioTest(TestCase):
 
             self.assertEqual(ord_qty, position.ordered_qty())
             self.assertEqual(fill_qty, position.filled_qty())
+
+    def test_no_position(self):
+        self.assertEquals(False, self.portfolio.has_position(cl_id=1, inst_id=1))
+        self.assertEquals(False, self.portfolio.has_position(cl_id=2, inst_id=1))
+        self.assertEquals(False, self.portfolio.has_position(cl_id=2, inst_id=2))
+
+    def test_position(self):
+        ord_req = NewOrderRequest(cl_id='test', cl_ord_id=1, portf_id="test", broker_id="Dummy", inst_id=1,
+                                  action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000, limit_price=18.5)
+        order1 = self.portfolio.send_order(ord_req)
+
+        er1 = ExecutionReport(cl_id='test', cl_ord_id=1, ord_id=1, er_id=1, inst_id=1, last_qty=500, last_price=18.4,
+                              status=OrdStatus.PARTIALLY_FILLED)
+
+        self.app_context.order_mgr.on_exec_report(er1)
+
+        self.assertEqual(500, order1.last_qty)
+        self.assertEqual(18.4, order1.last_price)
+        self.assertEqual(500, order1.filled_qty)
+        self.assertEqual(18.4, order1.avg_price)
+        self.assertEqual(OrdStatus.PARTIALLY_FILLED, order1.status)
+
+        self.assertEquals(True, self.portfolio.has_position(cl_id='test', inst_id=1))
+        self.assertEquals(False, self.portfolio.has_position(cl_id='test', inst_id=2))
+        self.assertEquals(False, self.portfolio.has_position(cl_id='dummy', inst_id=2))
+
+

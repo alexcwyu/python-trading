@@ -15,7 +15,7 @@ class Corr(PipeLine):
         result = {}
         if self.inputs[0].size() > self.length:
             if self.all_filled():
-                result[PipeLine.VALUE] = self.df.corr()
+                result[PipeLine.VALUE] = self.df.corr().values.tolist()
             else:
                 result[PipeLine.VALUE] = self._default_output()
         else:
@@ -25,8 +25,9 @@ class Corr(PipeLine):
     def _default_output(self):
         na_array = np.empty(shape=self.shape())
         na_array[:] = np.nan
-        return na_array
+        return na_array.tolist()
 
     def shape(self):
-        return np.array([self.numPipes, self.numPipes])
+        return [self.numPipes, self.numPipes]
+        # return np.array([self.numPipes, self.numPipes])
 

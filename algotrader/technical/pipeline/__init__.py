@@ -7,15 +7,21 @@ from algotrader.utils import logger
 
 class PipeLine(DataSeries):
     VALUE = 'value'
-    _slots__ = (
-        'inputs',
+
+    __slots__ = (
+        'cache',
         'numPipes',
         'length',
-        'input_keys',
-        'cache'
+        'input_names',
         'input_names_pos',
+        'input_names_and_series',
         'input_keys',
         '__curr_timestamp'
+    )
+
+    __transient__ = (
+        'app_context',
+        'inputs',
     )
 
     @staticmethod
@@ -41,8 +47,8 @@ class PipeLine(DataSeries):
 
         return ",".join(str(part) for part in parts)
 
-    def __init__(self, name, inputs, input_keys, length=None, desc=None, *args, **kwargs):
-        super(PipeLine, self).__init__(name=name, keys=None, desc=desc, *args, **kwargs)
+    def __init__(self, name, inputs, input_keys, length=None, desc=None, **kwargs):
+        super(PipeLine, self).__init__(name=name, keys=None, desc=desc, **kwargs)
         # f = lambda i: i \
         #     if isinstance(i, DataSeries) or isinstance(i, Indicator) \
         #     else inst_data_mgr.get_series(i)

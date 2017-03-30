@@ -25,6 +25,7 @@ class PandasMemoryDataFeed(Feed):
         """
         super(PandasMemoryDataFeed, self).__init__()
         self.sub_keys = []
+        self.df = pd.DataFrame()
 
     def _start(self, app_context):
         self.pandas_memory_config = app_context.app_config.get_config(PandasMemoryDataFeedConfig)
@@ -39,16 +40,18 @@ class PandasMemoryDataFeed(Feed):
     def id(self):
         return Feed.PandasMemory
 
-    def subscribe_mktdata(self, *sub_keys):
-        self.sub_keys.extend(sub_keys)
+    def subscribe_mktdata(self, sub_keys):
+        # logger.debug("[%s] subscrib_mktdata with subkeys type %s" % (self.__class__.__name__, type(sub_keys)))
+        # self.sub_keys.extend(sub_keys)
+        self.__load_data(sub_keys)
 
-        self.__load_data(self.sub_keys)
-        for index, row in self.df.iterrows():
-            ## TODO support bar filtering // from date, to date
-            bar = self.process_row(index, row)
-            self.data_event_bus.on_next(bar)
+        # for index, row in self.df.iterrows():
+        #     ## TODO support bar filtering // from date, to date
+        #     bar = self.process_row(index, row)
+        #     self.data_event_bus.on_next(bar)
 
     def process_row(self, index, row):
+        logger.debug("[%s] process_row with index %s, symbol %s" % (self.__class__.__name__, index, row['Symbol']))
         inst = self.ref_data_mgr.get_inst(symbol=row['Symbol'])
         return Bar(inst_id=inst.inst_id,
                    timestamp=DateUtils.datetime_to_unixtimemillis(index),
@@ -61,23 +64,45 @@ class PandasMemoryDataFeed(Feed):
 
     def __load_data(self, sub_keys):
 
-        self.dfs = []
+        dfs = []
+        sub_key_range = {sub_key.inst_id: (
+            DateUtils.date_to_unixtimemillis(sub_key.from_date), DateUtils.date_to_unixtimemillis(sub_key.to_date)) for
+                         sub_key in sub_keys}
+
         for sub_key in sub_keys:
             if not isinstance(sub_key, HistDataSubscriptionKey):
                 raise RuntimeError("only HistDataSubscriptionKey is supported!")
             if isinstance(sub_key.subscription_type,
-                          BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time and sub_key.subscription_type.bar_size == BarSize.D1:
+                          BarSubscriptionType) and sub_key.subscription_type.bar_type == BarType.Time: #and sub_key.subscription_type.bar_size == BarSize.D1:
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_key.inst_id)
                 symbol = inst.get_symbol(self.id())
 
                 # df = web.DataReader("F", self.system, sub_key.from_date, sub_key.to_date)
                 df = self.dict_of_df[symbol]
-                df['Symbol'] = symbol
-                df['BarSize'] = int(BarSize.D1)
+                # df['Symbol'] = symbol
+                # df['BarSize'] = int(BarSize.M5)
 
-                self.dfs.append(df)
+                dfs.append(df)
 
-        self.df = pd.concat(self.dfs).sort_index(0, ascending=True)
+        if len(dfs) > 0:
+            self.df = pd.concat(dfs).sort_index(0, ascending=True)
+            for index, row in df.iterrows():
+                inst = self.ref_data_mgr.get_inst(symbol=row['Symbol'])
+                range = sub_key_range[inst.inst_id]
+                timestamp = DateUtils.datetime_to_unixtimemillis(index)
+                if timestamp >= range[0] and timestamp < range[1]:
+                    self.data_event_bus.on_next(
+                        Bar(inst_id=inst.inst_id,
+                        timestamp=timestamp,
+                        open=row['Open'],
+                        high=row['High'],
+                        low=row['Low'],
+                        close=row['Close'],
+                        vol=row['Volume'],
+                        adj_close=row['Adj Close'],
+                        size=row['BarSize']))
+
+
 
         # for index, row in self.df.iterrows():
         # TODO support bar filtering // from date, to date

@@ -10,6 +10,7 @@ from algotrader.trading.position import PositionHolder
 from algotrader.trading.ref_data import InstType
 from algotrader.utils import logger
 from algotrader.utils.time_series import DataSeries
+import numpy as np
 
 
 class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler, AccountEventHandler,
@@ -20,6 +21,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         'orders',
         'app_context',
         'performance_series',
+        'cl_position_qty_series_dict'
         'total_equity',
         'cash',
         'stock_value',
@@ -40,6 +42,7 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
         self.orders = {}
 
         self.performance_series = DataSeries("%s.Performance" % self.portf_id, missing_value=0)
+        self.cl_position_qty_series_dict = {}
         self.total_equity = 0
         self.cash = cash
         self.stock_value = 0
@@ -150,6 +153,8 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
                               direction * exec_report.last_qty)
             self.update_position_price(exec_report.timestamp, exec_report.inst_id, multiplier*exec_report.last_price)
 
+        self.__update_position_qty(exec_report.timestamp, exec_report.cl_id, exec_report.inst_id)
+
     def update_position_price(self, timestamp, inst_id, price):
         super(Portfolio, self).update_position_price(timestamp, inst_id, price)
         self.__update_equity(timestamp, inst_id, price)
@@ -164,6 +169,38 @@ class Portfolio(PositionHolder, OrderEventHandler, ExecutionEventHandler, Market
 
         self.performance_series.add(
             {"timestamp": time, "stock_value": self.stock_value, "cash": self.cash, "total_equity": self.total_equity})
+
+    def __update_position_qty(self, time, cl_id, inst_id):
+        pos = self.get_position(inst_id)
+        qty = pos.filled_qty(cl_id)
+        inst_id_str = str(inst_id)
+        cl_id_str = str(cl_id)
+
+        if cl_id_str in self.cl_position_qty_series_dict:
+            pos_qty_series_dict = self.cl_position_qty_series_dict[cl_id_str]
+            if inst_id_str in pos_qty_series_dict:
+                pos_qty_series_dict[inst_id_str].add({"timestamp": time, "qty": qty})
+            else:
+                series = DataSeries("%s.PosQty" % inst_id, missing_value=0)
+                series.add({"timestamp": time, "qty": qty})
+                pos_qty_series_dict[inst_id_str] = series
+        else:
+            pos_qty_series_dict = {}
+            series = DataSeries("%s.PosQty" % inst_id, missing_value=0)
+            series.add({"timestamp": time, "qty": qty})
+            pos_qty_series_dict[inst_id_str] = series
+            self.cl_position_qty_series_dict[cl_id_str] = pos_qty_series_dict
+
+    def has_position(self, cl_id, inst_id):
+        inst_id_str = str(inst_id)
+        cl_id_str = str(cl_id)
+
+        if cl_id_str not in self.cl_position_qty_series_dict or \
+            inst_id_str not in self.cl_position_qty_series_dict[cl_id_str]:
+            return False
+
+        qty = self.cl_position_qty_series_dict[cl_id_str][inst_id_str].now("qty")
+        return True if np.abs(qty) > 0 else False
 
     def get_return(self):
         equity = self.performance_series.get_series("total_equity")

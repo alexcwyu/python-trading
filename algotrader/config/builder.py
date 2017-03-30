@@ -20,3 +20,11 @@ def backtest_mongo_persistance_config():
                              trade_ds_id=DataStore.Mongo, trade_persist_mode=PersistenceMode.Batch,
                              ts_ds_id=DataStore.Mongo, ts_persist_mode=PersistenceMode.Disable,
                              seq_ds_id=DataStore.Mongo, seq_persist_mode=PersistenceMode.Disable)
+
+
+def backtest_in_memory_config():
+    return PersistenceConfig("backtest_memory",
+                             ref_ds_id=DataStore.Mongo, ref_persist_mode=PersistenceMode.Disable,
+                             trade_ds_id=DataStore.InMemoryDB, trade_persist_mode=PersistenceMode.Disable,
+                             ts_ds_id=DataStore.InMemoryDB, ts_persist_mode=PersistenceMode.Disable,
+                             seq_ds_id=DataStore.InMemoryDB, seq_persist_mode=PersistenceMode.Disable)

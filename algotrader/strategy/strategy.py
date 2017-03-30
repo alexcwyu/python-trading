@@ -49,7 +49,7 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         self.orders = {}
 
     def __get_next_ord_id(self):
-        return self.app_context.seq_mgr.get_next_sequence(self.id())
+        return str(self.app_context.seq_mgr.get_next_sequence(self.id()))
 
 
     def get_stg_config_value(self, key, default_value=None):

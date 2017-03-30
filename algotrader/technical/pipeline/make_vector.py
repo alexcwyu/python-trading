@@ -4,8 +4,8 @@ import numpy as np
 
 
 class MakeVector(PipeLine):
-    _slots__ = (
-    )
+    # __slots__ = (
+    # )
 
     def __init__(self, inputs, input_key='close', desc="Bundle and Sync DataSeries to Vector"):
         super(MakeVector, self).__init__(PipeLine.get_name(MakeVector.__name__, inputs, input_key),
@@ -19,7 +19,7 @@ class MakeVector(PipeLine):
         if self.inputs[0].size() >= self.length:
             if self.all_filled():
                 packed_matrix = np.transpose(np.array(self.cache.values()))
-                result[PipeLine.VALUE] = packed_matrix
+                result[PipeLine.VALUE] = packed_matrix.tolist()
             else:
                 result[PipeLine.VALUE] = self._default_output()
         else:
@@ -30,9 +30,9 @@ class MakeVector(PipeLine):
     def _default_output(self):
         na_array = np.empty(shape=self.shape())
         na_array[:] = np.nan
-        return na_array
+        return na_array.tolist()
 
     def shape(self):
-        return np.array([1, self.numPipes])
+        return [1, self.numPipes]
 
 

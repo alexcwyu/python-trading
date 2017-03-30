@@ -5,54 +5,51 @@ from datetime import date
 from datetime import datetime
 
 import pandas as pd
-
-from algotrader.event.event_bus import EventBus
-from algotrader.event.event_handler import EventLogger
-from algotrader.event.market_data import Bar, BarType, BarSize
-from algotrader.provider.provider import HistDataSubscriptionKey, Feed, feed_mgr
-from algotrader.trading.ref_data import inmemory_ref_data_mgr
 from algotrader.utils import logger
 from algotrader.utils.clock import Clock
+from algotrader.provider.feed import Feed
+from algotrader.event.event_handler import EventLogger
+from algotrader.event.market_data import Bar, BarType, BarSize
+from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType
 
 
 class PandaH5DataFeed(Feed):
+    __metaclass__ = abc.ABCMeta
     """
-    This is a class to make a data feed from dataframe we already have in memory
+    This is a class to make a data feed from HDF5 with pandas
     """
-    ID = "PandasMemory"
+    ID = "PandasH5DataFeed"
 
-    def __init__(self, h5file, ref_data_mgr=None, data_event_bus=None):
+    def __init__(self, h5file):
         """
         :param h5file
-        :param ref_data_mgr:
-        :param data_event_bus:
         :return:
         """
+        super(PandaH5DataFeed, self).__init__()
         self.h5file = h5file
-        self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
-        self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject
-        self.__sub_keys = []
+        # self.__ref_data_mgr = ref_data_mgr if ref_data_mgr else inmemory_ref_data_mgr
+        # self.__data_event_bus = data_event_bus if data_event_bus else EventBus.data_subject
+        # self.__sub_keys = []
+        # feed_mgr.register(self)
 
-        feed_mgr.register(self)
+    def _start(self, app_context, **kwargs):
+        self.ref_data_mgr = self.app_context.ref_data_mgr
+        self.data_event_bus = self.app_context.event_bus.data_subject
 
-    def start(self):
-        self.__load_data(self.__sub_keys)
-        for index, row in self.df.iterrows():
-            ## TODO support bar filtering // from date, to date
-            bar = self.process_row(index, row)
-            self.__data_event_bus.on_next(bar)
-
-    def stop(self):
+    def _stop(self):
         pass
 
-    def id(self):
-        return PandaH5DataFeed.ID
+    # def start(self):
+    #     self.__load_data(self.__sub_keys)
+    #     for index, row in self.df.iterrows():
+    #         ## TODO support bar filtering // from date, to date
+    #         bar = self.process_row(index, row)
+    #         self.__data_event_bus.on_next(bar)
+
+
 
     def subscribe_all_mktdata(self, sub_keys):
-        if isinstance(sub_keys, list):
-            self.__sub_keys = self.__sub_keys + sub_keys
-        else:
-            self.__sub_keys.append(sub_keys)
+        self.__load_data([sub_keys])
 
     def subscribe_mktdata(self, sub_key):
         self.__sub_keys.append(sub_key)
@@ -96,6 +93,9 @@ class PandaH5DataFeed(Feed):
     def unsubscribe_mktdata(self, sub_key):
         pass
 
+    def id(self):
+        return PandaH5DataFeed.ID
+
 
 if __name__ == "__main__":
 
@@ -122,13 +122,17 @@ if __name__ == "__main__":
 
     today = date.today()
     startDate = date(2011,1,1)
-    sub_key0 = HistDataSubscriptionKey(inst_id=0, provider_id=PandaH5DataFeed.ID, data_type=Bar, bar_size=BarSize.D1,
+
+    sub_key0 = HistDataSubscriptionKey(inst_id=0, provider_id=PandaH5DataFeed.ID,
+                                       subscription_type=BarSubscriptionType(data_type=Bar, bar_size=BarSize.D1),
                                        from_date=startDate, to_date=today)
 
-    sub_key1 = HistDataSubscriptionKey(inst_id=1, provider_id=PandaH5DataFeed.ID, data_type=Bar, bar_size=BarSize.D1,
+    sub_key1 = HistDataSubscriptionKey(inst_id=1, provider_id=PandaH5DataFeed.ID,
+                                       subscription_type=BarSubscriptionType(data_type=Bar, bar_size=BarSize.D1),
                                        from_date=startDate, to_date=today)
 
-    sub_key2 = HistDataSubscriptionKey(inst_id=2, provider_id=PandaH5DataFeed.ID, data_type=Bar, bar_size=BarSize.D1,
+    sub_key2 = HistDataSubscriptionKey(inst_id=2, provider_id=PandaH5DataFeed.ID,
+                                       subscription_type=BarSubscriptionType(data_type=Bar, bar_size=BarSize.D1),
                                        from_date=startDate, to_date=today)
 
     feed.subscribe_all_mktdata([sub_key0, sub_key1, sub_key2])

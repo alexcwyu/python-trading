@@ -10,7 +10,7 @@ class Position(Persistable):
         'inst_id',
         'orders',
         'filled_qty_dict',
-        'last_price'
+        'last_price',
     )
 
     def __init__(self, inst_id=None):
@@ -35,15 +35,19 @@ class Position(Persistable):
     def add_position(self, cl_id, cl_ord_id, filled_qty):
         if cl_id not in self.filled_qty_dict:
             self.filled_qty_dict[cl_id] = {}
-        existing_filled_qty = self.filled_qty_dict[cl_id].get(cl_ord_id, 0)
+        existing_filled_qty = self.filled_qty_dict[str(cl_id)].get(cl_ord_id, 0)
         updated_filled_qty = existing_filled_qty + filled_qty
         self.filled_qty_dict[cl_id][cl_ord_id] = updated_filled_qty
 
-    def filled_qty(self):
+    def filled_qty(self, cl_id=None):
         total = 0
-        for cl_id, cl_filled_qty_dict in self.filled_qty_dict.iteritems():
-            for cl_ord_id, reg_qty in cl_filled_qty_dict.iteritems():
-                total += reg_qty
+        if cl_id is None:
+            for _, cl_filled_qty_dict in self.filled_qty_dict.iteritems():
+                for cl_ord_id, reg_qty in cl_filled_qty_dict.iteritems():
+                    total += reg_qty
+        else:
+            if cl_id in self.filled_qty_dict:
+                total = sum([reg_qty for cl_cord_id, reg_qty in self.filled_qty_dict[cl_id].iteritems()])
         return total
 
     def ordered_qty(self):
@@ -66,7 +70,7 @@ class Position(Persistable):
 class PositionHolder(MarketDataEventHandler):
     __metaclass__ = abc.ABCMeta
     __slots__ = (
-        'positions'
+        'positions',
     )
 
     def __init__(self):

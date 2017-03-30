@@ -1,4 +1,5 @@
 import datetime
+import numpy as np
 from unittest import TestCase
 
 from nose_parameterized import parameterized, param
@@ -15,7 +16,10 @@ from algotrader.event.order import NewOrderRequest, OrderCancelRequest, OrderRep
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
 from algotrader.provider.subscription import BarSubscriptionType
+from algotrader.technical import Indicator
 from algotrader.technical.ma import SMA
+from algotrader.technical.pipeline.rank import Rank
+from algotrader.technical.pipeline.make_vector import MakeVector
 from algotrader.trading.account import Account
 from algotrader.trading.order import Order
 from algotrader.trading.position import Position
@@ -170,6 +174,9 @@ class SerializerTest(TestCase):
 
         bar = self.app_context.inst_data_mgr.get_series("bar")
         sma = SMA(bar.name, 'close', 1, missing_value=0)
+        bar.start(self.app_context)
+        sma.start(self.app_context)
+
         t1 = datetime.datetime.now()
         t2 = t1 + datetime.timedelta(0, 3)
         t3 = t2 + datetime.timedelta(0, 3)
@@ -180,6 +187,54 @@ class SerializerTest(TestCase):
         bar.add({"timestamp": t3, "close": 2.8, "open": 1.8})
 
         SerializerTest.ser_deser(name, serializer, sma)
+
+
+    @parameterized.expand(params)
+    def test_numpy_array(self, name, serializer):
+        nan_array = np.empty([2, 5])
+        nan_array[:] = np.nan
+        SerializerTest.ser_deser(name, serializer, nan_array.tolist())
+
+        sample_vec = np.arange(10).reshape(2, 5).astype(np.float32)
+        SerializerTest.ser_deser(name, serializer, sample_vec.tolist())
+
+
+    # @parameterized.expand(params)
+    # def test_pipeline(self, name, serializer):
+    #     self.app_context = ApplicationContext()
+    #
+    #     bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+    #     bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+    #
+    #     bar0.start(self.app_context)
+    #     bar1.start(self.app_context)
+    #
+    #     rank = Rank([SMA(bar0, "close", 2), SMA(bar1, "close", 3), SMA(bar0, "close", 4)], input_key=Indicator.VALUE)
+    #     # basket = MakeVector(inputs=[bar0, bar1], input_key='close')
+    #
+    #     # basket.start(self.app_context)
+    #     rank.start(self.app_context) # only start at the tail is enough
+    #
+    #     t = datetime.datetime.now()
+    #     bar0.add({"timestamp": t, "close": 80.0, "open": 0})
+    #     bar1.add({"timestamp": t, "close": 95.0, "open": 0})
+    #
+    #     t = t + datetime.timedelta(0, 3)
+    #     bar0.add({"timestamp": t, "close": 85.0, "open": 0})
+    #     bar1.add({"timestamp": t, "close": 93.0, "open": 0})
+    #
+    #     t = t + datetime.timedelta(0, 3)
+    #     bar0.add({"timestamp": t, "close": 86.0, "open": 0})
+    #     bar1.add({"timestamp": t, "close": 91.0, "open": 0})
+    #
+    #     t = t + datetime.timedelta(0, 3)
+    #     bar0.add({"timestamp": t, "close": 90.0, "open": 0})
+    #     bar1.add({"timestamp": t, "close": 95.0, "open": 0})
+    #
+    #     print serializer.serialize(rank)
+    #
+    #     SerializerTest.ser_deser(name, serializer, rank)
+    #     # SerializerTest.ser_deser(name, serializer, basket)
 
     @parameterized.expand(params)
     def test_trading_config(self, name, serializer):

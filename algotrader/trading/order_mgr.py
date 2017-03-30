@@ -64,7 +64,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         self.ord_reqs_dict = {}
 
     def next_ord_id(self):
-        return self.app_context.seq_mgr.get_next_sequence(self.id())
+        return str(self.app_context.seq_mgr.get_next_sequence(self.id()))
 
     def on_bar(self, bar):
         super(OrderManager, self).on_bar(bar)

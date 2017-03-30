@@ -54,7 +54,7 @@ def call_talib_with_hlcv(ds, count, talib_func, *args, **kwargs):
 
 class SMA(Indicator):
     __slots__ = (
-        'length'
+        'length',
     )
 
     def __init__(self, input, input_key=None, length=0, desc="TALib Simple Moving Average"):
@@ -80,7 +80,7 @@ class SMA(Indicator):
 
 class EMA(Indicator):
     __slots__ = (
-        'length'
+        'length',
     )
 
     def __init__(self, input, input_key=None, length=0, desc="TALib Exponential Moving Average"):

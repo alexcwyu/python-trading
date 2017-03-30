@@ -48,7 +48,7 @@ class SimpleManager(Manager):
     __metaclass__ = abc.ABCMeta
 
     __slots__ = (
-        'item_dict'
+        'item_dict',
     )
 
     def __init__(self):

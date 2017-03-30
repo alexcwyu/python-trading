@@ -5,7 +5,7 @@ from algotrader.technical.pipeline import PipeLine
 import numpy as np
 
 class Pairwise(PipeLine):
-    _slots__ = (
+    __slots__ = (
         'lhs_name',
         'rhs_name',
         'func',
@@ -43,7 +43,7 @@ class Pairwise(PipeLine):
             except AssertionError as e:
                 raise ValueError("input_lhs shape should be the same as input_rhs in Pairwise Pipeline operation!")
         else:
-            self.__shape = np.array([1, 1])
+            self.__shape = [1, 1]
 
         super(Pairwise, self).update_all()
 
@@ -59,9 +59,9 @@ class Pairwise(PipeLine):
                 if self.is_input_pipeline:
                     xstk = np.vstack(x)
                     ystk = np.vstack(y)
-                    result[PipeLine.VALUE] = self.func(xstk, ystk)
+                    result[PipeLine.VALUE] = self.func(xstk, ystk).tolist()
                 else:
-                    result[PipeLine.VALUE] = self.func(x, y)
+                    result[PipeLine.VALUE] = self.func(x, y).tolist()
             else:
                 result[PipeLine.VALUE] = self._default_output()
         else:
@@ -72,7 +72,7 @@ class Pairwise(PipeLine):
     def _default_output(self):
         na_array = np.empty(shape=self.shape())
         na_array[:] = np.nan
-        return na_array
+        return na_array.tolist()
 
     def shape(self):
         return self.__shape

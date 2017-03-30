@@ -95,10 +95,12 @@ class PipelineTest(TestCase):
 
         rank = Rank([sma3, sma20, sma50], input_key='close')
         rank.start(self.app_context)
-        try:
-            np.testing.assert_almost_equal(np.array([1, 3]), rank.shape(), 5)
-        except AssertionError as e:
-            self.fail(e.message)
+
+        self.assertAlmostEqual([1, 3], rank.shape(), 5)
+        # try:
+        #     np.testing.assert_almost_equal(np.array([1, 3]), rank.shape(), 5)
+        # except AssertionError as e:
+        #     self.fail(e.message)
 
     def test_with_spread(self):
         bar0 = self.app_context.inst_data_mgr.get_series("bar0")
@@ -152,30 +154,40 @@ class PipelineTest(TestCase):
 
         t1 = datetime.datetime.now()
         bar0.add({"timestamp": t1, "close": 80.0, "open": 0})
-        self.__np_assert_almost_equal(nan_arr, basket.now()["value"])
+        # self.assertListEqual(nan_arr.tolist(),  basket.now()["value"])
+        self.__np_assert_almost_equal(nan_arr, np.array(basket.now()["value"]))
 
         bar1.add({"timestamp": t1, "close": 95.0, "open": 0})
+        # self.assertListEqual(nan_arr.tolist(),  basket.now()["value"])
         self.__np_assert_almost_equal(nan_arr, basket.now()["value"])
 
         bar2.add({"timestamp": t1, "close": 102.0, "open": 0})
-        self.__np_assert_almost_equal(nan_arr, basket.now()["value"])
+        # self.assertListEqual(nan_arr.tolist(),  basket.now()["value"])
+        self.__np_assert_almost_equal(nan_arr, np.array(basket.now()["value"]))
 
-        sync_vec = np.array([[80.0, 95.0, 102.0, 105.0]])
+        # sync_vec = np.array([[80.0, 95.0, 102.0, 105.0]])
+        sync_vec = [[80.0, 95.0, 102.0, 105.0]]
 
         bar3.add({"timestamp": t1, "close": 105.0, "open": 0})
-        self.__np_assert_almost_equal(sync_vec, basket.now()["value"])
+        # self.__np_assert_almost_equal(sync_vec, basket.now()["value"])
+        self.assertAlmostEqual(sync_vec, basket.now()["value"])
 
         bar4.add({"timestamp": t1, "close": 102.0, "open": 0})
         bar5.add({"timestamp": t1, "close": 95.0, "open": 0})
         bar6.add({"timestamp": t1, "close": 107.0, "open": 0})
         bar7.add({"timestamp": t1, "close": 101.0, "open": 0})
 
-        sync_vec2 = np.array([[102.0, 95.0, 107.0, 101.0]])
-        self.__np_assert_almost_equal(sync_vec2, basket2.now()["value"])
+        # sync_vec2 = np.array([[102.0, 95.0, 107.0, 101.0]])
+        sync_vec2 = [[102.0, 95.0, 107.0, 101.0]]
+        self.assertAlmostEqual(sync_vec2, basket2.now()["value"])
+        # self.__np_assert_almost_equal(sync_vec2, basket2.now()["value"])
 
-        target_spread = np.array([[22.0, 0.0, 5.0, -4.0]])
-        self.__np_assert_almost_equal(target_spread, cross_basket_spread.now()["value"])
-        self.__np_assert_almost_equal(sync_vec, basket.now()["value"])
+        # target_spread = np.array([[22.0, 0.0, 5.0, -4.0]])
+        target_spread = [[22.0, 0.0, 5.0, -4.0]]
+        self.assertAlmostEqual(target_spread, cross_basket_spread.now()["value"])
+        self.assertAlmostEqual(sync_vec, basket.now()["value"])
+        # self.__np_assert_almost_equal(target_spread, cross_basket_spread.now()["value"])
+        # self.__np_assert_almost_equal(sync_vec, basket.now()["value"])
 
 
     # def test_nan_before_size(self):
@@ -224,21 +236,30 @@ class PipelineTest(TestCase):
 
         rank_target = np.arange(4)/3.0
         rank_target = rank_target.reshape((1,4))
-        avg_target = np.array([[95.5]])
-        sum_target = np.array([[382.0]])
+        avg_target = 95.5 # for those return scala, it is a scala
+        sum_target = 382.0
         abs_target = np.array([[80.0, 95.0, 102.0, 105.0]])
         tail_target = np.array([[80.0, 101.0, 101.0, 105.0]])
         signvec_target = np.array([[1.0, 1.0, 1.0, 1.0]])
         scale_target = bar_t1_array / np.sum(bar_t1_array)
         scale_target = scale_target.reshape(1, 4)
 
-        self.__np_assert_almost_equal(abs_target, absv.now()["value"])
-        self.__np_assert_almost_equal(rank_target, rank.get_data()[0]["value"], 5)
-        self.__np_assert_almost_equal(avg_target, avg.get_data()[0]["value"], 5)
-        self.__np_assert_almost_equal(sum_target, gssum.get_data()[0]["value"], 5)
-        self.__np_assert_almost_equal(tail_target, tail.get_data()[0]["value"], 5)
-        self.__np_assert_almost_equal(signvec_target, signvec.get_data()[0]["value"], 5)
-        self.__np_assert_almost_equal(scale_target, scale.get_data()[0]["value"], 5)
+        # self.__np_assert_almost_equal(abs_target, absv.now()["value"])
+        # self.__np_assert_almost_equal(rank_target, rank.get_data()[0]["value"], 5)
+        # self.__np_assert_almost_equal(avg_target, avg.get_data()[0]["value"], 5)
+        # self.__np_assert_almost_equal(sum_target, gssum.get_data()[0]["value"], 5)
+        # self.__np_assert_almost_equal(tail_target, tail.get_data()[0]["value"], 5)
+        # self.__np_assert_almost_equal(signvec_target, signvec.get_data()[0]["value"], 5)
+        # self.__np_assert_almost_equal(scale_target, scale.get_data()[0]["value"], 5)
+
+        self.assertAlmostEqual(abs_target.tolist(), absv.now()["value"])
+        self.assertAlmostEqual(abs_target.tolist(), absv.get_data()[0]["value"], 5)
+        self.assertAlmostEqual(rank_target.tolist(), rank.get_data()[0]["value"], 5)
+        self.assertAlmostEqual(avg_target, avg.get_data()[0]["value"], 5)
+        self.assertAlmostEqual(sum_target, gssum.get_data()[0]["value"], 5)
+        self.assertAlmostEqual(tail_target.tolist(), tail.get_data()[0]["value"], 5)
+        self.assertAlmostEqual(signvec_target.tolist(), signvec.get_data()[0]["value"], 5)
+        self.assertAlmostEqual(scale_target.tolist(), scale.get_data()[0]["value"], 5)
 
         t2 = t1 + datetime.timedelta(0, 3)
         bar_t2_array = np.array([85, 98, 101.5, 103])
@@ -258,8 +279,10 @@ class PipelineTest(TestCase):
         decaylinear_target = np.dot(np.arange(3, 0, -1), stack)/np.sum(np.arange(3, 0, -1))
         scale_target = bar_t3_array / np.sum(bar_t3_array)
         scale_target = scale_target.reshape(1, 4)
-        self.__np_assert_almost_equal(decaylinear_target, decaylinear.now(keys=PipeLine.VALUE))
-        self.__np_assert_almost_equal(scale_target, scale.now(keys=PipeLine.VALUE))
+        self.assertAlmostEqual(decaylinear_target.tolist(), decaylinear.now(keys=PipeLine.VALUE))
+        self.assertAlmostEqual(scale_target.tolist(), scale.now(keys=PipeLine.VALUE))
+        # self.__np_assert_almost_equal(decaylinear_target, decaylinear.now(keys=PipeLine.VALUE))
+        # self.__np_assert_almost_equal(scale_target, scale.now(keys=PipeLine.VALUE))
 
 
     def test_with_multi_bar_multi_indicator(self):
@@ -286,27 +309,30 @@ class PipelineTest(TestCase):
 
         nan_arr = np.empty([1,3])
         nan_arr[:] = np.nan
-        self.__np_assert_almost_equal(nan_arr, rank.now()["value"])
+        # self.assertListEqual(nan_arr.tolist(), rank.now()["value"])
+        self.__np_assert_almost_equal(nan_arr, np.array(rank.now()["value"]))
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 85.0, "open": 0})
         bar1.add({"timestamp": t, "close": 93.0, "open": 0})
         target = nan_arr
         target[0, 0] = 0.
-        self.__np_assert_almost_equal(target, rank.now()["value"])
+        self.__np_assert_almost_equal(target, np.array(rank.now()["value"]))
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 86.0, "open": 0})
         bar1.add({"timestamp": t, "close": 91.0, "open": 0})
         target[0, 1] = 0.5
-        self.__np_assert_almost_equal(target, rank.now()["value"])
+        self.__np_assert_almost_equal(target.tolist(), rank.now()["value"])
+        # self.__np_assert_almost_equal(target, rank.now()["value"])
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 90.0, "open": 0})
         bar1.add({"timestamp": t, "close": 95.0, "open": 0})
         target = np.array([[0.5, 1.0, 0.]])
 
-        self.__np_assert_almost_equal(target, rank.now()["value"])
+        # self.assertAlmostEqual(target.tolist(), rank.now()["value"])
+        self.__np_assert_almost_equal(target, np.array(rank.now()["value"]))
 
     def test_with_multi_bar_multi_indicator_with_tail_start(self):
         bar0 = self.app_context.inst_data_mgr.get_series("bar0")
@@ -334,25 +360,27 @@ class PipelineTest(TestCase):
 
         nan_arr = np.empty([1,3])
         nan_arr[:] = np.nan
-        self.__np_assert_almost_equal(nan_arr, rank.now()["value"])
+        # self.assertListEqual(nan_arr.tolist(), rank.now()["value"])
+        self.__np_assert_almost_equal(nan_arr, np.array(rank.now()["value"]))
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 85.0, "open": 0})
         bar1.add({"timestamp": t, "close": 93.0, "open": 0})
         target = nan_arr
         target[0, 0] = 0.
-        self.__np_assert_almost_equal(target, rank.now()["value"])
+        self.__np_assert_almost_equal(target, np.array(rank.now()["value"]))
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 86.0, "open": 0})
         bar1.add({"timestamp": t, "close": 91.0, "open": 0})
         target[0, 1] = 0.5
-        self.__np_assert_almost_equal(target, rank.now()["value"])
+        self.__np_assert_almost_equal(target, np.array(rank.now()["value"]))
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 90.0, "open": 0})
         bar1.add({"timestamp": t, "close": 95.0, "open": 0})
         target = np.array([[0.5, 1.0, 0.]])
 
-        self.__np_assert_almost_equal(target, rank.now()["value"])
+        # self.assertAlmostEqual(target.tolist(), rank.now()["value"])
+        self.__np_assert_almost_equal(target, np.array(rank.now()["value"]))
 

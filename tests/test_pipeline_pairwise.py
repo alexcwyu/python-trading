@@ -158,6 +158,78 @@ class PairwiseTest(TestCase):
         y = np.vstack([x2, x3])
         self.__np_assert_almost_equal(pcorr.now('value'), np.corrcoef(x, y))
 
+    def test_infix_arithmetic(self):
+        from infix import or_infix as infix
+
+        @infix
+        def PipeLinePlus(x, y):
+            return Plus(x, y, input_key='close')
+
+        @infix
+        def PipeLineMinus(x, y):
+            return Minus(x, y, input_key='close')
+
+        @infix
+        def PipeLineTimes(x, y):
+            return Times(x, y, input_key='close')
+
+        @infix
+        def PipeLineDivides(x, y):
+            return Divides(x, y, input_key='close')
+
+        bar0 = self.app_context.inst_data_mgr.get_series("bar0")
+        bar1 = self.app_context.inst_data_mgr.get_series("bar1")
+
+        bar0.start(self.app_context)
+        bar1.start(self.app_context)
+
+        # plus = Plus(bar0, bar1, input_key='close')
+        # minus = Minus(bar0, bar1, input_key='close')
+        # times = Times(bar0, bar1, input_key='close')
+        # divides = Divides(bar0, bar1, input_key='close')
+        plus = bar0 |PipeLinePlus| bar1
+        minus = bar0 |PipeLineMinus| bar1
+        times = bar0 |PipeLineTimes| bar1
+        divides = bar0 |PipeLineDivides| bar1
+
+        plus.start(self.app_context)
+        minus.start(self.app_context)
+        times.start(self.app_context)
+        divides.start(self.app_context)
+
+        now = datetime.datetime.now()
+        x = np.array([80.0, 102.0, 101.0, 99.0])
+        y = np.array([95.0, 98.0, 105.2, 103.3])
+        ts = [now + datetime.timedelta(0, i*3) for i in range(4)]
+        x_p_y = x + y
+        x_m_y = x - y
+        x_t_y = x * y
+        x_d_y = x / y
+
+        bar0.add({"timestamp": ts[0], "close": x[0], "open": 0})
+        bar1.add({"timestamp": ts[0], "close": y[0], "open": 0})
+
+        self.assertEqual(plus.now('value'), 175.0)
+        self.assertEqual(minus.now('value'), -15.0)
+        self.assertEqual(times.now('value'), 7600.0)
+        self.assertEqual(divides.now('value'), 80.0/95.0)
+
+        bar0.add({"timestamp": ts[1], "close": x[1], "open": 0})
+        bar1.add({"timestamp": ts[1], "close": y[1], "open": 0})
+
+        self.assertEqual(plus.now('value'), 200.0)
+        self.assertEqual(minus.now('value'), 4.0)
+        self.assertEqual(times.now('value'), 102.0*98.0)
+        self.assertEqual(divides.now('value'), 102.0/98.0)
+
+        bar0.add({"timestamp": ts[2], "close": x[2], "open": 0})
+        bar1.add({"timestamp": ts[2], "close": y[2], "open": 0})
+
+        bar0.add({"timestamp": ts[3], "close": x[3], "open": 0})
+        bar1.add({"timestamp": ts[3], "close": y[3], "open": 0})
+
+        # self.assertEqual(pcorr.now('value'), np.corrcoef(x, y))
+
     def __np_assert_almost_equal(self, target, output, precision=10):
         try:
             np.testing.assert_almost_equal(target, output, precision)

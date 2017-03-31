@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Callable
 
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_helper import ModelHelper
@@ -10,89 +10,116 @@ from algotrader.model.trade_data_pb2 import *
 class ModelFactory(object):
     # ref data
     @staticmethod
-    def build_instrument(symbol: str, type: Instrument.InstType, primary_exch_id: str, ccy_id: str,
-                         name: str = None, exch_ids: List[str] = None, sector: str = None, industry: str = None,
-                         margin: float = None, tick_size: float = None,
-                         underlying: Underlying = None, derivative: DrivativeTraits = None,
-                         alt_symbols: Dict[str, str] = None, alt_ids: Dict[str, str] = None,
-                         alt_sectors: Dict[str, str] = None, alt_industries: Dict[str, str] = None) -> Instrument:
+    def new_instrument(symbol: str, type: Instrument.InstType, primary_exch_id: str, ccy_id: str,
+                       name: str = None, exch_ids: List[str] = None, sector: str = None, industry: str = None,
+                       margin: float = None, tick_size: float = None,
+                       alt_symbols: Dict[str, str] = None, alt_ids: Dict[str, str] = None,
+                       alt_sectors: Dict[str, str] = None, alt_industries: Dict[str, str] = None,
+                       underlying_type: Underlying.UnderlyingType = None,
+                       underlying_ids: List[str] = None,
+                       underlying_weights: List[float] = None,
+                       option_type: Instrument.OptionType = None,
+                       option_style: Instrument.OptionStyle = None, strike: float = None,
+                       exp_date: int = None,
+                       multiplier: float = None) -> Instrument:
         inst = Instrument()
-        # inst.inst_id = 10
         inst.inst_id = symbol + '@' + primary_exch_id
         inst.symbol = symbol
-        inst.name = name
-        inst.type = type
+        if isinstance(type, int):
+            inst.type = type
+        else:
+            inst.type = Instrument.InstType.DESCRIPTOR.values_by_name[type].number
         inst.primary_exch_id = primary_exch_id
-        ModelHelper.add_to_list(inst.exch_ids, exch_ids)
         inst.ccy_id = ccy_id
 
-        inst.sector = sector
-        inst.industry = industry
-        inst.margin = margin
-        inst.tick_size = tick_size
-        if underlying:
-            inst.underlying.CopyFrom(underlying)
-        if derivative:
-            inst.derivative.CopyFrom(derivative)
+        if name:
+            inst.name = name
+
+        ModelHelper.add_to_list(inst.exch_ids, exch_ids)
+
+        if sector:
+            inst.sector = sector
+
+        if industry:
+            inst.industry = industry
+
+        if margin:
+            inst.margin = margin
+
+        if tick_size:
+            inst.tick_size = tick_size
+
         ModelHelper.add_to_dict(inst.alt_symbols, alt_symbols)
         ModelHelper.add_to_dict(inst.alt_ids, alt_ids)
         ModelHelper.add_to_dict(inst.alt_sectors, alt_sectors)
         ModelHelper.add_to_dict(inst.alt_industries, alt_industries)
 
+        if underlying_type and underlying_ids:
+            ModelFactory.new_underlying(inst, underlying_type, underlying_ids, underlying_weights)
+
+            if option_type:
+                inst.option_type = option_type
+            if option_style:
+                inst.option_style = option_style
+            if strike:
+                inst.strike = strike
+            if exp_date:
+                inst.exp_date = exp_date
+            if multiplier:
+                inst.multiplier = multiplier
+
         return inst
 
     @staticmethod
-    def build_derivative_traits(option_type: DrivativeTraits.OptionType = None,
-                                option_style: DrivativeTraits.OptionStyle = None, strike: float = None,
-                                exp_date: int = None,
-                                multiplier: float = None) -> DrivativeTraits:
-        deriv = DrivativeTraits()
-        deriv.option_type = option_type
-        deriv.option_style = option_style
-        deriv.strike = strike
-        deriv.exp_date = exp_date
-        deriv.multiplier = multiplier
-
-        return deriv
-
-    @staticmethod
-    def build_underlying(type: Instrument.InstType, assets: List[Underlying.Asset]) -> Underlying:
-        underlying = Underlying()
+    def new_underlying(inst: Instrument, type: Underlying.UnderlyingType, assets: List[str],
+                       weights: List[float] = None) -> Underlying:
+        underlying = inst.underlying
         underlying.type = type
-        ModelHelper.add_to_list(underlying.assets, assets)
+
+        if weights:
+            for asset_id, weight in zip(assets, weights):
+                ModelFactory.add_asset(underlying=underlying, asset_id=asset_id, weight=weight)
+        else:
+            for asset_id in assets:
+                ModelFactory.add_asset(underlying=underlying, asset_id=asset_id)
 
         return underlying
 
     @staticmethod
-    def build_asset(inst_id: str, weight: float) -> Underlying.Asset:
-        asset = Underlying.Asset()
-        asset.inst_id = inst_id
-        asset.weight = weight
-
+    def add_asset(underlying: Underlying, asset_id: str, weight: float = None) -> Underlying.Asset:
+        asset = underlying.assets.add()
+        asset.inst_id = asset_id
+        if weight is not None:
+            asset.weight = weight
         return asset
 
     @staticmethod
-    def build_exchange(exch_id: str, name: str, country_id: str = None, trading_hours_id: str = None,
-                       holidays_id: str = None,
-                       alt_ids: Dict[str, str] = None) -> Exchange:
+    def new_exchange(exch_id: str, name: str, country_id: str = None, trading_hours_id: str = None,
+                     holidays_id: str = None,
+                     alt_ids: Dict[str, str] = None) -> Exchange:
         exchange = Exchange()
         exchange.exch_id = exch_id
-        exchange.name = name
-        exchange.country_id = country_id
-        exchange.trading_hours_id = trading_hours_id
-        exchange.holidays_id = holidays_id
+        if name:
+            exchange.name = name
+        if country_id:
+            exchange.country_id = country_id
+        if trading_hours_id:
+            exchange.trading_hours_id = trading_hours_id
+        if holidays_id:
+            exchange.holidays_id = holidays_id
         ModelHelper.add_to_dict(exchange.alt_ids, alt_ids)
         return exchange
 
     @staticmethod
-    def build_currency(ccy_id: str, name: str) -> Currency:
+    def new_currency(ccy_id: str, name: str) -> Currency:
         currency = Currency()
         currency.ccy_id = ccy_id
-        currency.name = name
+        if name:
+            currency.name = name
         return currency
 
     @staticmethod
-    def build_country(country_id: str, name: str, holidays_id: str = None) -> Country:
+    def new_country(country_id: str, name: str, holidays_id: str = None) -> Country:
         country = Country()
         country.country_id = country_id
         country.name = name
@@ -100,18 +127,18 @@ class ModelFactory(object):
         return country
 
     @staticmethod
-    def build_holiday_series(holidays_id, holidays) -> HolidaySeries:
+    def new_holiday_series(holidays_id) -> HolidaySeries:
         holiday_series = HolidaySeries()
         holiday_series.holidays_id = holidays_id
-        ModelHelper.add_to_list(holiday_series.holidays, holidays)
         return holiday_series
 
     @staticmethod
-    def build_holiday(trading_date: int, type: HolidaySeries.Holiday.Type, start_date: int, end_date: int,
-                      start_time: int = None,
-                      end_time: int = None,
-                      desc: str = None) -> HolidaySeries.Holiday:
-        holiday = HolidaySeries.Holiday()
+    def add_holiday(holiday_series: HolidaySeries, trading_date: int, type: HolidaySeries.Holiday.Type, start_date: int,
+                    end_date: int,
+                    start_time: int = None,
+                    end_time: int = None,
+                    desc: str = None) -> HolidaySeries.Holiday:
+        holiday = holiday_series.holidays.add()
         holiday.trading_date = trading_date
         holiday.type = type
         holiday.start_date = start_date
@@ -121,51 +148,41 @@ class ModelFactory(object):
             holiday.start_time = start_time
         if end_time:
             holiday.end_time = end_time
-
         if desc:
             holiday.desc = desc
+
         return holiday
 
     @staticmethod
-    def build_trading_hours(trading_hours_id: str, timezone_id: str,
-                            sessions: List[TradingHours.Session]) -> TradingHours:
+    def new_trading_hours(trading_hours_id: str, timezone_id: str) -> TradingHours:
         trading_hour = TradingHours()
         trading_hour.trading_hours_id = trading_hours_id
         trading_hour.timezone_id = timezone_id
-        ModelHelper.add_to_list_value(trading_hour.sessions, sessions)
         return trading_hour
 
     @staticmethod
-    def build_trading_session(start_weekdate: int, start_time: int, end_weekdate: int, end_time: int,
-                              eod: bool) -> TradingHours.Session:
-        session = TradingHours.Session()
+    def add_trading_session(trading_hour: TradingHours, start_weekdate: int, start_time: int, end_weekdate: int,
+                            end_time: int,
+                            eod: bool) -> TradingHours.Session:
+        session = trading_hour.sessions.add()
         session.start_weekdate = start_weekdate
         session.start_time = start_time
         session.end_weekdate = end_weekdate
         session.end_time = end_time
         session.eod = eod
-
         return session
 
     @staticmethod
-    def build_timezone(timezone_id: str) -> TimeZone:
+    def new_timezone(timezone_id: str) -> TimeZone:
         timezone = TimeZone()
         timezone.timezone_id = timezone_id
         return timezone
 
     @staticmethod
-    def build_time_series_item(timestamp: int, data: Dict[str, float]) -> TimeSeries.Item:
-        item = TimeSeries.Item()
-        item.timestamp = timestamp
-        ModelHelper.add_to_dict(item.data, data)
-
-        return item
-
-    @staticmethod
-    def build_time_series(series_id: str, name: str = '', desc: str = '',
-                          inputs: Union[str, List[str]] = None, keys: Union[str, List[str]] = None,
-                          default_output_key: str = 'value', missing_value_replace: float = 0.0, start_time: int = 0,
-                          end_time: int = 0, items: List[TimeSeries.Item] = None) -> TimeSeries:
+    def new_time_series(series_id: str, name: str = '', desc: str = '',
+                        inputs: Union[str, List[str]] = None, keys: Union[str, List[str]] = None,
+                        default_output_key: str = 'value', missing_value_replace: float = 0.0, start_time: int = 0,
+                        end_time: int = 0) -> TimeSeries:
         time_series = TimeSeries()
         time_series.series_id = series_id
         time_series.name = name
@@ -176,85 +193,131 @@ class ModelFactory(object):
         time_series.missing_value_replace = missing_value_replace
         time_series.start_time = start_time
         time_series.end_time = end_time
-        ModelHelper.add_to_list(time_series.items, items)
 
         return time_series
 
     @staticmethod
-    def build_bar(inst_id: str, type: Bar.Type, size: int, provider_id: str, timestamp: int,
-                  open: float, high: float, low: float, close: float, vol: float, adj_close: float = None,
-                  open_interest: float = None,
-                  utc_time: int = None, begin_time: int = None) -> Bar:
+    def add_time_series_item(time_series: TimeSeries, timestamp: int, data: Dict[str, float]) -> TimeSeries.Item:
+        item = time_series.items.add()
+        ModelFactory.update_time_series_time(item, timestamp=timestamp, data=data)
+        return item
+
+    @staticmethod
+    def update_time_series_time(item: TimeSeries.Item, timestamp: int = None,
+                                data: Dict[str, float] = None) -> TimeSeries.Item:
+        item.timestamp = timestamp
+        ModelHelper.add_to_dict(item.data, data)
+        return item
+
+    @staticmethod
+    def new_bar(inst_id: str, type: Bar.Type = None, size: int = None, provider_id: str = None, timestamp: int = None,
+                open: float = None, high: float = None, low: float = None, close: float = None, vol: float = None, adj_close: float = None,
+                open_interest: float = None,
+                utc_time: int = None, begin_time: int = None) -> Bar:
         bar = Bar()
         bar.inst_id = inst_id
-        bar.type = type
-        bar.size = size
-        bar.provider_id = provider_id
-        bar.timestamp = timestamp
-        bar.open = open
-        bar.high = high
-        bar.low = low
-        bar.close = close
-        bar.vol = vol
-        bar.adj_close = adj_close
-        bar.open_interest = open_interest
-        bar.utc_time = utc_time
-        bar.begin_time = begin_time
+        if type:
+            bar.type = type
+        if size:
+            bar.size = size
+        if provider_id:
+            bar.provider_id = provider_id
+        if timestamp:
+            bar.timestamp = timestamp
+        if open:
+            bar.open = open
+        if high:
+            bar.high = high
+        if low:
+            bar.low = low
+        if close:
+            bar.close = close
+        if vol:
+            bar.vol = vol
+        if adj_close:
+            bar.adj_close = adj_close
+        if open_interest:
+            bar.open_interest = open_interest
+        if utc_time:
+            bar.utc_time = utc_time
+        if begin_time:
+            bar.begin_time = begin_time
 
         return bar
 
     @staticmethod
-    def build_quote(inst_id: str, provider_id: str, timestamp: float, bid: float, bid_size: float, ask: float,
-                    ask_size: float, utc_time: int = None) -> Quote:
+    def new_quote(inst_id: str, provider_id: str = None, timestamp: float = None, bid: float = None, bid_size: float = None, ask: float = None,
+                  ask_size: float = None, utc_time: int = None) -> Quote:
         quote = Quote()
         quote.inst_id = inst_id
-        quote.provider_id = provider_id
-        quote.timestamp = timestamp
-        quote.utc_time = utc_time
-        quote.bid = bid
-        quote.bid_size = bid_size
-        quote.ask = ask
-        quote.ask_size = ask_size
+        if provider_id:
+            quote.provider_id = provider_id
+        if timestamp:
+            quote.timestamp = timestamp
+        if utc_time:
+            quote.utc_time = utc_time
+        if bid:
+            quote.bid = bid
+        if bid_size:
+            quote.bid_size = bid_size
+        if ask:
+            quote.ask = ask
+        if ask_size:
+            quote.ask_size = ask_size
 
         return quote
 
     @staticmethod
-    def build_trade(inst_id: str, provider_id: str, timestamp: int, price: float, size: float,
-                    utc_time: int = None) -> Trade:
+    def new_trade(inst_id: str, provider_id: str = None, timestamp: int = None, price: float = None, size: float = None,
+                  utc_time: int = None) -> Trade:
         trade = Trade()
         trade.inst_id = inst_id
-        trade.provider_id = provider_id
-        trade.timestamp = timestamp
-        trade.price = price
-        trade.size = size
-        trade.utc_time = utc_time
+        if provider_id:
+            trade.provider_id = provider_id
+        if timestamp:
+            trade.timestamp = timestamp
+        if price:
+            trade.price = price
+        if size:
+            trade.size = size
+        if utc_time:
+            trade.utc_time = utc_time
 
         return trade
 
     @staticmethod
-    def build_market_depth(inst_id: str, provider_id: str, timestamp: int, md_provider: str, position: int,
-                           operation: MarketDepth.Operation, side: MarketDepth.Side, price: float, size: float,
-                           utc_time: int = None) -> MarketDepth:
+    def new_market_depth(inst_id: str, provider_id: str = None, timestamp: int = None, md_provider: str = None, position: int = None,
+                         operation: MarketDepth.Operation = None, side: MarketDepth.Side = None, price: float = None, size: float = None,
+                         utc_time: int = None) -> MarketDepth:
         md = MarketDepth()
         md.inst_id = inst_id
-        md.provider_id = provider_id
-        md.timestamp = timestamp
-        md.md_provider = md_provider
-        md.position = position
-        md.operation = operation
-        md.side = side
-        md.price = price
-        md.size = size
-        md.utc_time = utc_time
+        if provider_id:
+            md.provider_id = provider_id
+        if timestamp:
+            md.timestamp = timestamp
+        if md_provider:
+            md.md_provider = md_provider
+        if position:
+            md.position = position
+        if operation:
+            md.operation = operation
+        if side:
+            md.side = side
+        if price:
+            md.price = price
+        if size:
+            md.size = size
+        if utc_time:
+            md.utc_time = utc_time
         return md
 
     @staticmethod
-    def build_new_order_request(timestamp: int, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str,
-                                inst_id: str,
-                                action: OrderAction, type: OrderType, qty: float, limit_price: float,
-                                stop_price: float = 0.0,
-                                tif: TIF = DAY, oca_tag: str = None,
-                                params: Dict[str, str] = None) -> NewOrderRequest:
+    def new_new_order_request(timestamp: int, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str,
+                              inst_id: str,
+                              action: OrderAction, type: OrderType, qty: float, limit_price: float,
+                              stop_price: float = 0.0,
+                              tif: TIF = DAY, oca_tag: str = None,
+                              params: Dict[str, str] = None) -> NewOrderRequest:
         req = NewOrderRequest()
 
         req.timestamp = timestamp
@@ -276,11 +339,11 @@ class ModelFactory(object):
         return req
 
     @staticmethod
-    def build_order_replace_request(timestamp: int, cl_id: str, cl_ord_id: str, cl_orig_req_id: str,
-                                    type: OrderType, qty: float,
-                                    limit_price: float, stop_price: float = None,
-                                    tif: TIF = DAY, oca_tag: str = None,
-                                    params: Dict[str, str] = None) -> OrderReplaceRequest:
+    def new_order_replace_request(timestamp: int, cl_id: str, cl_ord_id: str, cl_orig_req_id: str,
+                                  type: OrderType, qty: float,
+                                  limit_price: float, stop_price: float = None,
+                                  tif: TIF = DAY, oca_tag: str = None,
+                                  params: Dict[str, str] = None) -> OrderReplaceRequest:
         req = OrderReplaceRequest()
 
         req.timestamp = timestamp
@@ -298,8 +361,8 @@ class ModelFactory(object):
         return req
 
     @staticmethod
-    def build_order_cancel_request(timestamp: int, cl_id: str, cl_ord_id: str, cl_orig_req_id: str,
-                                   params: Dict[str, str] = None) -> OrderCancelRequest:
+    def new_order_cancel_request(timestamp: int, cl_id: str, cl_ord_id: str, cl_orig_req_id: str,
+                                 params: Dict[str, str] = None) -> OrderCancelRequest:
         req = OrderCancelRequest()
         req.timestamp = timestamp
         req.cl_id = cl_id
@@ -310,10 +373,10 @@ class ModelFactory(object):
         return req
 
     @staticmethod
-    def build_order_status_update(timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str,
-                                  cl_id: str,
-                                  cl_ord_id: str, inst_id: str, filled_qty: float, avg_price: float,
-                                  status: OrderStatus) -> OrderStatusUpdate:
+    def new_order_status_update(timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str,
+                                cl_id: str,
+                                cl_ord_id: str, inst_id: str, filled_qty: float, avg_price: float,
+                                status: OrderStatus) -> OrderStatusUpdate:
         event = OrderStatusUpdate()
         event.timestamp = timestamp
         event.broker_id = broker_id
@@ -329,54 +392,60 @@ class ModelFactory(object):
         return event
 
     @staticmethod
-    def build_execution_report(timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str,
-                               broker_er_id: str,
-                               cl_id: str,
-                               cl_ord_id: str, inst_id: str, last_qty: float, last_price: float, commission: float,
-                               filled_qty: float, avg_price: float,
-                               status: OrderStatus) -> ExecutionReport:
+    def new_execution_report(timestamp: int, broker_id: str, broker_event_id: str = None, broker_ord_id: str = None,
+                             cl_id: str = None,
+                             cl_ord_id: str = None, inst_id: str = None, last_qty: float = None, last_price: float = None, commission: float = None,
+                             filled_qty: float = None, avg_price: float = None,
+                             status: OrderStatus = None) -> ExecutionReport:
         event = ExecutionReport()
         event.timestamp = timestamp
         event.broker_id = broker_id
-        event.broker_event_id = broker_event_id
-        event.broker_ord_id = broker_ord_id
-        event.broker_er_id = broker_er_id
-        event.cl_id = cl_id
-        event.cl_ord_id = cl_ord_id
-        event.inst_id = inst_id
-        event.last_price = last_price
-        event.last_price = last_price
-        event.commission = commission
-        event.filled_qty = filled_qty
-        event.avg_price = avg_price
-        event.status = status
+        if broker_event_id:
+            event.broker_event_id = broker_event_id
+        if broker_ord_id:
+            event.broker_ord_id = broker_ord_id
+        if cl_id:
+            event.cl_id = cl_id
+        if cl_ord_id:
+            event.cl_ord_id = cl_ord_id
+        if inst_id:
+            event.inst_id = inst_id
+        if last_qty:
+            event.last_qty = last_qty
+        if last_price:
+            event.last_price = last_price
+        if commission:
+            event.commission = commission
+        if filled_qty:
+            event.filled_qty = filled_qty
+        if avg_price:
+            event.avg_price = avg_price
+        if status:
+            event.status = status
 
         return event
 
     @staticmethod
-    def build_account_value(key: str, ccy_values: Dict[str, float]) -> AccountValue:
-        value = AccountValue()
-        value.key = key
-        ModelHelper.add_to_dict(value.ccy_values, ccy_values)
-        return value
-
-    @staticmethod
-    def build_account_update(timestamp: int, broker_id: str, broker_event_id: str, account_name,
-                             values: AccountValue) -> AccountUpdate:
+    def new_account_update(timestamp: int, broker_id: str, broker_event_id: str, account_name) -> AccountUpdate:
         event = AccountUpdate()
 
         event.timestamp = timestamp
         event.broker_id = broker_id
         event.broker_event_id = broker_event_id
         event.account_name = account_name
-        ModelHelper.add_to_dict_value(event.values, values)
 
         return event
 
     @staticmethod
-    def build_portfolio_update(timestamp: int, broker_id: str, broker_event_id: str, portf_id: str, inst_id: str,
-                               position: float, mkt_price: float, mkt_value: float, avg_cost: float,
-                               unrealized_pnl: float, realized_pnl: float) -> PortfolioUpdate:
+    def update_account_value(value: AccountValue, key: str, ccy_values: Dict[str, float]) -> AccountValue:
+        value.key = key
+        ModelHelper.add_to_dict(value.ccy_values, ccy_values)
+        return value
+
+    @staticmethod
+    def new_portfolio_update(timestamp: int, broker_id: str, broker_event_id: str, portf_id: str, inst_id: str,
+                             position: float, mkt_price: float, mkt_value: float, avg_cost: float,
+                             unrealized_pnl: float, realized_pnl: float) -> PortfolioUpdate:
         event = PortfolioUpdate()
 
         event.timestamp = timestamp
@@ -394,116 +463,125 @@ class ModelFactory(object):
         return event
 
     @staticmethod
-    def build_account_state(acct_id: str, values: Dict[str, AccountValue] = None,
-                            positions: Dict[str, Position] = None) -> AccountState:
+    def new_account_state(acct_id: str) -> AccountState:
         account = AccountState()
-
         account.acct_id = acct_id
-        ModelHelper.add_to_dict_value(account.values, values)
-        ModelHelper.add_to_dict_value(account.positions, positions)
-
         return account
 
     @staticmethod
-    def build_portfolio_state(portf_id: str, cash: float, positions: Dict[str, Position] = None,
-                              performance: Performance = None,
-                              pnl: Pnl = None, drawdown: DrawDown = None) -> PortfolioState:
+    def new_portfolio_state(portf_id: str, cash: float, stock_value: float = None) -> PortfolioState:
         portfolio = PortfolioState()
         portfolio.portf_id = portf_id
         portfolio.cash = cash
-        ModelHelper.add_to_dict_value(portfolio.positions, positions)
-        portfolio.performance.CopyFrom(performance if performance else Performance())
-        portfolio.pnl.CopyFrom(pnl if pnl else Pnl())
-        portfolio.drawdown.CopyFrom(drawdown if drawdown else DrawDown())
-
+        if stock_value:
+            portfolio.stock_value = stock_value
+        ModelFactory.new_portfolio_performance(portfolio=portfolio)
+        ModelFactory.new_portfolio_pnl(portfolio=portfolio)
+        ModelFactory.new_portfolio_drawdown(portfolio=portfolio)
         return portfolio
 
     @staticmethod
-    def build_performance(total_equity: float, stock_value: float,
-                          performance_series: TimeSeries = None) -> Performance:
-        performance = Performance()
+    def new_portfolio_performance(portfolio: PortfolioState, total_equity: float = 0) -> Performance:
+        performance = portfolio.performance
         performance.total_equity = total_equity
-        performance.stock_value = stock_value
-        performance.series.CopyFrom(performance_series if performance_series else TimeSeries())
+        performance.series.series_id = portfolio.portf_id + "@performance"
         return performance
 
     @staticmethod
-    def build_pnl(last_pnl: float, pnl_series: TimeSeries = None) -> Pnl:
-        pnl = Pnl()
+    def new_portfolio_pnl(portfolio: PortfolioState, last_pnl: float = 0) -> Pnl:
+        pnl = portfolio.pnl
         pnl.last_pnl = last_pnl
-        pnl.series.CopyFrom(pnl_series if pnl_series else TimeSeries())
+        pnl.series.series_id = portfolio.portf_id + "@pnl"
         return pnl
 
     @staticmethod
-    def build_drawdown(last_drawdown: float, last_drawdown_pct: float, high_equity: float, low_equity: float,
-                       current_run_up: float, current_drawdown: float, drawdown_series: TimeSeries = None) -> DrawDown:
-        dd = DrawDown()
+    def new_portfolio_drawdown(portfolio: PortfolioState, last_drawdown: float = 0, last_drawdown_pct: float = 0,
+                               high_equity: float = 0,
+                               low_equity: float = 0,
+                               current_run_up: float = 0, current_drawdown: float = 0) -> DrawDown:
+        dd = portfolio.drawdown
         dd.last_drawdown = last_drawdown
         dd.last_drawdown_pct = last_drawdown_pct
         dd.high_equity = high_equity
         dd.low_equity = low_equity
         dd.current_run_up = current_run_up
         dd.current_drawdown = current_drawdown
-        dd.series.CopyFrom(drawdown_series if drawdown_series else TimeSeries())
+        dd.series.series_id = portfolio.portf_id + "@drawdown"
 
         return dd
 
     @staticmethod
-    def build_config(config_id: str, values: Dict[str, str]) -> Config:
-        config = Config()
-
-        config.config_id = config_id
-        ModelHelper.add_to_dict(config.values, values)
+    def update_config(config: Config, config_id: str = None, config_values: Dict[str, str] = None) -> Config:
+        if config_id:
+            config.config_id = config_id
+        if config_values:
+            ModelHelper.add_to_dict(config.values, config_values)
         return config
 
     @staticmethod
-    def build_strategy_state(stg_id: str, config: Config, positions: Dict[str, Position] = None) -> StrategyState:
+    def new_strategy_state(stg_id: str, config_values: Dict[str, str] = None) -> StrategyState:
         stg = StrategyState()
         stg.stg_id = stg_id
-        stg.config.CopyFrom(config if config else Config())
-        ModelHelper.add_to_dict_value(stg.positions, positions)
+        stg.config.config_id = stg_id
+        ModelFactory.update_config(stg.config, None, config_values)
         return stg
 
     @staticmethod
-    def build_order_state(cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str, inst_id: str,
-                          creation_timestamp: int, action: OrderAction, type: OrderType, qty: float, limit_price: float,
-                          stop_price: float = None, tif: TIF = DAY, oca_tag: str = None, params: Dict[str, str] = None,
-                          broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = None,
-                          filled_qty: float = 0, avg_price: float = 0, last_qty: float = 0, last_price: float = 0,
-                          stop_limit_ready: bool = False, trailing_stop_exec_price: float = None) -> OrderState:
+    def new_order_state(cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str, inst_id: str,
+                        creation_timestamp: int, action: OrderAction, type: OrderType, qty: float, limit_price: float,
+                        stop_price: float = None, tif: TIF = DAY, oca_tag: str = None, params: Dict[str, str] = None,
+                        broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = None,
+                        filled_qty: float = 0, avg_price: float = 0, last_qty: float = 0, last_price: float = 0,
+                        stop_limit_ready: bool = False, trailing_stop_exec_price: float = None) -> OrderState:
         order = OrderState()
         order.cl_id = cl_id
         order.cl_ord_id = cl_ord_id
         order.portf_id = portf_id
         order.broker_id = broker_id
-        order.broker_ord_id = broker_ord_id
+        if broker_ord_id:
+            order.broker_ord_id = broker_ord_id
         order.inst_id = inst_id
 
-        order.creation_timestamp = creation_timestamp
-        order.update_timestamp = update_timestamp
-
-        order.action = action
-        order.type = type
-        order.qty = qty
-        order.limit_price = limit_price
-        order.stop_price = stop_price
-        order.tif = tif
-        order.oca_tag = oca_tag
+        if creation_timestamp:
+            order.creation_timestamp = creation_timestamp
+        if update_timestamp:
+            order.update_timestamp = update_timestamp
+        if action:
+            order.action = action
+        if type:
+            order.type = type
+        if qty:
+            order.qty = qty
+        if limit_price:
+            order.limit_price = limit_price
+        if stop_price:
+            order.stop_price = stop_price
+        if tif:
+            order.tif = tif
+        if oca_tag:
+            order.oca_tag = oca_tag
         ModelHelper.add_to_dict(order.params, params)
 
-        order.status = status
-        order.filled_qty = filled_qty
-        order.avg_price = avg_price
-        order.last_qty = last_qty
-        order.last_price = last_price
-        order.stop_limit_ready = stop_limit_ready
-        order.trailing_stop_exec_price = trailing_stop_exec_price
+        if status:
+            order.status = status
+        if filled_qty:
+            order.filled_qty = filled_qty
+        if avg_price:
+            order.avg_price = avg_price
+        if last_qty:
+            order.last_qty = last_qty
+        if last_price:
+            order.last_price = last_price
+        if stop_limit_ready:
+            order.stop_limit_ready = stop_limit_ready
+        if trailing_stop_exec_price:
+            order.trailing_stop_exec_price = trailing_stop_exec_price
 
         return order
 
     @staticmethod
-    def build_order_state_from_nos(req: NewOrderRequest):
-        return ModelFactory.build_order_state(
+    def new_order_state_from_nos(req: NewOrderRequest) -> OrderState:
+        return ModelFactory.new_order_state(
             cl_id=req.cl_id,
             cl_ord_id=req.cl_ord_id,
             portf_id=req.portf_id,
@@ -521,21 +599,21 @@ class ModelFactory(object):
         )
 
     @staticmethod
-    def build_position(inst_id: str, ordered_qty: float = 0, filled_qty: float = 0, last_price: float = 0,
-                       orders: Dict[str, OrderPosition] = None) -> Position:
-        position = Position()
+    def add_position(attribute: Callable, inst_id: str, ordered_qty: float = 0, filled_qty: float = 0,
+                     last_price: float = 0) -> Position:
+        position = attribute.positions[inst_id]
 
         position.inst_id = inst_id
         position.ordered_qty = ordered_qty
         position.filled_qty = filled_qty
         position.last_price = last_price
-        ModelHelper.add_to_dict_value(position.orders, orders)
         return position
 
     @staticmethod
-    def build_order_position(cl_id: str, cl_ord_id: str, ordered_qty: float = 0,
-                             filled_qty: float = 0) -> OrderPosition:
-        pos = OrderPosition()
+    def add_order_position(position: Position, cl_id: str, cl_ord_id: str, ordered_qty: float = 0,
+                           filled_qty: float = 0) -> OrderPosition:
+        id = ModelFactory.new_cl_ord_id(cl_id, cl_ord_id)
+        pos = position.orders[id]
         pos.cl_id = cl_id
         pos.cl_ord_id = cl_ord_id
         pos.ordered_qty = ordered_qty
@@ -543,15 +621,15 @@ class ModelFactory(object):
         return pos
 
     @staticmethod
-    def build_cl_ord_id(cl_id: str, ord_id: str) -> str:
+    def new_cl_ord_id(cl_id: str, ord_id: str) -> str:
         return "%s@%s" % (cl_id, ord_id)
 
     @staticmethod
-    def build_inst_id(symbol: str, exch_id: str) -> str:
+    def new_inst_id(symbol: str, exch_id: str) -> str:
         return "%s@%s" % (symbol, exch_id)
 
     @staticmethod
-    def build_sequence(id: str, seq: int) -> Sequence:
+    def new_sequence(id: str, seq: int) -> Sequence:
         sequence = Sequence()
         sequence.id = id
         sequence.seq = seq

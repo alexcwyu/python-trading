@@ -55,15 +55,15 @@ class ModelHelper(object):
     def dict_to_object(data):
         pass
 
-    @staticmethod
-    def add_to_dict_value(attribute: Callable, dict: Dict[str, object]):
-        if dict:
-            for key, value in dict.items():
-                v = attribute[key]
-                if v:
-                    v.CopyFrom(value)
-                else:
-                    attribute[key] = value
+    # @staticmethod
+    # def add_to_dict_value(attribute: Callable, dict: Dict[str, object]):
+    #     if dict:
+    #         for key, value in dict.items():
+    #             v = attribute[key]
+    #             if v:
+    #                 v.CopyFrom(value)
+    #             else:
+    #                 attribute[key] = value
 
     @staticmethod
     def add_to_dict(attribute: Callable, dict: Dict[str, str]):
@@ -71,13 +71,13 @@ class ModelHelper(object):
             for key, value in dict.items():
                 attribute[key] = value
 
-    @staticmethod
-    def add_to_list_value(attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]):
-        if list_item:
-            if isinstance(list_item, (list, tuple)):
-                attribute.extend(list_item)
-            else:
-                attribute.extend([list_item])
+    # @staticmethod
+    # def add_to_list_value(attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]):
+    #     if list_item:
+    #         if isinstance(list_item, (list, tuple)):
+    #             attribute.extend(list_item)
+    #         else:
+    #             attribute.extend([list_item])
 
     @staticmethod
     def add_to_list(attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]):
@@ -91,4 +91,4 @@ class ModelHelper(object):
                 elif item is dict:
                     attribute.add(**item)
                 else:
-                    attribute.add(**protobuf_to_dict(item))
+                    raise RuntimeError

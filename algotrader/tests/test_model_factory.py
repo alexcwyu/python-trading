@@ -3,14 +3,14 @@ from unittest import TestCase
 from algotrader.tests.sample_factory import *
 
 
-class ModelHelperTest(TestCase):
+class ModelFactoryTest(TestCase):
     factory = SampleFactory()
 
     def setUp(self):
         self.factory = SampleFactory()
 
     def test_instrument(self):
-        inst = ModelHelperTest.factory.sample_instrument()
+        inst = ModelFactoryTest.factory.sample_instrument()
         self.assertEqual("2800.HK@SEHK", ModelHelper.get_id(inst))
 
     def test_exchange(self):
@@ -85,5 +85,3 @@ class ModelHelperTest(TestCase):
     def test_sequence(self):
         self.assertEqual("test_seq", ModelHelper.get_id(self.factory.sample_sequence()))
 
-    def test_config(self):
-        self.assertEqual("testConfig", ModelHelper.get_id(self.factory.sample_config()))

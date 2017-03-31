@@ -24,29 +24,29 @@ class IBModelFactory:
     }
 
     ord_action_mapping = {
-        OrderAction.BUY: "BUY",
-        OrderAction.SELL: "SELL",
-        OrderAction.SSHORT: "SSHORT"
+        Buy: "BUY",
+        Sell: "SELL",
+        #OrderAction.SSHORT: "SSHORT"
     }
 
     ord_type_mapping = {
-        OrderType.MARKET: "MKT",
-        OrderType.LIMIT: "LMT",
-        OrderType.STOP: "STP",
-        OrderType.STOP_LIMIT: "STPLMT",
-        OrderType.MARKET_ON_CLOSE: "MOC",
-        OrderType.LIMIT_ON_CLOSE: "LOC",
-        OrderType.TRAILING_STOP: "TRAIL",
-        OrderType.MARKET_TO_LIMIT: "MTL",
-        OrderType.MARKET_IF_PRICE_TOUCHED: "MIT",
-        OrderType.MARKET_ON_OPEN: "MOO"
+        Market: "MKT",
+        Limit: "LMT",
+        Stop: "STP",
+        StopLimit: "STPLMT",
+        MarketOnClose: "MOC",
+        LimitOnClose: "LOC",
+        TrailingStop: "TRAIL",
+        MarketToLimit: "MTL",
+        MarketIfPriceTouched: "MIT",
+        MarketOnOpen: "MOO"
     }
 
     tif_mapping = {
-        TIF.DAY: "DAY",
-        TIF.GTC: "GTC",
-        TIF.FOK: "FOK",
-        TIF.GTD: "GTD"
+        DAY: "DAY",
+        GTC: "GTC",
+        FOK: "FOK",
+        GTD: "GTD"
     }
 
     hist_data_type_mapping = {
@@ -81,10 +81,10 @@ class IBModelFactory:
     }
 
     ib_ord_status_map = {
-        "Submitted": OrderStatus.NEW,
-        "PendingCancel": OrderStatus.PENDING_CANCEL,
-        "Cancelled": OrderStatus.CANCELLED,
-        "Inactive": OrderStatus.REJECTED
+        "Submitted": New,
+        "PendingCancel": PendingCancel,
+        "Cancelled": Cancelled,
+        "Inactive": Rejected
 
     }
 

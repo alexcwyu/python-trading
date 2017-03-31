@@ -3,25 +3,14 @@ from unittest import TestCase
 from algotrader.model.protobuf_to_dict import *
 from algotrader.tests.sample_factory import *
 
-class ModelFactoryTest(TestCase):
+
+class SerializationTest(TestCase):
     def setUp(self):
         self.factory = SampleFactory()
 
     def test_instrument(self):
         inst = self.factory.sample_instrument()
         self.__test_serializaion(Instrument, inst)
-
-    def test_underlying(self):
-        underlying = self.factory.sample_underlying()
-        self.__test_serializaion(Underlying, underlying)
-
-    def test_derivative_traits(self):
-        derivative_traits = self.factory.sample_derivative_traits()
-        self.__test_serializaion(DrivativeTraits, derivative_traits)
-
-    def test_asset(self):
-        asset = self.factory.sample_asset()
-        self.__test_serializaion(Underlying.Asset, asset)
 
     def test_exchange(self):
         exchange = self.factory.sample_exchange()
@@ -35,17 +24,9 @@ class ModelFactoryTest(TestCase):
         country = self.factory.sample_country()
         self.__test_serializaion(Country, country)
 
-    def test_holiday(self):
-        holiday = self.factory.sample_holiday()
-        self.__test_serializaion(HolidaySeries.Holiday, holiday)
-
     def test_trading_holidays(self):
         trading_holiday = self.factory.sample_trading_holidays()
         self.__test_serializaion(HolidaySeries, trading_holiday)
-
-    def test_trading_session(self):
-        session = self.factory.sample_trading_session()
-        self.__test_serializaion(TradingHours.Session, session)
 
     def test_trading_hours(self):
         trading_hours = self.factory.sample_trading_hours()
@@ -54,10 +35,6 @@ class ModelFactoryTest(TestCase):
     def test_timezone(self):
         timezone = self.factory.sample_timezone()
         self.__test_serializaion(TimeZone, timezone)
-
-    def test_time_series_item(self):
-        item = self.factory.sample_time_series_item()
-        self.__test_serializaion(TimeSeries.Item, item)
 
     def test_time_series(self):
         ds = self.factory.sample_time_series()
@@ -90,9 +67,6 @@ class ModelFactoryTest(TestCase):
     def test_execution_report(self):
         self.__test_serializaion(ExecutionReport, self.factory.sample_execution_report())
 
-    def test_account_value(self):
-        self.__test_serializaion(AccountValue, self.factory.sample_account_value())
-
     def test_account_update(self):
         self.__test_serializaion(AccountUpdate, self.factory.sample_account_update())
 
@@ -105,29 +79,11 @@ class ModelFactoryTest(TestCase):
     def test_portfolio_state(self):
         self.__test_serializaion(PortfolioState, self.factory.sample_portfolio_state())
 
-    def test_performance(self):
-        self.__test_serializaion(Performance, self.factory.sample_performance())
-
-    def test_pnl(self):
-        self.__test_serializaion(Pnl, self.factory.sample_pnl())
-
-    def test_drawdown(self):
-        self.__test_serializaion(DrawDown, self.factory.sample_drawdown())
-
-    def test_config(self):
-        self.__test_serializaion(Config, self.factory.sample_config())
-
     def test_strategy_state(self):
         self.__test_serializaion(StrategyState, self.factory.sample_strategy_state())
 
     def test_order_state(self):
         self.__test_serializaion(OrderState, self.factory.sample_order_state())
-
-    def test_position(self):
-        self.__test_serializaion(Position, self.factory.sample_position())
-
-    def test_order_position(self):
-        self.__test_serializaion(OrderPosition, self.factory.sample_order_position())
 
     def test_sequence(self):
         self.__test_serializaion(Sequence, self.factory.sample_sequence())

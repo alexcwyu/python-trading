@@ -12,8 +12,8 @@ class PnlAnalyzer(Analyzer):
         self.state = portfolio.state.pnl
         self.series = DataSeries(self.portfolio.state.pnl.series)
 
-    def update(self, timestamp: int, current_value: float):
-        performance_series = self.portfolio.performance.performance_series
+    def update(self, timestamp: int, total_equity: float):
+        performance_series = self.portfolio.performance.series
 
         if self.series.size() >= 2:
             self.state.pnl = performance_series.get_by_idx(-1, PerformanceAnalyzer.TotalEquity) - \

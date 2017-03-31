@@ -4,7 +4,7 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
 from algotrader.trading.order import Order
 from algotrader.utils import logger
-
+from algotrader.model.model_factory import ModelFactory
 
 class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
     __slots__ = (
@@ -49,7 +49,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
 
             new_order_reqs = self.store.load_all('new_order_reqs')
             for new_order_req in new_order_reqs:
-                self.ord_reqs_dict[new_order_req.id()] = new_order_req
+                self.ord_reqs_dict[self._cl_ord_id(new_order_req)] = new_order_req
 
     def save_all(self):
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
@@ -99,7 +99,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
             portfolio.on_ord_upd(ord_upd)
         else:
             logger.warn("portfolio [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
-                order.portf_id, order.cl_id, order.cl_ord_id))
+                order.state.portf_id, order.state.cl_id, order.state.cl_ord_id))
 
         # notify stg
         stg = self.app_context.stg_mgr.get(order.cl_id)
@@ -107,7 +107,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
             stg.oon_ord_upd(ord_upd)
         else:
             logger.warn(
-                "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.cl_id, order.cl_id, order.cl_ord_id))
+                "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.state.cl_id, order.state.cl_id, order.state.cl_ord_id))
 
         # persist
         self._save_order(order)
@@ -120,51 +120,53 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
             self.store.save_exec_report(exec_report)
 
         # update order
-        order = self.order_dict["%s.%s" % (exec_report.cl_id, exec_report.cl_ord_id)]
+        ord_id = self._cl_ord_id(exec_report)
+        order = self.order_dict[ord_id]
         order.on_exec_report(exec_report)
 
         # enrich the cl_id and cl_ord_id
-        exec_report.cl_id = order.cl_id
-        exec_report.cl_ord_id = order.cl_ord_id
+        #exec_report.cl_id = order.state.cl_id
+        #exec_report.cl_ord_id = order.state.cl_ord_id
 
         # notify portfolio
-        portfolio = self.app_context.portf_mgr.get(order.portf_id)
+        portfolio = self.app_context.portf_mgr.get(order.state.portf_id)
         if portfolio:
             portfolio.on_exec_report(exec_report)
         else:
             logger.warn("portfolio [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
-                order.portf_id, order.cl_id, order.cl_ord_id))
+                order.state.portf_id, order.state.cl_id, order.state.cl_ord_id))
 
         # notify stg
-        stg = self.app_context.stg_mgr.get(order.cl_id)
+        stg = self.app_context.stg_mgr.get(order.state.cl_id)
         if stg:
             stg.on_exec_report(exec_report)
         else:
             logger.warn(
-                "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.cl_id, order.cl_id, order.cl_ord_id))
+                "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.state.cl_id, order.state.cl_id, order.state.cl_ord_id))
 
         # persist
         self._save_order(order)
 
     def send_order(self, new_ord_req):
-        if new_ord_req.id() in self.order_dict:
+        ord_id = self._cl_ord_id(new_ord_req)
+        if ord_id in self.order_dict:
             raise Exception(
-                "ClientOrderId has been used!! cl_id = %s, cl_ord_id = %s" % (new_ord_req.cl_id, new_ord_req.cl_ord_id))
+                "ClientOrderId has been used!! ord_id = %s" % (ord_id))
 
         # persist
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:
             self.store.save_new_order_req(new_ord_req)
 
-        order = Order(new_ord_req)
-        self.order_dict[order.id()] = order
+        order = Order(ModelFactory.new_order_state_from_nos(new_ord_req))
+        self.order_dict[ord_id] = order
 
-        if order.broker_id:
-            broker = self.app_context.provider_mgr.get(order.broker_id)
+        if order.state.broker_id:
+            broker = self.app_context.provider_mgr.get(order.state.broker_id)
             if broker:
                 broker.on_new_ord_req(new_ord_req)
             else:
-                logger.warn("broker [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
-                    order.broker_id, order.cl_id, order.cl_ord_id))
+                logger.warn("broker [%s] not found for order ord_id [%s]" % (
+                    order.state.broker_id, ord_id))
 
         # persist
         self._save_order(order)
@@ -172,15 +174,16 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         return order
 
     def cancel_order(self, ord_cancel_req):
-        if not ord_cancel_req.id() in self.order_dict:
-            raise Exception("ClientOrderId not found!! cl_id = %s, cl_ord_id = %s" % (
-                ord_cancel_req.cl_id, ord_cancel_req.cl_ord_id))
+        ord_id = self._cl_ord_id(ord_cancel_req)
+        if not ord_id in self.order_dict:
+            raise Exception("ClientOrderId not found!! ord_id = %s" % (
+                ord_id))
 
         # persist
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:
             self.store.save_ord_cancel_req(ord_cancel_req)
 
-        order = self.order_dict[ord_cancel_req.id()]
+        order = self.order_dict[ord_id]
 
         order.on_ord_cancel_req(ord_cancel_req)
         self.app_context.provider_mgr.get(order.broker_id).on_ord_cancel_req(ord_cancel_req)
@@ -191,15 +194,16 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         return order
 
     def replace_order(self, ord_replace_req):
-        if not ord_replace_req.id() in self.order_dict:
-            raise Exception("ClientOrderId not found!! cl_id = %s, cl_ord_id = %s" % (
-                ord_replace_req.cl_id, ord_replace_req.cl_ord_id))
+        ord_id = self._cl_ord_id(ord_replace_req)
+        if not ord_id in self.order_dict:
+            raise Exception("ClientOrderId not found!! ord_id = %s" % (
+                ord_id))
 
         # persist
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:
             self.store.save_ord_replace_req(ord_replace_req)
 
-        order = self.order_dict[ord_replace_req.id()]
+        order = self.order_dict[ord_id]
 
         order.on_ord_replace_req(ord_replace_req)
         self.app_context.provider_mgr.get(order.broker_id).on_ord_replace_req(ord_replace_req)
@@ -227,3 +231,6 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
     def _save_order(self, order):
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:
             self.store.save_order(order)
+
+    def _cl_ord_id(self, item):
+        return ModelFactory.new_cl_ord_id(item.cl_id, item.cl_ord_id)

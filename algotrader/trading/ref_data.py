@@ -1,10 +1,11 @@
 import abc
 import csv
 import os
-
 from algotrader import Manager
+
 from algotrader.config.persistence import PersistenceMode
 from algotrader.model.model_factory import ModelFactory
+from algotrader.model.ref_data_pb2 import *
 
 
 class RefDataManager(Manager):
@@ -90,13 +91,13 @@ class RefDataManager(Manager):
                     sector=None, industry=None,
                     put_call=None, expiry_date=None, und_inst_id=None, factor=1, strike=0.0, margin=0.0):
         inst_id = self.seq_mgr.get_next_sequence("instruments")
-        inst = ModelFactory.build_instrument(inst_id=inst_id, name=name, type=type,
-                                             symbol=symbol,
-                                             exch_id=exch_id, ccy_id=ccy_id,
-                                             alt_symbols=alt_symbols, sector=sector, industry=industry,
-                                             put_call=put_call,
-                                             expiry_date=expiry_date, und_inst_id=und_inst_id, factor=factor,
-                                             strike=strike, margin=margin)
+        inst = ModelFactory.new_instrument(inst_id=inst_id, name=name, type=type,
+                                           symbol=symbol,
+                                           exch_id=exch_id, ccy_id=ccy_id,
+                                           alt_symbols=alt_symbols, sector=sector, industry=industry,
+                                           put_call=put_call,
+                                           expiry_date=expiry_date, und_inst_id=und_inst_id, factor=factor,
+                                           strike=strike, margin=margin)
         self.add_inst(inst)
 
     #
@@ -198,43 +199,48 @@ class InMemoryRefDataManager(RefDataManager):
                     for item in row['alt_symbols'].split(";"):
                         kv = item.split("=")
                         alt_symbols[kv[0]] = kv[1]
-
-                inst = ModelFactory.build_instrument(inst_id=row['inst_id'], name=row['name'], type=row['type'],
-                                                     symbol=row['symbol'],
-                                                     exch_id=row['exch_id'], ccy_id=row['ccy_id'],
-                                                     alt_symbols=alt_symbols,
-                                                     sector=row['sector'], industry=row['industry'],
-                                                     put_call=row['put_call'], expiry_date=row['expiry_date'],
-                                                     und_inst_id=row['und_inst_id'],
-                                                     factor=row['factor'], strike=row['strike'], margin=row['margin'])
+                inst = ModelFactory.new_instrument(symbol=row['symbol'],
+                                                   type=row['type'],
+                                                   primary_exch_id=row['exch_id'],
+                                                   ccy_id=row['ccy_id'],
+                                                   name=row['name'],
+                                                   sector=row['sector'],
+                                                   industry=row['industry'],
+                                                   margin=row['margin'],
+                                                   alt_symbols=alt_symbols,
+                                                   underlying_ids=row['und_inst_id'],
+                                                   option_type=row['put_call'],
+                                                   option_style=Instrument.European,
+                                                   strike=row['strike'],
+                                                   exp_date=row['expiry_date'],
+                                                   multiplier=row['factor'])
                 self.add_inst(inst)
 
         with open(self.ccy_file) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
+                #
+                # alt_code = {}
+                # if 'alt_code' in row:
+                #     for item in row['alt_code'].split(";"):
+                #         kv = item.split("=")
+                #         alt_code[kv[0]] = kv[1]
 
-                alt_code = {}
-                if row['alt_code']:
-                    for item in row['alt_code'].split(";"):
-                        kv = item.split("=")
-                        alt_code[kv[0]] = kv[1]
-
-                ccy = ModelFactory.build_currency(ccy_id=row['ccy_id'], code=['code'], name=row['name'],
-                                                  alt_code=alt_code)
+                ccy = ModelFactory.new_currency(ccy_id=row['ccy_id'], name=row['name'])
                 self.add_ccy(ccy)
 
         with open(self.exch_file) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
 
-                alt_code = {}
-                if row['alt_code']:
+                alt_ids = {}
+                if 'alt_code' in row:
                     for item in row['alt_code'].split(";"):
                         kv = item.split("=")
-                        alt_code[kv[0]] = kv[1]
+                        alt_ids[kv[0]] = kv[1]
 
-                exch = ModelFactory.build_exchange(exch_id=row['exch_id'], code=['code'], name=row['name'],
-                                                   alt_code=alt_code)
+                exch = ModelFactory.new_exchange(exch_id=row['exch_id'], name=row['name'],
+                                                 alt_ids=alt_ids)
                 self.add_exch(exch)
 
     def save_all(self):

@@ -10,23 +10,22 @@ class PerformanceAnalyzer(Analyzer):
 
     def __init__(self, portfolio):
         self.portfolio = portfolio
-        self.state = self.portfolio.state.performance
-        self.series = DataSeries(self.state.series)
+        self.state = self.portfolio.state
+        self.performance = self.portfolio.state.performance
+        self.series = DataSeries(self.performance.series)
 
-    def update(self, timestamp: int, current_value: float):
-        self.state.stock_value = self.portfolio.stock_value
-        self.state.cash = self.portfolio.cash
-        self.state.total_equity = self.portfolio.total_equity
+    def update(self, timestamp: int, total_equity: float):
+        self.performance.total_equity = total_equity
         self.series.add(
             data={self.StockValue: self.state.stock_value,
                   self.Cash: self.state.cash,
-                  self.TotalEquity: self.state.total_equity},
+                  self.TotalEquity: total_equity},
             timestamp=timestamp)
 
     def get_result(self):
         return {self.StockValue: self.state.stock_value,
                 self.Cash: self.state.cash,
-                self.TotalEquity: self.state.total_equity}
+                self.TotalEquity: self.performance.total_equity}
 
     def get_series(self, keys=None):
         keys = keys if keys else [self.StockValue, self.Cash, self.TotalEquity]

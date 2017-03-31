@@ -3,11 +3,12 @@ from typing import List, Any
 from algotrader import Startable
 from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
 from algotrader.model.trade_data_pb2 import *
+from algotrader.model.model_factory import ModelFactory
 
 
 class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
     def __init__(self, state: OrderState = None, events: List[Any] = None):
-        super.__init__()
+        super().__init__()
         self.state = state
         self.events = events if events else []
 
@@ -17,7 +18,7 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
     def on_new_ord_req(self, req: NewOrderRequest):
         if self.state or len(self.events) > 0:
             raise Exception("NewOrderRequest cannot be added to already initialized order")
-        self.state = self.model_factory.build_order_state_from_nos(req)
+        self.state = self.model_factory.new_order_state_from_nos(req)
         self.events.append(req)
 
     def on_ord_replace_req(self, req: OrderReplaceRequest):
@@ -38,6 +39,7 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
                 "exec_report [%s] cl_id [%s] cl_ord_id [%s] is not same as current order cl_id [%s] cl_ord_id [%s]" % (
                     exec_report.er_id, exec_report.cl_id, exec_report.cl_ord_id, state.cl_id, state.cl_ord_id))
 
+        #    state.broker_ord_id = exec_report.broker_ord_id
         if not state.broker_ord_id:
             state.broker_ord_id = exec_report.broker_ord_id
         elif state.broker_ord_id != exec_report.broker_ord_id:
@@ -63,9 +65,9 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
             state.filled_qty += exec_report.last_qty
 
         if state.qty == state.filled_qty:
-            state.status = OrderStatus.FILLED
+            state.status = Filled
         elif state.qty > state.filled_qty:
-            state.status = OrderStatus.PARTIALLY_FILLED
+            state.status = PartiallyFilled
         else:
             raise Exception("filled qty %s is greater than ord qty %s" % (state.filled_qty, state.qty))
 
@@ -101,18 +103,21 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
 
     def is_done(self):
         status = self.state.status
-        return status == OrderStatus.REJECTED or status == OrderStatus.CANCELLED or status == OrderStatus.FILLED
+        return status == Rejected or status == Cancelled or status == Filled
 
     def is_active(self):
         status = self.state.status
-        return status == OrderStatus.NEW or status == OrderStatus.PENDING_SUBMIT or status == OrderStatus.SUBMITTED \
-               or status == OrderStatus.PARTIALLY_FILLED or status == OrderStatus.REPLACED
+        return status == New or status == PendingSubmit or status == Submitted \
+               or status == PartiallyFilled or status == Replaced
 
     def leave_qty(self):
         return self.state.qty - self.state.filled_qty
 
     def is_buy(self):
-        return self.state.action == OrderAction.BUY
+        return self.state.action == Buy
 
     def is_sell(self):
-        return self.state.action == OrderAction.SELL or self.state.action == OrderAction.SSHORT
+        return self.state.action == Sell
+
+    def id(self):
+        return ModelFactory.new_cl_ord_id(self.state.cl_id, self.state.cl_ord_id)

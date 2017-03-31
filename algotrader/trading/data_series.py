@@ -7,6 +7,7 @@ from rx.subjects import Subject
 
 from algotrader import Startable
 from algotrader.model.model_helper import ModelHelper
+from algotrader.model.model_factory import ModelFactory
 from algotrader.model.time_series_pb2 import TimeSeries
 
 
@@ -32,6 +33,7 @@ class DataSeries(Startable):
         self.data_list = []
         self.time_list = []
         self.data_time_dict = {}
+        self.last_item = None
         self.subject = Subject()
 
         if time_series and time_series.items:
@@ -72,8 +74,7 @@ class DataSeries(Startable):
 
             # self.data_list.append(enhanced_data)
             if not init:
-                self.last_item = self.time_series.items.add()
-                ModelHelper.add_to_dict(self.last_item.data, enhanced_data)
+                self.last_item = ModelFactory.add_time_series_item(self.time_series, timestamp, enhanced_data)
 
         elif timestamp == self.time_series.end_time:
 
@@ -86,7 +87,7 @@ class DataSeries(Startable):
                     self.data_time_dict[key][timestamp] = value
                     enhanced_data[key] = value
             if not init:
-                ModelHelper.add_to_dict(self.last_item.data, enhanced_data)
+                ModelFactory.update_time_series_time(self.last_item, timestamp, enhanced_data)
         else:
             raise AssertionError(
                 "Time for new Item %s cannot be earlier then previous item %s" % (timestamp, self.current_time()))

@@ -15,9 +15,8 @@ class DrawDownAnalyzer(Analyzer):
         self.state = self.portfolio.state.drawdown
         self.series = DataSeries(self.state.series)
 
-    def update(self, timestamp: int, current_value: float):
-        total_equity = self.portfolio.total_equity
-        if self.portfolio.performance_series.size() == 1:
+    def update(self, timestamp: int, total_equity: float):
+        if self.portfolio.performance.series.size() == 1:
             self.state.low_equity = total_equity
             self.state.high_equity = total_equity
         else:
@@ -32,13 +31,13 @@ class DrawDownAnalyzer(Analyzer):
                 self.state.current_drawdown = 1 - total_equity / self.state.high_equity
                 self.state.current_run_up = total_equity / self.state.low_equity - 1
 
-        if self.portfolio.performance_series.size() >= 2:
-            self.state.drawdown = total_equity - self.state.high_equity
+        if self.portfolio.performance.series.size() >= 2:
+            self.state.last_drawdown = total_equity - self.state.high_equity
 
             if self.state.high_equity != 0:
-                self.state.drawdown_pct = abs(self.state.drawdown / self.state.high_equity)
-            self.series.add(data={self.DrawDown: self.state.drawdown,
-                                  self.DrawDownPct: self.state.drawdown_pct}, timestamp=timestamp)
+                self.state.last_drawdown_pct = abs(self.state.last_drawdown / self.state.high_equity)
+            self.series.add(data={self.DrawDown: self.state.last_drawdown,
+                                  self.DrawDownPct: self.state.last_drawdown_pct}, timestamp=timestamp)
 
     def get_result(self):
         return {self.DrawDown: self.state.drawdown,

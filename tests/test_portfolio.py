@@ -1,7 +1,7 @@
 from collections import defaultdict
 from unittest import TestCase
 
-from algotrader.event.market_data import Trade, Bar, Quote
+from algotrader.event.market import Trade, Bar, Quote
 from algotrader.event.order import OrdAction, OrdType, NewOrderRequest, OrdStatus, ExecutionReport
 from algotrader.trading.portfolio import Portfolio
 from algotrader.config.app import ApplicationConfig

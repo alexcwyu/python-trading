@@ -118,7 +118,6 @@ message ExecutionReport {
     int64 timestamp = 3;
 
     string broker_ord_id = 4;
-    string broker_er_id = 5;
 
 
     string cl_id = 11;
@@ -174,17 +173,19 @@ message AccountState {
 message PortfolioState {
     string portf_id = 1;
     double cash = 2;
-    map<string, Position> positions = 3;
-    repeated string cl_ord_ids = 4;
-    Performance performance = 5;
-    Pnl pnl = 6;
-    DrawDown drawdown = 7;
+    double stock_value = 3;
+
+    map<string, Position> positions = 11;
+    repeated string cl_ord_ids = 12;
+
+    Performance performance = 21;
+    Pnl pnl = 22;
+    DrawDown drawdown = 23;
 }
 
 message Performance {
     double total_equity = 1;
-    double stock_value = 2;
-    algotrader.model.TimeSeries series = 3;
+    algotrader.model.TimeSeries series = 2;
 }
 
 message Pnl {

@@ -11,6 +11,7 @@ from algotrader.trading.ref_data import InMemoryRefDataManager, RefDataManager, 
 from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
 
+from algotrader.model.model_factory import ModelFactory
 
 class ApplicationContext(Startable):
     def __init__(self, app_config=None):

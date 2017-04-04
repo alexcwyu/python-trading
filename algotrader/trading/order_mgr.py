@@ -157,7 +157,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:
             self.store.save_new_order_req(new_ord_req)
 
-        order = Order(ModelFactory.new_order_state_from_nos(new_ord_req))
+        order = Order(ModelFactory.build_order_state_from_nos(new_ord_req))
         self.order_dict[ord_id] = order
 
         if order.state.broker_id:
@@ -233,4 +233,4 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
             self.store.save_order(order)
 
     def _cl_ord_id(self, item):
-        return ModelFactory.new_cl_ord_id(item.cl_id, item.cl_ord_id)
+        return ModelFactory.build_cl_ord_id(item.cl_id, item.cl_ord_id)

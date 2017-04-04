@@ -7,10 +7,11 @@ from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import EventLogger
 from algotrader.model.market_data_pb2 import Bar
 from algotrader.provider.feed import Feed
-from algotrader.provider.subscription import HistDataSubscriptionKey, BarSize
+from algotrader.provider.subscription import HistDataSubscriptionKey
 from algotrader.trading.ref_data import InMemoryRefDataManager
 from algotrader.utils import logger
 from algotrader.utils.clock import Clock
+from algotrader.utils.market_data_utils import BarSize
 
 
 class PandaH5DataFeed(Feed):

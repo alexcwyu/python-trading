@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package algotrader.model;
 
-message Bar{
-    enum Type{
+message Bar {
+    enum Type {
         Time = 0;
         Tick = 1;
         Volume = 2;
@@ -28,7 +28,7 @@ message Bar{
     double open_interest = 15;
 }
 
-message Quote{
+message Quote {
 
     string inst_id = 1;
     string provider_id = 2;
@@ -42,7 +42,7 @@ message Quote{
     double ask_size = 8;
 }
 
-message Trade{
+message Trade {
 
     string inst_id = 1;
     string provider_id = 2;
@@ -54,7 +54,7 @@ message Trade{
     double size = 6;
 }
 
-message MarketDepth{
+message MarketDepth {
     enum Side {
         Ask = 0;
         Bid = 1;
@@ -78,4 +78,59 @@ message MarketDepth{
     Side side = 8;
     double price = 9;
     double size = 10;
+}
+
+
+message BarSubscriptionRequest {
+    string inst_id = 1;
+    string provider_id = 2;
+
+    int64 from_date = 3;
+    int64 to_date = 4;
+}
+
+message QuoteSubscriptionRequest {
+    string inst_id = 1;
+    string provider_id = 2;
+
+    int64 from_date = 3;
+    int64 to_date = 4;
+}
+
+message TradeSubscriptionRequest {
+    string inst_id = 1;
+    string provider_id = 2;
+
+    int64 from_date = 3;
+    int64 to_date = 4;
+}
+
+message MarketDepthSubscriptionRequest {
+    string inst_id = 1;
+    string provider_id = 2;
+    int32 num_rows = 3;
+    string md_provider_id = 4;
+
+    int64 from_date = 5;
+    int64 to_date = 6;
+}
+
+
+message BarAggregationRequest {
+    enum InputType {
+        Bar = 0;
+        Trade = 1;
+        Bid = 2;
+        Ask = 3;
+        BidAsk = 4;
+        Middle = 5;
+        Spread = 6;
+    }
+
+    string inst_id = 1;
+    string provider_id = 2;
+    InputType input_type = 3;
+    Bar.Type output_type = 4;
+    int32 output_size = 5;
+
 }

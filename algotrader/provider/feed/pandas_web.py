@@ -9,10 +9,11 @@ from pandas_datareader import data
 from algotrader.event.event_handler import EventLogger
 from algotrader.model.market_data_pb2 import Bar
 from algotrader.provider.feed import Feed
-from algotrader.provider.subscription import BarSubscriptionType,HistDataSubscriptionKey, BarSize
+from algotrader.provider.subscription import BarSubscriptionType,HistDataSubscriptionKey
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
 
+from algotrader.utils.market_data_utils import BarSize
 
 class PandasWebDataFeed(Feed):
     __metaclass__ = abc.ABCMeta

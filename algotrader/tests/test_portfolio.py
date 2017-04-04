@@ -19,13 +19,13 @@ class PortfolioTest(TestCase):
         self.assertEqual(self.portfolio.state.cash, 100000)
 
     def test_position(self):
-        ord_req1 = ModelFactory.new_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test",
-                                                      broker_id="Dummy", inst_id='HSI@SEHK',
-                                                      action=Buy, type=Limit, qty=1000, limit_price=18.5)
+        ord_req1 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Buy, type=Limit, qty=1000, limit_price=18.5)
 
-        ord_req2 = ModelFactory.new_new_order_request(timestamp=1, cl_id='test', cl_ord_id='2', portf_id="test",
-                                                      broker_id="Dummy", inst_id='HSI@SEHK',
-                                                      action=Buy, type=Limit, qty=1800, limit_price=18.2)
+        ord_req2 = ModelFactory.build_new_order_request(timestamp=1, cl_id='test', cl_ord_id='2', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Buy, type=Limit, qty=1800, limit_price=18.2)
 
         self.assertEqual(0, len(self.portfolio.state.positions))
         self.assertEqual(100000, self.portfolio.state.cash)
@@ -43,13 +43,13 @@ class PortfolioTest(TestCase):
 
     def test_on_exec_report(self):
 
-        ord_req1 = ModelFactory.new_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test",
-                                                      broker_id="Dummy", inst_id='HSI@SEHK',
-                                                      action=Buy, type=Limit, qty=1000, limit_price=18.5)
+        ord_req1 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Buy, type=Limit, qty=1000, limit_price=18.5)
         order1 = self.portfolio.send_order(ord_req1)
 
-        er1 = ModelFactory.new_execution_report(timestamp=0, cl_id='test', cl_ord_id="1", broker_id="Dummy", broker_event_id="1", broker_ord_id="1", inst_id='HSI@SEHK', last_qty=500, last_price=18.4,
-                              status=PartiallyFilled)
+        er1 = ModelFactory.build_execution_report(timestamp=0, cl_id='test', cl_ord_id="1", broker_id="Dummy", broker_event_id="1", broker_ord_id="1", inst_id='HSI@SEHK', last_qty=500, last_price=18.4,
+                                                  status=PartiallyFilled)
 
         self.app_context.order_mgr.on_exec_report(er1)
 
@@ -69,8 +69,8 @@ class PortfolioTest(TestCase):
         self.assertEqual(expected_stock_value, self.portfolio.performance.series.now('stock_value'))
         self.assertEqual(expected_total_equity, self.portfolio.performance.series.now('total_equity'))
 
-        er2 = ModelFactory.new_execution_report(timestamp=0, cl_id='test', cl_ord_id="1", broker_id="Dummy", broker_event_id="2", broker_ord_id="1", inst_id='HSI@SEHK', last_qty=500, last_price=18.2,
-                              status=Filled)
+        er2 = ModelFactory.build_execution_report(timestamp=0, cl_id='test', cl_ord_id="1", broker_id="Dummy", broker_event_id="2", broker_ord_id="1", inst_id='HSI@SEHK', last_qty=500, last_price=18.2,
+                                                  status=Filled)
         self.app_context.order_mgr.on_exec_report(er2)
         self.assertEqual(500, order1.state.last_qty)
         self.assertEqual(18.2, order1.state.last_price)
@@ -90,14 +90,14 @@ class PortfolioTest(TestCase):
 
     def test_on_market_date_update(self):
 
-        ord_req1 = ModelFactory.new_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test",
-                                                      broker_id="Dummy", inst_id='HSI@SEHK',
-                                                      action=Buy, type=Limit, qty=1000, limit_price=18.5)
+        ord_req1 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Buy, type=Limit, qty=1000, limit_price=18.5)
 
         order1 = self.portfolio.on_new_ord_req(ord_req1)
 
-        er1 = ModelFactory.new_execution_report(timestamp=0, cl_id='test', cl_ord_id="1", broker_id="Dummy", broker_event_id="1", broker_ord_id="1", inst_id='HSI@SEHK', last_qty=500, last_price=18.4,
-                                                status=PartiallyFilled)
+        er1 = ModelFactory.build_execution_report(timestamp=0, cl_id='test', cl_ord_id="1", broker_id="Dummy", broker_event_id="1", broker_ord_id="1", inst_id='HSI@SEHK', last_qty=500, last_price=18.4,
+                                                  status=PartiallyFilled)
         self.app_context.order_mgr.on_exec_report(er1)
 
         expected_cash = 100000 - 500 * 18.4
@@ -108,7 +108,7 @@ class PortfolioTest(TestCase):
         self.assertEqual(expected_stock_value, self.portfolio.performance.series.get_by_idx(0, 'stock_value'))
         self.assertEqual(expected_total_equity, self.portfolio.performance.series.get_by_idx(0, 'total_equity'))
 
-        self.portfolio.on_trade(ModelFactory.new_trade(inst_id='HSI@SEHK', price=20, size=1000, timestamp=2))
+        self.portfolio.on_trade(ModelFactory.build_trade(inst_id='HSI@SEHK', price=20, size=1000, timestamp=2))
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 20
         expected_total_equity = expected_cash + expected_stock_value
@@ -116,7 +116,7 @@ class PortfolioTest(TestCase):
         self.assertEqual(expected_stock_value, self.portfolio.performance.series.get_by_idx(1, 'stock_value'))
         self.assertEqual(expected_total_equity, self.portfolio.performance.series.get_by_idx(1, 'total_equity'))
 
-        self.portfolio.on_bar(ModelFactory.new_bar(inst_id='HSI@SEHK', close=16, adj_close=16, vol=1000, timestamp=3))
+        self.portfolio.on_bar(ModelFactory.build_bar(inst_id='HSI@SEHK', close=16, adj_close=16, vol=1000, timestamp=3))
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 16
         expected_total_equity = expected_cash + expected_stock_value
@@ -124,7 +124,7 @@ class PortfolioTest(TestCase):
         self.assertEqual(expected_stock_value, self.portfolio.performance.series.get_by_idx(2, 'stock_value'))
         self.assertEqual(expected_total_equity, self.portfolio.performance.series.get_by_idx(2, 'total_equity'))
 
-        self.portfolio.on_quote(ModelFactory.new_quote(inst_id='HSI@SEHK', bid=16, ask=18, timestamp=4))
+        self.portfolio.on_quote(ModelFactory.build_quote(inst_id='HSI@SEHK', bid=16, ask=18, timestamp=4))
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 17
         expected_total_equity = expected_cash + expected_stock_value
@@ -155,7 +155,7 @@ class PortfolioTest(TestCase):
             (ord_qty, fill_qty) = qtys[inst_id]
 
             for pos_ord_req in pos_ord_reqs:
-                self.assertTrue(ModelFactory.new_cl_ord_id(pos_ord_req.cl_id, pos_ord_req.cl_ord_id) in position.orders)
+                self.assertTrue(ModelFactory.build_cl_ord_id(pos_ord_req.cl_id, pos_ord_req.cl_ord_id) in position.orders)
 
             self.assertEqual(ord_qty, position.ordered_qty)
             self.assertEqual(fill_qty, position.filled_qty)

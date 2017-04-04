@@ -10,7 +10,8 @@ from algotrader.config.persistence import PersistenceConfig
 from algotrader.provider.broker import Broker
 from algotrader.provider.persistence import PersistenceMode
 from algotrader.provider.persistence.data_store import DataStore
-from algotrader.provider.subscription import BarSubscriptionType, MarketDataSubscriber, BarSize
+from algotrader.provider.subscription import BarSubscriptionType, MarketDataSubscriber
+from algotrader.utils.market_data_utils import BarSize
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils import logger

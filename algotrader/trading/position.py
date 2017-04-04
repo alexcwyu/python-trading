@@ -41,7 +41,7 @@ class HasPositions(MarketDataEventHandler):
         position.ordered_qty += ordered_qty
 
     def __get_or_add_order(self, position: Position, cl_id: str, cl_ord_id: str) -> OrderPosition:
-        id = ModelFactory.new_cl_ord_id(cl_id, cl_ord_id)
+        id = ModelFactory.build_cl_ord_id(cl_id, cl_ord_id)
         if id not in position.orders:
             ModelFactory.add_order_position(position, cl_id=cl_id,
                                             cl_ord_id=cl_ord_id,

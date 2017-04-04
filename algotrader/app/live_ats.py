@@ -8,12 +8,12 @@ from algotrader.config.broker import IBConfig
 from algotrader.config.persistence import PersistenceConfig
 from algotrader.model.market_data_pb2 import Bar
 from algotrader.provider.broker import Broker
-from algotrader.provider.subscription import BarSubscriptionType, BarSize
+from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils import logger
 from algotrader.utils.clock import Clock
-
+from algotrader.utils.market_data_utils import BarSize
 
 class ATSRunner(Application):
     def init(self):

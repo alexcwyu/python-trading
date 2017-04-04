@@ -1,12 +1,15 @@
 from unittest import TestCase
 
-from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, OrdStatus, OrderStatusUpdate, ExecutionReport
+from algotrader.model.trade_data_pb2 import NewOrderRequest, OrderAction, OrderType, OrderStatus, OrderStatusUpdate, ExecutionReport
 from algotrader.trading.order import Order
+from algotrader.model.model_factory import ModelFactory
 
 
 class OrderTest(TestCase):
     def test_is_buy(self):
+        nos = ModelFactory.build_new_order_request()
         order = Order(
+
             NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
                             limit_price=18.5))
         self.assertTrue(order.is_buy())

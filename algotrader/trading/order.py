@@ -18,7 +18,7 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
     def on_new_ord_req(self, req: NewOrderRequest):
         if self.state or len(self.events) > 0:
             raise Exception("NewOrderRequest cannot be added to already initialized order")
-        self.state = self.model_factory.new_order_state_from_nos(req)
+        self.state = self.model_factory.build_order_state_from_nos(req)
         self.events.append(req)
 
     def on_ord_replace_req(self, req: OrderReplaceRequest):
@@ -120,4 +120,4 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
         return self.state.action == Sell
 
     def id(self):
-        return ModelFactory.new_cl_ord_id(self.state.cl_id, self.state.cl_ord_id)
+        return ModelFactory.build_cl_ord_id(self.state.cl_id, self.state.cl_ord_id)

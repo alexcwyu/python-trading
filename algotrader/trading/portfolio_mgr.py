@@ -35,7 +35,7 @@ class PortfolioManager(SimpleManager):
         return "PortfolioManager"
 
     def new_portfolio(self, portf_id: str, initial_cash: float = 1000000) -> Portfolio:
-        portfolio = Portfolio(ModelFactory.new_portfolio_state(portf_id=portf_id, cash=initial_cash))
+        portfolio = Portfolio(ModelFactory.build_portfolio_state(portf_id=portf_id, cash=initial_cash))
         self.add(portfolio)
         return portfolio
 

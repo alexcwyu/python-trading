@@ -8,8 +8,8 @@ from algotrader.model.trade_data_pb2 import *
 
 from algotrader.utils.date_utils import DateUtils
 from algotrader.provider.broker import Broker
-from algotrader.provider.subscription import BarSize, MarketDataType
-
+from algotrader.provider.subscription import MarketDataType
+from algotrader.utils.market_data_utils import BarSize
 
 
 class IBModelFactory:

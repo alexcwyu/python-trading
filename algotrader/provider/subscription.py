@@ -4,24 +4,15 @@ from algotrader.utils.ser_deser import Serializable
 
 from algotrader.model.market_data_pb2 import Bar
 
+from algotrader.utils.market_data_utils import BarSize
+
+
 class MarketDataType(object):
     Bar = 'Bar'
     Quote = 'Quote'
     Trade = 'Trade'
     MarketDepth = 'MarketDepth'
 
-
-class BarSize(object):
-    S1 = 1
-    S5 = 5
-    S15 = 15
-    S30 = 30
-    M1 = 60
-    M5 = 5 * 60
-    M15 = 15 * 60
-    M30 = 30 * 60
-    H1 = 60 * 60
-    D1 = 24 * 60 * 60
 
 
 class DataSubscriptionType(Serializable):

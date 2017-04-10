@@ -1,5 +1,7 @@
 import abc
 
+from algotrader.utils.trade_data_utils import TradeDataUtils
+
 
 class Slippage(object):
     __metaclass__ = abc.ABCMeta
@@ -8,7 +10,7 @@ class Slippage(object):
         return self.calc_price(new_ord_req, price, qty, bar.vol)
 
     def calc_price_w_quote(self, new_ord_req, price, qty, quote):
-        if new_ord_req.is_buy():
+        if TradeDataUtils.is_buy(new_ord_req):
             return self.calc_price(new_ord_req, price, qty, quote.bid_size)
         else:
             return self.calc_price(new_ord_req, price, qty, quote.ask_size)
@@ -34,7 +36,7 @@ class VolumeShareSlippage(Slippage):
 
         vol_share = float(qty) / float(avail_qty)
         impacted_price = vol_share ** 2 * self.price_impact
-        if new_ord_req.is_buy():
+        if TradeDataUtils.is_buy(new_ord_req):
             return price * (1 + impacted_price)
         else:
             return price * (1 - impacted_price)

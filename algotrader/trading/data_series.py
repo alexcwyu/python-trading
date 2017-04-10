@@ -1,13 +1,12 @@
 import datetime
-from typing import Dict
-
 import numpy as np
 import pandas as pd
-from rx.subjects import Subject
-
 from algotrader import Startable
-from algotrader.model.model_helper import ModelHelper
+from rx.subjects import Subject
+from typing import Dict
+
 from algotrader.model.model_factory import ModelFactory
+from algotrader.model.model_helper import ModelHelper
 from algotrader.model.time_series_pb2 import TimeSeries
 
 
@@ -87,7 +86,7 @@ class DataSeries(Startable):
                     self.data_time_dict[key][timestamp] = value
                     enhanced_data[key] = value
             if not init:
-                ModelFactory.update_time_series_time(self.last_item, timestamp, enhanced_data)
+                ModelFactory.update_time_series_item(self.last_item, timestamp, enhanced_data)
         else:
             raise AssertionError(
                 "Time for new Item %s cannot be earlier then previous item %s" % (timestamp, self.current_time()))

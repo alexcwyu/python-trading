@@ -22,7 +22,7 @@ def avg_gain_loss(series, input_key, begin, end):
 
     gain = 0
     loss = 0
-    for i in xrange(begin + 1, end):
+    for i in range(begin + 1, end):
         curr_gain, curr_loss = gain_loss(series[i - 1, input_key], series[i, input_key])
         gain += curr_gain
         loss += curr_loss
@@ -34,7 +34,7 @@ def rsi(values, input_key, length):
     if len(values) > length:
 
         avg_gain, avg_loss = avg_gain_loss(values, input_key, 0, length)
-        for i in xrange(length, len(values)):
+        for i in range(length, len(values)):
             gain, loss = gain_loss(values[i - 1, input_key], values[i, input_key])
             avg_gain = (avg_gain * (length - 1) + gain) / float(length)
             avg_loss = (avg_loss * (length - 1) + loss) / float(length)

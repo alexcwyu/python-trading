@@ -1,10 +1,9 @@
 # protoc -I=model --python_out=generated model/*.proto
 
 from datetime import date
-from unittest import TestCase
-
 from google.protobuf import json_format
 from protobuf_to_dict import *
+from unittest import TestCase
 
 import algotrader.model.ref_data_pb2 as ref_data
 from algotrader.utils.date_utils import DateUtils
@@ -34,14 +33,12 @@ class RefDataTest(TestCase):
         print("##########")
         print(inst)
 
-
         string = inst.SerializeToString()
         print("##########")
         print(string)
         inst2 = ref_data.Instrument()
         inst2.ParseFromString(string)
         self.assertEqual(inst, inst2)
-
 
         json_string = json_format.MessageToJson(inst)
         print("##########")
@@ -52,7 +49,6 @@ class RefDataTest(TestCase):
         print(d)
         inst3 = dict_to_protobuf(ref_data.Instrument, d)
         self.assertEqual(inst, inst3)
-
 
     def test_currency(self):
         currency = ref_data.Currency(ccy_id="HKD", name="Hong Kong Dollar", alt_codes={1: "HK", 2: "HKDD"})
@@ -91,7 +87,7 @@ class RefDataTest(TestCase):
     def test_trading_holidays(self):
         holidays = ref_data.TradingHolidays(
             id=6,
-            name = "HK holiday",
+            name="HK holiday",
             holidays=[
                 ref_data.TradingHolidays.Holiday(trading_date=1992,
                                                  start_date=19991222, start_time=900,
@@ -116,12 +112,11 @@ class RefDataTest(TestCase):
         self.assertEqual(holidays, holidays2)
 
     def test_trading_hours(self):
-
         hours = ref_data.TradingHours(
-            id = 29,
-            name = "HK Sessions",
-            timezone = "ASIA/HONG_KONG",
-            sessions = [
+            id=29,
+            name="HK Sessions",
+            timezone="ASIA/HONG_KONG",
+            sessions=[
                 ref_data.TradingHours.Session(
                     start_weekdate=ref_data.TradingHours.Session.Monday, start_time=900,
                     end_weekdate=ref_data.TradingHours.Session.Monday, end_time=915,

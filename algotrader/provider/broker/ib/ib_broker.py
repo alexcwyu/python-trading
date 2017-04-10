@@ -1,19 +1,18 @@
+import gevent
+import swigibpy
 import threading
 from collections import defaultdict
 
-import gevent
-import swigibpy
-
 from algotrader.config.broker import IBConfig
 from algotrader.model.market_data_pb2 import Bar, Quote, Trade, MarketDepth
-from algotrader.model.trade_data_pb2 import OrderStatusUpdate, ExecutionReport, OrderStatus
-from algotrader.provider.subscription import MarketDataType
+from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker import Broker
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, \
     TradeSubscriptionType, MarketDepthSubscriptionType
+from algotrader.provider.subscription import MarketDataType
 from algotrader.utils import logger
 
 
@@ -509,7 +508,7 @@ class IBBroker(IBSocket, Broker, Feed):
             ord_status = self.model_factory.convert_ib_ord_status(status)
             create_er = False
 
-            if ord_status == OrdStatus.NEW or ord_status == OrdStatus.PENDING_CANCEL or ord_status == OrdStatus.CANCELLED or ord_status == OrdStatus.REJECTED:
+            if ord_status == New or ord_status == PendingCancel or ord_status == Cancelled or ord_status == Rejected:
                 create_er = True
 
             if create_er:
@@ -701,7 +700,6 @@ class IBBroker(IBSocket, Broker, Feed):
     def error(self, id, errorCode, errorString):
         logger.error("error, id=%s, errorCode=%s, errorString=%s", id, errorCode, errorString)
         self._complete_req(id)
-
 
     def is_completed(self, req_id):
         return req_id in self.completed_reqs

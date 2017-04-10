@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from algotrader.provider.persistence.mongodb import MongoDBDataStore
-from algotrader.tests.sample_factory import *
+from tests.sample_factory import *
 
 
 class PersistenceTest(TestCase):

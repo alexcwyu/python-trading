@@ -1,19 +1,20 @@
-import abc
 import logging
+
+import abc
+import pandas as pd
 from datetime import date
 from datetime import datetime
-
-import pandas as pd
 from pandas_datareader import data
 
 from algotrader.event.event_handler import EventLogger
-from algotrader.model.market_data_pb2 import Bar
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
-from algotrader.provider.subscription import BarSubscriptionType,HistDataSubscriptionKey
+from algotrader.provider.subscription import BarSubscriptionType, HistDataSubscriptionKey
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
-
 from algotrader.utils.market_data_utils import BarSize
+
 
 class PandasWebDataFeed(Feed):
     __metaclass__ = abc.ABCMeta
@@ -79,15 +80,17 @@ class YahooDataFeed(PandasWebDataFeed):
 
     def process_row(self, index, row):
         inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
-        return Bar(inst_id=inst.inst_id,
-                   timestamp=DateUtils.datetime_to_unixtimemillis(index),
-                   open=row['Open'],
-                   high=row['High'],
-                   low=row['Low'],
-                   close=row['Close'],
-                   vol=row['Volume'],
-                   adj_close=row['Adj Close'],
-                   size=row['BarSize'])
+        return ModelFactory.build_bar(inst_id=inst.inst_id,
+                                      provider_id=self.id(),
+                                      type=Bar.Time,
+                                      timestamp=DateUtils.datetime_to_unixtimemillis(index),
+                                      open=row['Open'],
+                                      high=row['High'],
+                                      low=row['Low'],
+                                      close=row['Close'],
+                                      vol=row['Volume'],
+                                      adj_close=row['Adj Close'],
+                                      size=row['BarSize'])
 
 
 class GoogleDataFeed(PandasWebDataFeed):
@@ -114,7 +117,7 @@ if __name__ == "__main__":
 
     today = date.today()
     sub_key = HistDataSubscriptionKey(inst_id=3, provider_id=YahooDataFeed.ID,
-                                      subscription_type=BarSubscriptionType(data_type=Bar, bar_size=BarSize.D1),
+                                      subscription_type=BarSubscriptionType(data_type=Bar.Time, bar_size=BarSize.D1),
                                       from_date=datetime(2010, 1, 1), to_date=today)
 
     logger.setLevel(logging.DEBUG)

@@ -1,21 +1,16 @@
-
-import math
-from gevent.ares import result
-
-import talib
+import datetime
+import numpy as np
 from datetime import datetime
 from unittest import TestCase
-import numpy as np
-import datetime
+
 from algotrader.technical import Indicator
 from algotrader.technical.pipeline import PipeLine
-from algotrader.technical.pipeline.rank import Rank
 from algotrader.technical.pipeline.cross_sessional_apply import Average, Abs, Tail, Sign, DecayLinear, Scale
 from algotrader.technical.pipeline.cross_sessional_apply import Sum as GSSum
 from algotrader.technical.pipeline.make_vector import MakeVector
 from algotrader.technical.pipeline.pairwise import Minus
+from algotrader.technical.pipeline.rank import Rank
 from algotrader.technical.talib_wrapper import SMA
-from algotrader.config.app import ApplicationConfig
 from algotrader.trading.context import ApplicationContext
 
 
@@ -37,7 +32,7 @@ class PipelineTest(TestCase):
         rank = Rank([sma3, sma20, sma50], input_key='close')
         rank.start(self.app_context)
         self.assertEquals("Rank(SMA('bar',close,3),SMA('bar',close,20),SMA('bar',close,50),close)",
-            rank.name)
+                          rank.name)
 
         bar0 = self.app_context.inst_data_mgr.get_series("bar0")
         bar1 = self.app_context.inst_data_mgr.get_series("bar1")
@@ -64,8 +59,6 @@ class PipelineTest(TestCase):
         basket2 = MakeVector([bar4, bar5, bar6, bar7], input_key='close')
 
         cross_basket_spread = Minus(basket2, basket)
-
-
 
     def test_empty_at_initialize(self):
         close = self.app_context.inst_data_mgr.get_series("bar")
@@ -112,7 +105,6 @@ class PipelineTest(TestCase):
         except AssertionError as e:
             self.fail(e.message)
 
-
     def test_sync(self):
         bar0 = self.app_context.inst_data_mgr.get_series("bar0")
         bar1 = self.app_context.inst_data_mgr.get_series("bar1")
@@ -146,9 +138,8 @@ class PipelineTest(TestCase):
         basket_open2.start(self.app_context)
         cross_basket_spread.start(self.app_context)
 
-        nan_arr = np.empty([1,4])
+        nan_arr = np.empty([1, 4])
         nan_arr[:] = np.nan
-
 
         t1 = datetime.datetime.now()
         bar0.add({"timestamp": t1, "close": 80.0, "open": 0})
@@ -176,7 +167,6 @@ class PipelineTest(TestCase):
         target_spread = np.array([[22.0, 0.0, 5.0, -4.0]])
         self.__np_assert_almost_equal(target_spread, cross_basket_spread.now()["value"])
         self.__np_assert_almost_equal(sync_vec, basket.now()["value"])
-
 
     # def test_nan_before_size(self):
     def test_with_multiple_bar(self):
@@ -222,8 +212,8 @@ class PipelineTest(TestCase):
         #                     "value": np.arange(4)/3.0}],
         #                   rank.get_data())
 
-        rank_target = np.arange(4)/3.0
-        rank_target = rank_target.reshape((1,4))
+        rank_target = np.arange(4) / 3.0
+        rank_target = rank_target.reshape((1, 4))
         avg_target = np.array([[95.5]])
         sum_target = np.array([[382.0]])
         abs_target = np.array([[80.0, 95.0, 102.0, 105.0]])
@@ -255,12 +245,11 @@ class PipelineTest(TestCase):
         bar3.add({"timestamp": t3, "close": bar_t3_array[3], "open": 0})
 
         stack = np.vstack([bar_t1_array, bar_t2_array, bar_t3_array])
-        decaylinear_target = np.dot(np.arange(3, 0, -1), stack)/np.sum(np.arange(3, 0, -1))
+        decaylinear_target = np.dot(np.arange(3, 0, -1), stack) / np.sum(np.arange(3, 0, -1))
         scale_target = bar_t3_array / np.sum(bar_t3_array)
         scale_target = scale_target.reshape(1, 4)
         self.__np_assert_almost_equal(decaylinear_target, decaylinear.now(keys=PipeLine.VALUE))
         self.__np_assert_almost_equal(scale_target, scale.now(keys=PipeLine.VALUE))
-
 
     def test_with_multi_bar_multi_indicator(self):
         bar0 = self.app_context.inst_data_mgr.get_series("bar0")
@@ -283,19 +272,23 @@ class PipelineTest(TestCase):
         t = datetime.datetime.now()
         bar0.add({"timestamp": t, "close": 80.0, "open": 0})
         bar1.add({"timestamp": t, "close": 95.0, "open": 0})
-        print rank.now(keys=PipeLine.VALUE)
+        print
+        rank.now(keys=PipeLine.VALUE)
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 85.0, "open": 0})
         bar1.add({"timestamp": t, "close": 93.0, "open": 0})
-        print rank.now(keys=PipeLine.VALUE)
+        print
+        rank.now(keys=PipeLine.VALUE)
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 86.0, "open": 0})
         bar1.add({"timestamp": t, "close": 91.0, "open": 0})
-        print rank.now(keys=PipeLine.VALUE)
+        print
+        rank.now(keys=PipeLine.VALUE)
 
         t = t + datetime.timedelta(0, 3)
         bar0.add({"timestamp": t, "close": 90.0, "open": 0})
         bar1.add({"timestamp": t, "close": 95.0, "open": 0})
-        print rank.now(keys=PipeLine.VALUE)
+        print
+        rank.now(keys=PipeLine.VALUE)

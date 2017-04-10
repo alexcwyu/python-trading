@@ -1,9 +1,8 @@
 import datetime
 import math
-from unittest import TestCase
-
 import numpy as np
 import talib
+from unittest import TestCase
 
 from algotrader.technical.talib_wrapper import SMA
 from algotrader.trading.context import ApplicationContext
@@ -13,8 +12,6 @@ from algotrader.trading.data_series import DataSeries
 class TALibSMATest(TestCase):
     def setUp(self):
         self.app_context = ApplicationContext()
-
-
 
     def test_name(self):
         bar = self.app_context.inst_data_mgr.get_series("bar")
@@ -52,13 +49,13 @@ class TALibSMATest(TestCase):
                           sma.get_data())
 
         bar.add({"timestamp": t2, "close": 2.4, "open": 1.4})
-        self.assertEquals([{"timestamp": t1, 'value':np.nan, "name": "'SMA('bar',close,3)'"},
-                           {"timestamp": t2, 'value':np.nan, "name": "'SMA('bar',close,3)'"}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan, "name": "'SMA('bar',close,3)'"},
+                           {"timestamp": t2, 'value': np.nan, "name": "'SMA('bar',close,3)'"}],
                           sma.get_data())
 
         bar.add({"timestamp": t3, "close": 2.8, "open": 1.8})
-        self.assertEquals([{"timestamp": t1, 'value':np.nan, "name": "'SMA('bar',close,3)'"},
-                           {"timestamp": t2, 'value':np.nan, "name": "'SMA('bar',close,3)'"},
+        self.assertEquals([{"timestamp": t1, 'value': np.nan, "name": "'SMA('bar',close,3)'"},
+                           {"timestamp": t2, 'value': np.nan, "name": "'SMA('bar',close,3)'"},
                            {"timestamp": t3, 'value': 2.4, "name": "'SMA('bar',close,3)'"}],
                           sma.get_data())
 

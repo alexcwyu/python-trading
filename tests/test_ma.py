@@ -1,10 +1,8 @@
 import datetime
 import math
+import numpy as np
 from unittest import TestCase
 
-import numpy as np
-
-from algotrader.config.app import ApplicationConfig
 from algotrader.technical.ma import SMA
 from algotrader.trading.context import ApplicationContext
 
@@ -92,4 +90,3 @@ class MovingAverageTest(TestCase):
         self.assertEquals(2.4, sma.get_by_time(t3, 'value'))
         self.assertEquals(2.8, sma.get_by_time(t4, 'value'))
         self.assertEquals(3.2, sma.get_by_time(t5, 'value'))
-

@@ -1,15 +1,13 @@
 from unittest import TestCase
 
-from algotrader.utils.data_series_utils import DataSeriesUtils
-from algotrader.config.app import ApplicationConfig
 from algotrader.trading.context import ApplicationContext
+from algotrader.utils.data_series_utils import DataSeriesUtils
 
 
 class IndicatorTest(TestCase):
     def setUp(self):
         self.app_context = ApplicationContext()
         self.utils = DataSeriesUtils(self.app_context)
-
 
     def test_reuse(self):
         close = self.app_context.inst_data_mgr.get_series("bar")

@@ -1,8 +1,8 @@
 import abc
+from algotrader import HasId
 
 from algotrader.utils.ser_deser import Serializable
 
-from algotrader import HasId
 
 class PersistenceMode(object):
     Disable = 0

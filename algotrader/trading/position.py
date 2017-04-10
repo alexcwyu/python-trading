@@ -5,23 +5,30 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.model_helper import ModelHelper
 from algotrader.model.trade_data_pb2 import *
+from algotrader.utils.market_data_utils import MarketDataUtils
 
 
 class HasPositions(MarketDataEventHandler):
     __metaclass__ = abc.ABCMeta
 
+    def __init__(self, state):
+        self.__state = state
+
+    def positions(self):
+        return self.__state.positions
+
     def has_position(self, inst_id: str) -> bool:
-        return inst_id in self.state.positions
+        return inst_id in self.__state.positions
 
     def get_position(self, inst_id: str) -> Position:
-        if inst_id not in self.state.positions:
-            ModelFactory.add_position(self.state, inst_id=inst_id)
-        position = self.state.positions[inst_id]
+        if inst_id not in self.__state.positions:
+            ModelFactory.add_position(self.__state, inst_id=inst_id)
+        position = self.__state.positions[inst_id]
         return position
 
     def update_position_price(self, timestamp: int, inst_id: str, price: float) -> None:
-        if inst_id in self.state.positions:
-            position = self.state.positions[inst_id]
+        if inst_id in self.__state.positions:
+            position = self.__state.positions[inst_id]
             position.last_price = price
 
     def add_position(self, inst_id: str, cl_id: str, cl_ord_id: str, qty: float) -> None:
@@ -32,7 +39,7 @@ class HasPositions(MarketDataEventHandler):
         position.filled_qty += qty
 
     def add_order(self, inst_id: str, cl_id: str, cl_ord_id: str, ordered_qty: float) -> None:
-        ModelHelper.add_to_list(self.state.cl_ord_ids, [cl_ord_id])
+        ModelHelper.add_to_list(self.__state.cl_ord_ids, [cl_ord_id])
 
         position = self.get_position(inst_id)
         order_position = self.__get_or_add_order(position=position, cl_id=cl_id,
@@ -52,7 +59,7 @@ class HasPositions(MarketDataEventHandler):
         self.update_price(bar.timestamp, bar.inst_id, bar.close)
 
     def on_quote(self, quote: Quote) -> None:
-        self.update_price(quote.timestamp, quote.inst_id, (quote.ask + quote.bid) / 2)
+        self.update_price(quote.timestamp, quote.inst_id, MarketDataUtils.get_mid(quote))
 
     def on_trade(self, trade: Trade) -> None:
         self.update_price(trade.timestamp, trade.inst_id, trade.price)
@@ -75,6 +82,13 @@ class HasPositions(MarketDataEventHandler):
 
     def total_position_value(self) -> float:
         total = 0
-        for inst_id, position in self.state.positions.items():
+        for inst_id, position in self.__state.positions.items():
             total += self.position_value(inst_id)
         return total
+
+    def position_order_ids(self, inst_id: str):
+        if not self.has_position(inst_id):
+            return []
+
+        position = self.get_position(inst_id)
+        return [ord_id for ord_id in position.orders.keys()]

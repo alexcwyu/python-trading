@@ -1,7 +1,8 @@
-import datetime
-import time
 import unittest
+
+import datetime
 import gevent
+import time
 from nose.tools import nottest
 from unittest import TestCase
 

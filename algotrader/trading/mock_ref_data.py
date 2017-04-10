@@ -1,8 +1,8 @@
 import pandas as pd
 
-from algotrader.trading.ref_data import RefDataManager
 from algotrader.model.model_factory import *
-from algotrader.utils.py2to3 import *
+from algotrader.trading.ref_data import RefDataManager
+
 
 class MockRefDataManager(RefDataManager):
     """

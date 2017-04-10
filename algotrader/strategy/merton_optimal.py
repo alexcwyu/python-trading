@@ -1,5 +1,5 @@
-from algotrader.event.order import OrdAction
-from algotrader.strategy.strategy import Strategy
+from algotrader.model.trade_data_pb2 import *
+from algotrader.trading.strategy import Strategy
 
 
 class MertonOptimalBaby(Strategy):
@@ -21,7 +21,8 @@ class MertonOptimalBaby(Strategy):
         self.arate = self.get_stg_config_value("arate", 1)
         self.vol = self.get_stg_config_value("vol", 1)
 
-        self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
+        self.bar = app_context.inst_data_mgr.get_series(
+            "Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
         self.bar.start(app_context)
 
         self.optimal_weight = self.arate / self.vol ** 2  # assume risk free rate is zero
@@ -39,7 +40,7 @@ class MertonOptimalBaby(Strategy):
         delta = allocation - portfolio.stock_value
         if delta > 0:
             qty = delta / bar.close  # assume no lot size here
-            self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=qty)
+            self.market_order(inst_id=bar.inst_id, action=Buy, qty=qty)
         else:
             qty = -delta / bar.close  # assume no lot size here
-            self.market_order(inst_id=bar.inst_id, action=OrdAction.SELL, qty=qty)
+            self.market_order(inst_id=bar.inst_id, action=Sell, qty=qty)

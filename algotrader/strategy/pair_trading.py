@@ -1,10 +1,9 @@
 import math
-
 import rx
 from rx.subjects import BehaviorSubject
 
-from algotrader.event.order import OrdAction
-from algotrader.strategy.strategy import Strategy
+from algotrader.model.trade_data_pb2 import *
+from algotrader.trading.strategy import Strategy
 
 
 class PairTradingWithOUSpread(Strategy):
@@ -35,10 +34,12 @@ class PairTradingWithOUSpread(Strategy):
         self.ou_params = self.get_stg_config_value("ou_params", 1)
         self.gamma = self.get_stg_config_value("gamma", 1)
 
-        self.bar_0 = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
+        self.bar_0 = app_context.inst_data_mgr.get_series(
+            "Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
         self.bar_0.start(app_context)
 
-        self.bar_1 = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[1])
+        self.bar_1 = app_context.inst_data_mgr.get_series(
+            "Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[1])
         self.bar_1.start(app_context)
 
         self.instruments = self.app_context.app_config.instrument_ids
@@ -83,12 +84,12 @@ class PairTradingWithOUSpread(Strategy):
 
         qty = abs(delta_0) / spread_triple[0]  # assume no lot size here
         if delta_0 > 0:
-            self.market_order(inst_id=self.instruments[0], action=OrdAction.BUY, qty=qty)
+            self.market_order(inst_id=self.instruments[0], action=Buy, qty=qty)
         else:
-            self.market_order(inst_id=self.instruments[0], action=OrdAction.SELL, qty=qty)
+            self.market_order(inst_id=self.instruments[0], action=Sell, qty=qty)
 
         qty = abs(delta_1) / spread_triple[1]  # assume no lot size here
         if delta_1 > 0:
-            self.market_order(inst_id=self.instruments[1], action=OrdAction.BUY, qty=qty)
+            self.market_order(inst_id=self.instruments[1], action=Buy, qty=qty)
         else:
-            self.market_order(inst_id=self.instruments[1], action=OrdAction.SELL, qty=qty)
+            self.market_order(inst_id=self.instruments[1], action=Sell, qty=qty)

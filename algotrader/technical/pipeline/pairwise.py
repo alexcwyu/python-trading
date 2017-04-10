@@ -1,8 +1,9 @@
+import numpy as np
 
 from algotrader.technical import DataSeries
 from algotrader.technical import Indicator
 from algotrader.technical.pipeline import PipeLine
-import numpy as np
+
 
 class Pairwise(PipeLine):
     _slots__ = (
@@ -44,7 +45,6 @@ class Pairwise(PipeLine):
 
         super(Pairwise, self).update_all()
 
-
     def on_update(self, data):
         super(Pairwise, self).on_update(data)
         result = {}
@@ -70,8 +70,6 @@ class Pairwise(PipeLine):
         return self.__shape
 
 
-
-
 # print pairwiseTemplate.render({"className" : "Plus",
 #                          "func" : "lambda x: x[0, 0]+x[0, 1]"})
 #
@@ -95,29 +93,31 @@ class Pairwise(PipeLine):
 
 class Plus(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise Plus"):
-        super(Plus, self).__init__(input_lhs, input_rhs, func=lambda x, y: x+y,
-                                      name=PipeLine.get_name(Plus.__name__, [input_lhs, input_rhs], input_key),
-                                      input_key=input_key, desc=desc)
+        super(Plus, self).__init__(input_lhs, input_rhs, func=lambda x, y: x + y,
+                                   name=PipeLine.get_name(Plus.__name__, [input_lhs, input_rhs], input_key),
+                                   input_key=input_key, desc=desc)
+
 
 class Minus(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise Minus"):
-        super(Minus, self).__init__(input_lhs, input_rhs, func=lambda x, y: x-y,
-                                   name=PipeLine.get_name(Minus.__name__, [input_lhs, input_rhs], input_key),
-                                   input_key=input_key, desc=desc)
+        super(Minus, self).__init__(input_lhs, input_rhs, func=lambda x, y: x - y,
+                                    name=PipeLine.get_name(Minus.__name__, [input_lhs, input_rhs], input_key),
+                                    input_key=input_key, desc=desc)
 
 
 class Times(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise Times"):
-        super(Times, self).__init__(input_lhs, input_rhs, func=lambda x, y: x*y,
-                                   name=PipeLine.get_name(Times.__name__, [input_lhs, input_rhs], input_key),
-                                   input_key=input_key, desc=desc)
+        super(Times, self).__init__(input_lhs, input_rhs, func=lambda x, y: x * y,
+                                    name=PipeLine.get_name(Times.__name__, [input_lhs, input_rhs], input_key),
+                                    input_key=input_key, desc=desc)
 
 
 class Divides(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise Divdes"):
-        super(Divides, self).__init__(input_lhs, input_rhs, func=lambda x, y: x/y,
-                                   name=PipeLine.get_name(Divides.__name__, [input_lhs, input_rhs], input_key),
-                                   input_key=input_key, desc=desc)
+        super(Divides, self).__init__(input_lhs, input_rhs, func=lambda x, y: x / y,
+                                      name=PipeLine.get_name(Divides.__name__, [input_lhs, input_rhs], input_key),
+                                      input_key=input_key, desc=desc)
+
 
 class Greater(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise Greater"):
@@ -125,53 +125,65 @@ class Greater(Pairwise):
                                       name=PipeLine.get_name(Greater.__name__, [input_lhs, input_rhs], input_key),
                                       input_key=input_key, desc=desc)
 
+
 class GreaterOrEquals(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise GreaterOrEquals"):
         super(GreaterOrEquals, self).__init__(input_lhs, input_rhs, func=lambda x, y: x >= y,
-                                      name=PipeLine.get_name(GreaterOrEquals.__name__, [input_lhs, input_rhs], input_key),
-                                      input_key=input_key, desc=desc)
+                                              name=PipeLine.get_name(GreaterOrEquals.__name__, [input_lhs, input_rhs],
+                                                                     input_key),
+                                              input_key=input_key, desc=desc)
+
 
 class Less(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise Less"):
         super(Less, self).__init__(input_lhs, input_rhs, func=lambda x, y: x < y,
-                                      name=PipeLine.get_name(Less.__name__, [input_lhs, input_rhs], input_key),
-                                      input_key=input_key, desc=desc)
+                                   name=PipeLine.get_name(Less.__name__, [input_lhs, input_rhs], input_key),
+                                   input_key=input_key, desc=desc)
+
 
 class LessOrEquals(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise LessOrEquals"):
         super(LessOrEquals, self).__init__(input_lhs, input_rhs, func=lambda x, y: x <= y,
-                                      name=PipeLine.get_name(LessOrEquals.__name__, [input_lhs, input_rhs], input_key),
-                                      input_key=input_key, desc=desc)
+                                           name=PipeLine.get_name(LessOrEquals.__name__, [input_lhs, input_rhs],
+                                                                  input_key),
+                                           input_key=input_key, desc=desc)
+
 
 class Equals(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise Equals"):
         super(Equals, self).__init__(input_lhs, input_rhs, func=lambda x, y: x == y,
-                                      name=PipeLine.get_name(Equals.__name__, [input_lhs, input_rhs], input_key),
-                                      input_key=input_key, desc=desc)
+                                     name=PipeLine.get_name(Equals.__name__, [input_lhs, input_rhs], input_key),
+                                     input_key=input_key, desc=desc)
+
 
 class NotEquals(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise NotEquals"):
         super(NotEquals, self).__init__(input_lhs, input_rhs, func=lambda x, y: x != y,
-                                      name=PipeLine.get_name(NotEquals.__name__, [input_lhs, input_rhs], input_key),
-                                      input_key=input_key, desc=desc)
+                                        name=PipeLine.get_name(NotEquals.__name__, [input_lhs, input_rhs], input_key),
+                                        input_key=input_key, desc=desc)
+
 
 class Min(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise Min"):
         super(Min, self).__init__(input_lhs, input_rhs, func=lambda x, y: np.min(np.vstack([x, y]), axis=0),
-                                      name=PipeLine.get_name(Min.__name__, [input_lhs, input_rhs], input_key),
-                                      input_key=input_key, desc=desc)
+                                  name=PipeLine.get_name(Min.__name__, [input_lhs, input_rhs], input_key),
+                                  input_key=input_key, desc=desc)
+
 
 class Max(Pairwise):
     def __init__(self, input_lhs, input_rhs, input_key='close', desc="Pairwise Max"):
         super(Max, self).__init__(input_lhs, input_rhs, func=lambda x, y: np.max(np.vstack([x, y]), axis=0),
-                                      name=PipeLine.get_name(Max.__name__, [input_lhs, input_rhs], input_key),
-                                      input_key=input_key, desc=desc)
+                                  name=PipeLine.get_name(Max.__name__, [input_lhs, input_rhs], input_key),
+                                  input_key=input_key, desc=desc)
+
 
 class PairCorrelation(Pairwise):
     def __init__(self, input_lhs, input_rhs, length, input_key='close', desc="Pairwise PairCorrelation"):
-        super(PairCorrelation, self).__init__(input_lhs, input_rhs, length=length, func=lambda x, y: np.corrcoef(x, y)[0, 1],
-                                      name=PipeLine.get_name(PairCorrelation.__name__, [input_lhs, input_rhs], input_key),
-                                      input_key=input_key, desc=desc)
+        super(PairCorrelation, self).__init__(input_lhs, input_rhs, length=length,
+                                              func=lambda x, y: np.corrcoef(x, y)[0, 1],
+                                              name=PipeLine.get_name(PairCorrelation.__name__, [input_lhs, input_rhs],
+                                                                     input_key),
+                                              input_key=input_key, desc=desc)
 
 #
 # from jinja2 import Template

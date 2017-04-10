@@ -1,6 +1,5 @@
 import datetime
 
-from algotrader import HasId
 from algotrader.utils import msgpack_numpy as m
 
 m.patch()
@@ -26,7 +25,6 @@ class SlotPickleMixin(object):
 
 
 class Serializable(object):
-
     def __eq__(self, other):
         return (isinstance(other, self.__class__)
                 and MapSerializer.extract_slot(self) == MapSerializer.extract_slot(

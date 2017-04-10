@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from algotrader.tests.sample_factory import *
+from tests.sample_factory import *
 
 
 class ModelFactoryTest(TestCase):
@@ -84,4 +84,3 @@ class ModelFactoryTest(TestCase):
 
     def test_sequence(self):
         self.assertEqual("test_seq", ModelHelper.get_id(self.factory.sample_sequence()))
-

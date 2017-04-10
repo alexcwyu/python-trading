@@ -9,10 +9,9 @@ Support for serialization of numpy data types with msgpack.
 # Distributed under the terms of the BSD license:
 # http://www.opensource.org/licenses/bsd-license
 
-import os
-
 import msgpack
 import numpy as np
+import os
 
 # Fall back to pure Python
 if os.environ.get('MSGPACK_PUREPYTHON'):
@@ -193,7 +192,6 @@ def patch():
 
 
 if __name__ == '__main__':
-
     from unittest import main, TestCase
 
 

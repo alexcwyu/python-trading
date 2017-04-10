@@ -7,6 +7,7 @@ from algotrader.trading.data_series import DataSeries
 from algotrader.utils import logger
 from algotrader.utils.market_data_utils import BarSize
 
+
 class BarInputType:
     Bar = 0
     Trade = 1

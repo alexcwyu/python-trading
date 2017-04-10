@@ -6,8 +6,10 @@ class SampleFactory(object):
         pass
 
     def sample_instrument(self):
-        inst = ModelFactory.build_instrument(symbol='2800.HK', type=Instrument.STK, primary_exch_id='SEHK', ccy_id='HKD',
-                                             name='2800', exch_ids=['NYSE', 'TSE'], sector="Finance", industry="Banking",
+        inst = ModelFactory.build_instrument(symbol='2800.HK', type=Instrument.STK, primary_exch_id='SEHK',
+                                             ccy_id='HKD',
+                                             name='2800', exch_ids=['NYSE', 'TSE'], sector="Finance",
+                                             industry="Banking",
                                              margin=100, tick_size=0.05,
                                              alt_symbols={'IB': '2800', 'RIC': '2800.HK'},
                                              alt_ids={'VALOREN': '123123', 'ISIN': '123123'},
@@ -22,7 +24,7 @@ class SampleFactory(object):
 
     def sample_exchange(self):
         exchange = ModelFactory.build_exchange('SEHK', 'The Stock Exchange of Hong Kong Limited', 'HK', 'HKEX',
-                                             'HK_Holiday')
+                                               'HK_Holiday')
         return exchange
 
     def sample_currency(self):
@@ -139,7 +141,8 @@ class SampleFactory(object):
         return event
 
     def sample_portfolio_update(self):
-        event = ModelFactory.build_portfolio_update(0, "IB", broker_event_id="e_456", portf_id="BLSH", inst_id="HSI@SEHK",
+        event = ModelFactory.build_portfolio_update(0, "IB", broker_event_id="e_456", portf_id="BLSH",
+                                                    inst_id="HSI@SEHK",
                                                     position=10, mkt_price=123.1, mkt_value=1231, avg_cost=12.8,
                                                     unrealized_pnl=1230, realized_pnl=0.8)
 

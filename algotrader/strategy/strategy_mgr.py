@@ -1,6 +1,6 @@
+from algotrader import SimpleManager
 from importlib import import_module
 
-from algotrader import SimpleManager
 from algotrader.config.persistence import PersistenceMode
 
 

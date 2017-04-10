@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from algotrader.event.market_data import Bar, Quote, Trade
-from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
+from algotrader.model.model_factory import ModelFactory
+from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker.sim.data_processor import BarProcessor, TradeProcessor, QuoteProcessor
 from algotrader.provider.broker.sim.sim_config import SimConfig
 
@@ -11,9 +11,10 @@ class MarketDataProcessorTest(TestCase):
         config = SimConfig()
         processor = BarProcessor()
 
-        order = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT,
-                                qty=1000, limit_price=18.5)
-        bar = Bar(open=18, high=19, low=17, close=17.5, vol=1000)
+        order = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id="1", inst_id="1", action=Buy,
+                                                     type=Limit,
+                                                     qty=1000, limit_price=18.5)
+        bar = ModelFactory.build_bar(timestamp=0, inst_id="1", open=18, high=19, low=17, close=17.5, vol=1000)
 
         self.assertEqual(17.5, processor.get_price(order, bar, config))
         self.assertEqual(1000, processor.get_qty(order, bar, config))
@@ -26,9 +27,10 @@ class MarketDataProcessorTest(TestCase):
         config = SimConfig()
         processor = TradeProcessor()
 
-        order = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT,
-                                qty=1000, limit_price=18.5)
-        trade = Trade(price=20, size=200)
+        order = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id="1", inst_id="1", action=Buy,
+                                                     type=Limit,
+                                                     qty=1000, limit_price=18.5)
+        trade = ModelFactory.build_trade(timestamp=0, inst_id="1", price=20, size=200)
 
         self.assertEqual(20, processor.get_price(order, trade, config))
         self.assertEqual(200, processor.get_qty(order, trade, config))
@@ -37,15 +39,17 @@ class MarketDataProcessorTest(TestCase):
         config = SimConfig()
         processor = QuoteProcessor()
 
-        order = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT,
-                                qty=1000, limit_price=18.5)
-        quote = Quote(bid=18, ask=19, bid_size=200, ask_size=500)
+        order = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id="1", inst_id="1", action=Buy,
+                                                     type=Limit,
+                                                     qty=1000, limit_price=18.5)
+        quote = ModelFactory.build_quote(timestamp=0, inst_id="1", bid=18, ask=19, bid_size=200, ask_size=500)
 
         self.assertEqual(19, processor.get_price(order, quote, config))
         self.assertEqual(500, processor.get_qty(order, quote, config))
 
-        order2 = NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=1, action=OrdAction.SELL, type=OrdType.LIMIT,
-                                 qty=1000,
-                                 limit_price=18.5)
+        order2 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id="2", inst_id="1",
+                                                      action=Sell, type=Limit,
+                                                      qty=1000,
+                                                      limit_price=18.5)
         self.assertEqual(18, processor.get_price(order2, quote, config))
         self.assertEqual(200, processor.get_qty(order2, quote, config))

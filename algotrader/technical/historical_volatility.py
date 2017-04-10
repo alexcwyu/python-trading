@@ -1,5 +1,4 @@
 import math
-
 import numpy as np
 
 from algotrader.technical import Indicator

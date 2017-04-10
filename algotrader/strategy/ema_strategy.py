@@ -1,6 +1,6 @@
-from algotrader.event.order import OrdAction
-from algotrader.strategy.strategy import Strategy
+from algotrader.model.trade_data_pb2 import *
 from algotrader.technical.talib_wrapper import EMA
+from algotrader.trading.strategy import Strategy
 from algotrader.utils import logger
 
 
@@ -12,7 +12,8 @@ class EMAStrategy(Strategy):
     def _start(self, app_context, **kwargs):
         self.qty = self.get_stg_config_value("qty", 1)
 
-        self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
+        self.bar = app_context.inst_data_mgr.get_series(
+            "Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
         self.bar.start(app_context)
 
         self.ema_fast = EMA(self.bar, 'close', 10)
@@ -28,12 +29,12 @@ class EMAStrategy(Strategy):
 
     def on_bar(self, bar):
         if self.buy_order is None and self.ema_fast.now('value') > self.ema_slow.now('value'):
-            self.buy_order = self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=self.qty)
+            self.buy_order = self.market_order(inst_id=bar.inst_id, action=Buy, qty=self.qty)
             logger.info("%s,B,%s,%s,%.2f,%.2f,%.2f" % (
                 bar.timestamp, self.buy_order.cl_id, self.buy_order.cl_ord_id, bar.close, self.ema_fast.now('value'),
                 self.ema_slow.now('value')))
         elif self.buy_order is not None and self.ema_fast.now('value') < self.ema_slow.now('value'):
-            sell_order = self.market_order(inst_id=bar.inst_id, action=OrdAction.SELL, qty=self.qty)
+            sell_order = self.market_order(inst_id=bar.inst_id, action=Sell, qty=self.qty)
             logger.info("%s,S,%s,%s,%.2f,%.2f,%.2f" % (
                 bar.timestamp, sell_order.cl_id, sell_order.cl_ord_id, bar.close, self.ema_fast.now('value'),
                 self.ema_slow.now('value')))

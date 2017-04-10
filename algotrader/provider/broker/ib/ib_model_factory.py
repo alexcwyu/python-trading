@@ -1,14 +1,12 @@
-from datetime import datetime
-
 import swigibpy
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
-
-from algotrader.utils.date_utils import DateUtils
 from algotrader.provider.broker import Broker
 from algotrader.provider.subscription import MarketDataType
+from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.market_data_utils import BarSize
 
 
@@ -26,7 +24,7 @@ class IBModelFactory:
     ord_action_mapping = {
         Buy: "BUY",
         Sell: "SELL",
-        #OrderAction.SSHORT: "SSHORT"
+        # OrderAction.SSHORT: "SSHORT"
     }
 
     ord_type_mapping = {
@@ -135,7 +133,7 @@ class IBModelFactory:
     def convert_ord_action(self, ord_action):
         return self.ord_action_mapping[ord_action]
 
-    def create_ib_contract(self, inst_id = None, symbol = None, exchange = None, sec_type = None, currency = None):
+    def create_ib_contract(self, inst_id=None, symbol=None, exchange=None, sec_type=None, currency=None):
         contract = swigibpy.Contract()
 
         if inst_id:
@@ -156,13 +154,15 @@ class IBModelFactory:
 
         return contract
 
-
-    def create_ib_scanner_subsciption(self, num_row = None, inst_type = None, location_code = None, scan_code = None,
-                                      above_price = None, below_price = None, above_vol = None, avg_opt_vol_above = None,
-                                      mkt_cap_above = None, mkt_cap_below = None, moody_rating_above = None, moody_rating_below = None,
-                                      sp_rating_above = None, sp_rating_below = None,  mat_date_above = None, mat_date_below = None,
-                                      coupon_rate_above = None, coupon_rate_below = None,  exc_convertible = None, scanner_setting_pairs = None,
-                                      stk_type_filter = None):
+    def create_ib_scanner_subsciption(self, num_row=None, inst_type=None, location_code=None, scan_code=None,
+                                      above_price=None, below_price=None, above_vol=None, avg_opt_vol_above=None,
+                                      mkt_cap_above=None, mkt_cap_below=None, moody_rating_above=None,
+                                      moody_rating_below=None,
+                                      sp_rating_above=None, sp_rating_below=None, mat_date_above=None,
+                                      mat_date_below=None,
+                                      coupon_rate_above=None, coupon_rate_below=None, exc_convertible=None,
+                                      scanner_setting_pairs=None,
+                                      stk_type_filter=None):
 
         sub = swigibpy.ScannerSubscription()
 
@@ -210,7 +210,6 @@ class IBModelFactory:
             sub.stockTypeFilter = stk_type_filter
 
         return sub
-
 
     def convert_hist_data_type(self, type):
         return self.hist_data_type_mapping.get(type, "MIDPOINT")

@@ -1,7 +1,6 @@
-from algotrader.event.order import OrdAction
-from algotrader.strategy.strategy import Strategy
+from algotrader.model.trade_data_pb2 import *
 from algotrader.technical.roc import ROC
-from algotrader.utils import logger
+from algotrader.trading.strategy import Strategy
 
 
 class Down2PctStrategy(Strategy):
@@ -28,12 +27,12 @@ class Down2PctStrategy(Strategy):
     def on_bar(self, bar):
         if self.order is None:
             if self.roc.now('value') < -0.02:
-                #logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
-                self.order = self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=self.qty)
+                # logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
+                self.order = self.market_order(inst_id=bar.inst_id, action=Buy, qty=self.qty)
                 self.day_count = 0
         else:
             self.day_count += 1
             if self.day_count >= 5:
-                #logger.info("%s,S,%.2f" % (bar.timestamp, bar.close))
-                self.market_order(inst_id=bar.inst_id, action=OrdAction.SELL, qty=self.qty)
+                # logger.info("%s,S,%.2f" % (bar.timestamp, bar.close))
+                self.market_order(inst_id=bar.inst_id, action=Sell, qty=self.qty)
                 self.order = None

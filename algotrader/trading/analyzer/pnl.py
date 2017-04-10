@@ -1,29 +1,31 @@
 from algotrader.trading.analyzer import Analyzer
-from algotrader.trading.data_series import DataSeries
-
 from algotrader.trading.analyzer.performance import PerformanceAnalyzer
+from algotrader.trading.data_series import DataSeries
 
 
 class PnlAnalyzer(Analyzer):
     Pnl = "Pnl"
 
-    def __init__(self, portfolio):
+    def __init__(self, portfolio, state):
         self.portfolio = portfolio
-        self.state = portfolio.state.pnl
-        self.series = DataSeries(self.portfolio.state.pnl.series)
+        self.state = state
+        self.series = DataSeries(self.state.pnl.series)
 
     def update(self, timestamp: int, total_equity: float):
         performance_series = self.portfolio.performance.series
 
         if self.series.size() >= 2:
-            self.state.pnl = performance_series.get_by_idx(-1, PerformanceAnalyzer.TotalEquity) - \
-                             self.portfolio.performance_series.get_by_idx(-2, PerformanceAnalyzer.TotalEquity)
+            self.state.pnl.last_pnl = performance_series.get_by_idx(-1, PerformanceAnalyzer.TotalEquity) - \
+                                      self.portfolio.performance_series.get_by_idx(-2, PerformanceAnalyzer.TotalEquity)
 
-            self.series.add(data={self.Pnl: self.state.pnl}, timestamp=timestamp)
+            self.series.add(data={self.Pnl: self.state.pnl.last_pnl}, timestamp=timestamp)
 
     def get_result(self):
-        return {self.Pnl: self.state.pnl}
+        return {self.Pnl: self.state.pnl.last_pnl}
 
     def get_series(self, keys=None):
         keys = keys if keys else self.Pnl
         return {self.Pnl: self.series.get_series(self.Pnl)}
+
+    def last_pnl(self) -> float:
+        return self.state.pnl.last_pnl

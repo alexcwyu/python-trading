@@ -1,8 +1,7 @@
 import abc
-
+from algotrader import Startable
 from rx import Observer
 
-from algotrader import Startable
 from algotrader.event.event_bus import EventBus
 from algotrader.model.model_factory import *
 from algotrader.utils import logger

@@ -64,27 +64,27 @@ class DefaultFillStrategy(FillStrategy):
                 or (isinstance(event, Quote) and not config.fill_on_quote):
             return None
 
-        if new_ord_req.type == OrderType.MARKET:
+        if new_ord_req.type == Market:
             return self.__market_ord_handler.process(new_ord_req, event, new_order)
-        elif new_ord_req.type == OrderType.LIMIT:
+        elif new_ord_req.type == Limit:
             return self.__limit_ord_handler.process(new_ord_req, event, new_order)
-        elif new_ord_req.type == OrderType.STOP_LIMIT:
+        elif new_ord_req.type == StopLimit:
             return self.__stop_limit_ord_handler.process(new_ord_req, event, new_order)
-        elif new_ord_req.type == OrderType.STOP:
+        elif new_ord_req.type == Stop:
             return self.__stop_ord_handler.process(new_ord_req, event, new_order)
-        elif new_ord_req.type == OrderType.TRAILING_STOP:
+        elif new_ord_req.type == TrailingStop:
             return self.__trailing_stop_ord_handler.process(new_ord_req, event, new_order)
         assert False
 
     def process_w_price_qty(self, new_ord_req, price, qty):
-        if new_ord_req.type == OrderType.MARKET:
+        if new_ord_req.type == Market:
             return self.__market_ord_handler.process_w_price_qty(new_ord_req, price, qty)
-        elif new_ord_req.type == OrderType.LIMIT:
+        elif new_ord_req.type == Limit:
             return self.__limit_ord_handler.process_w_price_qty(new_ord_req, price, qty)
-        elif new_ord_req.type == OrderType.STOP_LIMIT:
+        elif new_ord_req.type == StopLimit:
             return self.__stop_limit_ord_handler.process_w_price_qty(new_ord_req, price, qty)
-        elif new_ord_req.type == OrderType.STOP:
+        elif new_ord_req.type == Stop:
             return self.__stop_ord_handler.process_w_price_qty(new_ord_req, price, qty)
-        elif new_ord_req.type == OrderType.TRAILING_STOP:
+        elif new_ord_req.type == TrailingStop:
             return self.__trailing_stop_ord_handler.process_w_price_qty(new_ord_req, price, qty)
         return None

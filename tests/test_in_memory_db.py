@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import PersistenceConfig, InMemoryStoreConfig
-from algotrader.event.market_data import Bar
+from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.persistence import PersistenceMode
 from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.persistence.inmemory import InMemoryDataStore
@@ -13,7 +13,6 @@ from algotrader.utils.clock import Clock
 
 class InMemoryDBTest(TestCase):
     def setUp(self):
-
 
         persistence_config = PersistenceConfig(None,
                                                DataStore.InMemoryDB, PersistenceMode.Batch,
@@ -26,8 +25,9 @@ class InMemoryDBTest(TestCase):
         delete_at_stop = False
 
         app_config = ApplicationConfig(None, None, Clock.RealTime, persistence_config,
-                                       InMemoryStoreConfig(file="%s_db.p"%name,
-                                                           create_at_start=create_at_start, delete_at_stop=delete_at_stop))
+                                       InMemoryStoreConfig(file="%s_db.p" % name,
+                                                           create_at_start=create_at_start,
+                                                           delete_at_stop=delete_at_stop))
         self.context = ApplicationContext(app_config=app_config)
 
         self.db = InMemoryDataStore()
@@ -40,8 +40,9 @@ class InMemoryDBTest(TestCase):
         inputs = []
         for x in range(0, 10):
             data = sorted([random.randint(0, 100) for i in range(0, 4)])
-            bar = Bar(timestamp=x, inst_id=3, open=data[1], high=data[3], low=data[0], close=data[2],
-                      vol=random.randint(100, 1000))
+            bar = ModelFactory.build_bar(timestamp=x, inst_id="3", open=data[1], high=data[3], low=data[0],
+                                         close=data[2],
+                                         vol=random.randint(100, 1000))
             inputs.append(bar)
             self.db.save_bar(bar)
 
@@ -56,5 +57,3 @@ class InMemoryDBTest(TestCase):
 
         for x in range(0, 10):
             self.assertEquals(inputs[x], bars[x])
-
-

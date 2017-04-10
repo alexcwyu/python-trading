@@ -1,9 +1,9 @@
 import datetime
 from unittest import TestCase
 
-from algotrader.model.market_data_pb2 import *
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.market_data_utils import BarSize, MarketDataUtils
+
 
 class BarTest(TestCase):
     current_dt = datetime.datetime(year=2016, month=8, day=1, hour=6, minute=3, second=4)

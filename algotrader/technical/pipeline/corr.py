@@ -1,6 +1,7 @@
-from algotrader.technical import Indicator
-from algotrader.technical.pipeline import PipeLine
 import numpy as np
+
+from algotrader.technical.pipeline import PipeLine
+
 
 class Corr(PipeLine):
     _slots__ = (
@@ -8,7 +9,7 @@ class Corr(PipeLine):
 
     def __init__(self, inputs, input_key='close', length=30, desc="Correlation"):
         super(Corr, self).__init__(PipeLine.get_name(Corr.__name__, input),
-                                   input,  input_key, length, desc)
+                                   input, input_key, length, desc)
         super(Corr, self).update_all()
 
     def on_update(self, data):
@@ -29,4 +30,3 @@ class Corr(PipeLine):
 
     def shape(self):
         return np.array([self.numPipes, self.numPipes])
-

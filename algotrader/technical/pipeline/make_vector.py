@@ -1,6 +1,6 @@
-from algotrader.technical import Indicator
-from algotrader.technical.pipeline import PipeLine
 import numpy as np
+
+from algotrader.technical.pipeline import PipeLine
 
 
 class MakeVector(PipeLine):
@@ -9,7 +9,7 @@ class MakeVector(PipeLine):
 
     def __init__(self, inputs, input_key='close', desc="Bundle and Sync DataSeries to Vector"):
         super(MakeVector, self).__init__(PipeLine.get_name(MakeVector.__name__, inputs, input_key),
-                                                  inputs,  input_key, length=1, desc=desc)
+                                         inputs, input_key, length=1, desc=desc)
         super(MakeVector, self).update_all()
 
     def on_update(self, data):
@@ -34,5 +34,3 @@ class MakeVector(PipeLine):
 
     def shape(self):
         return np.array([1, self.numPipes])
-
-

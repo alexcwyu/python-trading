@@ -22,8 +22,8 @@ from test_portfolio import PortfolioTest
 from test_position import PositionTest
 from test_rolling import RollingApplyTest
 from test_ser_deser import SerializerTest
-from test_talib_wrapper import TALibSMATest
 from test_strategy_persistence import StrategyPersistenceTest
+from test_talib_wrapper import TALibSMATest
 
 
 def suite():

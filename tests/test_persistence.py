@@ -1,116 +1,165 @@
-import math
+from pymongo import MongoClient
 from unittest import TestCase
 
-from algotrader.config.app import ApplicationConfig
-from algotrader.config.persistence import PersistenceConfig, InMemoryStoreConfig
-from algotrader.provider.persistence.data_store import DataStore
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.technical.ma import SMA
-from algotrader.trading.context import ApplicationContext
-from algotrader.utils.clock import Clock
+from algotrader.model.protobuf_to_dict import *
+from tests.sample_factory import *
 
 
 class PersistenceTest(TestCase):
-    def new_app_context(self):
-        name = "test"
-        create_at_start = True
-        delete_at_stop = False
+    host = "localhost"
+    port = 27017
+    dbname = "test"
+    client = None
+    db = None
 
-        app_config = ApplicationConfig("app", None, Clock.Simulation, PersistenceConfig(
-            ref_ds_id=DataStore.InMemoryDB, ref_persist_mode=PersistenceMode.RealTime,
-            trade_ds_id=DataStore.InMemoryDB, trade_persist_mode=PersistenceMode.RealTime,
-            ts_ds_id=DataStore.InMemoryDB, ts_persist_mode=PersistenceMode.RealTime,
-            seq_ds_id=DataStore.InMemoryDB, seq_persist_mode=PersistenceMode.RealTime),
-                                       InMemoryStoreConfig(file="%s_db.p" % name,
-                                                           create_at_start=create_at_start,
-                                                           delete_at_stop=delete_at_stop))
-        app_context = ApplicationContext(app_config=app_config)
-        app_context.start()
-        return app_context
+    @classmethod
+    def setUpClass(cls):
+        cls.client = MongoClient(host=cls.host, port=cls.port)
+        cls.db = cls.client[cls.dbname]
 
-    def test_save_and_load_indicator(self):
-        app_context = self.new_app_context()
+        cls.tests = cls.db['tests']
+        cls.factory = SampleFactory()
 
-        bar = app_context.inst_data_mgr.get_series("bar")
-        bar.start(app_context)
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.drop_database(cls.dbname)
 
-        sma = SMA(bar, input_key='close', length=3)
-        sma.start(app_context)
+    def setUp(self):
+        pass
 
-        t1 = 0
-        t2 = t1 + 1
-        t3 = t2 + 1
-        t4 = t3 + 1
-        t5 = t4 + 1
+    def tearDown(self):
+        PersistenceTest.tests.remove()
 
-        bar.add({"timestamp": t1, "close": 2.0, "open": 0})
-        self.assertTrue(math.isnan(sma.now('value')))
+    def test_instrument(self):
+        inst = PersistenceTest.factory.sample_instrument()
+        self.__test_persistence(Instrument, inst)
 
-        bar.add({"timestamp": t2, "close": 2.4, "open": 1.4})
-        self.assertTrue(math.isnan(sma.now('value')))
+    def test_underlying(self):
+        underlying = self.factory.sample_underlying()
+        self.__test_persistence(Underlying, underlying)
 
-        bar.add({"timestamp": t3, "close": 2.8, "open": 1.8})
-        self.assertEquals(2.4, sma.now('value'))
+    #
+    # def test_derivative_traits(self):
+    #     derivative_traits = self.factory.sample_derivative_traits()
+    #     self.__test_persistence(DrivativeTraits, derivative_traits)
 
-        app_context.stop()
+    def test_asset(self):
+        asset = self.factory.sample_asset()
+        self.__test_persistence(Underlying.Asset, asset)
 
-        ## restart...:
+    def test_exchange(self):
+        exchange = self.factory.sample_exchange()
+        self.__test_persistence(Exchange, exchange)
 
-        app_context = self.new_app_context()
+    def test_currency(self):
+        currency = self.factory.sample_currency()
+        self.__test_persistence(Currency, currency)
 
-        bar_new = app_context.inst_data_mgr.get_series("bar")
-        bar_new.start(app_context)
+    def test_country(self):
+        country = self.factory.sample_country()
+        self.__test_persistence(Country, country)
 
-        sma_new = app_context.inst_data_mgr.get_series(sma.id())
-        sma_new.start(app_context)
+    def test_holiday(self):
+        holiday = self.factory.sample_holiday()
+        self.__test_persistence(HolidaySeries.Holiday, holiday)
 
-        bar_new.add({"timestamp": t4, "close": 3.2, "open": 2.2})
-        self.assertEquals(2.8, sma_new.now('value'))
+    def test_trading_holidays(self):
+        trading_holiday = self.factory.sample_trading_holidays()
+        self.__test_persistence(HolidaySeries, trading_holiday)
 
-        bar_new.add({"timestamp": t5, "close": 3.6, "open": 2.6})
-        self.assertEquals(3.2, sma_new.now('value'))
+    def test_trading_session(self):
+        session = self.factory.sample_trading_session()
+        self.__test_persistence(TradingHours.Session, session)
 
-        self.assertTrue(math.isnan(sma_new.get_by_idx(0, 'value')))
-        self.assertTrue(math.isnan(sma_new.get_by_idx(1, 'value')))
-        self.assertEquals(2.4, sma_new.get_by_idx(2, 'value'))
-        self.assertEquals(2.8, sma_new.get_by_idx(3, 'value'))
-        self.assertEquals(3.2, sma_new.get_by_idx(4, 'value'))
+    def test_trading_hours(self):
+        trading_hours = self.factory.sample_trading_hours()
+        self.__test_persistence(TradingHours, trading_hours)
 
-        self.assertTrue(math.isnan(sma_new.get_by_time(t1, 'value')))
-        self.assertTrue(math.isnan(sma_new.get_by_time(t2, 'value')))
-        self.assertEquals(2.4, sma_new.get_by_time(t3, 'value'))
-        self.assertEquals(2.8, sma_new.get_by_time(t4, 'value'))
+    def test_timezone(self):
+        timezone = self.factory.sample_timezone()
+        self.__test_persistence(TimeZone, timezone)
 
-        self.assertTrue(math.isnan(sma_new.get_by_time(t1, 'value')))
-        self.assertTrue(math.isnan(sma_new.get_by_time(t1, 'value')))
+    def test_time_series_item(self):
+        item = self.factory.sample_time_series_item()
+        self.__test_persistence(TimeSeries.Item, item)
 
-        old_bar_dict = bar.get_data_dict(['close'])
-        old_sma_dict = sma.get_data_dict(['value'])
+    def test_time_series(self):
+        ds = self.factory.sample_time_series()
+        self.__test_persistence(TimeSeries, ds)
 
-        new_bar_dict = bar_new.get_data_dict(['close'])
-        new_sma_dict = sma_new.get_data_dict(['value'])
+    def test_bar(self):
+        self.__test_persistence(Bar, self.factory.sample_bar())
 
-        self.assertEquals(3, len(old_bar_dict))
-        self.assertEquals(3, len(old_sma_dict))
+    def test_quote(self):
+        self.__test_persistence(Quote, self.factory.sample_quote())
 
-        self.assertEquals(5, len(new_bar_dict))
-        self.assertEquals(5, len(new_sma_dict))
+    def test_trade(self):
+        self.__test_persistence(Trade, self.factory.sample_trade())
 
-        self.assertEquals(2.0, new_bar_dict['0'])
-        self.assertTrue(math.isnan(new_sma_dict['0']))
+    def test_market_depth(self):
+        self.__test_persistence(MarketDepth, self.factory.sample_market_depth())
 
-        self.assertEquals(2.4, new_bar_dict['1'])
-        self.assertTrue(math.isnan(new_sma_dict['1']))
+    def test_new_order_request(self):
+        self.__test_persistence(NewOrderRequest, self.factory.sample_new_order_request())
 
-        self.assertEquals(2.8, new_bar_dict['2'])
-        self.assertEquals(2.4, new_sma_dict['2'])
+    def test_order_replace_request(self):
+        self.__test_persistence(OrderReplaceRequest, self.factory.sample_order_replace_request())
 
-        self.assertEquals(3.2, new_bar_dict['3'])
-        self.assertEquals(2.8, new_sma_dict['3'])
+    def test_order_cancel_request(self):
+        self.__test_persistence(OrderCancelRequest, self.factory.sample_order_cancel_request())
 
-        self.assertEquals(3.6, new_bar_dict['4'])
-        self.assertEquals(3.2, new_sma_dict['4'])
+    def test_order_status_update(self):
+        self.__test_persistence(OrderStatusUpdate, self.factory.sample_order_status_update())
 
-        db = app_context.get_ref_data_store()
-        app_context.stop()
-        db.remove_database()
+    def test_execution_report(self):
+        self.__test_persistence(ExecutionReport, self.factory.sample_execution_report())
+
+    def test_account_value(self):
+        self.__test_persistence(AccountValue, self.factory.sample_account_value())
+
+    def test_account_update(self):
+        self.__test_persistence(AccountUpdate, self.factory.sample_account_update())
+
+    def test_portfolio_update(self):
+        self.__test_persistence(PortfolioUpdate, self.factory.sample_portfolio_update())
+
+    def test_account_state(self):
+        self.__test_persistence(AccountState, self.factory.sample_account_state())
+
+    def test_portfolio_state(self):
+        self.__test_persistence(PortfolioState, self.factory.sample_portfolio_state())
+
+    def test_performance(self):
+        self.__test_persistence(Performance, self.factory.sample_performance())
+
+    def test_pnl(self):
+        self.__test_persistence(Pnl, self.factory.sample_pnl())
+
+    def test_drawdown(self):
+        self.__test_persistence(DrawDown, self.factory.sample_drawdown())
+
+    def test_config(self):
+        self.__test_persistence(Config, self.factory.sample_config())
+
+    def test_strategy_state(self):
+        self.__test_persistence(StrategyState, self.factory.sample_strategy_state())
+
+    def test_order_state(self):
+        self.__test_persistence(OrderState, self.factory.sample_order_state())
+
+    def test_position(self):
+        self.__test_persistence(Position, self.factory.sample_position())
+
+    def test_order_position(self):
+        self.__test_persistence(OrderPosition, self.factory.sample_order_position())
+
+    def test_sequence(self):
+        self.__test_persistence(Sequence, self.factory.sample_sequence())
+
+    def __test_persistence(self, cls, obj):
+        data = protobuf_to_dict(obj)
+        PersistenceTest.tests.update({'_id': 1}, data, upsert=True)
+        result = PersistenceTest.tests.find_one({"_id": 1})
+        del result['_id']
+        new_obj = dict_to_protobuf(cls, result)
+        self.assertEqual(obj, new_obj)

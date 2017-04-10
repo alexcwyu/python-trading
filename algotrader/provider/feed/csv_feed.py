@@ -1,13 +1,15 @@
 import pandas as pd
 
 from algotrader.config.feed import CSVFeedConfig
-from algotrader.model.market_data_pb2 import Bar
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.market_data_utils import BarSize
 
 dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
+
 
 class CSVDataFeed(Feed):
     def __init__(self):
@@ -40,7 +42,7 @@ class CSVDataFeed(Feed):
         dfs = []
         sub_key_range = {sub_key.inst_id: (
             DateUtils.date_to_unixtimemillis(sub_key.from_date), DateUtils.date_to_unixtimemillis(sub_key.to_date)) for
-                         sub_key in sub_keys}
+            sub_key in sub_keys}
 
         for sub_key in sub_keys:
 
@@ -60,7 +62,10 @@ class CSVDataFeed(Feed):
             timestamp = DateUtils.datetime_to_unixtimemillis(index)
             if timestamp >= range[0] and timestamp < range[1]:
                 self.data_event_bus.on_next(
-                    Bar(inst_id=inst.inst_id,
+                    ModelFactory.build_bar(
+                        inst_id=inst.inst_id,
+                        type=Bar.Time,
+                        provider_id=self.id(),
                         timestamp=timestamp,
                         open=row['Open'],
                         high=row['High'],

@@ -4,7 +4,7 @@ from algotrader.model.market_data_pb2 import Trade, Bar, Quote
 from algotrader.trading.bar_aggregator import BarAggregator, BarInputType
 from algotrader.trading.data_series import DataSeries
 from algotrader.utils.clock import SimulationClock
-from algotrader.utils.market_data_utils import BarSize
+
 
 class BarAggregatorTest(TestCase):
     class DummyEventBus:

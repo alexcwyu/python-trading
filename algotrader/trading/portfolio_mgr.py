@@ -1,8 +1,8 @@
 from algotrader import SimpleManager
 
 from algotrader.config.persistence import PersistenceMode
-from algotrader.trading.portfolio import Portfolio
 from algotrader.model.model_factory import ModelFactory
+from algotrader.trading.portfolio import Portfolio
 
 
 class PortfolioManager(SimpleManager):

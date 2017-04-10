@@ -1,9 +1,9 @@
 import rx
 from rx.subjects import BehaviorSubject
 
-from algotrader.event.order import OrdAction
-from algotrader.strategy.strategy import Strategy
+from algotrader.model.trade_data_pb2 import *
 from algotrader.technical.talib_wrapper import EMA, SMA
+from algotrader.trading.strategy import Strategy
 from algotrader.utils import logger
 
 
@@ -52,12 +52,12 @@ class VixVxvRatio(Strategy):
             if ratio < self.threshold[0]:
                 # logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
                 self.order = self.market_order(inst_id=self.xiv.id(),
-                                               action=OrdAction.BUY,
+                                               action=Buy,
                                                qty=self.qty)
             # long VXX when ratio > 1.08
             elif ratio > self.threshold[1]:
                 # logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
-                self.order = self.market_order(inst_id=self.vxx, action=OrdAction.BUY, qty=self.qty)
+                self.order = self.market_order(inst_id=self.vxx, action=Buy, qty=self.qty)
 
 
 class VxvVxmtRatio(Strategy):
@@ -94,10 +94,10 @@ class VxvVxmtRatio(Strategy):
             if ratio < self.threshold[0]:
                 logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
                 if bar.inst_id == self.xiv.id():
-                    self.order = self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=self.qty)
+                    self.order = self.market_order(inst_id=bar.inst_id, action=Buy, qty=self.qty)
 
             # long VXX when ratio > 1.08
             elif ratio > self.threshold[1]:
                 logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
                 if bar.inst_id == self.vxx.id():
-                    self.order = self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=self.qty)
+                    self.order = self.market_order(inst_id=bar.inst_id, action=Buy, qty=self.qty)

@@ -1,11 +1,12 @@
 import logging
-from datetime import date
 
 import pandas as pd
+from datetime import date
 
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import EventLogger
-from algotrader.model.market_data_pb2 import Bar
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey
 from algotrader.trading.ref_data import InMemoryRefDataManager
@@ -58,14 +59,16 @@ class PandaH5DataFeed(Feed):
 
     def process_row(self, index, row):
         inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
-        return Bar(inst_id=inst.inst_id,
-                   timestamp=Clock.datetime_to_unixtimemillis(index),
-                   open=row['Open'],
-                   high=row['High'],
-                   low=row['Low'],
-                   close=row['Close'],
-                   vol=row['Volume'],
-                   size=row['BarSize'])
+        return ModelFactory.build_bar(inst_id=inst.inst_id,
+                                      type=Bar.Time,
+                                      provider_id=self.id(),
+                                      timestamp=Clock.datetime_to_unixtimemillis(index),
+                                      open=row['Open'],
+                                      high=row['High'],
+                                      low=row['Low'],
+                                      close=row['Close'],
+                                      vol=row['Volume'],
+                                      size=row['BarSize'])
 
     def __load_data(self, sub_keys):
         with pd.HDFStore(self.h5file) as store:

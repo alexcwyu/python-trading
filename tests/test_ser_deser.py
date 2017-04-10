@@ -1,233 +1,99 @@
-import datetime
 from unittest import TestCase
 
-from nose_parameterized import parameterized, param
-
-from algotrader.provider.broker import Broker
-from algotrader.provider.feed import Feed
-from algotrader.config.app import BacktestingConfig
-from algotrader.event.account import AccountUpdate, PortfolioUpdate
-from algotrader.event.market_data import Bar, Trade, Quote, MarketDepth, MDOperation, MDSide
-from algotrader.event.market_data import BarSize, BarType
-from algotrader.event.order import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
-    ExecutionReport, TIF, \
-    OrdStatus, OrdAction, OrdType
-from algotrader.provider.broker.sim.simulator import Simulator
-from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
-from algotrader.provider.subscription import BarSubscriptionType
-from algotrader.technical.ma import SMA
-from algotrader.trading.account import Account
-from algotrader.trading.order import Order
-from algotrader.trading.position import Position
-from algotrader.trading.ref_data import Instrument, Exchange, Currency
-from algotrader.utils.ser_deser import MsgPackSerializer, JsonSerializer, MapSerializer
-from algotrader.trading.data_series import DataSeries
-
-from algotrader.config.app import ApplicationConfig
-from algotrader.trading.context import ApplicationContext
-
-params = [
-    param('MsgPackSerializer', MsgPackSerializer),
-    param('JsonSerializer', JsonSerializer),
-    param('MapSerializer', MapSerializer)
-]
+from algotrader.model.protobuf_to_dict import *
+from tests.sample_factory import *
 
 
-class SerializerTest(TestCase):
-    # Market Data Event
-    @parameterized.expand(params)
-    def test_bar(self, name, serializer):
-        item = Bar(open=18, high=19, low=17, close=17.5, vol=100, inst_id=1, timestamp=datetime.datetime.now())
-        SerializerTest.ser_deser(name, serializer, item)
+class SerializationTest(TestCase):
+    def setUp(self):
+        self.factory = SampleFactory()
 
-    @parameterized.expand(params)
-    def test_quote(self, name, serializer):
-        item = Quote(bid=18, ask=19, bid_size=200, ask_size=500, inst_id=1, timestamp=datetime.datetime.now())
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_instrument(self):
+        inst = self.factory.sample_instrument()
+        self.__test_serializaion(Instrument, inst)
 
-    @parameterized.expand(params)
-    def test_trade(self, name, serializer):
-        item = Trade(price=20, size=200, inst_id=1, timestamp=datetime.datetime.now())
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_exchange(self):
+        exchange = self.factory.sample_exchange()
+        self.__test_serializaion(Exchange, exchange)
 
-    @parameterized.expand(params)
-    def test_market_depth(self, name, serializer):
-        item = MarketDepth(inst_id=1, timestamp=datetime.datetime.now(), provider_id=20, position=10,
-                           operation=MDOperation.Insert, side=MDSide.Ask,
-                           price=10.1, size=20)
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_currency(self):
+        currency = self.factory.sample_currency()
+        self.__test_serializaion(Currency, currency)
 
-    # Order Event
-    @parameterized.expand(params)
-    def test_new_order_request(self, name, serializer):
-        item = NewOrderRequest(timestamp=datetime.datetime.now(), cl_id=1, cl_ord_id=2, portf_id=3, broker_id='IB',
-                               inst_id=3,
-                               action=OrdAction.BUY, type=OrdType.LIMIT,
-                               qty=10, limit_price=16.01,
-                               stop_price=17.5, tif=TIF.DAY, oca_tag="WTF", params=None)
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_country(self):
+        country = self.factory.sample_country()
+        self.__test_serializaion(Country, country)
 
-    @parameterized.expand(params)
-    def test_order_replace_request(self, name, serializer):
-        item = OrderReplaceRequest(timestamp=datetime.datetime.now(), cl_id=1, cl_ord_id=1, type=OrdType.LIMIT,
-                                   qty=12, limit_price=13.2, stop_price=13.5, tif=TIF.DAY, oca_tag="WTF", params=None)
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_trading_holidays(self):
+        trading_holiday = self.factory.sample_trading_holidays()
+        self.__test_serializaion(HolidaySeries, trading_holiday)
 
-    @parameterized.expand(params)
-    def test_order_cancel_request(self, name, serializer):
-        item = OrderCancelRequest(timestamp=datetime.datetime.now(), cl_id=1, cl_ord_id=1, params=None)
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_trading_hours(self):
+        trading_hours = self.factory.sample_trading_hours()
+        self.__test_serializaion(TradingHours, trading_hours)
 
-    # Execution Event
-    @parameterized.expand(params)
-    def test_order_status_update(self, name, serializer):
-        item = OrderStatusUpdate(broker_id="IB", ord_id=1, cl_id=1, cl_ord_id=1, inst_id=3,
-                                 timestamp=datetime.datetime.now(),
-                                 filled_qty=10,
-                                 avg_price=15.6, status=OrdStatus.NEW)
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_timezone(self):
+        timezone = self.factory.sample_timezone()
+        self.__test_serializaion(TimeZone, timezone)
 
-    @parameterized.expand(params)
-    def test_execution_report(self, name, serializer):
-        item = ExecutionReport(broker_id="IB", ord_id=1, cl_id=1, cl_ord_id=1, inst_id=3,
-                               timestamp=datetime.datetime.now(),
-                               er_id=None,
-                               last_qty=10, last_price=10.8,
-                               filled_qty=140, avg_price=21.2, commission=18,
-                               status=OrdStatus.NEW)
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_time_series(self):
+        ds = self.factory.sample_time_series()
+        self.__test_serializaion(TimeSeries, ds)
 
-    # Account Event
-    @parameterized.expand(params)
-    def test_account_update(self, name, serializer):
-        item = AccountUpdate("TEST", "Pnl", "USD", 286.8, timestamp=datetime.datetime.now())
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_bar(self):
+        self.__test_serializaion(Bar, self.factory.sample_bar())
 
-    @parameterized.expand(params)
-    def test_portfolio_update(self, name, serializer):
-        item = PortfolioUpdate(4, 100, 26.1, 2610, 24, 210.0, 0.0,
-                               "TEST", timestamp=datetime.datetime.now())
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_quote(self):
+        self.__test_serializaion(Quote, self.factory.sample_quote())
 
-    # Ref Data
-    @parameterized.expand(params)
-    def test_instrument(self, name, serializer):
-        item = Instrument(3, "Google", "STK", "GOOG", "SMART", "USD", alt_symbols={"IB": "GOOG"}, alt_exch_id=None,
-                          sector=None, industry=None,
-                          put_call=None, expiry_date=None, und_inst_id=None, factor=1, strike=0.0, margin=0.0)
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_trade(self):
+        self.__test_serializaion(Trade, self.factory.sample_trade())
 
-    @parameterized.expand(params)
-    def test_exchange(self, name, serializer):
-        item = Exchange("SEHK", "SEHK")
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_market_depth(self):
+        self.__test_serializaion(MarketDepth, self.factory.sample_market_depth())
 
-    @parameterized.expand(params)
-    def test_currency(self, name, serializer):
-        item = Currency("USD", "US Dollar")
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_new_order_request(self):
+        self.__test_serializaion(NewOrderRequest, self.factory.sample_new_order_request())
 
-    # Trade Data
+    def test_order_replace_request(self):
+        self.__test_serializaion(OrderReplaceRequest, self.factory.sample_order_replace_request())
 
-    @parameterized.expand(params)
-    def test_position(self, name, serializer):
-        item = Position(inst_id=1)
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_order_cancel_request(self):
+        self.__test_serializaion(OrderCancelRequest, self.factory.sample_order_cancel_request())
 
-    @parameterized.expand(params)
-    def test_order(self, name, serializer):
-        nos = NewOrderRequest(timestamp=None, cl_id=None, cl_ord_id=None, portf_id=None, broker_id=None, inst_id=None,
-                              action=None, type=None,
-                              qty=0, limit_price=0,
-                              stop_price=0, tif=TIF.DAY, oca_tag=None, params=None)
+    def test_order_status_update(self):
+        self.__test_serializaion(OrderStatusUpdate, self.factory.sample_order_status_update())
 
-        item = Order(nos=nos)
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_execution_report(self):
+        self.__test_serializaion(ExecutionReport, self.factory.sample_execution_report())
 
-    @parameterized.expand(params)
-    def test_account(self, id, serializer):
-        item = Account(acct_id="")
+    def test_account_update(self):
+        self.__test_serializaion(AccountUpdate, self.factory.sample_account_update())
 
-        SerializerTest.ser_deser(id, serializer, item)
+    def test_portfolio_update(self):
+        self.__test_serializaion(PortfolioUpdate, self.factory.sample_portfolio_update())
 
-    @parameterized.expand(params)
-    def test_data_series(self, name, serializer):
-        item = DataSeries("close", missing_value=0)
+    def test_account_state(self):
+        self.__test_serializaion(AccountState, self.factory.sample_account_state())
 
-        t = datetime.datetime(2000, 1, 1, 11, 34, 59)
+    def test_portfolio_state(self):
+        self.__test_serializaion(PortfolioState, self.factory.sample_portfolio_state())
 
-        values = [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
-                  45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
-        for idx, value in enumerate(values):
-            item.add({"timestamp": t, "v1": value, "v2": value})
-            t = t + datetime.timedelta(0, 3)
+    def test_strategy_state(self):
+        self.__test_serializaion(StrategyState, self.factory.sample_strategy_state())
 
-        SerializerTest.ser_deser(name, serializer, item)
+    def test_order_state(self):
+        self.__test_serializaion(OrderState, self.factory.sample_order_state())
 
-    @parameterized.expand(params)
-    def test_indicator(self, name, serializer):
-        self.app_context = ApplicationContext()
+    def test_sequence(self):
+        self.__test_serializaion(Sequence, self.factory.sample_sequence())
 
-        bar = self.app_context.inst_data_mgr.get_series("bar")
-        sma = SMA(bar.name, 'close', 1, missing_value=0)
-        t1 = datetime.datetime.now()
-        t2 = t1 + datetime.timedelta(0, 3)
-        t3 = t2 + datetime.timedelta(0, 3)
+    def __test_serializaion(self, cls, obj):
+        print(obj)
 
-        bar.add({"timestamp": t1, "close": 2.0, "open": 0})
-        bar.add({"timestamp": t2, "close": 2.4, "open": 1.4})
+        obj2 = cls()
+        obj2.ParseFromString(obj.SerializeToString())
+        self.assertEqual(obj, obj2)
 
-        bar.add({"timestamp": t3, "close": 2.8, "open": 1.8})
-
-        SerializerTest.ser_deser(name, serializer, sma)
-
-    @parameterized.expand(params)
-    def test_trading_config(self, name, serializer):
-        instrument = 0
-
-        dates = [datetime.datetime(2000, 1, 1), datetime.datetime(2015, 1, 1)]
-
-        config = BacktestingConfig(stg_id="sma", portfolio_id='test',
-                                   instrument_ids=[instrument],
-                                   subscription_types=[BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
-                                   from_date=dates[0], to_date=dates[-1],
-                                   broker_id=Broker.Simulator,
-                                   feed_id=Feed.PandasMemory)
-        SerializerTest.ser_deser(name, serializer, config)
-
-    # # TODO fix error
-    # @parameterized.expand(params)
-    # def test_portfolio(self, name, serializer):
-    #     item = Portfolio(portf_id="", cash=1000)
-    #     SerializerTest.ser_deser(name, serializer, item)
-    #
-    #
-    # # TODO fix json error
-    # @parameterized.expand(params)
-    # def test_strategy(self, name, serializer):
-    #     stg = Strategy(stg_id='st1', next_ord_id=0, trading_config=None, ref_data_mgr=None)
-    #     nos = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
-    #                     limit_price=18.5)
-    #
-    #     order = Order(nos=nos)
-    #
-    #     stg.ord_req[nos.cl_ord_id] = nos
-    #     stg.order[order.cl_ord_id] = order
-    #     stg.add_position(nos.inst_id, nos.cl_id, nos.cl_ord_id, nos.qty)
-    #     stg.update_position_price(time=0, inst_id=nos.inst_id, price=100)
-    #
-    #     SerializerTest.ser_deser(name, serializer, stg)
-
-
-
-    @staticmethod
-    def ser_deser(name, serializer, item):
-        packed = serializer.serialize(item)
-        unpacked = serializer.deserialize(packed)
-        print "===== %s" % name
-        print packed
-        print item
-        print unpacked
-        print MapSerializer.extract_slot(item)
-        print MapSerializer.extract_slot(unpacked)
-        assert MapSerializer.extract_slot(item) == MapSerializer.extract_slot(unpacked)
+        obj3 = dict_to_protobuf(cls, protobuf_to_dict(obj))
+        self.assertEqual(obj, obj3)

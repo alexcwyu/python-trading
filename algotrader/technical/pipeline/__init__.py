@@ -1,6 +1,5 @@
-from collections import OrderedDict
-
 import numpy as np
+from collections import OrderedDict
 
 from algotrader.technical import Indicator
 from algotrader.trading.data_series import DataSeries

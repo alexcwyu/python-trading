@@ -1,17 +1,18 @@
 import logging
-from datetime import datetime
 
 import pandas as pd
+from datetime import datetime
 
 from algotrader.config.feed import PandasMemoryDataFeedConfig
 from algotrader.event.event_handler import EventLogger
-from algotrader.model.market_data_pb2 import Bar
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
-from algotrader.provider.subscription import BarSubscriptionType,HistDataSubscriptionKey
+from algotrader.provider.subscription import BarSubscriptionType, HistDataSubscriptionKey
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
-
 from algotrader.utils.market_data_utils import BarSize
+
 
 class PandasMemoryDataFeed(Feed):
     """
@@ -52,14 +53,16 @@ class PandasMemoryDataFeed(Feed):
 
     def process_row(self, index, row):
         inst = self.ref_data_mgr.get_inst(symbol=row['Symbol'])
-        return Bar(inst_id=inst.inst_id,
-                   timestamp=DateUtils.datetime_to_unixtimemillis(index),
-                   open=row['Open'],
-                   high=row['High'],
-                   low=row['Low'],
-                   close=row['Close'],
-                   vol=row['Volume'],
-                   size=row['BarSize'])
+        return ModelFactory.build_bar(inst_id=inst.inst_id,
+                                      provider_id=self.id(),
+                                      type=Bar.Time,
+                                      timestamp=DateUtils.datetime_to_unixtimemillis(index),
+                                      open=row['Open'],
+                                      high=row['High'],
+                                      low=row['Low'],
+                                      close=row['Close'],
+                                      vol=row['Volume'],
+                                      size=row['BarSize'])
 
     def __load_data(self, sub_keys):
 

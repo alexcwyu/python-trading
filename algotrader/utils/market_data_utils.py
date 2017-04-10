@@ -1,6 +1,6 @@
 import datetime
 
-from algotrader.model.market_data_pb2 import Quote
+from algotrader.model.market_data_pb2 import *
 from algotrader.utils.date_utils import DateUtils
 
 
@@ -15,6 +15,19 @@ class BarSize(object):
     M30 = 30 * 60
     H1 = 60 * 60
     D1 = 24 * 60 * 60
+
+
+class BarType(object):
+    map = {
+        0: "Time",
+        1: "Tick",
+        2: "Volume",
+        3: "Dynamic"
+    }
+
+    @staticmethod
+    def name(type: int) -> str:
+        return BarType.map[type]
 
 
 class MarketDataUtils(object):
@@ -35,9 +48,22 @@ class MarketDataUtils(object):
             return DateUtils.datetime_to_unixtimemillis(datetime.datetime(year=dt.year, month=dt.month, day=dt.day))
 
     @staticmethod
-    def get_mid(self, quote: Quote):
+    def get_mid(quote: Quote):
         if quote.bid is not None and quote.bid > 0 and quote.ask is not None and quote.ask > 0:
             return (quote.bid + quote.ask) / 2
         elif quote.bid is not None and quote.bid > 0:
             return quote.bid
-        return self.ask
+        return quote.ask
+
+    @staticmethod
+    def get_series_id(item) -> str:
+        if isinstance(item, Bar):
+            return "Bar.%s.%s.%s" % (item.inst_id, BarType.name(item.type), item.size)
+        if isinstance(item, Trade):
+            return "Trade.%s" % (item.inst_id)
+        if isinstance(item, Quote):
+            return "Quote.%s" % (item.inst_id)
+        if isinstance(item, MarketDepth):
+            return "MarketDepth.%s" % (item.inst_id)
+
+        raise RuntimeError("unknown series type")

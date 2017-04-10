@@ -1,4 +1,5 @@
-from algotrader import Startable, HasId
+from algotrader import Startable
+
 from algotrader.config.app import ApplicationConfig
 from algotrader.event.event_bus import EventBus
 from algotrader.provider.provider_mgr import ProviderManager
@@ -11,7 +12,6 @@ from algotrader.trading.ref_data import InMemoryRefDataManager, RefDataManager, 
 from algotrader.trading.seq_mgr import SequenceManager
 from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
 
-from algotrader.model.model_factory import ModelFactory
 
 class ApplicationContext(Startable):
     def __init__(self, app_config=None):
@@ -69,4 +69,3 @@ class ApplicationContext(Startable):
 
     def get_seq_data_store(self):
         return self.provider_mgr.get(self.app_config.persistence_config.seq_ds_id)
-

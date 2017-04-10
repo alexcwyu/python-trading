@@ -29,8 +29,8 @@ class ModelFactory(object):
             inst.type = type
         else:
             inst.type = Instrument.InstType.DESCRIPTOR.values_by_name[type].number
-        inst.primary_exch_id = primary_exch_id
-        inst.ccy_id = ccy_id
+        inst.primary_exch_id = str(primary_exch_id)
+        inst.ccy_id = str(ccy_id)
 
         if name:
             inst.name = name
@@ -88,32 +88,32 @@ class ModelFactory(object):
     @staticmethod
     def add_asset(underlying: Underlying, asset_id: str, weight: float = None) -> Underlying.Asset:
         asset = underlying.assets.add()
-        asset.inst_id = asset_id
+        asset.inst_id = str(asset_id)
         if weight is not None:
             asset.weight = weight
         return asset
 
     @staticmethod
-    def build_exchange(exch_id: str, name: str, country_id: str = None, trading_hours_id: str = None,
+    def build_exchange(exch_id: str, name: str = None, country_id: str = None, trading_hours_id: str = None,
                        holidays_id: str = None,
                        alt_ids: Dict[str, str] = None) -> Exchange:
         exchange = Exchange()
-        exchange.exch_id = exch_id
+        exchange.exch_id = str(exch_id)
         if name:
             exchange.name = name
         if country_id:
-            exchange.country_id = country_id
+            exchange.country_id = str(country_id)
         if trading_hours_id:
-            exchange.trading_hours_id = trading_hours_id
+            exchange.trading_hours_id = str(trading_hours_id)
         if holidays_id:
-            exchange.holidays_id = holidays_id
+            exchange.holidays_id = str(holidays_id)
         ModelHelper.add_to_dict(exchange.alt_ids, alt_ids)
         return exchange
 
     @staticmethod
     def build_currency(ccy_id: str, name: str = None) -> Currency:
         currency = Currency()
-        currency.ccy_id = ccy_id
+        currency.ccy_id = str(ccy_id)
         if name:
             currency.name = name
         return currency
@@ -121,17 +121,17 @@ class ModelFactory(object):
     @staticmethod
     def build_country(country_id: str, name: str = None, holidays_id: str = None) -> Country:
         country = Country()
-        country.country_id = country_id
+        country.country_id = str(country_id)
         if name:
             country.name = name
         if holidays_id:
-            country.holidays_id = holidays_id
+            country.holidays_id = str(holidays_id)
         return country
 
     @staticmethod
     def build_holiday_series(holidays_id) -> HolidaySeries:
         holiday_series = HolidaySeries()
-        holiday_series.holidays_id = holidays_id
+        holiday_series.holidays_id = str(holidays_id)
         return holiday_series
 
     @staticmethod
@@ -157,8 +157,8 @@ class ModelFactory(object):
     @staticmethod
     def build_trading_hours(trading_hours_id: str, timezone_id: str) -> TradingHours:
         trading_hour = TradingHours()
-        trading_hour.trading_hours_id = trading_hours_id
-        trading_hour.timezone_id = timezone_id
+        trading_hour.trading_hours_id = str(trading_hours_id)
+        trading_hour.timezone_id = str(timezone_id)
         return trading_hour
 
     @staticmethod
@@ -180,14 +180,16 @@ class ModelFactory(object):
         return timezone
 
     @staticmethod
-    def build_time_series(series_id: str, name: str = '', desc: str = '',
+    def build_time_series(series_id: str, name: str = None, desc: str = None,
                           inputs: Union[str, List[str]] = None, keys: Union[str, List[str]] = None,
                           default_output_key: str = 'value', missing_value_replace: float = 0.0, start_time: int = 0,
                           end_time: int = 0) -> TimeSeries:
         time_series = TimeSeries()
-        time_series.series_id = series_id
-        time_series.name = name
-        time_series.desc = desc
+        time_series.series_id = str(series_id)
+        if name:
+            time_series.name = name
+        if desc:
+            time_series.desc = desc
         ModelHelper.add_to_list(time_series.inputs, inputs)
         ModelHelper.add_to_list(time_series.keys, keys)
         time_series.default_output_key = default_output_key
@@ -198,13 +200,13 @@ class ModelFactory(object):
         return time_series
 
     @staticmethod
-    def add_time_series_item(time_series: TimeSeries, timestamp: int, data: Dict[str, float]) -> TimeSeries.Item:
+    def add_time_series_item(time_series: TimeSeries, timestamp: int, data: Dict[str, float] = None) -> TimeSeries.Item:
         item = time_series.items.add()
-        ModelFactory.update_time_series_time(item, timestamp=timestamp, data=data)
+        ModelFactory.update_time_series_item(item, timestamp=timestamp, data=data)
         return item
 
     @staticmethod
-    def update_time_series_time(item: TimeSeries.Item, timestamp: int = None,
+    def update_time_series_item(item: TimeSeries.Item, timestamp: int = None,
                                 data: Dict[str, float] = None) -> TimeSeries.Item:
         item.timestamp = timestamp
         ModelHelper.add_to_dict(item.data, data)
@@ -217,13 +219,13 @@ class ModelFactory(object):
                   open_interest: float = None,
                   utc_time: int = None, begin_time: int = None) -> Bar:
         bar = Bar()
-        bar.inst_id = inst_id
+        bar.inst_id = str(inst_id)
         if type:
             bar.type = type
         if size:
             bar.size = size
         if provider_id:
-            bar.provider_id = provider_id
+            bar.provider_id = str(provider_id)
         if timestamp:
             bar.timestamp = timestamp
         if open:
@@ -252,9 +254,9 @@ class ModelFactory(object):
                     bid_size: float = None, ask: float = None,
                     ask_size: float = None, utc_time: int = None) -> Quote:
         quote = Quote()
-        quote.inst_id = inst_id
+        quote.inst_id = str(inst_id)
         if provider_id:
-            quote.provider_id = provider_id
+            quote.provider_id = str(provider_id)
         if timestamp:
             quote.timestamp = timestamp
         if utc_time:
@@ -275,9 +277,9 @@ class ModelFactory(object):
                     size: float = None,
                     utc_time: int = None) -> Trade:
         trade = Trade()
-        trade.inst_id = inst_id
+        trade.inst_id = str(inst_id)
         if provider_id:
-            trade.provider_id = provider_id
+            trade.provider_id = str(provider_id)
         if timestamp:
             trade.timestamp = timestamp
         if price:
@@ -296,13 +298,13 @@ class ModelFactory(object):
                            size: float = None,
                            utc_time: int = None) -> MarketDepth:
         md = MarketDepth()
-        md.inst_id = inst_id
+        md.inst_id = str(inst_id)
         if provider_id:
-            md.provider_id = provider_id
+            md.provider_id = str(provider_id)
         if timestamp:
             md.timestamp = timestamp
         if md_provider:
-            md.md_provider = md_provider
+            md.md_provider = str(md_provider)
         if position:
             md.position = position
         if operation:
@@ -318,26 +320,36 @@ class ModelFactory(object):
         return md
 
     @staticmethod
-    def build_new_order_request(timestamp: int, cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str,
-                                inst_id: str,
-                                action: OrderAction, type: OrderType, qty: float, limit_price: float,
-                                stop_price: float = 0.0,
+    def build_new_order_request(timestamp: int, cl_id: str, cl_ord_id: str, portf_id: str = None, broker_id: str = None,
+                                inst_id: str = None,
+                                action: OrderAction = None, type: OrderType = None, qty: float = None,
+                                limit_price: float = None,
+                                stop_price: float = None,
                                 tif: TIF = DAY, oca_tag: str = None,
                                 params: Dict[str, str] = None) -> NewOrderRequest:
         req = NewOrderRequest()
 
         req.timestamp = timestamp
-        req.cl_id = cl_id
-        req.cl_ord_id = cl_ord_id
-        req.portf_id = portf_id
-        req.broker_id = broker_id
-        req.inst_id = inst_id
-        req.action = action
-        req.type = type
-        req.qty = qty
-        req.limit_price = limit_price
-        req.stop_price = stop_price
-        req.tif = tif
+        req.cl_id = str(cl_id)
+        req.cl_ord_id = str(cl_ord_id)
+        if portf_id:
+            req.portf_id = str(portf_id)
+        if broker_id:
+            req.broker_id = str(broker_id)
+        if inst_id:
+            req.inst_id = str(inst_id)
+        if action:
+            req.action = action
+        if type:
+            req.type = type
+        if qty:
+            req.qty = qty
+        if limit_price:
+            req.limit_price = limit_price
+        if stop_price:
+            req.stop_price = stop_price
+        if tif:
+            req.tif = tif
         if oca_tag:
             req.oca_tag = oca_tag
         ModelHelper.add_to_dict(req.params, params)
@@ -346,22 +358,28 @@ class ModelFactory(object):
 
     @staticmethod
     def build_order_replace_request(timestamp: int, cl_id: str, cl_ord_id: str, cl_orig_req_id: str,
-                                    type: OrderType, qty: float,
-                                    limit_price: float, stop_price: float = None,
+                                    type: OrderType = None, qty: float = None,
+                                    limit_price: float = None, stop_price: float = None,
                                     tif: TIF = DAY, oca_tag: str = None,
                                     params: Dict[str, str] = None) -> OrderReplaceRequest:
         req = OrderReplaceRequest()
 
         req.timestamp = timestamp
-        req.cl_id = cl_id
-        req.cl_ord_id = cl_ord_id
-        req.cl_orig_req_id = cl_orig_req_id
-        req.type = type
-        req.qty = qty
-        req.limit_price = limit_price
-        req.stop_price = stop_price
-        req.tif = tif
-        req.oca_tag = oca_tag
+        req.cl_id = str(cl_id)
+        req.cl_ord_id = str(cl_ord_id)
+        req.cl_orig_req_id = str(cl_orig_req_id)
+        if type:
+            req.type = type
+        if qty:
+            req.qty = qty
+        if limit_price:
+            req.limit_price = limit_price
+        if stop_price:
+            req.stop_price = stop_price
+        if tif:
+            req.tif = tif
+        if oca_tag:
+            req.oca_tag = oca_tag
         ModelHelper.add_to_dict(req.params, params)
 
         return req
@@ -371,9 +389,9 @@ class ModelFactory(object):
                                    params: Dict[str, str] = None) -> OrderCancelRequest:
         req = OrderCancelRequest()
         req.timestamp = timestamp
-        req.cl_id = cl_id
-        req.cl_ord_id = cl_ord_id
-        req.cl_orig_req_id = cl_orig_req_id
+        req.cl_id = str(cl_id)
+        req.cl_ord_id = str(cl_ord_id)
+        req.cl_orig_req_id = str(cl_orig_req_id)
         ModelHelper.add_to_dict(req.params, params)
 
         return req
@@ -381,19 +399,24 @@ class ModelFactory(object):
     @staticmethod
     def build_order_status_update(timestamp: int, broker_id: str, broker_event_id: str, broker_ord_id: str,
                                   cl_id: str,
-                                  cl_ord_id: str, inst_id: str, filled_qty: float, avg_price: float,
-                                  status: OrderStatus) -> OrderStatusUpdate:
+                                  cl_ord_id: str, inst_id: str = None, filled_qty: float = None,
+                                  avg_price: float = None,
+                                  status: OrderStatus = None) -> OrderStatusUpdate:
         event = OrderStatusUpdate()
         event.timestamp = timestamp
-        event.broker_id = broker_id
-        event.broker_event_id = broker_event_id
-        event.broker_ord_id = broker_ord_id
-        event.cl_id = cl_id
-        event.cl_ord_id = cl_ord_id
-        event.inst_id = inst_id
-        event.filled_qty = filled_qty
-        event.avg_price = avg_price
-        event.status = status
+        event.broker_id = str(broker_id)
+        event.broker_event_id = str(broker_event_id)
+        event.broker_ord_id = str(broker_ord_id)
+        event.cl_id = str(cl_id)
+        event.cl_ord_id = str(cl_ord_id)
+        if inst_id:
+            event.inst_id = str(inst_id)
+        if filled_qty:
+            event.filled_qty = filled_qty
+        if avg_price:
+            event.avg_price = avg_price
+        if status:
+            event.status = status
 
         return event
 
@@ -406,17 +429,17 @@ class ModelFactory(object):
                                status: OrderStatus = None) -> ExecutionReport:
         event = ExecutionReport()
         event.timestamp = timestamp
-        event.broker_id = broker_id
+        event.broker_id = str(broker_id)
         if broker_event_id:
-            event.broker_event_id = broker_event_id
+            event.broker_event_id = str(broker_event_id)
         if broker_ord_id:
-            event.broker_ord_id = broker_ord_id
+            event.broker_ord_id = str(broker_ord_id)
         if cl_id:
-            event.cl_id = cl_id
+            event.cl_id = str(cl_id)
         if cl_ord_id:
-            event.cl_ord_id = cl_ord_id
+            event.cl_ord_id = str(cl_ord_id)
         if inst_id:
-            event.inst_id = inst_id
+            event.inst_id = str(inst_id)
         if last_qty:
             event.last_qty = last_qty
         if last_price:
@@ -433,14 +456,16 @@ class ModelFactory(object):
         return event
 
     @staticmethod
-    def build_account_update(timestamp: int, broker_id: str, broker_event_id: str, account_name) -> AccountUpdate:
+    def build_account_update(timestamp: int, broker_id: str, broker_event_id: str,
+                             account_name: str = None) -> AccountUpdate:
         event = AccountUpdate()
 
         event.timestamp = timestamp
-        event.broker_id = broker_id
-        event.broker_event_id = broker_event_id
-        event.account_name = account_name
+        event.broker_id = str(broker_id)
+        event.broker_event_id = str(broker_event_id)
 
+        if account_name:
+            event.account_name = account_name
         return event
 
     @staticmethod
@@ -451,35 +476,43 @@ class ModelFactory(object):
 
     @staticmethod
     def build_portfolio_update(timestamp: int, broker_id: str, broker_event_id: str, portf_id: str, inst_id: str,
-                               position: float, mkt_price: float, mkt_value: float, avg_cost: float,
-                               unrealized_pnl: float, realized_pnl: float) -> PortfolioUpdate:
+                               position: float = None, mkt_price: float = None, mkt_value: float = None,
+                               avg_cost: float = None,
+                               unrealized_pnl: float = None, realized_pnl: float = None) -> PortfolioUpdate:
         event = PortfolioUpdate()
 
         event.timestamp = timestamp
-        event.broker_id = broker_id
-        event.broker_event_id = broker_event_id
-        event.portf_id = portf_id
-        event.inst_id = inst_id
-        event.position = position
-        event.mkt_price = mkt_price
-        event.mkt_value = mkt_value
-        event.avg_cost = avg_cost
-        event.unrealized_pnl = unrealized_pnl
-        event.realized_pnl = realized_pnl
+        event.broker_id = str(broker_id)
+        event.broker_event_id = str(broker_event_id)
+        event.portf_id = str(portf_id)
+        event.inst_id = str(inst_id)
+        if position:
+            event.position = position
+        if mkt_price:
+            event.mkt_price = mkt_price
+        if mkt_value:
+            event.mkt_value = mkt_value
+        if avg_cost:
+            event.avg_cost = avg_cost
+        if unrealized_pnl:
+            event.unrealized_pnl = unrealized_pnl
+        if realized_pnl:
+            event.realized_pnl = realized_pnl
 
         return event
 
     @staticmethod
     def build_account_state(acct_id: str) -> AccountState:
         account = AccountState()
-        account.acct_id = acct_id
+        account.acct_id = str(acct_id)
         return account
 
     @staticmethod
-    def build_portfolio_state(portf_id: str, cash: float, stock_value: float = None) -> PortfolioState:
+    def build_portfolio_state(portf_id: str, cash: float = None, stock_value: float = None) -> PortfolioState:
         portfolio = PortfolioState()
-        portfolio.portf_id = portf_id
-        portfolio.cash = cash
+        portfolio.portf_id = str(portf_id)
+        if cash:
+            portfolio.cash = cash
         if stock_value:
             portfolio.stock_value = stock_value
         ModelFactory.build_portfolio_performance(portfolio=portfolio)
@@ -520,7 +553,7 @@ class ModelFactory(object):
     @staticmethod
     def update_config(config: Config, config_id: str = None, config_values: Dict[str, str] = None) -> Config:
         if config_id:
-            config.config_id = config_id
+            config.config_id = str(config_id)
         if config_values:
             ModelHelper.add_to_dict(config.values, config_values)
         return config
@@ -528,26 +561,27 @@ class ModelFactory(object):
     @staticmethod
     def build_strategy_state(stg_id: str, config_values: Dict[str, str] = None) -> StrategyState:
         stg = StrategyState()
-        stg.stg_id = stg_id
-        stg.config.config_id = stg_id
+        stg.stg_id = str(stg_id)
+        stg.config.config_id = str(stg_id)
         ModelFactory.update_config(stg.config, None, config_values)
         return stg
 
     @staticmethod
     def build_order_state(cl_id: str, cl_ord_id: str, portf_id: str, broker_id: str, inst_id: str,
-                          creation_timestamp: int, action: OrderAction, type: OrderType, qty: float, limit_price: float,
+                          creation_timestamp: int = None, action: OrderAction = None, type: OrderType = None,
+                          qty: float = None, limit_price: float = None,
                           stop_price: float = None, tif: TIF = DAY, oca_tag: str = None, params: Dict[str, str] = None,
-                          broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = None,
+                          broker_ord_id: str = None, update_timestamp: int = None, status: OrderStatus = New,
                           filled_qty: float = 0, avg_price: float = 0, last_qty: float = 0, last_price: float = 0,
                           stop_limit_ready: bool = False, trailing_stop_exec_price: float = None) -> OrderState:
         order = OrderState()
-        order.cl_id = cl_id
-        order.cl_ord_id = cl_ord_id
-        order.portf_id = portf_id
-        order.broker_id = broker_id
+        order.cl_id = str(cl_id)
+        order.cl_ord_id = str(cl_ord_id)
+        order.portf_id = str(portf_id)
+        order.broker_id = str(broker_id)
         if broker_ord_id:
-            order.broker_ord_id = broker_ord_id
-        order.inst_id = inst_id
+            order.broker_ord_id = str(broker_ord_id)
+        order.inst_id = str(inst_id)
 
         if creation_timestamp:
             order.creation_timestamp = creation_timestamp
@@ -610,7 +644,7 @@ class ModelFactory(object):
                      last_price: float = 0) -> Position:
         position = attribute.positions[inst_id]
 
-        position.inst_id = inst_id
+        position.inst_id = str(inst_id)
         position.ordered_qty = ordered_qty
         position.filled_qty = filled_qty
         position.last_price = last_price
@@ -621,8 +655,8 @@ class ModelFactory(object):
                            filled_qty: float = 0) -> OrderPosition:
         id = ModelFactory.build_cl_ord_id(cl_id, cl_ord_id)
         pos = position.orders[id]
-        pos.cl_id = cl_id
-        pos.cl_ord_id = cl_ord_id
+        pos.cl_id = str(cl_id)
+        pos.cl_ord_id = str(cl_ord_id)
         pos.ordered_qty = ordered_qty
         pos.filled_qty = filled_qty
         return pos
@@ -638,6 +672,6 @@ class ModelFactory(object):
     @staticmethod
     def build_sequence(id: str, seq: int) -> Sequence:
         sequence = Sequence()
-        sequence.id = id
+        sequence.id = str(id)
         sequence.seq = seq
         return sequence

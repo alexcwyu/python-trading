@@ -1,7 +1,6 @@
 from typing import Dict, Callable, Union
 
 from algotrader.model.market_data_pb2 import *
-from algotrader.model.protobuf_to_dict import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.trade_data_pb2 import *
@@ -55,29 +54,11 @@ class ModelHelper(object):
     def dict_to_object(data):
         pass
 
-    # @staticmethod
-    # def add_to_dict_value(attribute: Callable, dict: Dict[str, object]):
-    #     if dict:
-    #         for key, value in dict.items():
-    #             v = attribute[key]
-    #             if v:
-    #                 v.CopyFrom(value)
-    #             else:
-    #                 attribute[key] = value
-
     @staticmethod
     def add_to_dict(attribute: Callable, dict: Dict[str, str]):
         if dict:
             for key, value in dict.items():
                 attribute[key] = value
-
-    # @staticmethod
-    # def add_to_list_value(attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]):
-    #     if list_item:
-    #         if isinstance(list_item, (list, tuple)):
-    #             attribute.extend(list_item)
-    #         else:
-    #             attribute.extend([list_item])
 
     @staticmethod
     def add_to_list(attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]):

@@ -15,6 +15,7 @@ from algotrader.utils import logger
 from algotrader.utils.clock import Clock
 from algotrader.utils.market_data_utils import BarSize
 
+
 class ATSRunner(Application):
     def init(self):
         logger.info("starting ATS")

@@ -1,4 +1,5 @@
 import _pickle as pickle
+
 import os
 
 from algotrader.config.persistence import InMemoryStoreConfig

@@ -1,10 +1,10 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
+from algotrader import Startable
 from builtins import *
 from typing import Dict
 
-from algotrader import Startable
 from algotrader.config.app import BacktestingConfig
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
@@ -16,12 +16,12 @@ from algotrader.trading.position import HasPositions
 
 class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscriber, Startable, HasPositions):
     def __init__(self, state: StrategyState = None):
-        super().__init__()
-        self.state = state
+        super().__init__(state)
+        self.__state = state
 
     def __get_next_req_id(self):
-        id = self.state.next_ord_id if self.state.next_ord_id else 1
-        self.state.next_ord_id = id + 1
+        id = self.__state.next_ord_id if self.__state.next_ord_id else 1
+        self.__state.next_ord_id = id + 1
         return id
 
     def get_stg_config_value(self, key, default_value=None):
@@ -86,7 +86,7 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
                 self.feed.subscribe_mktdata(sub_key)
 
     def id(self):
-        return self.stg_id
+        return self.__state.stg_id
 
     def on_bar(self, bar: Bar):
         super().on_bar(bar)
@@ -187,3 +187,8 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
 
     def get_portfolio(self):
         return self.portfolio
+
+    def portf_id(self) -> str:
+        if not self.__state:
+            return None
+        return self.__state.portf_id

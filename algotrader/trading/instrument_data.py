@@ -1,11 +1,13 @@
 import numpy as np
-
 from algotrader import Manager
+
 from algotrader.config.persistence import PersistenceMode
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
-from algotrader.utils import logger
+from algotrader.model.model_factory import ModelFactory
 from algotrader.trading.data_series import DataSeries
+from algotrader.utils import logger
+from algotrader.utils.market_data_utils import *
 
 
 class InstrumentDataManager(MarketDataEventHandler, Manager):
@@ -68,7 +70,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
         self.__bar_dict[bar.inst_id] = bar
 
-        self.get_series(bar.series_id()).add(
+        self.get_series(MarketDataUtils.get_series_id(bar)).add(
             {"timestamp": bar.timestamp, "open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
              "vol": bar.vol})
 
@@ -79,7 +81,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         logger.debug("[%s] %s" % (self.__class__.__name__, quote))
         self.__quote_dict[quote.inst_id] = quote
 
-        self.get_series(quote.series_id()).add(
+        self.get_series(MarketDataUtils.get_series_id(quote)).add(
             {"timestamp": quote.timestamp, "bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
              "ask_size": quote.ask_size})
 
@@ -89,7 +91,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__trade_dict[trade.inst_id] = trade
-        self.get_series(trade.series_id()).add({"timestamp": trade.timestamp, "price": trade.price, "size": trade.size})
+        self.get_series(MarketDataUtils.get_series_id(trade)).add(
+            {"timestamp": trade.timestamp, "price": trade.price, "size": trade.size})
 
         if self._is_realtime_persist():
             self.store.save_trade(trade)
@@ -121,7 +124,9 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def get_series(self, key, create_if_missing=True, cls=DataSeries, desc=None, missing_value=np.nan):
         if type(key) == str:
             if key not in self.__series_dict:
-                self.__series_dict[key] = cls(name=key, desc=desc, missing_value=missing_value)
+                self.__series_dict[key] = cls(
+                    time_series=ModelFactory.build_time_series(series_id=key, name=key, desc=desc,
+                                                               missing_value_replace=missing_value))
             return self.__series_dict[key]
         raise AssertionError()
 

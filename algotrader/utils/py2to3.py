@@ -7,5 +7,3 @@ try:
     range = xrange  # Python 2
 except NameError:
     pass  # Python 3
-
-from past.builtins import long

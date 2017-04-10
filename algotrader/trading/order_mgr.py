@@ -1,10 +1,12 @@
 from algotrader import Manager
+
 from algotrader.config.persistence import PersistenceMode
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
+from algotrader.model.model_factory import ModelFactory
 from algotrader.trading.order import Order
 from algotrader.utils import logger
-from algotrader.model.model_factory import ModelFactory
+
 
 class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
     __slots__ = (
@@ -89,25 +91,27 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         order = self.order_dict["%s.%s" % (ord_upd.cl_id, ord_upd.cl_ord_id)]
         order.on_ord_upd(ord_upd)
 
-        # enrich the cl_id and cl_ord_id
-        ord_upd.cl_id = order.cl_id
-        ord_upd.cl_ord_id = order.cl_ord_id
+        # # TODO wtf???
+        # # enrich the cl_id and cl_ord_id
+        # ord_upd.cl_id = order.cl_id()
+        # ord_upd.cl_ord_id = order.cl_ord_id()
 
         # notify portfolio
-        portfolio = self.app_context.portf_mgr.get_portfolio(order.portf_id)
+        portfolio = self.app_context.portf_mgr.get_portfolio(order.portf_id())
         if portfolio:
             portfolio.on_ord_upd(ord_upd)
         else:
             logger.warn("portfolio [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
-                order.state.portf_id, order.state.cl_id, order.state.cl_ord_id))
+                order.portf_id(), order.cl_id(), order.cl_ord_id()))
 
         # notify stg
-        stg = self.app_context.stg_mgr.get(order.cl_id)
+        stg = self.app_context.stg_mgr.get(order.cl_id())
         if stg:
             stg.oon_ord_upd(ord_upd)
         else:
             logger.warn(
-                "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.state.cl_id, order.state.cl_id, order.state.cl_ord_id))
+                "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
+                    order.cl_id(), order.cl_id(), order.cl_ord_id()))
 
         # persist
         self._save_order(order)
@@ -124,25 +128,22 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         order = self.order_dict[ord_id]
         order.on_exec_report(exec_report)
 
-        # enrich the cl_id and cl_ord_id
-        #exec_report.cl_id = order.state.cl_id
-        #exec_report.cl_ord_id = order.state.cl_ord_id
-
         # notify portfolio
-        portfolio = self.app_context.portf_mgr.get(order.state.portf_id)
+        portfolio = self.app_context.portf_mgr.get(order.portf_id())
         if portfolio:
             portfolio.on_exec_report(exec_report)
         else:
             logger.warn("portfolio [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
-                order.state.portf_id, order.state.cl_id, order.state.cl_ord_id))
+                order.portf_id(), order.cl_id(), order.cl_ord_id()))
 
         # notify stg
-        stg = self.app_context.stg_mgr.get(order.state.cl_id)
+        stg = self.app_context.stg_mgr.get(order.cl_id())
         if stg:
             stg.on_exec_report(exec_report)
         else:
             logger.warn(
-                "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (order.state.cl_id, order.state.cl_id, order.state.cl_ord_id))
+                "stg [%s] not found for order cl_id [%s] cl_ord_id [%s]" % (
+                    order.cl_id(), order.cl_id(), order.cl_ord_id()))
 
         # persist
         self._save_order(order)
@@ -160,13 +161,13 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         order = Order(ModelFactory.build_order_state_from_nos(new_ord_req))
         self.order_dict[ord_id] = order
 
-        if order.state.broker_id:
-            broker = self.app_context.provider_mgr.get(order.state.broker_id)
+        if order.broker_id():
+            broker = self.app_context.provider_mgr.get(order.broker_id())
             if broker:
                 broker.on_new_ord_req(new_ord_req)
             else:
                 logger.warn("broker [%s] not found for order ord_id [%s]" % (
-                    order.state.broker_id, ord_id))
+                    order.broker_id(), ord_id))
 
         # persist
         self._save_order(order)
@@ -186,7 +187,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         order = self.order_dict[ord_id]
 
         order.on_ord_cancel_req(ord_cancel_req)
-        self.app_context.provider_mgr.get(order.broker_id).on_ord_cancel_req(ord_cancel_req)
+        self.app_context.provider_mgr.get(order.broker_id()).on_ord_cancel_req(ord_cancel_req)
 
         # persist
         self._save_order(order)
@@ -206,7 +207,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         order = self.order_dict[ord_id]
 
         order.on_ord_replace_req(ord_replace_req)
-        self.app_context.provider_mgr.get(order.broker_id).on_ord_replace_req(ord_replace_req)
+        self.app_context.provider_mgr.get(order.broker_id()).on_ord_replace_req(ord_replace_req)
 
         # persist
         self._save_order(order)
@@ -217,10 +218,10 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         return "OrderManager"
 
     def get_portf_orders(self, portf_id):
-        return [order for order in self.order_dict.values() if order.portf_id == portf_id]
+        return [order for order in self.order_dict.values() if order.portf_id() == portf_id]
 
     def get_strategy_orders(self, stg_id):
-        return [order for order in self.order_dict.values() if order.cl_id == stg_id]
+        return [order for order in self.order_dict.values() if order.cl_id() == stg_id]
 
     def get_portf_order_reqs(self, portf_id):
         return [new_ord_req for new_ord_req in self.ord_reqs_dict.values() if new_ord_req.portf_id == portf_id]

@@ -1,4 +1,5 @@
 from algotrader import SimpleManager
+
 from algotrader.config.persistence import PersistenceMode
 
 

@@ -1,4 +1,4 @@
-from algotrader.event.market_data import BarSize, BarType
+# TODO fix it
 from datetime import date
 from unittest import TestCase
 
@@ -9,6 +9,7 @@ from algotrader.config.persistence import PersistenceConfig, PersistenceMode
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
 from algotrader.provider.persistence.data_store import DataStore
+from algotrader.provider.subscription import *
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
@@ -21,7 +22,7 @@ class StrategyPersistenceTest(TestCase):
                                              portfolio_id='test', portfolio_initial_cash=100000,
                                              instrument_ids=[4],
                                              subscription_types=[
-                                                 BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                                                 BarSubscriptionType(bar_type=Bar.Time, bar_size=BarSize.D1)],
                                              from_date=date(1993, 1, 1), to_date=date(2017, 1, 1),
                                              broker_id=Broker.Simulator,
                                              feed_id=Feed.CSV,
@@ -43,7 +44,7 @@ class StrategyPersistenceTest(TestCase):
                                              portfolio_id='test_1', portfolio_initial_cash=100000,
                                              instrument_ids=[4],
                                              subscription_types=[
-                                                 BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                                                 BarSubscriptionType(bar_type=Bar.Time, bar_size=BarSize.D1)],
                                              from_date=date(1993, 1, 1), to_date=date(2008, 1, 1),
                                              broker_id=Broker.Simulator,
                                              feed_id=Feed.CSV,
@@ -68,7 +69,7 @@ class StrategyPersistenceTest(TestCase):
                                              portfolio_id='test_1', portfolio_initial_cash=100000,
                                              instrument_ids=[4],
                                              subscription_types=[
-                                                 BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                                                 BarSubscriptionType(bar_type=Bar.Time, bar_size=BarSize.D1)],
                                              from_date=date(2008, 1, 1), to_date=date(2017, 1, 1),
                                              broker_id=Broker.Simulator,
                                              feed_id=Feed.CSV,

@@ -1,6 +1,7 @@
 import numpy as np
 
 from algotrader.technical.pipeline import PipeLine
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 class MakeVector(PipeLine):
@@ -12,10 +13,10 @@ class MakeVector(PipeLine):
                                          inputs, input_key, length=1, desc=desc)
         super(MakeVector, self).update_all()
 
-    def on_update(self, data):
-        super(MakeVector, self).on_update(data)
+    def on_update(self, event: DataSeriesEvent):
+        super(MakeVector, self).on_update(event)
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.inputs[0].size() >= self.length:
             if self.all_filled():
                 packed_matrix = np.transpose(np.array(self.cache.values()))

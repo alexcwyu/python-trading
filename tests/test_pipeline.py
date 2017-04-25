@@ -141,7 +141,7 @@ class PipelineTest(TestCase):
         nan_arr = np.empty([1, 4])
         nan_arr[:] = np.nan
 
-        t1 = datetime.datetime.now()
+        t1 = 1
         bar0.add({"timestamp": t1, "close": 80.0, "open": 0})
         self.__np_assert_almost_equal(nan_arr, basket.now()["value"])
 
@@ -200,7 +200,7 @@ class PipelineTest(TestCase):
         decaylinear.start(self.app_context)
         scale.start(self.app_context)
 
-        t1 = datetime.datetime.now()
+        t1 = 1
         bar_t1_array = np.array([80, 95, 102, 105])
         bar0.add({"timestamp": t1, "close": bar_t1_array[0], "open": 0})
         bar1.add({"timestamp": t1, "close": bar_t1_array[1], "open": 0})
@@ -230,14 +230,14 @@ class PipelineTest(TestCase):
         self.__np_assert_almost_equal(signvec_target, signvec.get_data()[0]["value"], 5)
         self.__np_assert_almost_equal(scale_target, scale.get_data()[0]["value"], 5)
 
-        t2 = t1 + datetime.timedelta(0, 3)
+        t2 = t1 + 3
         bar_t2_array = np.array([85, 98, 101.5, 103])
         bar0.add({"timestamp": t2, "close": bar_t2_array[0], "open": 0})
         bar1.add({"timestamp": t2, "close": bar_t2_array[1], "open": 0})
         bar2.add({"timestamp": t2, "close": bar_t2_array[2], "open": 0})
         bar3.add({"timestamp": t2, "close": bar_t2_array[3], "open": 0})
 
-        t3 = t2 + datetime.timedelta(0, 3)
+        t3 = t2 + 3
         bar_t3_array = np.array([87, 91, 107.0, 115])
         bar0.add({"timestamp": t3, "close": bar_t3_array[0], "open": 0})
         bar1.add({"timestamp": t3, "close": bar_t3_array[1], "open": 0})
@@ -269,25 +269,25 @@ class PipelineTest(TestCase):
         rank = Rank([sma_2_bar0, sma_3_bar1, sma_4_bar0], input_key=Indicator.VALUE)
         rank.start(self.app_context)
 
-        t = datetime.datetime.now()
+        t = 1
         bar0.add({"timestamp": t, "close": 80.0, "open": 0})
         bar1.add({"timestamp": t, "close": 95.0, "open": 0})
         print
         rank.now(keys=PipeLine.VALUE)
 
-        t = t + datetime.timedelta(0, 3)
+        t = t + 3
         bar0.add({"timestamp": t, "close": 85.0, "open": 0})
         bar1.add({"timestamp": t, "close": 93.0, "open": 0})
         print
         rank.now(keys=PipeLine.VALUE)
 
-        t = t + datetime.timedelta(0, 3)
+        t = t + 3
         bar0.add({"timestamp": t, "close": 86.0, "open": 0})
         bar1.add({"timestamp": t, "close": 91.0, "open": 0})
         print
         rank.now(keys=PipeLine.VALUE)
 
-        t = t + datetime.timedelta(0, 3)
+        t = t + 3
         bar0.add({"timestamp": t, "close": 90.0, "open": 0})
         bar1.add({"timestamp": t, "close": 95.0, "open": 0})
         print

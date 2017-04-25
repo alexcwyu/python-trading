@@ -2,7 +2,7 @@
 
 from datetime import date
 from google.protobuf import json_format
-from protobuf_to_dict import *
+from algotrader.model.protobuf_to_dict import *
 from unittest import TestCase
 
 import algotrader.model.ref_data_pb2 as ref_data
@@ -13,10 +13,9 @@ class RefDataTest(TestCase):
     def test_instrument(self):
         inst = ref_data.Instrument()
 
-        inst.inst_id = 10
+        inst.inst_id = "10"
         inst.name = 'HSBC'
         inst.symbol = '0005.HK'
-        inst.long_name = 'The Hongkong and Shanghai Banking Corporation'
         inst.type = ref_data.Instrument.CBO
         inst.primary_exch_id = "SEHK"
         inst.exch_ids.append("NYSE")
@@ -51,7 +50,7 @@ class RefDataTest(TestCase):
         self.assertEqual(inst, inst3)
 
     def test_currency(self):
-        currency = ref_data.Currency(ccy_id="HKD", name="Hong Kong Dollar", alt_codes={1: "HK", 2: "HKDD"})
+        currency = ref_data.Currency(ccy_id="HKD", name="Hong Kong Dollar")
 
         print(currency)
 
@@ -62,8 +61,7 @@ class RefDataTest(TestCase):
         self.assertEqual(currency, currency2)
 
     def test_exchange(self):
-        exchange = ref_data.Exchange(exch_id="SEHK", name="The Stock Exchange of Hong Kong Limited"
-                                     , alt_codes={1: "HKEX", 2: "HKX"})
+        exchange = ref_data.Exchange(exch_id="SEHK", name="The Stock Exchange of Hong Kong Limited")
 
         print(exchange)
 

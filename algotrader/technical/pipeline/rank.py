@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from algotrader.technical.pipeline import PipeLine
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 class Rank(PipeLine):
@@ -15,10 +16,10 @@ class Rank(PipeLine):
                                    inputs, input_key, length=1, desc=desc)
         # super(Rank, self).update_all()
 
-    def on_update(self, data):
-        super(Rank, self).on_update(data)
+    def on_update(self, event: DataSeriesEvent):
+        super(Rank, self).on_update(event)
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.all_filled():
             df = pd.DataFrame(self.cache)
             result[PipeLine.VALUE] = ((df.rank(axis=1, ascending=self.ascending) - 1) / (df.shape[1] - 1)).tail(

@@ -2,6 +2,7 @@ import numpy as np
 import talib
 
 from algotrader.technical import Indicator
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 def ds_to_high_numpy(ds, idx):
@@ -61,10 +62,10 @@ class SMA(Indicator):
         self.length = int(length)
         super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc)
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
 
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             value = talib.SMA(
                 np.array(
@@ -88,10 +89,10 @@ class EMA(Indicator):
         self.length = int(length)
         super(EMA, self).update_all()
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
 
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             value = talib.EMA(
                 np.array(

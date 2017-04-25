@@ -1,6 +1,7 @@
 import numpy as np
 
 from algotrader.technical import Indicator
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 class MAX(Indicator):
@@ -13,9 +14,9 @@ class MAX(Indicator):
         super(MAX, self).__init__(Indicator.get_name(MAX.__class__, input, input_key, length), input, input_key,
                                   desc)
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             result[Indicator.VALUE] = self.input.max(-self.length, self.input_keys[0])
         else:
@@ -35,9 +36,9 @@ class MIN(Indicator):
         self.length = int(length)
         super(MIN, self).update_all()
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             result[Indicator.VALUE] = self.input.min(-self.length, self.input_keys[0])
         else:
@@ -57,9 +58,9 @@ class STD(Indicator):
         self.length = int(length)
         super(STD, self).update_all()
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             result[Indicator.VALUE] = self.input.std(-self.length, self.input_keys[0])
         else:
@@ -78,9 +79,9 @@ class VAR(Indicator):
                                   desc)
         self.length = int(length)
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             result[Indicator.VALUE] = self.input.std(-self.length, self.input_keys[0])
         else:

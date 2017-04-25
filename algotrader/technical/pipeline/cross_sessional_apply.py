@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from algotrader.technical.pipeline import PipeLine
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 # TODO: One output scalar
@@ -17,10 +18,10 @@ class CrossSessionalApply(PipeLine):
         self.np_func = np_func
         super(CrossSessionalApply, self).update_all()
 
-    def on_update(self, data):
-        super(CrossSessionalApply, self).on_update(data)
+    def on_update(self, event: DataSeriesEvent):
+        super(CrossSessionalApply, self).on_update(event)
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.inputs[0].size() >= self.length:
             if self.all_filled():
                 # result[PipeLine.VALUE] = self.np_func(self.df.values)
@@ -56,10 +57,10 @@ class CrossSessionalApplyScala(PipeLine):
         self.np_func = np_func
         super(CrossSessionalApplyScala, self).update_all()
 
-    def on_update(self, data):
-        super(CrossSessionalApplyScala, self).on_update(data)
+    def on_update(self, event: DataSeriesEvent):
+        super(CrossSessionalApplyScala, self).on_update(event)
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.inputs[0].size() >= self.length:
             if self.all_filled():
                 packed_matrix = np.transpose(np.array(self.cache.values()))

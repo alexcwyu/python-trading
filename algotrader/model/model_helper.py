@@ -1,10 +1,12 @@
+from bidict import bidict
 from typing import Dict, Callable, Union
 
 from algotrader.model.market_data_pb2 import *
+from algotrader.model.protobuf_to_dict import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.trade_data_pb2 import *
-
+import numpy
 
 class ModelHelper(object):
     id_map = {
@@ -41,24 +43,72 @@ class ModelHelper(object):
 
     }
 
+    db_map = bidict({
+        Instrument: "instruments",
+        Exchange: "exchanges",
+        Currency: "currencies",
+        # Country: "countries",
+        # HolidaySeries: "holiday_series",
+        # TradingHours: "trading_hours",
+        # TimeZone: "time_zones",
+
+        TimeSeries: "time_series",
+
+        Bar: "bars",
+        Quote: "quotes",
+        Trade: "trades",
+        MarketDepth: "market_depths",
+
+        NewOrderRequest: "new_order_reqs",
+        OrderReplaceRequest: "ord_replace_reqs",
+        OrderCancelRequest: "ord_cancel_reqs",
+
+        OrderStatusUpdate: "ord_status_upds",
+        ExecutionReport: "exec_reports",
+        AccountUpdate: "account_updates",
+        PortfolioUpdate: "portfolio_updates",
+
+        AccountState: "accounts",
+        PortfolioState: "portfolios",
+        StrategyState: "strategies",
+        OrderState: "orders",
+        Config: "configs",
+        Sequence: "sequences",
+
+    })
+
     @staticmethod
     def get_id(object):
         t = type(object)
         return ModelHelper.id_map[t](object)
 
     @staticmethod
-    def object_to_dict(obj):
-        pass
+    def get_db(object):
+        t = type(object)
+        return ModelHelper.db_map[t]
 
     @staticmethod
-    def dict_to_object(data):
-        pass
+    def get_type(db):
+        return ModelHelper.db_map.inv[db]
+
+    @staticmethod
+    def object_to_dict(obj):
+        return protobuf_to_dict(obj)
+
+    @staticmethod
+    def dict_to_object(cls, data):
+        return dict_to_protobuf(cls, data)
 
     @staticmethod
     def add_to_dict(attribute: Callable, dict: Dict[str, str]):
         if dict:
             for key, value in dict.items():
-                attribute[key] = value
+                if isinstance(value, (int, str, bool, float)):
+                    attribute[key] = value
+                elif isinstance(value, (numpy.int64, numpy.int32, numpy.float32, numpy.float64)):
+                    attribute[key] = numpy.asscalar(value)
+                else:
+                    raise RuntimeError
 
     @staticmethod
     def add_to_list(attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]):

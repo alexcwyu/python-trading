@@ -30,9 +30,9 @@ class RollingApplyTest(TestCase):
         stddev = StdDev(bar, input_key='close', length=3)
         stddev.start(self.app_context)
 
-        t1 = datetime.datetime.now()
+        t1 = 1
 
-        nextTime = lambda t: t + datetime.timedelta(0, 3)
+        nextTime = lambda t: t + 3
 
         x = np.random.normal(0, 2.0, 3)
         ts = np.cumsum(x) + 100
@@ -40,24 +40,23 @@ class RollingApplyTest(TestCase):
         i = 0
 
         bar.add({"timestamp": t1, "close": ts[i], "open": 0})
-        self.assertEquals([{"name": "'%s'" % stddev.name,
-                            "timestamp": t1,
+        self.assertEquals([{"timestamp": t1,
                             'value': np.nan}],
                           stddev.get_data())
 
         t2 = nextTime(t1)
         i = i + 1
         bar.add({"timestamp": t2, "close": ts[i], "open": 1.4})
-        self.assertEquals([{"name": "'%s'" % stddev.name, "timestamp": t1, 'value': np.nan},
-                           {"name": "'%s'" % stddev.name, "timestamp": t2, 'value': np.nan}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan},
+                           {"timestamp": t2, 'value': np.nan}],
                           stddev.get_data())
 
         t3 = nextTime(t2)
         i = i + 1
         bar.add({"timestamp": t3, "close": ts[i], "open": 1.8})
-        self.assertEquals([{"name": "'%s'" % stddev.name, "timestamp": t1, 'value': np.nan},
-                           {"name": "'%s'" % stddev.name, "timestamp": t2, 'value': np.nan},
-                           {"name": "'%s'" % stddev.name, "timestamp": t3, 'value': np.std(ts)}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan},
+                           {"timestamp": t2, 'value': np.nan},
+                           {"timestamp": t3, 'value': np.std(ts)}],
                           stddev.get_data())
 
         # def test_moving_average_calculation(self):

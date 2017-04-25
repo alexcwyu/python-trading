@@ -1,6 +1,7 @@
 import numpy as np
 
 from algotrader.technical import Indicator
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 class SMA(Indicator):
@@ -13,9 +14,9 @@ class SMA(Indicator):
         super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc,
                                   **kwargs)
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             value = 0.0
             for idx in range(self.input.size() - self.length, self.input.size()):

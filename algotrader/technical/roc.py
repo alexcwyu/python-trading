@@ -1,6 +1,7 @@
 import numpy as np
 
 from algotrader.technical import Indicator
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 def roc(prev_value, curr_value):
@@ -18,9 +19,9 @@ class ROC(Indicator):
         self.length = int(length)
         super(ROC, self).__init__(Indicator.get_name(ROC.__name__, input, input_key, length), input, input_key, desc)
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() > self.length:
             prev_value = self.input.ago(self.length, self.input_keys[0])
             curr_value = self.input.now(self.input_keys[0])

@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from algotrader.technical import Indicator
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 class RollingApply(Indicator):
@@ -15,9 +16,9 @@ class RollingApply(Indicator):
         self.func = func
         super(RollingApply, self).__init__(name=name, input=input, input_keys=input_key, desc=desc, *args, **kwargs)
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             sliced = self.input.get_by_idx(keys=self.input_keys, idx=slice(-self.length, None, None))
             result[Indicator.VALUE] = self.func(sliced)

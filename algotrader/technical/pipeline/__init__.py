@@ -2,7 +2,9 @@ import numpy as np
 from collections import OrderedDict
 
 from algotrader.technical import Indicator
-from algotrader.trading.data_series import DataSeries
+from algotrader.trading.data_series import DataSeries, DataSeriesEvent
+
+from algotrader.model.model_factory import ModelFactory
 
 
 class PipeLine(DataSeries):
@@ -42,7 +44,11 @@ class PipeLine(DataSeries):
         return ",".join(str(part) for part in parts)
 
     def __init__(self, name, inputs, input_keys, length=None, desc=None, *args, **kwargs):
-        super(PipeLine, self).__init__(name=name, keys=None, desc=desc, *args, **kwargs)
+
+
+
+        #super(PipeLine, self).__init__(name=name, keys=None, desc=desc, *args, **kwargs)
+
         # f = lambda i: i \
         #     if isinstance(i, DataSeries) or isinstance(i, Indicator) \
         #     else inst_data_mgr.get_series(i)
@@ -96,6 +102,10 @@ class PipeLine(DataSeries):
         self.__curr_timestamp = None
         self._flush_and_create()
         self.inputs = []
+
+
+        super(PipeLine, self).__init__(ModelFactory.build_time_series(series_id=name, name=name, desc=desc, inputs=self.input_names))
+
         # self.df = pd.DataFrame(index=range(self.length), columns=input_names)
         # self.cache = {} # key is input name, value is numpy array
         # self.update_all()
@@ -109,12 +119,12 @@ class PipeLine(DataSeries):
         for name in missing_input_names:
             self.input_names_and_series[name] = self.app_context.inst_data_mgr.get_series(name)
 
-        self.inputs = self.input_names_and_series.values()
+        self.inputs = [v for k, v in self.input_names_and_series.items()]
         self.app_context.inst_data_mgr.add_series(self)
 
         self.update_all()
         # for i in self.inputs:
-        for i in self.input_names_and_series.values():
+        for i in self.inputs:
             i.subject.subscribe(self.on_update)
 
     def _stop(self):
@@ -145,12 +155,14 @@ class PipeLine(DataSeries):
         # check_df = self.df.isnull()*1
         # return False if check_df.sum(axis=1).sum(axis=0) > 0 else True
 
-    def on_update(self, data):
-        if data['timestamp'] != self.__curr_timestamp:
-            self.__curr_timestamp = data['timestamp']
+    def on_update(self, event : DataSeriesEvent):
+        data = event.data
+        timestamp = event.timestamp
+        data_name = event.name
+        if timestamp != self.__curr_timestamp:
+            self.__curr_timestamp = timestamp
             self._flush_and_create()
 
-        data_name = data['name']
         if data_name in self.input_names:
             j = self.input_names_pos[data_name]
             self.cache[data_name] = self.inputs[j].get_by_idx(

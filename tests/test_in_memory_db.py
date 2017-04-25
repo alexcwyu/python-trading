@@ -52,7 +52,7 @@ class InMemoryDBTest(TestCase):
         self.db.start(self.context)
 
         bars = self.db.load_all('bars')
-        bars = sorted(bars, cmp=lambda x, y: x.timestamp - y.timestamp, reverse=False)
+        bars = sorted(bars, key=lambda x: x.timestamp, reverse=False)
         self.assertEquals(10, len(bars))
 
         for x in range(0, 10):

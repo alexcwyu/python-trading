@@ -2,6 +2,7 @@ import math
 import numpy as np
 
 from algotrader.technical import Indicator
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 class HistoricalVolatility(Indicator):
@@ -16,9 +17,9 @@ class HistoricalVolatility(Indicator):
         super(HistoricalVolatility, self).__init__(
             Indicator.get_name(HistoricalVolatility.__name__, input, input_key, length), input, input_key, desc)
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             sum_ret_sq = 0.0
             for idx in range(self.input.size() - self.length + 1, self.input.size()):

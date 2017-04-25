@@ -1,6 +1,7 @@
 import numpy as np
 
 from algotrader.technical.pipeline import PipeLine
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 class Corr(PipeLine):
@@ -12,7 +13,7 @@ class Corr(PipeLine):
                                    input, input_key, length, desc)
         super(Corr, self).update_all()
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
         if self.inputs[0].size() > self.length:
             if self.all_filled():

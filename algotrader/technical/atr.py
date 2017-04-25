@@ -1,5 +1,6 @@
 from algotrader.technical import Indicator
 from algotrader.technical.ma import SMA
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 class ATR(Indicator):
@@ -18,9 +19,10 @@ class ATR(Indicator):
         super(ATR, self).__init__(Indicator.get_name(ATR.__name__, input, length), input, ['high', 'low', 'close'],
                                   desc)
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         sma_input = {}
-        sma_input['timestamp'] = data['timestamp']
+        sma_input['timestamp'] = event.timestamp
+        data = event.data
         high = data['high']
         low = data['low']
         close = data['close']

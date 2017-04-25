@@ -1,6 +1,7 @@
 import numpy as np
 
 from algotrader.technical import Indicator
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 def gain_loss(prev_value, next_value):
@@ -61,9 +62,9 @@ class RSI(Indicator):
         self.__prev_loss = None
         super(RSI, self).update_all()
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() > self.length:
             if self.__prev_gain is None:
                 avg_gain, avg_loss = avg_gain_loss(self.input, self.input_keys[0], 0, self.input.size())

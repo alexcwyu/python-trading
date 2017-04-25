@@ -77,10 +77,10 @@ class PairwiseTest(TestCase):
         divides.start(self.app_context)
         pcorr.start(self.app_context)
 
-        now = datetime.datetime.now()
+        now = 1
         x = np.array([80.0, 102.0, 101.0, 99.0])
         y = np.array([95.0, 98.0, 105.2, 103.3])
-        ts = [now + datetime.timedelta(0, i * 3) for i in range(4)]
+        ts = [now + 3 for i in range(4)]
         x_p_y = x + y
         x_m_y = x - y
         x_t_y = x * y

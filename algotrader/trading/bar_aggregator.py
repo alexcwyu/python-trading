@@ -3,9 +3,9 @@ from rx import Observable
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.model.model_factory import *
 from algotrader.provider.subscription import *
-from algotrader.trading.data_series import DataSeries
+from algotrader.trading.data_series import DataSeries, DataSeriesEvent
 from algotrader.utils import logger
-from algotrader.utils.market_data_utils import BarSize
+from algotrader.utils.market_data_utils import BarSize, MarketDataUtils
 
 
 class BarInputType:
@@ -46,7 +46,7 @@ class BarAggregator(MarketDataEventHandler):
         self.__input.subject.subscribe(on_next=self.on_update)
         if self.__output_bar_type == Bar.Time:
             current_ts = self.__clock.now()
-            next_ts = Bar.get_next_bar_start_time(current_ts, self.__output_size)
+            next_ts = MarketDataUtils.get_next_bar_start_time(current_ts, self.__output_size)
             diff = next_ts - current_ts
             Observable.timer(int(diff), self.__output_size * 1000, self.__clock.scheduler).subscribe(
                 on_next=self.publish)
@@ -102,8 +102,8 @@ class BarAggregator(MarketDataEventHandler):
         if self.__new_bar:
 
             if self.__output_bar_type == Bar.Time:
-                self.__start_time = Bar.get_current_bar_start_time(timestamp, self.__output_size)
-                self.__end_time = Bar.get_current_bar_end_time(timestamp, self.__output_size)
+                self.__start_time = MarketDataUtils.get_current_bar_start_time(timestamp, self.__output_size)
+                self.__end_time = MarketDataUtils.get_current_bar_end_time(timestamp, self.__output_size)
             else:
                 self.__start_time = timestamp
             self.__open = open
@@ -120,11 +120,12 @@ class BarAggregator(MarketDataEventHandler):
         self.__close = close
         self.__volume += size
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
+        data = event.data
         if isinstance(data, (Trade, Bar, Quote)):
             data = data.to_dict()
 
-        self.__timestamp = data['timestamp']
+        self.__timestamp = event.timestamp
 
         ## Time Bar, need to check if require publish existing before handling new update
         if self.__output_bar_type == Bar.Time and self.__count > 0 and self.__timestamp > self.__end_time:

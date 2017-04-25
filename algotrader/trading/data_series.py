@@ -1,10 +1,11 @@
 import datetime
+
 import numpy as np
 import pandas as pd
-from algotrader import Startable
 from rx.subjects import Subject
 from typing import Dict
 
+from algotrader import Startable
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.model_helper import ModelHelper
 from algotrader.model.time_series_pb2 import TimeSeries
@@ -26,18 +27,24 @@ class DataSeries(Startable):
             return "'%s'" % input.time_series.series_id
         return "'%s'" % input
 
-    def __init__(self, time_series: TimeSeries):
-        self.time_series = time_series
-        self.name = time_series.name
+    def __init__(self, time_series: TimeSeries = None):
+
         self.data_list = []
         self.time_list = []
         self.data_time_dict = {}
         self.last_item = None
         self.subject = Subject()
 
-        if time_series and time_series.items:
-            for item in time_series.items:
-                self.add(dict(item.data), item.timestamp, True)
+        if time_series:
+            self.time_series = time_series
+            self.name = time_series.name
+
+            if time_series and hasattr(time_series, 'items') and time_series.items:
+                for item in time_series.items:
+                    self.add(dict(item.data), item.timestamp, True)
+        else:
+            pass
+
 
     def _start(self, app_context, **kwargs):
         pass
@@ -94,6 +101,7 @@ class DataSeries(Startable):
         self.time_series.end_time = timestamp
         self.data_list.append(enhanced_data)
         self.subject.on_next(DataSeriesEvent(name=DataSeries.get_name(self), timestamp=timestamp, data=data))
+        #self.subject.on_next(data)
 
     def current_time(self):
         return self.time_series.end_time

@@ -8,6 +8,7 @@ import numpy as np
 from pykalman import KalmanFilter
 
 from algotrader.technical import Indicator
+from algotrader.trading.data_series import DataSeriesEvent
 
 
 class KalmanFilteringPairRegression(Indicator):
@@ -34,9 +35,9 @@ class KalmanFilteringPairRegression(Indicator):
         self.trans_cov = delta / (1 - delta) * np.eye(2)
         super(KalmanFilteringPairRegression, self).update_all()
 
-    def on_update(self, data):
+    def on_update(self, event: DataSeriesEvent):
         result = {}
-        result['timestamp'] = data['timestamp']
+        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
 
             independent_var = self.input.get_by_idx_range(key=None, start_idx=0, end_idx=-1)

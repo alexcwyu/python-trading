@@ -31,24 +31,23 @@ class MovingAverageTest(TestCase):
         sma = SMA(bar, 'close', 3)
         sma.start(self.app_context)
 
-        t1 = datetime.datetime.now()
-        t2 = t1 + datetime.timedelta(0, 3)
-        t3 = t2 + datetime.timedelta(0, 3)
+        t1 = 1
+        t2 = t1 + 3
+        t3 = t2 + 3
 
         bar.add({"timestamp": t1, "close": 2.0, "open": 0})
-        self.assertEquals([{"name": "'SMA('bar',close,3)'",
-                            "timestamp": t1, 'value': np.nan}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan}],
                           sma.get_data())
 
         bar.add({"timestamp": t2, "close": 2.4, "open": 1.4})
-        self.assertEquals([{"name": "'SMA('bar',close,3)'", "timestamp": t1, 'value': np.nan},
-                           {"name": "'SMA('bar',close,3)'", "timestamp": t2, 'value': np.nan}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan},
+                           {"timestamp": t2, 'value': np.nan}],
                           sma.get_data())
 
         bar.add({"timestamp": t3, "close": 2.8, "open": 1.8})
-        self.assertEquals([{"name": "'SMA('bar',close,3)'", "timestamp": t1, 'value': np.nan},
-                           {"name": "'SMA('bar',close,3)'", "timestamp": t2, 'value': np.nan},
-                           {"name": "'SMA('bar',close,3)'", "timestamp": t3, 'value': 2.4}],
+        self.assertEquals([{"timestamp": t1, 'value': np.nan},
+                           {"timestamp": t2, 'value': np.nan},
+                           {"timestamp": t3, 'value': 2.4}],
                           sma.get_data())
 
     def test_moving_average_calculation(self):
@@ -58,11 +57,11 @@ class MovingAverageTest(TestCase):
         sma = SMA(bar, input_key='close', length=3)
         sma.start(self.app_context)
 
-        t1 = datetime.datetime.now()
-        t2 = t1 + datetime.timedelta(0, 3)
-        t3 = t2 + datetime.timedelta(0, 3)
-        t4 = t3 + datetime.timedelta(0, 3)
-        t5 = t4 + datetime.timedelta(0, 3)
+        t1 = 1
+        t2 = t1 + 3
+        t3 = t2 + 3
+        t4 = t3 + 3
+        t5 = t4 + 3
 
         bar.add({"timestamp": t1, "close": 2.0, "open": 0})
         self.assertTrue(math.isnan(sma.now('value')))

@@ -2,7 +2,6 @@ import math
 import numpy as np
 import pandas as pd
 import talib
-from algotrader.event.market_data import BarSize, BarType
 from datetime import datetime
 from datetime import timedelta
 from unittest import TestCase
@@ -15,7 +14,7 @@ from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.strategy.sma_strategy import SMAStrategy
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
-
+from algotrader.utils.market_data_utils import BarType, BarSize
 
 class TestCompareWithFunctionalBacktest(TestCase):
     start_date = datetime(2000, 1, 1)

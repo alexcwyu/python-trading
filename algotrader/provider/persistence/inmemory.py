@@ -6,7 +6,8 @@ from algotrader.config.persistence import InMemoryStoreConfig
 from algotrader.provider.persistence.data_store import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
     SequenceDataStore
 from algotrader.utils.date_utils import DateUtils
-from algotrader.utils.ser_deser import MapSerializer
+from algotrader.model.protobuf_to_dict import *
+from algotrader.model.model_helper import ModelHelper
 
 
 class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
@@ -22,7 +23,6 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
             self.db = {}
 
         self.bars = self._get_data('bars')
-        self.trades = self._get_data('trades')
         self.quotes = self._get_data('quotes')
         self.trades = self._get_data('trades')
         self.market_depths = self._get_data('market_depths')
@@ -48,10 +48,8 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
         self.exec_reports = self._get_data('exec_reports')
         self.ord_status_upds = self._get_data('ord_status_upds')
 
-        self.strategies = self._get_data('strategies')
         self.sequences = self._get_data('sequences')
 
-        self.serializer = MapSerializer
 
     def _get_data(self, key):
         if key not in self.db:
@@ -73,17 +71,18 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
     def id(self):
         return DataStore.InMemoryDB
 
-    def load_all(self, clazz):
+    def load_all(self, db):
         result = []
-        if clazz == 'sequences':
+        if db == 'sequences':
             return self.sequences
-        for data in self.db.get(clazz, {}).values():
-            obj = self.serializer.deserialize(data)
+        clazz = ModelHelper.get_type(db)
+        for id, data in self.db.get(db, {}).items():
+            obj = ModelHelper.dict_to_object(clazz, data)
             result.append(obj)
         return result
 
     def _serialize(self, serializable):
-        return serializable.id(), self.serializer.serialize(serializable)
+        return ModelHelper.get_id(serializable), ModelHelper.object_to_dict(serializable)
 
     # RefDataStore
     def save_instrument(self, instrument):

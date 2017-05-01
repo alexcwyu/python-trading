@@ -98,7 +98,7 @@ class Portfolio(HasPositions):
             self.update_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
     def update_price(self, timestamp: int, inst_id: str, price: float) -> None:
-        self.update_position_price(timestamp, inst_id, price)
+        super().update_price(timestamp, inst_id, price)
         self.__update_equity(timestamp, inst_id, price)
         for analyzer in self.__analyzers:
             analyzer.update(timestamp, self.total_equity)

@@ -80,7 +80,7 @@ class RefDataManager(Manager):
     # get inst
     def get_insts_by_ids(self, ids):
         ids = set(ids)
-        return [self._inst_dict[id] for id in ids if id in self.self._inst_dict]
+        return [self._inst_dict[id] for id in ids if id in self._inst_dict]
 
     def get_insts_by_symbols(self, symbols):
         symbols = set(symbols)

@@ -1,19 +1,20 @@
 from algotrader.model.trade_data_pb2 import *
 from algotrader.technical.roc import ROC
+from algotrader.trading.context import ApplicationContext
 from algotrader.trading.strategy import Strategy
 
 
 class Down2PctStrategy(Strategy):
-    def __init__(self, stg_id=None, stg_configs=None):
-        super(Down2PctStrategy, self).__init__(stg_id=stg_id, stg_configs=stg_configs)
+    def __init__(self, stg_id: str, state: StrategyState = None):
+        super(Down2PctStrategy, self).__init__(stg_id=stg_id, state=state)
         self.day_count = 0
         self.order = None
 
-    def _start(self, app_context, **kwargs):
-        self.qty = self.get_stg_config_value("qty", 1)
+    def _start(self, app_context: ApplicationContext, **kwargs):
+        self.qty = app_context.app_config.get("Strategy", self.state.stg_id, "qty", default=1)
 
         self.close = self.app_context.inst_data_mgr.get_series(
-            "Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
+            "Bar.%s.Time.86400" % app_context.app_config.get("Application", "instrumentIds")[0])
         self.close.start(app_context)
 
         self.roc = ROC(self.close, 'close', 1)

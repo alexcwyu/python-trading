@@ -83,19 +83,18 @@ class RefDataTest(TestCase):
         self.assertEqual(country, country2)
 
     def test_trading_holidays(self):
-        holidays = ref_data.TradingHolidays(
-            id=6,
-            name="HK holiday",
+        holidays = ref_data.HolidaySeries(
+            holidays_id="6",
             holidays=[
-                ref_data.TradingHolidays.Holiday(trading_date=1992,
+                ref_data.HolidaySeries.Holiday(trading_date=1992,
                                                  start_date=19991222, start_time=900,
                                                  end_date=19991222, end_time=1600,
-                                                 type=ref_data.TradingHolidays.Holiday.LateOpen,
+                                                 type=ref_data.HolidaySeries.Holiday.LateOpen,
                                                  desc="regular"),
-                ref_data.TradingHolidays.Holiday(trading_date=1992,
+                ref_data.HolidaySeries.Holiday(trading_date=1992,
                                                  start_date=19991223, start_time=900,
                                                  end_date=19991223, end_time=1600,
-                                                 type=ref_data.TradingHolidays.Holiday.LateOpen,
+                                                 type=ref_data.HolidaySeries.Holiday.LateOpen,
                                                  desc="regular")
             ]
 
@@ -104,16 +103,15 @@ class RefDataTest(TestCase):
         print(holidays)
 
         b = holidays.SerializeToString()
-        holidays2 = ref_data.TradingHolidays()
+        holidays2 = ref_data.HolidaySeries()
         holidays2.ParseFromString(b)
 
         self.assertEqual(holidays, holidays2)
 
     def test_trading_hours(self):
         hours = ref_data.TradingHours(
-            id=29,
-            name="HK Sessions",
-            timezone="ASIA/HONG_KONG",
+            trading_hours_id="29",
+            timezone_id="ASIA/HONG_KONG",
             sessions=[
                 ref_data.TradingHours.Session(
                     start_weekdate=ref_data.TradingHours.Session.Monday, start_time=900,

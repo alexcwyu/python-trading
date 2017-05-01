@@ -1,6 +1,7 @@
 from algotrader.model.trade_data_pb2 import *
 from algotrader.trading.strategy import Strategy
-
+from algotrader.model.model_factory import ModelFactory
+from algotrader.trading.context import ApplicationContext
 
 class MertonOptimalBaby(Strategy):
     """
@@ -13,16 +14,17 @@ class MertonOptimalBaby(Strategy):
     So now this class is used as testing purpose
     """
 
-    def __init__(self, stg_id=None, stg_configs=None):
-        super(MertonOptimalBaby, self).__init__(stg_id=stg_id, stg_configs=stg_configs)
+    def __init__(self, stg_id: str, state: StrategyState = None):
+        super(MertonOptimalBaby, self).__init__(stg_id=stg_id, state=state)
         self.buy_order = None
 
-    def _start(self, app_context, **kwargs):
-        self.arate = self.get_stg_config_value("arate", 1)
-        self.vol = self.get_stg_config_value("vol", 1)
+    def _start(self, app_context: ApplicationContext, **kwargs):
+        self.arate = app_context.app_config.get("Strategy", self.state.stg_id, "arate", default=1)
+        self.vol = app_context.app_config.get("Strategy", self.state.stg_id, "vol", default=1)
 
-        self.bar = app_context.inst_data_mgr.get_series(
-            "Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
+        self.bar = self.app_context.inst_data_mgr.get_series(
+            "Bar.%s.Time.86400" % app_context.app_config.get("Application", "instrumentIds")[0])
+
         self.bar.start(app_context)
 
         self.optimal_weight = self.arate / self.vol ** 2  # assume risk free rate is zero

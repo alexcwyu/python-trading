@@ -2,17 +2,29 @@ from pymongo import MongoClient
 
 from algotrader.model.model_helper import *
 from algotrader.model.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
+from algotrader.provider.persistence.data_store import RefDataStore, TimeSeriesDataStore, TradeDataStore, \
+    SequenceDataStore
+from algotrader.trading.context import ApplicationContext
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
 
 
-class MongoDBDataStore(object):
+class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
     def __init__(self):
         super(MongoDBDataStore, self).__init__()
 
-    def _start(self, host, port, dbname):
-        self.client = MongoClient(host=host, port=port)
-        self.db = self.client[dbname]
+    def _start(self, app_context: ApplicationContext, **kwargs):
+
+        self.host = app_context.app_config.get("DataStore", "MongoDB", "host")
+        self.port = app_context.app_config.get("DataStore", "MongoDB", "port")
+        self.username = app_context.app_config.get("DataStore", "MongoDB", "username")
+        self.password = app_context.app_config.get("DataStore", "MongoDB", "password")
+        self.dbname = app_context.app_config.get("DataStore", "MongoDB", "dbname")
+        self.create_at_start = app_context.app_config.get("Application", "createDBAtStart")
+        self.delete_at_stop = app_context.app_config.get("Application", "deleteDBAtStop")
+
+        self.client = MongoClient(host=self.host, port=self.port)
+        self.db = self.client[self.dbname]
 
         self.db_map = {
             Instrument: self.db['instruments'],
@@ -50,13 +62,13 @@ class MongoDBDataStore(object):
 
     def _stop(self):
         if self.client:
-            if self.mongo_config.delete_at_stop:
+            if self.delete_at_stop:
                 self.remove_database()
             self.client.close()
 
     def remove_database(self):
         try:
-            self.client.drop_database(self.mongo_config.dbname)
+            self.client.drop_database(self.dbname)
         except:
             pass
 

@@ -2,7 +2,7 @@ import pandas as pd
 
 from algotrader.model.model_factory import *
 from algotrader.trading.ref_data import RefDataManager
-
+import six
 
 class MockRefDataManager(RefDataManager):
     """
@@ -71,13 +71,13 @@ class MockRefDataManager(RefDataManager):
         insts = []
         if isinstance(instruments, (list, tuple, set)):
             for instrument in instruments:
-                if isinstance(instrument, (int, long)) or isinstance(instrument, str):
+                if isinstance(instrument, (six.integer_types)) or isinstance(instrument, str):
                     insts.append(self.search_inst(inst=instrument))
                 elif isinstance(instrument, Instrument):
                     insts.append(instrument)
                 else:
                     raise "Unknown instrument %s" % instrument
-        elif isinstance(instruments, (int, long)) or isinstance(instruments, str):
+        elif isinstance(instruments, (six.integer_types)) or isinstance(instruments, str):
             insts.append(self.search_inst(inst=instruments))
         elif isinstance(instruments, Instrument):
             insts.append(instruments)
@@ -99,7 +99,7 @@ class MockRefDataManager(RefDataManager):
         return None
 
     def search_inst(self, inst):
-        if isinstance(inst, (int, long)):
+        if isinstance(inst, (six.integer_types)):
             return self._inst_dict.get(inst, None)
         elif inst in self._inst_symbol_dict:
             return self._inst_symbol_dict[inst]

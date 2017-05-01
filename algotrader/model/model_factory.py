@@ -559,11 +559,10 @@ class ModelFactory(object):
         return config
 
     @staticmethod
-    def build_strategy_state(stg_id: str, config_values: Dict[str, str] = None) -> StrategyState:
+    def build_strategy_state(stg_id: str) -> StrategyState:
         stg = StrategyState()
         stg.stg_id = str(stg_id)
         stg.config.config_id = str(stg_id)
-        ModelFactory.update_config(stg.config, None, config_values)
         return stg
 
     @staticmethod

@@ -1,9 +1,9 @@
+import threading
+
 import gevent
 import swigibpy
-import threading
 from collections import defaultdict
 
-from algotrader.config.broker import IBConfig
 from algotrader.model.market_data_pb2 import Bar, Quote, Trade, MarketDepth
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker import Broker
@@ -13,6 +13,7 @@ from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, \
     TradeSubscriptionType, MarketDepthSubscriptionType
 from algotrader.provider.subscription import MarketDataType
+from algotrader.trading.context import ApplicationContext
 from algotrader.utils import logger
 
 
@@ -151,15 +152,17 @@ class IBBroker(IBSocket, Broker, Feed):
         self.completed_reqs = []
         self.req_callback = {}
 
-    def _start(self, app_context, **kwargs):
-        self.ib_config = app_context.app_config.get_config(IBConfig)
+    def _start(self, app_context: ApplicationContext, **kwargs):
 
-        self.next_request_id = self.ib_config.next_request_id
-        self.next_order_id = self.ib_config.next_order_id
+        self.next_request_id = app_context.app_config.get("Broker", "IBBroker", "nextRequestId")
+        self.next_order_id = app_context.app_config.get("Broker", "IBBroker", "nextOrderId")
+        self.port = app_context.app_config.get("Broker", "IBBroker", "port")
+        self.client_id = app_context.app_config.get("Broker", "IBBroker", "clientId")
+        self.account = app_context.app_config.get("Broker", "IBBroker", "account")
+        self.daemon = app_context.app_config.get("Broker", "IBBroker", "daemon")
+        self.use_gevent = app_context.app_config.get("Broker", "IBBroker", "useGevent")
+
         self.tws = swigibpy.EPosixClientSocket(self)
-        self.port = self.ib_config.port
-        self.client_id = self.ib_config.client_id
-        self.account = self.ib_config.account
 
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
@@ -169,11 +172,11 @@ class IBBroker(IBSocket, Broker, Feed):
         if not self.tws.eConnect("", self.port, self.client_id, poll_auto=False):
             raise RuntimeError('Failed to connect TWS')
 
-        if self.ib_config.use_gevent:
+        if self.use_gevent:
             gevent.spawn(self.poll)
         else:
             thread = threading.Thread(target=self.poll)
-            thread.daemon = self.ib_config.daemon
+            thread.daemon = self.daemon
             thread.start()
 
         if self.account:

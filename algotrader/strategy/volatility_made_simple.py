@@ -8,8 +8,8 @@ from algotrader.utils import logger
 
 
 class VixVxvRatio(Strategy):
-    def __init__(self, stg_id=None, stg_configs=None):
-        super(VixVxvRatio, self).__init__(stg_id=stg_id, stg_configs=stg_configs)
+    def __init__(self, stg_id: str, state: StrategyState = None):
+        super(VixVxvRatio, self).__init__(stg_id=stg_id, state=state)
         self.day_count = 0
         self.order = None
 

@@ -203,19 +203,20 @@ message DrawDown {
     algotrader.model.TimeSeries series = 7;
 }
 
-
-message Config {
-    string config_id = 1;
-    map<string, string> values = 2;
-}
+//
+//message Config {
+//    string config_id = 1;
+//    map<string, string> values = 2;
+//}
 
 message StrategyState {
     string stg_id = 1;
-    Config config = 2;
-    repeated string cl_ord_ids = 3;
-    map<string, Position> positions = 4;
-    string portf_id = 5;
-    int64 next_ord_id = 6;
+    string stg_cls = 2;
+//    Config config = 3;
+    repeated string cl_ord_ids = 4;
+    map<string, Position> positions = 5;
+    string portf_id = 6;
+    int64 next_ord_id = 7;
 }
 
 

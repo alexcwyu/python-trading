@@ -1,14 +1,14 @@
 import logging
-
-import pandas as pd
 from datetime import datetime
 
-from algotrader.config.feed import PandasMemoryDataFeedConfig
+import pandas as pd
+
 from algotrader.event.event_handler import EventLogger
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import BarSubscriptionType, HistDataSubscriptionKey
+from algotrader.trading.context import ApplicationContext
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.market_data_utils import BarSize
@@ -29,15 +29,15 @@ class PandasMemoryDataFeed(Feed):
         super(PandasMemoryDataFeed, self).__init__()
         self.sub_keys = []
 
-    def _start(self, app_context):
-        self.pandas_memory_config = app_context.app_config.get_config(PandasMemoryDataFeedConfig)
-        self.dict_of_df = self.pandas_memory_config.dict_df
-
+    def _start(self, app_context: ApplicationContext):
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
 
     def _stop(self):
         pass
+
+    def set_data_frame(self, dict_of_df):
+        self.dict_of_df = dict_of_df
 
     def id(self):
         return Feed.PandasMemory

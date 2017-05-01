@@ -2,23 +2,24 @@ import _pickle as pickle
 
 import os
 
-from algotrader.config.persistence import InMemoryStoreConfig
+from algotrader.model.model_helper import ModelHelper
 from algotrader.provider.persistence.data_store import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
     SequenceDataStore
+from algotrader.trading.context import ApplicationContext
 from algotrader.utils.date_utils import DateUtils
-from algotrader.model.protobuf_to_dict import *
-from algotrader.model.model_helper import ModelHelper
 
 
 class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
     def __init__(self):
         super(InMemoryDataStore, self).__init__()
 
-    def _start(self, app_context, **kwargs):
-        self.config = app_context.app_config.get_config(InMemoryStoreConfig)
+    def _start(self, app_context: ApplicationContext, **kwargs):
+        self.file = app_context.app_config.get("DataStore", "InMemoryDB", "file")
+        self.create_at_start = app_context.app_config.get("Application", "createDBAtStart")
+        self.delete_at_stop = app_context.app_config.get("Application", "deleteDBAtStop")
 
         try:
-            self.db = pickle.load(open(self.config.file, "rb"))
+            self.db = pickle.load(open(self.file, "rb"))
         except:
             self.db = {}
 
@@ -50,21 +51,20 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
 
         self.sequences = self._get_data('sequences')
 
-
     def _get_data(self, key):
         if key not in self.db:
             self.db[key] = {}
         return self.db[key]
 
     def _stop(self):
-        if self.config.delete_at_stop:
+        if self.delete_at_stop:
             self.remove_database()
         else:
-            pickle.dump(self.db, open(self.config.file, "wb+"))
+            pickle.dump(self.db, open(self.file, "wb+"))
 
     def remove_database(self):
         try:
-            os.remove(self.config.file)
+            os.remove(self.file)
         except:
             pass
 

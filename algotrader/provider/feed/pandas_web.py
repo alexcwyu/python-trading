@@ -1,9 +1,9 @@
-import logging
-
 import abc
-import pandas as pd
+import logging
 from datetime import date
 from datetime import datetime
+
+import pandas as pd
 from pandas_datareader import data
 
 from algotrader.event.event_handler import EventLogger
@@ -11,6 +11,7 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
 from algotrader.provider.subscription import BarSubscriptionType, HistDataSubscriptionKey
+from algotrader.trading.context import ApplicationContext
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.market_data_utils import BarSize
@@ -23,7 +24,7 @@ class PandasWebDataFeed(Feed):
         super(PandasWebDataFeed, self).__init__()
         self.system = system
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context: ApplicationContext, **kwargs):
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
 

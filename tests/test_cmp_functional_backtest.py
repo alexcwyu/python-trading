@@ -6,6 +6,9 @@ from datetime import datetime
 from datetime import timedelta
 from unittest import TestCase
 
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.time_series_pb2 import *
+from algotrader.model.model_factory import ModelFactory
 from algotrader.config.app import BacktestingConfig
 from algotrader.config.feed import PandasMemoryDataFeedConfig
 from algotrader.provider.broker import Broker
@@ -17,9 +20,8 @@ from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_data
 from algotrader.utils.market_data_utils import BarType, BarSize
 
 class TestCompareWithFunctionalBacktest(TestCase):
-    start_date = datetime(2000, 1, 1)
     num_days = 3000
-    dates = [start_date + timedelta(days=i) for i in range(num_days)]
+    dates = [i for i in range(num_days)]
     init_cash = 1000000
 
     def get_df(self, asset):
@@ -82,7 +84,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
 
         config = BacktestingConfig(id=None, stg_id='sma', portfolio_id='test2',
                                    instrument_ids=[instrument],
-                                   subscription_types=[BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                                   subscription_types=[BarSubscriptionType(bar_type=Bar.Time, bar_size=BarSize.D1)],
                                    from_date=TestCompareWithFunctionalBacktest.dates[0],
                                    to_date=TestCompareWithFunctionalBacktest.dates[-1],
                                    broker_id=Broker.Simulator,

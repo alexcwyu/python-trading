@@ -40,7 +40,8 @@ class MarketDataEventHandler(EventHandler):
         elif isinstance(event, MarketDepth):
             self.on_market_depth(event)
         else:
-            raise AttributeError()
+            pass
+            #raise AttributeError()
 
     def on_bar(self, bar: Bar) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
@@ -66,7 +67,8 @@ class OrderEventHandler(EventHandler):
         elif isinstance(event, OrderReplaceRequest):
             self.on_ord_replace_req(event)
         else:
-            raise AttributeError()
+            pass
+            #raise AttributeError()
 
     # Sync interface, return Order
     def send_order(self, new_ord_req: NewOrderRequest) -> None:
@@ -105,7 +107,8 @@ class ExecutionEventHandler(EventHandler):
         elif isinstance(event, ExecutionReport):
             self.on_exec_report(event)
         else:
-            raise AttributeError()
+            pass
+            #raise AttributeError()
 
     def on_ord_upd(self, ord_upd: OrderStatusUpdate) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
@@ -121,7 +124,8 @@ class AccountEventHandler(EventHandler):
         if isinstance(event, AccountUpdate):
             self.on_acc_upd(event)
         else:
-            raise AttributeError()
+            pass
+            #raise AttributeError()
 
     def on_acc_upd(self, acc_upd: AccountUpdate) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, acc_upd))
@@ -134,7 +138,8 @@ class PortfolioEventHandler(EventHandler):
         if isinstance(event, PortfolioUpdate):
             self.on_portf_upd(event)
         else:
-            raise AttributeError()
+            pass
+            #raise AttributeError()
 
     def on_portf_upd(self, portf_upd: PortfolioUpdate) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, portf_upd))

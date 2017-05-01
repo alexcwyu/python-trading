@@ -20,13 +20,13 @@ class StrategyPersistenceTest(TestCase):
         backtest_config0 = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
                                              stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
                                              portfolio_id='test', portfolio_initial_cash=100000,
-                                             instrument_ids=[4],
+                                             instrument_ids=['SPY@NYSEARCA'],
                                              subscription_types=[
                                                  BarSubscriptionType(bar_type=Bar.Time, bar_size=BarSize.D1)],
                                              from_date=date(1993, 1, 1), to_date=date(2017, 1, 1),
                                              broker_id=Broker.Simulator,
                                              feed_id=Feed.CSV,
-                                             stg_configs={'qty': 1000},
+                                             stg_configs={'qty': "1000"},
                                              ref_data_mgr_type=RefDataManager.InMemory,
                                              persistence_config=PersistenceConfig(),
                                              provider_configs=CSVFeedConfig(path='data/tradedata')
@@ -42,13 +42,13 @@ class StrategyPersistenceTest(TestCase):
         backtest_config1 = BacktestingConfig(id="down2%-test-config_1", stg_id="down2%_1",
                                              stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
                                              portfolio_id='test_1', portfolio_initial_cash=100000,
-                                             instrument_ids=[4],
+                                             instrument_ids=['SPY@NYSEARCA'],
                                              subscription_types=[
                                                  BarSubscriptionType(bar_type=Bar.Time, bar_size=BarSize.D1)],
                                              from_date=date(1993, 1, 1), to_date=date(2008, 1, 1),
                                              broker_id=Broker.Simulator,
                                              feed_id=Feed.CSV,
-                                             stg_configs={'qty': 1000},
+                                             stg_configs={'qty': "1000"},
                                              ref_data_mgr_type=RefDataManager.InMemory, persistence_config=
                                              PersistenceConfig(seq_ds_id=DataStore.InMemoryDB,
                                                                seq_persist_mode=PersistenceMode.Batch,

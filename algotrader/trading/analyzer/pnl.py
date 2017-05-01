@@ -16,9 +16,13 @@ class PnlAnalyzer(Analyzer):
 
         if self.series.size() >= 2:
             self.state.pnl.last_pnl = performance_series.get_by_idx(-1, PerformanceAnalyzer.TotalEquity) - \
-                                      self.portfolio.performance_series.get_by_idx(-2, PerformanceAnalyzer.TotalEquity)
+                                      performance_series.get_by_idx(-2, PerformanceAnalyzer.TotalEquity)
 
             self.series.add(data={self.Pnl: self.state.pnl.last_pnl}, timestamp=timestamp)
+        else:
+            self.state.pnl.last_pnl = 0
+            self.series.add(data={self.Pnl: self.state.pnl.last_pnl}, timestamp=timestamp)
+
 
     def get_result(self):
         return {self.Pnl: self.state.pnl.last_pnl}

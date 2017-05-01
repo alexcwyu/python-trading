@@ -1,0 +1,68 @@
+{
+  "Broker": {
+    "IBBroker": {
+      "clientId": 0,
+      "host": "localhost",
+      "nextOrderId": 1,
+      "account": 1,
+      "port": 4001,
+      "daemon": true,
+      "nextRequestId": 1,
+      "useGevent": false
+    },
+    "Simulator": {
+      "fillStrategy": "Default",
+      "nextOrderId": 1,
+      "commission": "Default",
+      "nextExecId": 1
+    }
+  },
+  "Application": {
+    "clock": "Simulation",
+    "refDataMgr": "InMemory"
+  },
+  "Feed": {
+    "CSVFeed": {
+      "path": "../data/tradedata"
+    }
+  },
+  "StgConfig": {
+    "down2%Stg": {
+      "qty": null
+    }
+  },
+  "Persistence": {
+    "dataStore": "InMemoryDB",
+    "persistenceMode": "Disable"
+  },
+  "DataStore": {
+    "MongoDB": {
+      "username": null,
+      "dbname": "algotrader",
+      "host": "localhost",
+      "password": null,
+      "port": 27107
+    },
+    "InMemoryDB": {
+      "file": "algotrader_db.p"
+    },
+    "CassandraDB": {
+      "keyspace": "algotrader",
+      "scriptPath": "../../../scripts/cassandra/algotrader.cql",
+      "username": null,
+      "contactPoints": [
+        "127.0.0.1"
+      ],
+      "password": null,
+      "port": null
+    }
+  },
+  "Trading": {
+    "stgId": null,
+    "portfolioId": null,
+    "feedId": null,
+    "instrumentIds": null,
+    "stgCls": null,
+    "brokerId": null
+  }
+}

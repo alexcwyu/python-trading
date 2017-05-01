@@ -1,0 +1,65 @@
+Application:
+
+  clockId: "Simulation"
+
+  dataStoreId: "InMemoryDB"
+  persistenceMode: "Disable"
+  createDBAtStart : false
+  deleteDBAtStop : false
+
+  tradingMode:
+  feedId:
+  brokerId:
+  portfolioId:
+  stgId:
+  stgCls:
+  instrumentIds:
+
+
+
+Strategy:
+  down2%Stg:
+    qty: 
+
+
+DataStore:
+
+  CassandraDB:
+    contactPoints:
+      - "127.0.0.1"
+    port:
+    username:
+    password:
+    keyspace: "algotrader"
+    scriptPath: "../../../scripts/cassandra/algotrader.cql"
+
+  MongoDB:
+    host: "localhost"
+    port: 27107
+    username:
+    password:
+    dbname: "algotrader"
+
+  InMemoryDB:
+    file: "algotrader_db.p"
+
+Feed:
+  CSVFeed:
+    path: "../data/tradedata"
+
+Broker:
+  IBBroker:
+    host: "localhost"
+    port: 4001
+    clientId: 0
+    account: 1
+    daemon: true
+    useGevent: false
+    nextRequestId: 1
+    nextOrderId: 1
+
+  Simulator:
+    commission: "Default"
+    fillStrategy: "Default"
+    nextOrderId: 1
+    nextExecId: 1

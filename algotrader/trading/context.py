@@ -1,7 +1,10 @@
-from algotrader import Startable
+from typing import Dict
 
-from algotrader.config.app import ApplicationConfig
+from algotrader import Startable
+from algotrader.config import Config
 from algotrader.event.event_bus import EventBus
+from algotrader.model.model_factory import ModelFactory
+from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.provider_mgr import ProviderManager
 from algotrader.strategy.strategy_mgr import StrategyManager
 from algotrader.trading.account_mgr import AccountManager
@@ -14,12 +17,12 @@ from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
 
 
 class ApplicationContext(Startable):
-    def __init__(self, app_config=None):
+    def __init__(self, config: Dict = None):
         super(ApplicationContext, self).__init__()
 
         self.startables = []
 
-        self.app_config = app_config if app_config else ApplicationConfig()
+        self.app_config = Config(config)
 
         self.clock = self.add_startable(self.__get_clock())
         self.provider_mgr = self.add_startable(ProviderManager())
@@ -35,20 +38,21 @@ class ApplicationContext(Startable):
         self.stg_mgr = self.add_startable(StrategyManager())
 
         self.event_bus = EventBus()
+        self.model_factory = ModelFactory
 
-    def add_startable(self, startable):
+    def add_startable(self, startable: Startable) -> Startable:
         self.startables.append(startable)
         return startable
 
-    def __get_clock(self):
-        if self.app_config.clock_type == Clock.RealTime:
+    def __get_clock(self) -> Clock:
+        if self.app_config.get("Application", "clockId") == Clock.RealTime:
             return RealTimeClock()
         return SimulationClock()
 
-    def __get_ref_data_mgr(self):
-        if self.app_config.ref_data_mgr_type == RefDataManager.DB:
-            return DBRefDataManager()
-        return InMemoryRefDataManager()
+    def __get_ref_data_mgr(self) -> RefDataManager:
+        if self.app_config.get("Application", "dataStoreId") == DataStore.InMemoryDB:
+            return InMemoryRefDataManager()
+        return DBRefDataManager()
 
     def _start(self, app_context, **kwargs):
         for startable in self.startables:
@@ -58,14 +62,15 @@ class ApplicationContext(Startable):
         for startable in reversed(self.startables):
             startable.stop()
 
-    def get_trade_data_store(self):
-        return self.provider_mgr.get(self.app_config.persistence_config.trade_ds_id)
+    def get_data_store(self) -> DataStore:
+        return self.provider_mgr.get(self.app_config.get("Application", "dataStoreId"))
 
-    def get_ref_data_store(self):
-        return self.provider_mgr.get(self.app_config.persistence_config.ref_ds_id)
+    def get_broker(self):
+        pass
 
-    def get_timeseries_data_store(self):
-        return self.provider_mgr.get(self.app_config.persistence_config.ts_ds_id)
+    def get_feed(self):
+        pass
 
-    def get_seq_data_store(self):
-        return self.provider_mgr.get(self.app_config.persistence_config.seq_ds_id)
+    def get_portfolio(self):
+        pass
+

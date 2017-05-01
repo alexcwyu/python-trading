@@ -12,27 +12,28 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, MarketDataSubscriber
 from algotrader.trading.position import HasPositions
+from algotrader.model.model_factory import ModelFactory
 
-
-class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscriber, Startable, HasPositions):
-    def __init__(self, state: StrategyState = None):
-        super().__init__(state)
-        self.__state = state
+class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber):
+    def __init__(self, stg_id: str, state: StrategyState = None):
+        self.state = state if state else ModelFactory.build_strategy_state(stg_id=stg_id)
+        super().__init__(self.state)
 
     def __get_next_req_id(self):
-        id = self.__state.next_ord_id if self.__state.next_ord_id else 1
-        self.__state.next_ord_id = id + 1
+        id = self.state.next_ord_id if self.state.next_ord_id else 1
+        self.state.next_ord_id = id + 1
         return id
 
     def get_stg_config_value(self, key, default_value=None):
-        if self.config:
-            return self.config.values.get(key, default_value)
+        if self.state.config and self.state.config.values:
+            return self.state.config.values.get(key, default_value)
         return default_value
 
     def _start(self, app_context, **kwargs):
         self.app_context.stg_mgr.add(self)
         self.model_factory = self.app_context.model_factory
         self.app_config = self.app_context.app_config
+        self.ord_reqs ={}
 
         # TODO
         self.config = None
@@ -42,7 +43,7 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
         self.feed = self.app_context.provider_mgr.get(self.app_config.feed_id) if self.app_config else None
         self.broker = self.app_context.provider_mgr.get(self.app_config.broker_id)
 
-        self.instruments = self.ref_data_mgr.get_insts(self.app_context.app_config.instrument_ids)
+        self.instruments = self.ref_data_mgr.get_insts_by_ids(self.app_context.app_config.instrument_ids)
         self.clock = self.app_context.clock
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
@@ -86,7 +87,7 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
                 self.feed.subscribe_mktdata(sub_key)
 
     def id(self):
-        return self.__state.stg_id
+        return self.state.stg_id
 
     def on_bar(self, bar: Bar):
         super().on_bar(bar)
@@ -101,25 +102,25 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
         super().on_market_depth(market_depth)
 
     def on_ord_upd(self, ord_upd: OrderStatusUpdate):
-        if ord_upd.cl_id == self.stg_id:
+        if ord_upd.cl_id == self.state.stg_id:
             super().on_ord_upd(ord_upd)
 
     def on_exec_report(self, exec_report: ExecutionReport):
-        if exec_report.cl_id == self.stg_id:
+        if exec_report.cl_id == self.state.stg_id:
             super().on_exec_report(exec_report)
             ord_req = self.ord_reqs[exec_report.cl_ord_id]
-            direction = 1 if ord_req.action == OrderAction.BUY else -1
+            direction = 1 if ord_req.action == Buy else -1
             if exec_report.last_qty > 0:
                 self.add_position(exec_report.inst_id, exec_report.cl_id, exec_report.cl_ord_id,
                                   direction * exec_report.last_qty)
-                self.update_position_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
+                self.update_price(exec_report.timestamp, exec_report.inst_id, exec_report.last_price)
 
-    def market_order(self, inst_id, action, qty, tif=TIF.DAY, oca_tag=None, params=None):
-        return self.new_order(inst_id=inst_id, action=action, type=OrderType.MARKET, qty=qty, limit_price=0.0, tif=tif,
+    def market_order(self, inst_id, action, qty, tif=DAY, oca_tag=None, params=None):
+        return self.new_order(inst_id=inst_id, action=action, type=Market, qty=qty, limit_price=0.0, tif=tif,
                               oca_tag=oca_tag, params=params)
 
-    def limit_order(self, inst_id, action, qty, price, tif=TIF.DAY, oca_tag=None, params=None):
-        return self.new_order(inst_id=inst_id, action=action, type=OrderType.LIMIT, qty=qty, limit_price=price, tif=tif,
+    def limit_order(self, inst_id, action, qty, price, tif=DAY, oca_tag=None, params=None):
+        return self.new_order(inst_id=inst_id, action=action, type=Limit, qty=qty, limit_price=price, tif=tif,
                               oca_tag=oca_tag, params=params)
 
     def stop_order(self):
@@ -141,13 +142,13 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
     def new_order(self,
                   inst_id: str, action: OrderAction, type: OrderType,
                   qty: float, limit_price: float = 0,
-                  stop_price: float = 0, tif: TIF = TIF.DAY, oca_tag: str = None,
+                  stop_price: float = 0, tif: TIF = DAY, oca_tag: str = None,
                   params: Dict[str, str] = None) -> NewOrderRequest:
 
         req = self.model_factory.build_new_order_request(timestamp=self.clock.now(),
-                                                         cl_id=self.stg_id,
+                                                         cl_id=self.state.stg_id,
                                                          cl_ord_id=self.__get_next_req_id(),
-                                                         portf_id=self.portfolio.portf_id,
+                                                         portf_id=self.portfolio.state.portf_id,
                                                          broker_id=self.app_config.broker_id,
                                                          inst_id=inst_id,
                                                          action=action,
@@ -165,7 +166,7 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
 
     def cancel_order(self, cl_orig_req_id: str, params: Dict[str, str] = None) -> OrderCancelRequest:
         req = self.model_factory.build_order_cancel_request(timestamp=self.clock.now(),
-                                                            cl_id=self.stg_id, cl_ord_id=self.__get_next_req_id(),
+                                                            cl_id=self.state.stg_id, cl_ord_id=self.__get_next_req_id(),
                                                             cl_orig_req_id=cl_orig_req_id, params=params)
         self.ord_reqs[req.cl_ord_id] = req
         self.portfolio.cancel_order(req)
@@ -175,7 +176,7 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
                       stop_price: float = None, tif: TIF = None, oca_tag: str = None,
                       params: Dict[str, str] = None) -> OrderReplaceRequest:
         req = self.model_factory.build_order_replace_request(timestamp=self.clock.now(),
-                                                             cl_id=self.stg_id, cl_ord_id=self.__get_next_req_id(),
+                                                             cl_id=self.state.stg_id, cl_ord_id=self.__get_next_req_id(),
                                                              cl_orig_req_id=cl_orig_req_id, type=type, qty=qty,
                                                              limit_price=limit_price,
                                                              stop_price=stop_price, tif=tif,
@@ -189,6 +190,6 @@ class Strategy(ExecutionEventHandler, MarketDataEventHandler, MarketDataSubscrib
         return self.portfolio
 
     def portf_id(self) -> str:
-        if not self.__state:
+        if not self.state:
             return None
-        return self.__state.portf_id
+        return self.state.portf_id

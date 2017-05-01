@@ -1,5 +1,7 @@
 Application:
 
+  type: "BackTesting"
+
   clockId: "Simulation"
 
   dataStoreId: "InMemoryDB"
@@ -7,14 +9,17 @@ Application:
   createDBAtStart : false
   deleteDBAtStop : false
 
-  tradingMode:
   feedId:
   brokerId:
   portfolioId:
   stgId:
   stgCls:
   instrumentIds:
+  subscriptionTypes:
 
+  fromDate : 20000101
+  toDate :
+  portfolioInitialcash : 100000
 
 
 Strategy:

@@ -13,7 +13,7 @@ class SequenceManager(SimpleManager):
     def _start(self, app_context: ApplicationContext, **kwargs):
         self.app_context = app_context
         self.store = self.app_context.get_seq_data_store()
-        self.persist_mode = self.app_context.app_config.persistence_config.seq_persist_mode
+        self.persist_mode = self.app_context.app_config.get("Application", "persistenceMode")
         self.load_all()
 
     def load_all(self):

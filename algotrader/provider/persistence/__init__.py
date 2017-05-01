@@ -5,9 +5,9 @@ from algotrader.utils.ser_deser import Serializable
 
 
 class PersistenceMode(object):
-    Disable = 0
-    Batch = 1
-    RealTime = 2
+    Disable = "Disable"
+    Batch = "Batch"
+    RealTime = "RealTime"
 
 
 class Persistable(Serializable, HasId):

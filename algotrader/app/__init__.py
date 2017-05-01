@@ -2,6 +2,11 @@ from algotrader import Startable
 
 
 class Application(Startable):
+    DataImport = "DataImport"
+    LiveTrading = "LiveTrading"
+    BackTesting = "BackTesting"
+
+
     def _start(self, app_context):
         try:
             self.init()

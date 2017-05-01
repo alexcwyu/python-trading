@@ -1,7 +1,8 @@
 import numpy as np
 from algotrader import Manager
 
-from algotrader.config.persistence import PersistenceMode
+from algotrader.trading.context import ApplicationContext
+from algotrader.provider.persistence import PersistenceMode
 from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.model.model_factory import ModelFactory
@@ -19,9 +20,9 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__series_dict = {}
         self.subscription = None
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context: ApplicationContext, **kwargs):
         self.store = self.app_context.get_timeseries_data_store()
-        self.persist_mode = self.app_context.app_config.persistence_config.ts_persist_mode
+        self.persist_mode = self.app_context.app_config.get("Application", "persistenceMode")
         self.load_all()
         self.subscription = EventBus.data_subject.subscribe(self.on_next)
 

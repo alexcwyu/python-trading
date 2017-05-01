@@ -1,21 +1,24 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
-from algotrader import Startable
 from builtins import *
+
 from typing import Dict
 
-from algotrader.config.app import BacktestingConfig
+from algotrader.app import Application
 from algotrader.event.event_bus import EventBus
-from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
+from algotrader.event.event_handler import ExecutionEventHandler
 from algotrader.model.market_data_pb2 import *
+from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, MarketDataSubscriber
+from algotrader.trading.context import ApplicationContext
 from algotrader.trading.position import HasPositions
-from algotrader.model.model_factory import ModelFactory
+
 
 class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber):
     def __init__(self, stg_id: str, state: StrategyState = None):
+        self.stg_id = stg_id
         self.state = state if state else ModelFactory.build_strategy_state(stg_id=stg_id)
         super().__init__(self.state)
 
@@ -24,26 +27,24 @@ class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber):
         self.state.next_ord_id = id + 1
         return id
 
-    def get_stg_config_value(self, key, default_value=None):
-        if self.state.config and self.state.config.values:
-            return self.state.config.values.get(key, default_value)
-        return default_value
+    def get_stg_config(self, key, default_value=None):
+        return self.app_context.app_config.get("Strategy", self.stg_id, key, default=default_value)
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context: ApplicationContext, **kwargs):
         self.app_context.stg_mgr.add(self)
         self.model_factory = self.app_context.model_factory
         self.app_config = self.app_context.app_config
-        self.ord_reqs ={}
+        self.ord_reqs = {}
 
         # TODO
         self.config = None
 
         self.ref_data_mgr = self.app_context.ref_data_mgr
-        self.portfolio = self.app_context.portf_mgr.get(self.app_config.portfolio_id)
-        self.feed = self.app_context.provider_mgr.get(self.app_config.feed_id) if self.app_config else None
-        self.broker = self.app_context.provider_mgr.get(self.app_config.broker_id)
+        self.portfolio = self.app_context.portf_mgr.get(self.app_config.get("Application", "portfolioId"))
+        self.feed = self.app_context.provider_mgr.get(self.app_config.get("Application", "feedId"))
+        self.broker = self.app_context.provider_mgr.get(self.app_config.get("Application", "brokerId"))
 
-        self.instruments = self.ref_data_mgr.get_insts_by_ids(self.app_context.app_config.instrument_ids)
+        self.instruments = self.ref_data_mgr.get_insts_by_ids(self.app_config.get("Application", "instrumentIds"))
         self.clock = self.app_context.clock
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
@@ -59,11 +60,14 @@ class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber):
         if self.feed:
             self.feed.start(app_context)
 
-        if isinstance(self.app_config, BacktestingConfig):
-            self.subscript_market_data(self.feed, self.instruments, self.app_config.subscription_types,
-                                       self.app_config.from_date, self.app_config.to_date)
+        if self.app_config.get("Application", "type") == Application.BackTesting:
+            self.subscript_market_data(self.feed, self.instruments,
+                                       self.app_config.get("Application", "subscriptionTypes"),
+                                       self.app_config.get("Application", "fromDate"),
+                                       self.app_config.get("Application", "toDate"))
         else:
-            self.subscript_market_data(self.feed, self.instruments, self.app_config.subscription_types)
+            self.subscript_market_data(self.feed, self.instruments,
+                                       self.app_config.get("Application", "subscriptionTypes"))
 
     def _stop(self):
         if self.event_subscription:
@@ -72,17 +76,16 @@ class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber):
     def _subscribe_market_data(self, feed, instruments, subscription_types):
         for instrument in instruments:
             for subscription_type in subscription_types:
-                if isinstance(self.app_config, BacktestingConfig):
-
+                if self.app_config.get("Application", "type") == Application.BackTesting:
                     sub_key = HistDataSubscriptionKey(inst_id=instrument.inst_id,
-                                                      provider_id=self.app_config.feed_id,
+                                                      provider_id=self.app_config.get("Application", "feedId"),
                                                       subscription_type=subscription_type,
-                                                      from_date=self.app_config.from_date,
-                                                      to_date=self.app_config.to_date)
+                                                      from_date=self.app_config.get("Application", "fromDate"),
+                                                      to_date=self.app_config.get("Application", "toDate"))
 
                 else:
                     sub_key = SubscriptionKey(inst_id=instrument.inst_id,
-                                              provider_id=self.app_config.feed_id,
+                                              provider_id=self.app_config.get("Application", "feedId"),
                                               subscription_type=subscription_type)
                 self.feed.subscribe_mktdata(sub_key)
 
@@ -149,7 +152,7 @@ class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber):
                                                          cl_id=self.state.stg_id,
                                                          cl_ord_id=self.__get_next_req_id(),
                                                          portf_id=self.portfolio.state.portf_id,
-                                                         broker_id=self.app_config.broker_id,
+                                                         broker_id=self.app_config.get("Application", "brokerId"),
                                                          inst_id=inst_id,
                                                          action=action,
                                                          type=type,
@@ -176,7 +179,8 @@ class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber):
                       stop_price: float = None, tif: TIF = None, oca_tag: str = None,
                       params: Dict[str, str] = None) -> OrderReplaceRequest:
         req = self.model_factory.build_order_replace_request(timestamp=self.clock.now(),
-                                                             cl_id=self.state.stg_id, cl_ord_id=self.__get_next_req_id(),
+                                                             cl_id=self.state.stg_id,
+                                                             cl_ord_id=self.__get_next_req_id(),
                                                              cl_orig_req_id=cl_orig_req_id, type=type, qty=qty,
                                                              limit_price=limit_price,
                                                              stop_price=stop_price, tif=tif,

@@ -1,6 +1,6 @@
 from algotrader import SimpleManager
 
-from algotrader.config.persistence import PersistenceMode
+from algotrader.provider.persistence import PersistenceMode
 from algotrader.trading.account import Account
 from algotrader.trading.context import ApplicationContext
 
@@ -9,9 +9,9 @@ class AccountManager(SimpleManager):
     def __init__(self):
         super(AccountManager, self).__init__()
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context : ApplicationContext, **kwargs):
         self.store = self.app_context.get_trade_data_store()
-        self.persist_mode = self.app_context.app_config.persistence_config.trade_persist_mode
+        self.persist_mode = self.app_context.app_config.get("Application", "persistenceMode")
         self.load_all()
 
     def load_all(self):

@@ -14,8 +14,8 @@ class VixVxvRatio(Strategy):
         self.order = None
 
     def _start(self, app_context, **kwargs):
-        self.qty = self.get_stg_config_value("qty", 1)
-        self.threshold = self.get_stg_config_value("threshold", 1)
+        self.qty = self.get_stg_config("qty", 1)
+        self.threshold = self.get_stg_config("threshold", 1)
 
         self.xiv = app_context.ref_data_mgr.get_inst('XIV', 'SMART')
         self.vxx = app_context.ref_data_mgr.get_inst('VXX', 'SMART')
@@ -68,8 +68,8 @@ class VxvVxmtRatio(Strategy):
 
     def _start(self, app_context, **kwargs):
 
-        self.qty = self.get_stg_config_value("qty", 1)
-        self.threshold = self.get_stg_config_value("threshold", 1)
+        self.qty = self.get_stg_config("qty", 1)
+        self.threshold = self.get_stg_config("threshold", 1)
 
         self.xiv = app_context.ref_data_mgr.get_inst('XIV', 'SMART')
         self.vxx = app_context.ref_data_mgr.get_inst('VXX', 'SMART')

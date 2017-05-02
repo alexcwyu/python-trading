@@ -1,15 +1,8 @@
-from datetime import date
-
 from algotrader.app import Application
+
 from algotrader.chart.plotter import StrategyPlotter
-from algotrader.config.builder import *
-from algotrader.model.market_data_pb2 import Bar
-from algotrader.provider.broker import Broker
-from algotrader.provider.feed import Feed
-from algotrader.provider.subscription import BarSubscriptionType
+from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
-from algotrader.trading.ref_data import RefDataManager
-from algotrader.utils.market_data_utils import BarSize
 
 
 class BacktestRunner(Application):
@@ -18,14 +11,15 @@ class BacktestRunner(Application):
 
     def init(self):
         self.app_config = self.app_context.app_config
-        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.portfolio_id,
-                                                                         self.app_config.portfolio_initial_cash)
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.get_app_config("portfolioId"),
+                                                                         self.app_config.get_app_config("portfolioInitialcash"))
 
         self.initial_result = self.portfolio.get_result()
 
         self.app_context.add_startable(self.portfolio)
 
-        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.app_config)
+        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.app_config.get_app_config("stgId"),
+                                                                self.app_config.get_app_config("stgCls"))
         self.app_context.add_startable(self.strategy)
 
     def run(self):
@@ -50,20 +44,11 @@ class BacktestRunner(Application):
 
 
 def main():
-    backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
-                                        stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
-                                        portfolio_id='test', portfolio_initial_cash=100000,
-                                        instrument_ids=['SPY@NYSEARCA'],
-                                        subscription_types=[
-                                            BarSubscriptionType(bar_type=Bar.Time, bar_size=BarSize.D1)],
-                                        from_date=date(2010, 1, 1), to_date=date.today(),
-                                        broker_id=Broker.Simulator,
-                                        feed_id=Feed.CSV,
-                                        stg_configs={'qty': '1000'},
-                                        ref_data_mgr_type=RefDataManager.InMemory,
-                                        persistence_config=backtest_no_persistance_config(),
-                                        provider_configs=[MongoDBConfig(), CSVFeedConfig(path='../../data/tradedata')])
-    app_context = ApplicationContext(app_config=backtest_config)
+    app_config = Config(
+        load_from_yaml("../../config/backtest.yaml"),
+        load_from_yaml("../../config/down2%.yaml"))
+
+    app_context = ApplicationContext(app_config=app_config)
 
     BacktestRunner(True).start(app_context)
 

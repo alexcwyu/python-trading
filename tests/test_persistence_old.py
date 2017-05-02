@@ -1,13 +1,13 @@
 import math
-from unittest import TestCase
-
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import PersistenceConfig, InMemoryStoreConfig
 from algotrader.provider.persistence import PersistenceMode
+from unittest import TestCase
+
 from algotrader.provider.persistence.data_store import DataStore
 from algotrader.technical.ma import SMA
+from algotrader.trading.clock import Clock
 from algotrader.trading.context import ApplicationContext
-from algotrader.utils.clock import Clock
 
 
 class PersistenceTest(TestCase):
@@ -17,10 +17,10 @@ class PersistenceTest(TestCase):
         delete_at_stop = False
 
         app_config = ApplicationConfig("app", None, Clock.Simulation, PersistenceConfig(
-            ref_ds_id=DataStore.InMemoryDB, ref_persist_mode=PersistenceMode.RealTime,
-            trade_ds_id=DataStore.InMemoryDB, trade_persist_mode=PersistenceMode.RealTime,
-            ts_ds_id=DataStore.InMemoryDB, ts_persist_mode=PersistenceMode.RealTime,
-            seq_ds_id=DataStore.InMemoryDB, seq_persist_mode=PersistenceMode.RealTime),
+            ref_ds_id=DataStore.InMemory, ref_persist_mode=PersistenceMode.RealTime,
+            trade_ds_id=DataStore.InMemory, trade_persist_mode=PersistenceMode.RealTime,
+            ts_ds_id=DataStore.InMemory, ts_persist_mode=PersistenceMode.RealTime,
+            seq_ds_id=DataStore.InMemory, seq_persist_mode=PersistenceMode.RealTime),
                                        InMemoryStoreConfig(file="%s_db.p" % name,
                                                            create_at_start=create_at_start,
                                                            delete_at_stop=delete_at_stop))

@@ -2,8 +2,8 @@ import abc
 
 from algotrader.provider import Provider
 from algotrader.provider.feed import Feed
-from algotrader.provider.subscription import QuoteSubscriptionType, MarketDepthSubscriptionType, BarSubscriptionType, \
-    TradeSubscriptionType
+from algotrader.model.model_factory import ModelFactory
+from algotrader.model.market_data_pb2 import *
 
 
 class DataStore(Provider):
@@ -11,7 +11,7 @@ class DataStore(Provider):
     KDB = "KDB"
     Influx = "Influx"
     Mongo = "Mongo"
-    InMemoryDB = "InMemoryDB"
+    InMemory = "InMemory"
 
     __metaclass__ = abc.ABCMeta
 
@@ -27,6 +27,9 @@ class DataStore(Provider):
 
     def remove_database(self):
         pass
+
+    def _get_datastore_config(self, path: str, default=None):
+        return self.app_context.app_config.get_datastore_config(self.id(), path, default=default)
 
 
 class RefDataStore(DataStore):
@@ -80,17 +83,17 @@ class TimeSeriesDataStore(DataStore, Feed):
         for data in sorted_data_list:
             data_event_bus.on_next(data)
 
-    def load_mktdata(self, *sub_keys):
+    def load_mktdata(self, *sub_reqs):
         data_list = []
-        for sub_key in sub_keys:
-            if isinstance(sub_key.subscription_type, QuoteSubscriptionType):
-                data_list.extend(self.load_quotes(sub_key))
-            elif isinstance(sub_key.subscription_type, MarketDepthSubscriptionType):
-                data_list.extend(self.load_market_depths(sub_key))
-            elif isinstance(sub_key.subscription_type, BarSubscriptionType):
-                data_list.extend(self.load_bars(sub_key))
-            elif isinstance(sub_key.subscription_type, TradeSubscriptionType):
-                data_list.extend(self.load_trades(sub_key))
+        for sub_req in sub_reqs:
+            if sub_req.type == MarketDataSubscriptionRequest.Quote:
+                data_list.extend(self.load_quotes(sub_req))
+            elif sub_req.type == MarketDataSubscriptionRequest.MarketDepth:
+                data_list.extend(self.load_market_depths(sub_req))
+            elif sub_req.type == MarketDataSubscriptionRequest.Bar:
+                data_list.extend(self.load_bars(sub_req))
+            elif sub_req.type == MarketDataSubscriptionRequest.Trade:
+                data_list.extend(self.load_trades(sub_req))
 
         sorted_data_list = sorted(data_list, key=lambda data: data.timestamp)
         return sorted_data_list

@@ -38,7 +38,7 @@ class ModelHelper(object):
         PortfolioState: lambda portfolio: portfolio.portf_id,
         StrategyState: lambda strategy: strategy.stg_id,
         OrderState: lambda order: '{}.{}'.format(order.cl_id, order.cl_ord_id),
-        Config: lambda config: config.config_id,
+        #Config: lambda config: config.config_id,
         Sequence: lambda seq: seq.id,
 
     }
@@ -72,7 +72,7 @@ class ModelHelper(object):
         PortfolioState: "portfolios",
         StrategyState: "strategies",
         OrderState: "orders",
-        Config: "configs",
+        #Config: "configs",
         Sequence: "sequences",
 
     })

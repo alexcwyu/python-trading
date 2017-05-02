@@ -1,24 +1,25 @@
 import random
-from unittest import TestCase
 
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import PersistenceConfig, InMemoryStoreConfig
-from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.persistence import PersistenceMode
+from unittest import TestCase
+
+from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.persistence.inmemory import InMemoryDataStore
+from algotrader.trading.clock import Clock
 from algotrader.trading.context import ApplicationContext
-from algotrader.utils.clock import Clock
 
 
 class InMemoryDBTest(TestCase):
     def setUp(self):
 
         persistence_config = PersistenceConfig(None,
-                                               DataStore.InMemoryDB, PersistenceMode.Batch,
-                                               DataStore.InMemoryDB, PersistenceMode.Batch,
-                                               DataStore.InMemoryDB, PersistenceMode.Batch,
-                                               DataStore.InMemoryDB, PersistenceMode.Batch)
+                                               DataStore.InMemory, PersistenceMode.Batch,
+                                               DataStore.InMemory, PersistenceMode.Batch,
+                                               DataStore.InMemory, PersistenceMode.Batch,
+                                               DataStore.InMemory, PersistenceMode.Batch)
 
         name = "test"
         create_at_start = True

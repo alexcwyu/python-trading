@@ -50,11 +50,11 @@ class StrategyPersistenceTest(TestCase):
                                              feed_id=Feed.CSV,
                                              stg_configs={'qty': "1000"},
                                              ref_data_mgr_type=RefDataManager.InMemory, persistence_config=
-                                             PersistenceConfig(seq_ds_id=DataStore.InMemoryDB,
+                                             PersistenceConfig(seq_ds_id=DataStore.InMemory,
                                                                seq_persist_mode=PersistenceMode.Batch,
-                                                               ts_ds_id=DataStore.InMemoryDB,
+                                                               ts_ds_id=DataStore.InMemory,
                                                                ts_persist_mode=PersistenceMode.Batch,
-                                                               trade_ds_id=DataStore.InMemoryDB,
+                                                               trade_ds_id=DataStore.InMemory,
                                                                trade_persist_mode=PersistenceMode.Batch),
                                              provider_configs=CSVFeedConfig(path='data/tradedata'))
         app_context1 = ApplicationContext(app_config=backtest_config1)
@@ -75,11 +75,11 @@ class StrategyPersistenceTest(TestCase):
                                              feed_id=Feed.CSV,
                                              stg_configs={'qty': 1000},
                                              ref_data_mgr_type=RefDataManager.InMemory,
-                                             persistence_config=PersistenceConfig(seq_ds_id=DataStore.InMemoryDB,
+                                             persistence_config=PersistenceConfig(seq_ds_id=DataStore.InMemory,
                                                                                   seq_persist_mode=PersistenceMode.Batch,
-                                                                                  ts_ds_id=DataStore.InMemoryDB,
+                                                                                  ts_ds_id=DataStore.InMemory,
                                                                                   ts_persist_mode=PersistenceMode.Batch,
-                                                                                  trade_ds_id=DataStore.InMemoryDB,
+                                                                                  trade_ds_id=DataStore.InMemory,
                                                                                   trade_persist_mode=PersistenceMode.Batch),
                                              provider_configs=CSVFeedConfig(path='data/tradedata'))
         app_context2 = ApplicationContext(app_config=backtest_config2)

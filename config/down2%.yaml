@@ -1,0 +1,16 @@
+Application:
+  stgId: "down2%"
+  stgCls: "algotrader.strategy.down_2pct_strategy.Down2PctStrategy"
+  instrumentIds:
+    - "SPY@NYSEARCA"
+  subscriptionTypes:
+    - "Bar.Yahoo.Time.D1"
+  subscriptions:
+  fromDate : 20100101
+  toDate :
+  portfolioInitialcash : 100000
+
+
+Strategy:
+  down2%:
+    qty: 1

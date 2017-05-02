@@ -5,10 +5,8 @@ from dateutil.relativedelta import relativedelta
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker import Broker
-from algotrader.provider.subscription import MarketDataType
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.market_data_utils import BarSize
-
 
 class IBModelFactory:
     IB_DATETIME_FORMAT = "%Y%m%d %H:%M:%S %Z"
@@ -48,9 +46,9 @@ class IBModelFactory:
     }
 
     hist_data_type_mapping = {
-        MarketDataType.Bar: "TRADES",
-        MarketDataType.Quote: "BID_ASK",
-        MarketDataType.Trade: "TRADES"
+        MarketDataSubscriptionRequest.Bar: "TRADES",
+        MarketDataSubscriptionRequest.Quote: "BID_ASK",
+        MarketDataSubscriptionRequest.Trade: "TRADES"
     }
 
     bar_size_mapping = {

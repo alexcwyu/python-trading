@@ -2,7 +2,6 @@ from rx import Observable
 
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.model.model_factory import *
-from algotrader.provider.subscription import *
 from algotrader.trading.data_series import DataSeries, DataSeriesEvent
 from algotrader.utils import logger
 from algotrader.utils.market_data_utils import BarSize, MarketDataUtils

@@ -1,35 +1,11 @@
+from unittest import TestCase
 
-import configparser
-import json
-import yaml
-try:
-    from yaml import CLoader as Loader, CDumper as Dumper
-except ImportError:
-    from yaml import Loader, Dumper
-
-def test_ini():
-
-    config = configparser.ConfigParser()
-    config.sections()
-    config.read('../config.ini')
-
-    d = config._sections
-    print(d)
-
-def test_json():
-    with open('../backtest.json', 'r') as f:
-        data = json.load(f)
-        print(data)
-
-def test_yaml():
-    with open('../backtest.yaml', 'r') as f:
-        read_data = f.read()
-        data = yaml.load(read_data)
-        print(data)
+from algotrader.trading.config import Config, load_from_yaml
 
 
-test_ini()
-
-test_json()
-
-test_yaml()
+class ConfigTest(TestCase):
+    def test_multiple(self):
+        app_config = Config(
+            load_from_yaml("../config/backtest.yaml"),
+            load_from_yaml("../config/down2%.yaml"))
+        self.assertEquals(1, app_config.get_strategy_config("down2%", "qty"))

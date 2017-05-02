@@ -5,7 +5,6 @@ import os
 from algotrader.model.model_helper import ModelHelper
 from algotrader.provider.persistence.data_store import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
     SequenceDataStore
-from algotrader.trading.context import ApplicationContext
 from algotrader.utils.date_utils import DateUtils
 
 
@@ -13,10 +12,10 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
     def __init__(self):
         super(InMemoryDataStore, self).__init__()
 
-    def _start(self, app_context: ApplicationContext, **kwargs):
-        self.file = app_context.app_config.get("DataStore", "InMemoryDB", "file")
-        self.create_at_start = app_context.app_config.get("Application", "createDBAtStart")
-        self.delete_at_stop = app_context.app_config.get("Application", "deleteDBAtStop")
+    def _start(self, app_context, **kwargs):
+        self.file = self._get_datastore_config("file")
+        self.create_at_start = app_context.app_config.get_app_config("createDBAtStart")
+        self.delete_at_stop = app_context.app_config.get_app_config("deleteDBAtStop")
 
         try:
             self.db = pickle.load(open(self.file, "rb"))
@@ -69,7 +68,7 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
             pass
 
     def id(self):
-        return DataStore.InMemoryDB
+        return DataStore.InMemory
 
     def load_all(self, db):
         result = []

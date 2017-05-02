@@ -2,17 +2,12 @@ from gevent import monkey
 
 monkey.patch_all()
 import logging
-import time
 from datetime import date, timedelta
 
-from algotrader.event.event_handler import EventLogger
-from algotrader.event.market_data import Bar, BarSize, BarType
+from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, OrderReplaceRequest
-from algotrader.provider.broker.ib.ib_broker import IBBroker
-from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, TradeSubscriptionType
-from algotrader.utils import logger
-from algotrader.app import Application
-from algotrader.config.app import RealtimeMarketDataImporterConfig, HistoricalMarketDataImporterConfig
+from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType
+from algotrader.config.app import RealtimeMarketDataImporterConfig
 from algotrader.config.broker import IBConfig
 from algotrader.config.persistence import MongoDBConfig
 from algotrader.config.persistence import PersistenceConfig
@@ -21,11 +16,10 @@ from algotrader.provider.broker import Broker
 from algotrader.provider.persistence import PersistenceMode
 from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
-from algotrader.provider.subscription import MarketDataSubscriber
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils import logger
-from algotrader.utils.clock import Clock
+from algotrader.trading.clock import Clock
 import time
 
 
@@ -135,10 +129,10 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
 
     persistence_config = PersistenceConfig(None,
-                                           DataStore.InMemoryDB, PersistenceMode.RealTime,
-                                           DataStore.InMemoryDB, PersistenceMode.RealTime,
-                                           DataStore.InMemoryDB, PersistenceMode.RealTime,
-                                           DataStore.InMemoryDB, PersistenceMode.RealTime)
+                                           DataStore.InMemory, PersistenceMode.RealTime,
+                                           DataStore.InMemory, PersistenceMode.RealTime,
+                                           DataStore.InMemory, PersistenceMode.RealTime,
+                                           DataStore.InMemory, PersistenceMode.RealTime)
     app_config = RealtimeMarketDataImporterConfig(None, RefDataManager.InMemory, Clock.RealTime,
                                               Broker.IB, [3],
                                               [BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],

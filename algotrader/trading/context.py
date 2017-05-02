@@ -1,28 +1,27 @@
-from typing import Dict
-
 from algotrader import Startable
-from algotrader.config import Config
+
 from algotrader.event.event_bus import EventBus
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.provider_mgr import ProviderManager
 from algotrader.strategy.strategy_mgr import StrategyManager
 from algotrader.trading.account_mgr import AccountManager
+from algotrader.trading.clock import Clock, RealTimeClock, SimulationClock
+from algotrader.trading.config import Config
 from algotrader.trading.instrument_data import InstrumentDataManager
 from algotrader.trading.order_mgr import OrderManager
 from algotrader.trading.portfolio_mgr import PortfolioManager
 from algotrader.trading.ref_data import InMemoryRefDataManager, RefDataManager, DBRefDataManager
 from algotrader.trading.seq_mgr import SequenceManager
-from algotrader.utils.clock import Clock, RealTimeClock, SimulationClock
 
 
 class ApplicationContext(Startable):
-    def __init__(self, config: Dict = None):
+    def __init__(self, app_config: Config):
         super(ApplicationContext, self).__init__()
 
         self.startables = []
 
-        self.app_config = Config(config)
+        self.app_config = app_config
 
         self.clock = self.add_startable(self.__get_clock())
         self.provider_mgr = self.add_startable(ProviderManager())
@@ -45,12 +44,12 @@ class ApplicationContext(Startable):
         return startable
 
     def __get_clock(self) -> Clock:
-        if self.app_config.get("Application", "clockId") == Clock.RealTime:
+        if self.app_config.get_app_config("clockId") == Clock.RealTime:
             return RealTimeClock()
         return SimulationClock()
 
     def __get_ref_data_mgr(self) -> RefDataManager:
-        if self.app_config.get("Application", "dataStoreId") == DataStore.InMemoryDB:
+        if self.app_config.get_app_config("dataStoreId") == DataStore.InMemory:
             return InMemoryRefDataManager()
         return DBRefDataManager()
 
@@ -63,7 +62,7 @@ class ApplicationContext(Startable):
             startable.stop()
 
     def get_data_store(self) -> DataStore:
-        return self.provider_mgr.get(self.app_config.get("Application", "dataStoreId"))
+        return self.provider_mgr.get(self.app_config.get_app_config("dataStoreId"))
 
     def get_broker(self):
         pass
@@ -73,4 +72,3 @@ class ApplicationContext(Startable):
 
     def get_portfolio(self):
         pass
-

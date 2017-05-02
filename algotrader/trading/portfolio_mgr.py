@@ -1,7 +1,7 @@
 from algotrader import SimpleManager
-from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.persistence import PersistenceMode
-from algotrader.trading.context import ApplicationContext
+
+from algotrader.model.model_factory import ModelFactory
 from algotrader.trading.portfolio import Portfolio
 
 
@@ -9,9 +9,9 @@ class PortfolioManager(SimpleManager):
     def __init__(self):
         super(PortfolioManager, self).__init__()
 
-    def _start(self, app_context: ApplicationContext, **kwargs):
-        self.store = self.app_context.get_trade_data_store()
-        self.persist_mode = self.app_context.app_config.get("Application", "persistenceMode")
+    def _start(self, app_context, **kwargs):
+        self.store = self.app_context.get_data_store()
+        self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
         self.load_all()
 
     def load_all(self) -> None:

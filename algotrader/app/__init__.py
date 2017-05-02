@@ -6,7 +6,6 @@ class Application(Startable):
     LiveTrading = "LiveTrading"
     BackTesting = "BackTesting"
 
-
     def _start(self, app_context):
         try:
             self.init()

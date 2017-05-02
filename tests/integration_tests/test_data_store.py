@@ -1,30 +1,31 @@
+from datetime import date, timedelta, datetime
+
+from algotrader.config.app import ApplicationConfig, BacktestingConfig
+from algotrader.config.persistence import MongoDBConfig, CassandraConfig, PersistenceConfig, InMemoryStoreConfig
 from algotrader.event.account import AccountUpdate, PortfolioUpdate
 from algotrader.event.market_data import Bar, Trade, Quote, MarketDepth, MDOperation, MDSide
 from algotrader.event.market_data import BarSize, BarType
 from algotrader.event.order import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
     ExecutionReport, TIF, \
     OrdStatus, OrdAction, OrdType
-from algotrader.strategy.strategy import Strategy
-from cassandra.cluster import Cluster
-from datetime import date, timedelta, datetime
-from nose_parameterized import parameterized, param
-from unittest import TestCase
-
-from algotrader.config.app import ApplicationConfig, BacktestingConfig
-from algotrader.config.persistence import MongoDBConfig, CassandraConfig, PersistenceConfig, InMemoryStoreConfig
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
 from algotrader.provider.persistence import PersistenceMode
+from algotrader.strategy.strategy import Strategy
+from cassandra.cluster import Cluster
+from nose_parameterized import parameterized, param
+from unittest import TestCase
+
 from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.provider.subscription import HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType, \
     MarketDepthSubscriptionType
 from algotrader.technical.ma import SMA
 from algotrader.trading.account import Account
+from algotrader.trading.clock import Clock
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.order import Order
 from algotrader.trading.ref_data import Instrument, Exchange, Currency
-from algotrader.utils.clock import Clock
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.ser_deser import MapSerializer
 
@@ -57,7 +58,7 @@ context = ApplicationContext(app_config=app_config)
 clock = context.clock
 mongo = context.provider_mgr.get(DataStore.Mongo)
 cassandra = context.provider_mgr.get(DataStore.Cassandra)
-inmemory = context.provider_mgr.get(DataStore.InMemoryDB)
+inmemory = context.provider_mgr.get(DataStore.InMemory)
 
 params = [
     param('Mongo', mongo),

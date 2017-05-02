@@ -11,9 +11,9 @@ message Bar {
     }
 
     string inst_id = 1;
-    Type type = 2;
-    int32 size = 3;
-    string provider_id = 4;
+    string provider_id = 2;
+    Type type = 3;
+    int32 size = 4;
     int64 timestamp = 5;
 
     int64 utc_time = 6;
@@ -81,40 +81,22 @@ message MarketDepth {
 }
 
 
-message BarSubscriptionRequest {
-    string inst_id = 1;
-    string provider_id = 2;
+message MarketDataSubscriptionRequest {
+    enum MDType {
+        Bar = 0;
+        Trade = 1;
+        Quote = 2;
+        MarketDepth = 3;
+    }
+    MDType type = 1;
+    string inst_id = 2;
+    string provider_id = 3;
+    Bar.Type bar_type = 4;
+    int32 bar_size = 5;
 
-    int64 from_date = 3;
-    int64 to_date = 4;
+    int64 from_date = 6;
+    int64 to_date = 7;
 }
-
-message QuoteSubscriptionRequest {
-    string inst_id = 1;
-    string provider_id = 2;
-
-    int64 from_date = 3;
-    int64 to_date = 4;
-}
-
-message TradeSubscriptionRequest {
-    string inst_id = 1;
-    string provider_id = 2;
-
-    int64 from_date = 3;
-    int64 to_date = 4;
-}
-
-message MarketDepthSubscriptionRequest {
-    string inst_id = 1;
-    string provider_id = 2;
-    int32 num_rows = 3;
-    string md_provider_id = 4;
-
-    int64 from_date = 5;
-    int64 to_date = 6;
-}
-
 
 message BarAggregationRequest {
     enum InputType {
@@ -130,7 +112,8 @@ message BarAggregationRequest {
     string inst_id = 1;
     string provider_id = 2;
     InputType input_type = 3;
-    Bar.Type output_type = 4;
-    int32 output_size = 5;
+    int32 input_bar_size = 4;
+    Bar.Type output_type = 5;
+    int32 output_size = 6;
 
 }

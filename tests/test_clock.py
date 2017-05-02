@@ -1,13 +1,13 @@
+import datetime
 import unittest
 
-import datetime
 import gevent
 import time
 from nose.tools import nottest
 from unittest import TestCase
 
 from algotrader.model.model_factory import ModelFactory
-from algotrader.utils.clock import SimulationClock, RealTimeClock
+from algotrader.trading.clock import SimulationClock, RealTimeClock
 from algotrader.utils.date_utils import DateUtils
 
 

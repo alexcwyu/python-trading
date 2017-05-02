@@ -8,25 +8,20 @@ import os
 import csv
 import datetime
 from algotrader.trading.ref_data import RefDataManager, \
-    DBRefDataManager, Instrument, Currency, Exchange, InstType
-from algotrader.trading.context import ApplicationConfig, ApplicationContext
-from algotrader.utils.clock import Clock
+    Instrument, Currency, Exchange, InstType
+from algotrader.trading.clock import Clock
 import random
 import time
 from pymongo import MongoClient
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import MongoDBConfig, PersistenceConfig
 # from algotrader.config.trading import BacktestingConfig
-from algotrader.event.market_data import Bar
-from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
 from algotrader.provider.persistence import PersistenceMode
 from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.persistence.mongodb import MongoDBDataStore
-from algotrader.trading.account_mgr import AccountManager
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.portfolio import Portfolio
 from algotrader.trading.seq_mgr import SequenceManager
-from algotrader.utils.ser_deser import JsonSerializer, MapSerializer
 from algotrader.provider.feed import Feed
 
 def get_default_app_context():

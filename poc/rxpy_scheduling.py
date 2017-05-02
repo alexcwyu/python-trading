@@ -1,13 +1,11 @@
 from datetime import datetime, timedelta
 
 import gevent
+from algotrader.event.market_data import Bar, BarSize
 from rx.concurrency.historicalscheduler import HistoricalScheduler
 
-from algotrader.event.market_data import Bar, BarSize
-from algotrader.utils.clock import RealTimeClock
+from algotrader.trading.clock import RealTimeClock
 from algotrader.utils.date_utils import DateUtils
-
-
 
 realtime_clock = RealTimeClock()
 
@@ -43,7 +41,7 @@ class HistoricalScheduler2(HistoricalScheduler):
 
 starttime = datetime.now()
 scheduler1 = HistoricalScheduler2(initial_clock=starttime)
-from algotrader.utils.clock import RealTimeScheduler
+from algotrader.trading.clock import RealTimeScheduler
 
 scheduler2 = RealTimeScheduler()
 endtime = [None]

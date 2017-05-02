@@ -1,10 +1,10 @@
 import abc
 import csv
+
 import os
 from algotrader import Manager
-
-from algotrader.trading.context import ApplicationContext
 from algotrader.provider.persistence import PersistenceMode
+
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.ref_data_pb2 import *
 
@@ -121,10 +121,10 @@ class DBRefDataManager(RefDataManager):
     def __init__(self):
         super(DBRefDataManager, self).__init__()
 
-    def _start(self, app_context: ApplicationContext, **kwargs):
+    def _start(self, app_context, **kwargs):
         super(DBRefDataManager, self)._start(app_context, **kwargs)
-        self.store = self.app_context.get_ref_data_store()
-        self.persist_mode = self.app_context.app_config.get("Application", "persistenceMode")
+        self.store = self.app_context.get_data_store()
+        self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
         self.load_all()
 
     def _stop(self):

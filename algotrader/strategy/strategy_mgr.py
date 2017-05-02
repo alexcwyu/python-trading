@@ -1,8 +1,6 @@
-from importlib import import_module
-
 from algotrader import SimpleManager
 from algotrader.provider.persistence import PersistenceMode
-from algotrader.trading.context import ApplicationContext
+from importlib import import_module
 
 
 class StrategyManager(SimpleManager):
@@ -10,9 +8,9 @@ class StrategyManager(SimpleManager):
         super(StrategyManager, self).__init__()
         self.stg_cls_dict = {}
 
-    def _start(self, app_context: ApplicationContext, **kwargs):
-        self.store = self.app_context.get_trade_data_store()
-        self.persist_mode = self.app_context.app_config.get("Application", "persistenceMode")
+    def _start(self, app_context, **kwargs):
+        self.store = self.app_context.get_data_store()
+        self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
         self.load_all()
 
     def load_all(self):
@@ -50,9 +48,7 @@ class StrategyManager(SimpleManager):
         self.add(strategy)
         return strategy
 
-    def get_or_new_stg(self, app_config):
-        stg_id = app_config.stg_id
-        stg_cls = app_config.stg_cls
+    def get_or_new_stg(self, stg_id, stg_cls):
         if self.has_item(stg_id):
             stg = self.get(stg_id)
             return stg

@@ -1,10 +1,10 @@
 import math
+
 import rx
 from rx.subjects import BehaviorSubject
 
 from algotrader.model.trade_data_pb2 import *
 from algotrader.trading.strategy import Strategy
-from algotrader.trading.context import ApplicationContext
 
 
 class PairTradingWithOUSpread(Strategy):
@@ -18,23 +18,23 @@ class PairTradingWithOUSpread(Strategy):
     So now this class is used as testing purpose
     """
 
-
     def __init__(self, stg_id: str, state: StrategyState = None):
         super(PairTradingWithOUSpread, self).__init__(stg_id=stg_id, state=state)
         self.buy_order = None
 
-    def _start(self, app_context : ApplicationContext, **kwargs):
-        self.ou_params = app_context.app_config.get("Strategy", self.state.stg_id, "ou_params", default=1)
-        self.gamma = app_context.app_config.get("Strategy", self.state.stg_id, "gamma", default=1)
+    def _start(self, app_context, **kwargs):
+        self.ou_params = self._get_stg_config("ou_params", default=1)
+        self.gamma = self._get_stg_config("gamma", default=1)
+
+        self.instruments = app_context.app_config.get_app_config("instrumentIds")
         self.bar_0 = self.app_context.inst_data_mgr.get_series(
-            "Bar.%s.Time.86400" % app_context.app_config.get("Application", "instrumentIds")[0])
+            "Bar.%s.Time.86400" % self.instruments[0])
         self.bar_1 = self.app_context.inst_data_mgr.get_series(
-            "Bar.%s.Time.86400" % app_context.app_config.get("Application", "instrumentIds")[1])
+            "Bar.%s.Time.86400" % self.instruments[1])
 
         self.bar_0.start(app_context)
         self.bar_1.start(app_context)
 
-        self.instruments = app_context.app_config.get("Application", "instrumentIds")
         self.log_spot_0 = BehaviorSubject(0)
         self.log_spot_1 = BehaviorSubject(0)
         self.spread_stream = rx.Observable \

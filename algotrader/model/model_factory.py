@@ -320,6 +320,22 @@ class ModelFactory(object):
         return md
 
     @staticmethod
+    def build_market_data_subscription_request(type: MarketDataSubscriptionRequest.MDType, inst_id: str,
+                                               provider_id: str,
+                                               bar_type: Bar.Type = None, bar_size: int = None, from_date: int = None,
+                                               to_date: int = None):
+        req = MarketDataSubscriptionRequest(type=type, inst_id=inst_id, provider_id=provider_id)
+        if bar_type:
+            req.bar_type = bar_type
+        if bar_size:
+            req.bar_size = bar_size
+        if from_date:
+            req.from_date = from_date
+        if to_date:
+            req.to_date = to_date
+        return req
+
+    @staticmethod
     def build_new_order_request(timestamp: int, cl_id: str, cl_ord_id: str, portf_id: str = None, broker_id: str = None,
                                 inst_id: str = None,
                                 action: OrderAction = None, type: OrderType = None, qty: float = None,
@@ -551,18 +567,9 @@ class ModelFactory(object):
         return dd
 
     @staticmethod
-    def update_config(config: Config, config_id: str = None, config_values: Dict[str, str] = None) -> Config:
-        if config_id:
-            config.config_id = str(config_id)
-        if config_values:
-            ModelHelper.add_to_dict(config.values, config_values)
-        return config
-
-    @staticmethod
     def build_strategy_state(stg_id: str) -> StrategyState:
         stg = StrategyState()
         stg.stg_id = str(stg_id)
-        stg.config.config_id = str(stg_id)
         return stg
 
     @staticmethod

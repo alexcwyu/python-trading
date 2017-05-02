@@ -4,32 +4,34 @@ Application:
 
   clockId: "Simulation"
 
-  dataStoreId: "InMemoryDB"
+  dataStoreId: "InMemory"
   persistenceMode: "Disable"
   createDBAtStart : false
   deleteDBAtStop : false
 
-  feedId:
-  brokerId:
-  portfolioId:
-  stgId:
-  stgCls:
+  feedId: "CSV"
+  brokerId: "Simulator"
+  portfolioId: "test"
+  stgId: "down2%"
+  stgCls: "algotrader.strategy.down_2pct_strategy.Down2PctStrategy"
   instrumentIds:
+    - "SPY@NYSEARCA"
   subscriptionTypes:
-
-  fromDate : 20000101
+    - "Bar.Yahoo.Time.D1"
+  subscriptions:
+  fromDate : 20100101
   toDate :
   portfolioInitialcash : 100000
 
 
 Strategy:
-  down2%Stg:
-    qty: 
+  down2%:
+    qty: 1
 
 
 DataStore:
 
-  CassandraDB:
+  Cassandra:
     contactPoints:
       - "127.0.0.1"
     port:
@@ -38,22 +40,22 @@ DataStore:
     keyspace: "algotrader"
     scriptPath: "../../../scripts/cassandra/algotrader.cql"
 
-  MongoDB:
+  Mongo:
     host: "localhost"
     port: 27107
     username:
     password:
     dbname: "algotrader"
 
-  InMemoryDB:
+  InMemory:
     file: "algotrader_db.p"
 
 Feed:
-  CSVFeed:
+  CSV:
     path: "../data/tradedata"
 
 Broker:
-  IBBroker:
+  IB:
     host: "localhost"
     port: 4001
     clientId: 0

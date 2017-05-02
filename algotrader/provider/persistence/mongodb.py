@@ -1,11 +1,10 @@
+from algotrader.utils import logger
 from pymongo import MongoClient
 
 from algotrader.model.model_helper import *
 from algotrader.model.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
 from algotrader.provider.persistence.data_store import RefDataStore, TimeSeriesDataStore, TradeDataStore, \
     SequenceDataStore
-from algotrader.trading.context import ApplicationContext
-from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
 
 
@@ -13,15 +12,15 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
     def __init__(self):
         super(MongoDBDataStore, self).__init__()
 
-    def _start(self, app_context: ApplicationContext, **kwargs):
+    def _start(self, app_context, **kwargs):
 
-        self.host = app_context.app_config.get("DataStore", "MongoDB", "host")
-        self.port = app_context.app_config.get("DataStore", "MongoDB", "port")
-        self.username = app_context.app_config.get("DataStore", "MongoDB", "username")
-        self.password = app_context.app_config.get("DataStore", "MongoDB", "password")
-        self.dbname = app_context.app_config.get("DataStore", "MongoDB", "dbname")
-        self.create_at_start = app_context.app_config.get("Application", "createDBAtStart")
-        self.delete_at_stop = app_context.app_config.get("Application", "deleteDBAtStop")
+        self.host = self._get_datastore_config("host")
+        self.port = self._get_datastore_config("port")
+        self.username = self._get_datastore_config("username")
+        self.password = self._get_datastore_config("password")
+        self.dbname = self._get_datastore_config("dbname")
+        self.create_at_start = app_context.app_config.get_app_config("createDBAtStart")
+        self.delete_at_stop = app_context.app_config.get_app_config("deleteDBAtStop")
 
         self.client = MongoClient(host=self.host, port=self.port)
         self.db = self.client[self.dbname]

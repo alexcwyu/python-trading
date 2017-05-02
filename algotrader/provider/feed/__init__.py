@@ -22,3 +22,6 @@ class Feed(Provider):
     @abc.abstractmethod
     def unsubscribe_mktdata(self, *sub_key):
         raise NotImplementedError()
+
+    def _get_feed_config(self, path: str, default=None):
+        return self.app_context.app_config.get_feed_config(self.id(), path, default=default)

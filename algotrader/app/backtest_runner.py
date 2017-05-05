@@ -21,7 +21,7 @@ class BacktestRunner(Application):
                                                                 self.app_config.get_app_config("stgCls"))
         self.app_context.add_startable(self.strategy)
 
-        self.is_plot = self.app_context.provider_mgr.get(self.app_config.get_app_config("plot", True))
+        self.is_plot = self.app_config.get_app_config("plot", default=True)
 
     def run(self):
         logger.info("starting BackTest")

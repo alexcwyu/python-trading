@@ -1,7 +1,7 @@
 import zerorpc
 
-from algotrader.trading.order_mgr import OrderManager
-from algotrader.utils import logger
+from algotrader.trading.order import OrderManager
+from algotrader.utils.logging import logger
 
 
 class RemoteOrderManager(OrderManager):

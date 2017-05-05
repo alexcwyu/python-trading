@@ -2,13 +2,12 @@ from pymongo import MongoClient
 
 from algotrader.model.model_helper import *
 from algotrader.model.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
-from algotrader.provider.persistence.data_store import RefDataStore, TimeSeriesDataStore, TradeDataStore, \
-    SequenceDataStore
+from algotrader.provider.persistence import SimpleDataStore, DataStore
 from algotrader.utils.logging import logger
 from algotrader.utils.date_utils import date_to_unixtimemillis
 
 
-class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
+class MongoDBDataStore(SimpleDataStore):
     def __init__(self):
         super(MongoDBDataStore, self).__init__()
 
@@ -71,7 +70,7 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
             pass
 
     def id(self):
-        return "Mongo"
+        return DataStore.Mongo
 
     def save(self, obj):
         logger.info("[%s] saving %s" % (self.__class__.__name__, obj))

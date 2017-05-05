@@ -2,17 +2,17 @@ from algotrader import Startable
 
 from algotrader.event.event_bus import EventBus
 from algotrader.model.model_factory import ModelFactory
-from algotrader.provider.persistence.data_store import DataStore
-from algotrader.provider.provider_mgr import ProviderManager
+from algotrader.provider.persistence import DataStore
+from algotrader.provider import ProviderManager
 from algotrader.strategy.strategy_mgr import StrategyManager
-from algotrader.trading.account_mgr import AccountManager
+from algotrader.trading.account import AccountManager
 from algotrader.trading.clock import Clock, RealTimeClock, SimulationClock
 from algotrader.trading.config import Config
 from algotrader.trading.instrument_data import InstrumentDataManager
-from algotrader.trading.order_mgr import OrderManager
-from algotrader.trading.portfolio_mgr import PortfolioManager
+from algotrader.trading.order import OrderManager
+from algotrader.trading.portfolio import PortfolioManager
 from algotrader.trading.ref_data import InMemoryRefDataManager, RefDataManager, DBRefDataManager
-from algotrader.trading.seq_mgr import SequenceManager
+from algotrader.trading.sequence import SequenceManager
 
 
 class ApplicationContext(Startable):

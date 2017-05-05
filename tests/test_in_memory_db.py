@@ -6,7 +6,7 @@ from algotrader.provider.persistence import PersistenceMode
 from unittest import TestCase
 
 from algotrader.model.model_factory import ModelFactory
-from algotrader.provider.persistence.data_store import DataStore
+from algotrader.provider.persistence import DataStore
 from algotrader.provider.persistence.inmemory import InMemoryDataStore
 from algotrader.trading.clock import Clock
 from algotrader.trading.context import ApplicationContext

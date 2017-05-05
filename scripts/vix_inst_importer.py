@@ -17,11 +17,11 @@ from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import MongoDBConfig, PersistenceConfig
 # from algotrader.config.trading import BacktestingConfig
 from algotrader.provider.persistence import PersistenceMode
-from algotrader.provider.persistence.data_store import DataStore
+from algotrader.provider.persistence import DataStore
 from algotrader.provider.persistence.mongodb import MongoDBDataStore
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.portfolio import Portfolio
-from algotrader.trading.seq_mgr import SequenceManager
+from algotrader.trading.sequence import SequenceManager
 from algotrader.provider.feed import Feed
 
 def get_default_app_context():

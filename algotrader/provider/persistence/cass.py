@@ -4,14 +4,13 @@
 #
 # from algotrader.config.persistence import CassandraConfig
 # from algotrader.event.market_data import Bar, Trade, Quote, MarketDepth
-# from algotrader.provider.persistence.data_store import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
-#     SequenceDataStore
+# from algotrader.provider.persistence import DataStore, SimpleDataStore
 # from algotrader.trading.ref_data import Instrument, Currency, Exchange
 # from algotrader.utils.logging import logger
 # from algotrader.utils.ser_deser import MsgPackSerializer
 #
 #
-# class CassandraDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
+# class CassandraDataStore(SimpleDataStore):
 #     insert_bars_cql = """INSERT INTO bars (inst_id, type, size, begin_time, timestamp, open, high, low, close, vol, adj_close) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
 #     insert_quotes_cql = """INSERT INTO quotes (inst_id, timestamp, bid, ask, bid_size, ask_size) VALUES (?, ?, ?, ?, ?, ?)"""
 #     insert_trades_cql = """INSERT INTO trades (inst_id, timestamp, price, size) VALUES (?, ?, ?, ?)"""

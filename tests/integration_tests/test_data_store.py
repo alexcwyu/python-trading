@@ -16,7 +16,7 @@ from nose_parameterized import parameterized, param
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
 from algotrader.provider.persistence import PersistenceMode
-from algotrader.provider.persistence.data_store import DataStore
+from algotrader.provider.persistence import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.provider.subscription import HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType, \
     MarketDepthSubscriptionType

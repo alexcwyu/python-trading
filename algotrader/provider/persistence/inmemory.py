@@ -2,12 +2,11 @@ import _pickle as pickle
 import os
 
 from algotrader.model.model_helper import ModelHelper
-from algotrader.provider.persistence.data_store import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
-    SequenceDataStore
+from algotrader.provider.persistence import DataStore, SimpleDataStore
 from algotrader.utils.date_utils import date_to_unixtimemillis
 
 
-class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
+class InMemoryDataStore(SimpleDataStore):
     def __init__(self):
         super(InMemoryDataStore, self).__init__()
 

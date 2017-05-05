@@ -74,7 +74,7 @@ class MongoDBDataStore(SimpleDataStore):
 
     def save(self, obj):
         logger.info("[%s] saving %s" % (self.__class__.__name__, obj))
-        id = ModelHelper.get_id(obj)
+        id = ModelHelper.get_model_id(obj)
         packed_data = protobuf_to_dict(obj)
         t = type(obj)
         self.db_map[t].update({'_id': id}, packed_data, upsert=True)

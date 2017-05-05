@@ -11,7 +11,7 @@ from algotrader.model.trade_data_pb2 import *
 
 
 class ModelHelper(object):
-    id_map = {
+    model_id_map = {
         Instrument: lambda inst: inst.inst_id,
         Exchange: lambda exchange: exchange.exch_id,
         Currency: lambda currency: currency.ccy_id,
@@ -45,7 +45,7 @@ class ModelHelper(object):
 
     }
 
-    db_map = bidict({
+    model_db_map = bidict({
         Instrument: "instruments",
         Exchange: "exchanges",
         Currency: "currencies",
@@ -80,25 +80,25 @@ class ModelHelper(object):
     })
 
     @staticmethod
-    def get_id(object):
+    def get_model_id(object):
         t = type(object)
-        return ModelHelper.id_map[t](object)
+        return ModelHelper.model_id_map[t](object)
 
     @staticmethod
-    def get_db(object):
+    def get_model_db(object):
         t = type(object)
-        return ModelHelper.db_map[t]
+        return ModelHelper.model_db_map[t]
 
     @staticmethod
-    def get_type(db):
-        return ModelHelper.db_map.inv[db]
+    def get_model_from_db_name(db):
+        return ModelHelper.model_db_map.inv[db]
 
     @staticmethod
-    def object_to_dict(obj):
+    def model_to_dict(obj):
         return protobuf_to_dict(obj)
 
     @staticmethod
-    def dict_to_object(cls, data):
+    def dict_to_model(cls, data):
         return dict_to_protobuf(cls, data)
 
     @staticmethod

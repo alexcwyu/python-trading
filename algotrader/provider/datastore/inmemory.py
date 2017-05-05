@@ -72,14 +72,14 @@ class InMemoryDataStore(SimpleDataStore):
         result = []
         if db == 'sequences':
             return self.sequences
-        clazz = ModelHelper.get_type(db)
+        clazz = ModelHelper.get_model_from_db_name(db)
         for id, data in self.db.get(db, {}).items():
-            obj = ModelHelper.dict_to_object(clazz, data)
+            obj = ModelHelper.dict_to_model(clazz, data)
             result.append(obj)
         return result
 
     def _serialize(self, serializable):
-        return ModelHelper.get_id(serializable), ModelHelper.object_to_dict(serializable)
+        return ModelHelper.get_model_id(serializable), ModelHelper.model_to_dict(serializable)
 
     # RefDataStore
     def save_instrument(self, instrument):

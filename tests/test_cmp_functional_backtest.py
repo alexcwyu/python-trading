@@ -1,20 +1,17 @@
 import math
+from unittest import TestCase
+
 import numpy as np
 import pandas as pd
 import talib
-from datetime import datetime
-from datetime import timedelta
-from unittest import TestCase
 
-from algotrader.model.market_data_pb2 import *
-from algotrader.model.time_series_pb2 import *
-from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
 from algotrader.strategy.sma_strategy import SMAStrategy
 from algotrader.trading.context import ApplicationContext
-from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
 from algotrader.utils.market_data import *
+from tests.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
+
 
 class TestCompareWithFunctionalBacktest(TestCase):
     num_days = 3000

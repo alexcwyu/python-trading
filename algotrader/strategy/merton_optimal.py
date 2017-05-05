@@ -1,5 +1,5 @@
 from algotrader.model.trade_data_pb2 import *
-from algotrader.trading.strategy import Strategy
+from algotrader.strategy import Strategy
 
 
 class MertonOptimalBaby(Strategy):

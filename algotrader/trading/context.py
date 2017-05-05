@@ -4,7 +4,7 @@ from algotrader.event.event_bus import EventBus
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.persistence import DataStore
 from algotrader.provider import ProviderManager
-from algotrader.strategy.strategy_mgr import StrategyManager
+from algotrader.strategy import StrategyManager
 from algotrader.trading.account import AccountManager
 from algotrader.trading.clock import Clock, RealTimeClock, SimulationClock
 from algotrader.trading.config import Config

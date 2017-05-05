@@ -1,6 +1,6 @@
 from algotrader.model.trade_data_pb2 import *
 from algotrader.technical.talib_wrapper import EMA
-from algotrader.trading.strategy import Strategy
+from algotrader.strategy import Strategy
 from algotrader.utils.logging import logger
 
 

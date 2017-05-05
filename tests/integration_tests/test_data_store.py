@@ -9,7 +9,7 @@ from algotrader.event.market_data import BarSize, BarType
 from algotrader.event.order import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
     ExecutionReport, TIF, \
     OrdStatus, OrdAction, OrdType
-from algotrader.strategy.strategy import Strategy
+from algotrader.strategy import Strategy
 from cassandra.cluster import Cluster
 from nose_parameterized import parameterized, param
 

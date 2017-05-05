@@ -269,7 +269,7 @@ class IBBroker(IBSocket, Broker, Feed):
     def __req_real_time_bar(self, req_id, sub_req, contract):
         self.tws.reqRealTimeBars(req_id, contract,
                                  sub_req.subscription_type.bar_size,  # barSizeSetting,
-                                 self.model_factory.convert_hist_data_type(sub_req.subscription_type.get_model_from_db_name()),
+                                 self.model_factory.convert_hist_data_type(sub_req.subscription_type.data_type),
                                  0  # RTH Regular trading hour
                                  )
 

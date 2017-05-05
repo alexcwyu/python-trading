@@ -1,8 +1,7 @@
-from algotrader.utils import logger
-
 from algotrader.model.trade_data_pb2 import *
 from algotrader.technical.talib_wrapper import EMA
 from algotrader.trading.strategy import Strategy
+from algotrader.utils import logger
 
 
 class EMAStrategy(Strategy):
@@ -10,7 +9,7 @@ class EMAStrategy(Strategy):
         super(EMAStrategy, self).__init__(stg_id=stg_id, state=state)
         self.buy_order = None
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
 
         self.instruments = app_context.app_config.get_app_config("instrumentIds")
         self.qty = self._get_stg_config("qty", default=1)
@@ -25,7 +24,7 @@ class EMAStrategy(Strategy):
         self.ema_slow = EMA(self.bar, 'close', 25)
         self.ema_slow.start(app_context)
 
-        super(EMAStrategy, self)._start(app_context, **kwargs)
+        super(EMAStrategy, self)._start(app_context)
 
     def _stop(self):
         super(EMAStrategy, self)._stop()

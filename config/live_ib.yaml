@@ -1,22 +1,16 @@
 Application:
 
-  type: "BackTesting"
+  type: "LiveTrading"
 
-  clockId: "Simulation"
+  clockId: "RealTime"
 
-  dataStoreId: "InMemory"
-  persistenceMode: "Disable"
+  dataStoreId: "Mongo"
+  persistenceMode: "RealTime"
   createDBAtStart : false
   deleteDBAtStop : false
 
-  feedId: "CSV"
-  brokerId: "Simulator"
-  portfolioId: "test"
-
-  fromDate : 20100101
-  toDate : 20170101
-  portfolioInitialcash : 100000
-  plot : true
+  feedId: "IB"
+  brokerId: "IB"
 
 
 DataStore:
@@ -45,8 +39,12 @@ Feed:
     path: "../data/tradedata"
 
 Broker:
-  Simulator:
-    commission: "Default"
-    fillStrategy: "Default"
+  IB:
+    host: "localhost"
+    port: 4001
+    clientId: 0
+    account: 1
+    daemon: true
+    useGevent: false
+    nextRequestId: 1
     nextOrderId: 1
-    nextExecId: 1

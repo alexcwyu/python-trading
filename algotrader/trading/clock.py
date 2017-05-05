@@ -12,7 +12,6 @@ from rx.concurrency.historicalscheduler import HistoricalScheduler
 from rx.concurrency.mainloopscheduler import GEventScheduler
 from rx.concurrency.newthreadscheduler import NewThreadScheduler
 
-from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
@@ -73,8 +72,7 @@ class RealTimeClock(Clock):
     def id(self):
         return Clock.RealTime
 
-    def _start(self, app_context, **kwargs):
-        self.app_context = app_context
+    def _start(self, app_context):
         pass
 
     def _stop(self):
@@ -103,9 +101,8 @@ class SimulationClock(Clock, MarketDataEventHandler):
         super(SimulationClock, self).__init__(scheduler=scheduler if scheduler else SimulationScheduler(
             initial_clock=self.__current_timestamp_mills / 1000))
 
-    def _start(self, app_context, **kwargs):
-        self.app_context = app_context
-        self.subscription = EventBus.data_subject.subscribe(self.on_next)
+    def _start(self, app_context):
+        self.subscription = app_context.event_bus.data_subject.subscribe(self.on_market_data_event)
 
     def _stop(self):
         if self.subscription:

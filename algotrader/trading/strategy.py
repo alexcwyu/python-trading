@@ -2,11 +2,9 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 from builtins import *
-
-from algotrader import HasId
 from typing import Dict
 
-from algotrader.event.event_bus import EventBus
+from algotrader import Startable, HasId
 from algotrader.event.event_handler import ExecutionEventHandler
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
@@ -15,7 +13,7 @@ from algotrader.provider.subscription import MarketDataSubscriber
 from algotrader.trading.position import HasPositions
 
 
-class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber, HasId):
+class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber, Startable, HasId):
     def __init__(self, stg_id: str, state: StrategyState = None):
         self.stg_id = stg_id
         self.state = state if state else ModelFactory.build_strategy_state(stg_id=stg_id)
@@ -29,25 +27,25 @@ class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber, HasId)
     def _get_stg_config(self, key, default=None):
         return self.app_context.app_config.get_strategy_config(self.id(), key, default=default)
 
-    def _start(self, app_context, **kwargs):
-        self.app_context.stg_mgr.add(self)
-        self.model_factory = self.app_context.model_factory
-        self.app_config = self.app_context.app_config
+    def _start(self, app_context):
+        app_context.stg_mgr.add(self)
+        self.model_factory = app_context.model_factory
+        self.app_config = app_context.app_config
         self.ord_reqs = {}
 
         # TODO
         self.config = None
 
-        self.ref_data_mgr = self.app_context.ref_data_mgr
-        self.portfolio = self.app_context.portf_mgr.get(self.app_config.get_app_config("portfolioId"))
-        self.feed = self.app_context.provider_mgr.get(self.app_config.get_app_config("feedId"))
-        self.broker = self.app_context.provider_mgr.get(self.app_config.get_app_config("brokerId"))
+        self.ref_data_mgr = app_context.ref_data_mgr
+        self.portfolio = app_context.portf_mgr.get(self.app_config.get_app_config("portfolioId"))
+        self.feed = app_context.provider_mgr.get(self.app_config.get_app_config("feedId"))
+        self.broker = app_context.provider_mgr.get(self.app_config.get_app_config("brokerId"))
 
         self.instruments = self.ref_data_mgr.get_insts_by_ids(self.app_config.get_app_config("instrumentIds"))
-        self.clock = self.app_context.clock
-        self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
+        self.clock = app_context.clock
+        self.event_subscription = app_context.event_bus.data_subject.subscribe(self.on_market_data_event)
 
-        for order_req in self.app_context.order_mgr.get_strategy_order_reqs(self.id()):
+        for order_req in app_context.order_mgr.get_strategy_order_reqs(self.id()):
             self.ord_reqs[order_req.cl_ord_id] = order_req
 
         if self.portfolio:

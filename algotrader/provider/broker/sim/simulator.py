@@ -1,13 +1,12 @@
-from algotrader.provider.broker import Broker
-from algotrader.utils import logger
 from collections import defaultdict
 
-from algotrader.event.event_bus import EventBus
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
+from algotrader.provider.broker import Broker
 from algotrader.provider.broker.sim.commission import NoCommission
 from algotrader.provider.broker.sim.fill_strategy import DefaultFillStrategy
+from algotrader.utils import logger
 
 
 class Simulator(Broker, MarketDataEventHandler):
@@ -24,13 +23,12 @@ class Simulator(Broker, MarketDataEventHandler):
     def get_commission(self, commission_id=None):
         return NoCommission()
 
-    def _start(self, app_context, **kwargs):
-        self.app_context = app_context
+    def _start(self, app_context):
         self.clock = app_context.clock
         self.fill_strategy = self.get_fill_strategy(self._get_broker_config("fillStrategy"))
         self.commission = self.get_commission(self._get_broker_config("commission"))
         self.exec_handler = self.app_context.order_mgr
-        self.subscription = EventBus.data_subject.subscribe(self.on_next)
+        self.subscription = app_context.event_bus.data_subject.subscribe(self.on_market_data_event)
 
     def _stop(self):
         if self.subscription:
@@ -156,4 +154,3 @@ class Simulator(Broker, MarketDataEventHandler):
 
     def _get_orders(self):
         return self.ord_req_map
-

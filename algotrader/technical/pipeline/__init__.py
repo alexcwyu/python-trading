@@ -1,10 +1,10 @@
-import numpy as np
 from collections import OrderedDict
 
-from algotrader.technical import Indicator
-from algotrader.trading.data_series import DataSeries, DataSeriesEvent
+import numpy as np
 
 from algotrader.model.model_factory import ModelFactory
+from algotrader.technical import Indicator
+from algotrader.trading.data_series import DataSeries, DataSeriesEvent
 
 
 class PipeLine(DataSeries):
@@ -45,9 +45,7 @@ class PipeLine(DataSeries):
 
     def __init__(self, name, inputs, input_keys, length=None, desc=None, *args, **kwargs):
 
-
-
-        #super(PipeLine, self).__init__(name=name, keys=None, desc=desc, *args, **kwargs)
+        # super(PipeLine, self).__init__(name=name, keys=None, desc=desc, *args, **kwargs)
 
         # f = lambda i: i \
         #     if isinstance(i, DataSeries) or isinstance(i, Indicator) \
@@ -103,15 +101,15 @@ class PipeLine(DataSeries):
         self._flush_and_create()
         self.inputs = []
 
-
-        super(PipeLine, self).__init__(ModelFactory.build_time_series(series_id=name, name=name, desc=desc, inputs=self.input_names))
+        super(PipeLine, self).__init__(
+            ModelFactory.build_time_series(series_id=name, name=name, desc=desc, inputs=self.input_names))
 
         # self.df = pd.DataFrame(index=range(self.length), columns=input_names)
         # self.cache = {} # key is input name, value is numpy array
         # self.update_all()
 
-    def _start(self, app_context, *args, **kwargs):
-        super(PipeLine, self)._start(self.app_context, *args, **kwargs)
+    def _start(self, app_context):
+        super(PipeLine, self)._start(self.app_context)
 
         # if not hasattr(self, 'inputs') or not self.inputs:
         #     self.inputs = [self.app_context.inst_data_mgr.get_series(name) for name in self.input_names]
@@ -155,7 +153,7 @@ class PipeLine(DataSeries):
         # check_df = self.df.isnull()*1
         # return False if check_df.sum(axis=1).sum(axis=0) > 0 else True
 
-    def on_update(self, event : DataSeriesEvent):
+    def on_update(self, event: DataSeriesEvent):
         data = event.data
         timestamp = event.timestamp
         data_name = event.name

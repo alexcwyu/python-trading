@@ -1,16 +1,16 @@
 import threading
+from collections import defaultdict
 
 import gevent
 import swigibpy
-from algotrader.provider.broker import Broker
-from algotrader.provider.feed import Feed
-from algotrader.utils import logger
-from collections import defaultdict
 
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
+from algotrader.provider.broker import Broker
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
+from algotrader.provider.feed import Feed
+from algotrader.utils import logger
 
 
 class DataRecord(object):
@@ -149,7 +149,7 @@ class IBBroker(IBSocket, Broker, Feed):
         self.completed_reqs = []
         self.req_callback = {}
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
 
         self.next_request_id = self._get_broker_config("nextRequestId")
         self.next_order_id = self._get_broker_config("nextOrderId")

@@ -49,6 +49,7 @@ class BarSize(object):
     def value(name: str) -> int:
         return BarSize.map[name]
 
+
 class MarketDataSubscriptionType(object):
     map = bidict({
         "Bar": MarketDataSubscriptionRequest.Bar,

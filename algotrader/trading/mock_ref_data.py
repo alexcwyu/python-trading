@@ -1,8 +1,9 @@
 import pandas as pd
+import six
 
 from algotrader.model.model_factory import *
 from algotrader.trading.ref_data import RefDataManager
-import six
+
 
 class MockRefDataManager(RefDataManager):
     """
@@ -23,7 +24,7 @@ class MockRefDataManager(RefDataManager):
 
         self.start()
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         for index, row in self.inst_df.iterrows():
             inst = Instrument(inst_id=row['inst_id'], name=row['name'], type=row['type'], symbol=row['symbol'],
                               exch_id=row['exch_id'], ccy_id=row['ccy_id'], alt_symbols=row['alt_symbols'],

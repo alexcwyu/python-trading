@@ -1,10 +1,10 @@
-from algotrader.utils import logger
 from pymongo import MongoClient
 
 from algotrader.model.model_helper import *
 from algotrader.model.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
 from algotrader.provider.persistence.data_store import RefDataStore, TimeSeriesDataStore, TradeDataStore, \
     SequenceDataStore
+from algotrader.utils import logger
 from algotrader.utils.date_utils import DateUtils
 
 
@@ -12,7 +12,7 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
     def __init__(self):
         super(MongoDBDataStore, self).__init__()
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
 
         self.host = self._get_datastore_config("host")
         self.port = self._get_datastore_config("port")

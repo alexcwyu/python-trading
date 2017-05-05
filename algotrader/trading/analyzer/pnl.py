@@ -23,7 +23,6 @@ class PnlAnalyzer(Analyzer):
             self.state.pnl.last_pnl = 0
             self.series.add(data={self.Pnl: self.state.pnl.last_pnl}, timestamp=timestamp)
 
-
     def get_result(self):
         return {self.Pnl: self.state.pnl.last_pnl}
 

@@ -1,12 +1,14 @@
-from bidict import bidict
 from typing import Dict, Callable, Union
+
+import numpy
+from bidict import bidict
 
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.protobuf_to_dict import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.trade_data_pb2 import *
-import numpy
+
 
 class ModelHelper(object):
     id_map = {
@@ -38,7 +40,7 @@ class ModelHelper(object):
         PortfolioState: lambda portfolio: portfolio.portf_id,
         StrategyState: lambda strategy: strategy.stg_id,
         OrderState: lambda order: '{}.{}'.format(order.cl_id, order.cl_ord_id),
-        #Config: lambda config: config.config_id,
+        # Config: lambda config: config.config_id,
         Sequence: lambda seq: seq.id,
 
     }
@@ -72,7 +74,7 @@ class ModelHelper(object):
         PortfolioState: "portfolios",
         StrategyState: "strategies",
         OrderState: "orders",
-        #Config: "configs",
+        # Config: "configs",
         Sequence: "sequences",
 
     })

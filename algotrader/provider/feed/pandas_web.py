@@ -1,16 +1,11 @@
 import abc
-import logging
-from datetime import date
-from datetime import datetime
 
 import pandas as pd
-from algotrader.provider.feed import Feed
-from algotrader.utils import logger
 from pandas_datareader import data
 
-from algotrader.event.event_handler import EventLogger
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
+from algotrader.provider.feed import Feed
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.market_data_utils import BarSize
 
@@ -22,7 +17,7 @@ class PandasWebDataFeed(Feed):
         super(PandasWebDataFeed, self).__init__()
         self.system = system
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
 
@@ -43,7 +38,6 @@ class PandasWebDataFeed(Feed):
             if not sub_req.from_date:
                 raise RuntimeError("only HistDataSubscriptionKey is supported!")
             if sub_req.type == MarketDataSubscriptionRequest.Bar and sub_req.bar_type == Bar.Time and sub_req.bar_size == BarSize.D1:
-
                 inst = self.__ref_data_mgr.get_inst(inst_id=sub_req.inst_id)
                 symbol = inst.get_symbol(self.ID)
 
@@ -110,16 +104,15 @@ class GoogleDataFeed(PandasWebDataFeed):
                    vol=row['Volume'],
                    size=row['BarSize'])
 
-
-if __name__ == "__main__":
-    feed = YahooDataFeed()
-
-    today = date.today()
-    sub_req = HistDataSubscriptionKey(inst_id=3, provider_id=YahooDataFeed.ID,
-                                      subscription_type=BarSubscriptionType(data_type=Bar.Time, bar_size=BarSize.D1),
-                                      from_date=datetime(2010, 1, 1), to_date=today)
-
-    logger.setLevel(logging.DEBUG)
-    eventLogger = EventLogger()
-
-    feed.subscribe_mktdata(sub_req)
+# if __name__ == "__main__":
+#     feed = YahooDataFeed()
+#
+#     today = date.today()
+#     sub_req = HistDataSubscriptionKey(inst_id=3, provider_id=YahooDataFeed.ID,
+#                                       subscription_type=BarSubscriptionType(data_type=Bar.Time, bar_size=BarSize.D1),
+#                                       from_date=datetime(2010, 1, 1), to_date=today)
+#
+#     logger.setLevel(logging.DEBUG)
+#     eventLogger = EventLogger()
+#
+#     feed.subscribe_mktdata(sub_req)

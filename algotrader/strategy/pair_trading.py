@@ -22,7 +22,7 @@ class PairTradingWithOUSpread(Strategy):
         super(PairTradingWithOUSpread, self).__init__(stg_id=stg_id, state=state)
         self.buy_order = None
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.ou_params = self._get_stg_config("ou_params", default=1)
         self.gamma = self._get_stg_config("gamma", default=1)
 
@@ -41,7 +41,7 @@ class PairTradingWithOUSpread(Strategy):
             .zip(self.log_spot_0, self.log_spot_1, lambda x, y: [x, y, x - y]) \
             .subscribe(self.rebalance)
 
-        super(PairTradingWithOUSpread, self)._start(app_context, **kwargs)
+        super(PairTradingWithOUSpread, self)._start(app_context)
 
     def _stop(self):
         super(PairTradingWithOUSpread, self)._stop()

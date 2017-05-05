@@ -1,5 +1,4 @@
 import _pickle as pickle
-
 import os
 
 from algotrader.model.model_helper import ModelHelper
@@ -12,7 +11,7 @@ class InMemoryDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Seque
     def __init__(self):
         super(InMemoryDataStore, self).__init__()
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.file = self._get_datastore_config("file")
         self.create_at_start = app_context.app_config.get_app_config("createDBAtStart")
         self.delete_at_stop = app_context.app_config.get_app_config("deleteDBAtStop")

@@ -13,7 +13,7 @@ class VixVxvRatio(Strategy):
         self.day_count = 0
         self.order = None
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.qty = self._get_stg_config("qty", 1)
         self.threshold = self._get_stg_config("threshold", 1)
 
@@ -33,7 +33,7 @@ class VixVxvRatio(Strategy):
             .zip(self.vix_strm, self.vxv_strm, lambda x, y: x / y) \
             .subscribe(self.on_ratio)
 
-        super(VixVxvRatio, self)._start(app_context, **kwargs)
+        super(VixVxvRatio, self)._start(app_context)
 
     def _stop(self):
         super(VixVxvRatio, self)._stop()
@@ -66,7 +66,7 @@ class VxvVxmtRatio(Strategy):
         self.day_count = 0
         self.order = None
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
 
         self.qty = self._get_stg_config("qty", 1)
         self.threshold = self._get_stg_config("threshold", 1)
@@ -83,7 +83,7 @@ class VxvVxmtRatio(Strategy):
         self.ema_60 = EMA()
         self.sma_fast = SMA(self.bar, 'close', 10)
 
-        super(VxvVxmtRatio, self)._start(app_context, **kwargs)
+        super(VxvVxmtRatio, self)._start(app_context)
 
     def on_bar(self, bar):
         ratio = self.vix_close.now('value') / self.vxv_close.now('close')

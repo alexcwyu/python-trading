@@ -1,6 +1,6 @@
-from algotrader import Startable
 from typing import List, Any
 
+from algotrader import Startable
 from algotrader.event.event_handler import MarketDataEventHandler, ExecutionEventHandler
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
@@ -12,7 +12,7 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
         self.__state = state
         self.events = events if events else []
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.model_factory = app_context.model_factory
 
     def on_new_ord_req(self, req: NewOrderRequest) -> None:

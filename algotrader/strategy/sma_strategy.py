@@ -1,8 +1,7 @@
-from algotrader.utils import logger
-
 from algotrader.model.trade_data_pb2 import *
 from algotrader.technical.ma import SMA
 from algotrader.trading.strategy import Strategy
+from algotrader.utils import logger
 
 
 class SMAStrategy(Strategy):
@@ -10,7 +9,7 @@ class SMAStrategy(Strategy):
         super(SMAStrategy, self).__init__(stg_id=stg_id, state=state)
         self.buy_order = None
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.instruments = app_context.app_config.get_app_config("instrumentIds")
         self.qty = self._get_stg_config("qty", default=1)
         self.bar = self.app_context.inst_data_mgr.get_series(
@@ -22,7 +21,7 @@ class SMAStrategy(Strategy):
         self.sma_slow = SMA(self.bar, 'close', 25)
         self.sma_slow.start(app_context)
 
-        super(SMAStrategy, self)._start(app_context, **kwargs)
+        super(SMAStrategy, self)._start(app_context)
 
     def _stop(self):
         super(SMAStrategy, self)._stop()

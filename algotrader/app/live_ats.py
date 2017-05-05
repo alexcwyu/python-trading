@@ -1,28 +1,16 @@
-'''
-Created on 4/16/16
-@author = 'jason'
-'''
 from algotrader.app import Application
-from algotrader.provider.broker import Broker
-from algotrader.utils import logger
-
-from algotrader.model.market_data_pb2 import Bar
-from algotrader.trading.clock import Clock
+from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
-from algotrader.trading.ref_data import RefDataManager
-from algotrader.utils.market_data_utils import BarSize
+from algotrader.utils import logger
 
 
 class ATSRunner(Application):
     def init(self):
-        logger.info("starting ATS")
-
         self.app_config = self.app_config
-        self.app_context = ApplicationContext(app_config=self.app_config)
-        self.app_context.start()
 
-        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.portfolio_id,
-                                                                         self.app_config.portfolio_initial_cash)
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.get_app_config("portfolioId"),
+                                                                         self.app_config.get_app_config(
+                                                                             "portfolioInitialcash"))
         self.app_context.add_startable(self.portfolio)
 
         self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.app_config.get_app_config("stgId"),
@@ -30,29 +18,22 @@ class ATSRunner(Application):
         self.app_context.add_startable(self.strategy)
 
     def run(self):
+        logger.info("starting ATS")
+
+        self.app_context.start()
         self.strategy.start(self.app_context)
 
         logger.info("ATS started, presss Ctrl-C to stop")
 
 
 def main():
-    pass
-    # broker_config = IBConfig(client_id=2)
-    # live_trading_config = LiveTradingConfig(id=None,
-    #                                         stg_id="down2%",
-    #                                         stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
-    #                                         portfolio_id='test',
-    #                                         instrument_ids=[4],
-    #                                         subscription_types=[
-    #                                             BarSubscriptionType(bar_type=Bar.Time, bar_size=BarSize.M1)],
-    #                                         feed_id=Broker.IB,
-    #                                         broker_id=Broker.IB,
-    #                                         ref_data_mgr_type=RefDataManager.DB, clock_type=Clock.RealTime,
-    #                                         persistence_config=PersistenceConfig(),
-    #                                         configs=[broker_config])
-    #
-    # app_context = ApplicationContext(app_config=live_trading_config)
-    # ATSRunner().start(app_context)
+    app_config = Config(
+        load_from_yaml("../../config/live_ib.yaml"),
+        load_from_yaml("../../config/down2%.yaml"))
+
+    app_context = ApplicationContext(app_config=app_config)
+
+    ATSRunner().start(app_context)
 
 
 if __name__ == "__main__":

@@ -1,18 +1,33 @@
 import abc
-from algotrader import Startable
+
 from rx import Observer
 
-from algotrader.event.event_bus import EventBus
+from algotrader import Startable
 from algotrader.model.model_factory import *
 from algotrader.utils import logger
 
 
-class EventHandler(Observer, Startable):
+class EventHandler(Observer):
     __metaclass__ = abc.ABCMeta
 
-    @abc.abstractmethod
     def on_next(self, event) -> None:
-        pass
+        if isinstance(event, (Bar, Quote, Trade, MarketDepth)):
+            self.on_market_data_event(event)
+
+        elif isinstance(event, (NewOrderRequest, OrderCancelRequest, OrderReplaceRequest)):
+            self.on_order_event(event)
+
+        elif isinstance(event, (OrderStatusUpdate, ExecutionReport)):
+            self.on_execution_event(event)
+
+        elif isinstance(event, (AccountUpdate)):
+            self.on_account_event(event)
+
+        elif isinstance(event, (PortfolioUpdate)):
+            self.on_portfolio_event(event)
+
+        else:
+            raise AttributeError()
 
     def on_error(self, err):
         logger.debug("[%s] Error: %s" % (self.__class__.__name__, err))
@@ -20,17 +35,32 @@ class EventHandler(Observer, Startable):
     def on_completed(self):
         logger.debug("[%s] Completed" % self.__class__.__name__)
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         pass
 
     def _stop(self):
+        pass
+
+    def on_market_data_event(self, event) -> None:
+        pass
+
+    def on_order_event(self, event) -> None:
+        pass
+
+    def on_execution_event(self, event) -> None:
+        pass
+
+    def on_account_event(self, event) -> None:
+        pass
+
+    def on_portfolio_event(self, event) -> None:
         pass
 
 
 class MarketDataEventHandler(EventHandler):
     __metaclass__ = abc.ABCMeta
 
-    def on_next(self, event) -> None:
+    def on_market_data_event(self, event) -> None:
         if isinstance(event, Bar):
             self.on_bar(event)
         elif isinstance(event, Quote):
@@ -40,8 +70,7 @@ class MarketDataEventHandler(EventHandler):
         elif isinstance(event, MarketDepth):
             self.on_market_depth(event)
         else:
-            pass
-            #raise AttributeError()
+            raise AttributeError()
 
     def on_bar(self, bar: Bar) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
@@ -59,7 +88,7 @@ class MarketDataEventHandler(EventHandler):
 class OrderEventHandler(EventHandler):
     __metaclass__ = abc.ABCMeta
 
-    def on_next(self, event) -> None:
+    def on_order_event(self, event) -> None:
         if isinstance(event, NewOrderRequest):
             self.on_new_ord_req(event)
         elif isinstance(event, OrderCancelRequest):
@@ -67,8 +96,7 @@ class OrderEventHandler(EventHandler):
         elif isinstance(event, OrderReplaceRequest):
             self.on_ord_replace_req(event)
         else:
-            pass
-            #raise AttributeError()
+            raise AttributeError()
 
     # Sync interface, return Order
     def send_order(self, new_ord_req: NewOrderRequest) -> None:
@@ -101,14 +129,13 @@ class OrderEventHandler(EventHandler):
 class ExecutionEventHandler(EventHandler):
     __metaclass__ = abc.ABCMeta
 
-    def on_next(self, event) -> None:
+    def on_execution_event(self, event) -> None:
         if isinstance(event, OrderStatusUpdate):
             self.on_ord_upd(event)
         elif isinstance(event, ExecutionReport):
             self.on_exec_report(event)
         else:
-            pass
-            #raise AttributeError()
+            raise AttributeError()
 
     def on_ord_upd(self, ord_upd: OrderStatusUpdate) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, ord_upd))
@@ -120,12 +147,11 @@ class ExecutionEventHandler(EventHandler):
 class AccountEventHandler(EventHandler):
     __metaclass__ = abc.ABCMeta
 
-    def on_next(self, event) -> None:
+    def on_account_event(self, event) -> None:
         if isinstance(event, AccountUpdate):
             self.on_acc_upd(event)
         else:
-            pass
-            #raise AttributeError()
+            raise AttributeError()
 
     def on_acc_upd(self, acc_upd: AccountUpdate) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, acc_upd))
@@ -134,25 +160,23 @@ class AccountEventHandler(EventHandler):
 class PortfolioEventHandler(EventHandler):
     __metaclass__ = abc.ABCMeta
 
-    def on_next(self, event) -> None:
+    def on_portfolio_event(self, event) -> None:
         if isinstance(event, PortfolioUpdate):
             self.on_portf_upd(event)
         else:
-            pass
-            #raise AttributeError()
+            raise AttributeError()
 
     def on_portf_upd(self, portf_upd: PortfolioUpdate) -> None:
         logger.debug("[%s] %s" % (self.__class__.__name__, portf_upd))
 
 
 class EventLogger(ExecutionEventHandler, MarketDataEventHandler, OrderEventHandler, PortfolioEventHandler,
-                  AccountEventHandler):
-    def __init__(self, data_subject=None, execution_subject=None):
-        self.data_subject = data_subject if data_subject else EventBus.data_subject
-        self.execution_subject = execution_subject if execution_subject else EventBus.execution_subject
-
-        self.data_subject.subscribe(self.on_next)
-        self.execution_subject.subscribe(self.on_next)
+                  AccountEventHandler, Startable):
+    def _start(self, app_context):
+        self.data_subject = app_context.event_bus.data_subject
+        self.execution_subject = app_context.event_bus.execution_subject
+        self.data_subject.subscribe(self.on_market_data_event)
+        self.execution_subject.subscribe(self.on_execution_event)
 
     def on_bar(self, bar: Bar) -> None:
         logger.info(bar)

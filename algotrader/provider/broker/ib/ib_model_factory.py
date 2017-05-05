@@ -1,5 +1,6 @@
-import swigibpy
 from datetime import datetime
+
+import swigibpy
 from dateutil.relativedelta import relativedelta
 
 from algotrader.model.market_data_pb2 import *
@@ -7,6 +8,7 @@ from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker import Broker
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.market_data_utils import BarSize
+
 
 class IBModelFactory:
     IB_DATETIME_FORMAT = "%Y%m%d %H:%M:%S %Z"

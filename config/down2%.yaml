@@ -6,10 +6,6 @@ Application:
   subscriptionTypes:
     - "Bar.Yahoo.Time.D1"
   subscriptions:
-  fromDate : 20100101
-  toDate :
-  portfolioInitialcash : 100000
-
 
 Strategy:
   down2%:

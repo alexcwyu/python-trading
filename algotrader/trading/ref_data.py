@@ -1,12 +1,11 @@
 import abc
 import csv
-
 import os
-from algotrader import Manager
-from algotrader.provider.persistence import PersistenceMode
 
+from algotrader import Manager
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.ref_data_pb2 import *
+from algotrader.provider.persistence import PersistenceMode
 
 
 class RefDataManager(Manager):
@@ -24,7 +23,7 @@ class RefDataManager(Manager):
         self._exch_dict = {}
         self._country_dict = {}
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.seq_mgr = app_context.seq_mgr
 
     # add
@@ -121,8 +120,8 @@ class DBRefDataManager(RefDataManager):
     def __init__(self):
         super(DBRefDataManager, self).__init__()
 
-    def _start(self, app_context, **kwargs):
-        super(DBRefDataManager, self)._start(app_context, **kwargs)
+    def _start(self, app_context):
+        super(DBRefDataManager, self)._start(app_context)
         self.store = self.app_context.get_data_store()
         self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
         self.load_all()
@@ -179,7 +178,7 @@ class InMemoryRefDataManager(RefDataManager):
     def __init__(self):
         super(InMemoryRefDataManager, self).__init__()
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.inst_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/instrument.csv'))
         self.ccy_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/ccy.csv'))
         self.exch_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../data/refdata/exch.csv'))

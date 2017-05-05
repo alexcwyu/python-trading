@@ -1,5 +1,6 @@
-from algotrader.trading.data_series import DataSeries
 from algotrader.model.model_factory import ModelFactory
+from algotrader.trading.data_series import DataSeries
+
 
 class Indicator(DataSeries):
     VALUE = 'value'
@@ -47,10 +48,11 @@ class Indicator(DataSeries):
             else:
                 self.input_name = input
                 self.input = None
-        super(Indicator, self).__init__(ModelFactory.build_time_series(series_id=name, name=name, desc=desc, inputs=self.input_name))
+        super(Indicator, self).__init__(
+            ModelFactory.build_time_series(series_id=name, name=name, desc=desc, inputs=self.input_name))
 
-    def _start(self, app_context, **kwargs):
-        super(Indicator, self)._start(self.app_context, **kwargs)
+    def _start(self, app_context):
+        super(Indicator, self)._start(self.app_context)
 
         if not hasattr(self, 'input') or not self.input:
             self.input = self.app_context.inst_data_mgr.get_series(self.input_name)

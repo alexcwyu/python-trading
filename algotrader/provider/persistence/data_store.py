@@ -1,9 +1,8 @@
 import abc
 
+from algotrader.model.market_data_pb2 import *
 from algotrader.provider import Provider
 from algotrader.provider.feed import Feed
-from algotrader.model.model_factory import ModelFactory
-from algotrader.model.market_data_pb2 import *
 
 
 class DataStore(Provider):

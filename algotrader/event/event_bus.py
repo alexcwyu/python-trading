@@ -2,8 +2,9 @@ from rx.subjects import Subject
 
 
 class EventBus(object):
-    data_subject = Subject()
-    order_subject = Subject()
-    execution_subject = Subject()
-    portfolio_subject = Subject()
-    account_subject = Subject()
+    def __init__(self):
+        self.data_subject = Subject()
+        self.order_subject = Subject()
+        self.execution_subject = Subject()
+        self.portfolio_subject = Subject()
+        self.account_subject = Subject()

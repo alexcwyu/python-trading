@@ -3,16 +3,15 @@ from algotrader.app import Application
 from algotrader.chart.plotter import StrategyPlotter
 from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
+from algotrader.utils import logger
 
 
 class BacktestRunner(Application):
-    def __init__(self, isplot=False):
-        self.isplot = isplot
-
     def init(self):
         self.app_config = self.app_context.app_config
         self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.get_app_config("portfolioId"),
-                                                                         self.app_config.get_app_config("portfolioInitialcash"))
+                                                                         self.app_config.get_app_config(
+                                                                             "portfolioInitialcash"))
 
         self.initial_result = self.portfolio.get_result()
 
@@ -22,25 +21,32 @@ class BacktestRunner(Application):
                                                                 self.app_config.get_app_config("stgCls"))
         self.app_context.add_startable(self.strategy)
 
+        self.is_plot = self.app_context.provider_mgr.get(self.app_config.get_app_config("plot", True))
+
     def run(self):
+        logger.info("starting BackTest")
+
         self.app_context.start()
         self.strategy.start(self.app_context)
-        if self.isplot:
+
+
+        result = self.portfolio.get_result()
+        print("Initial:", self.initial_result)
+        print("Final:", result)
+        if self.is_plot:
             self.plot()
 
     def plot(self):
-        print
-        self.portfolio.get_result()
-
         # pyfolio
-        rets = self.portfolio.get_return()
+        ret = self.portfolio.get_return()
         # import pyfolio as pf
-        # pf.create_returns_tear_sheet(rets)
-        # pf.create_full_tear_sheet(rets)
+        # pf.create_returns_tear_sheet(ret)
+        # pf.create_full_tear_sheet(ret)
 
         # build in plot
+
         plotter = StrategyPlotter(self.strategy)
-        plotter.plot(instrument=self.app_context.app_config.instrument_ids[0])
+        plotter.plot(instrument=self.app_context.app_config.get_app_config("instrumentIds")[0])
 
 
 def main():
@@ -50,7 +56,7 @@ def main():
 
     app_context = ApplicationContext(app_config=app_config)
 
-    BacktestRunner(True).start(app_context)
+    BacktestRunner().start(app_context)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,8 @@
-import logging
-from datetime import datetime
-
 import pandas as pd
-from algotrader.provider.feed import Feed
-from algotrader.utils import logger
 
-from algotrader.event.event_handler import EventLogger
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
+from algotrader.provider.feed import Feed
 from algotrader.utils.date_utils import DateUtils
 from algotrader.utils.market_data_utils import BarSize
 
@@ -25,7 +20,6 @@ class PandasMemoryDataFeed(Feed):
         :return:
         """
         super(PandasMemoryDataFeed, self).__init__()
-        self.sub_reqs = []
 
     def _start(self, app_context):
         self.ref_data_mgr = self.app_context.ref_data_mgr
@@ -41,9 +35,7 @@ class PandasMemoryDataFeed(Feed):
         return Feed.PandasMemory
 
     def subscribe_mktdata(self, *sub_reqs):
-        self.sub_reqs.extend(sub_reqs)
-
-        self.__load_data(self.sub_reqs)
+        self.__load_data(*sub_reqs)
         for index, row in self.df.iterrows():
             ## TODO support bar filtering // from date, to date
             bar = self.process_row(index, row)
@@ -69,9 +61,8 @@ class PandasMemoryDataFeed(Feed):
             if not sub_req.from_date:
                 raise RuntimeError("only HistDataSubscriptionKey is supported!")
             if sub_req.type == MarketDataSubscriptionRequest.Bar and sub_req.bar_type == Bar.Time and sub_req.bar_size == BarSize.D1:
-
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_req.inst_id)
-                symbol = inst.get_symbol(self.id())
+                symbol = inst.symbol
 
                 # df = web.DataReader("F", self.system, sub_req.from_date, sub_req.to_date)
                 df = self.dict_of_df[symbol]
@@ -81,11 +72,6 @@ class PandasMemoryDataFeed(Feed):
                 self.dfs.append(df)
 
         self.df = pd.concat(self.dfs).sort_index(0, ascending=True)
-
-        # for index, row in self.df.iterrows():
-        # TODO support bar filtering // from date, to date
-        # bar = self.process_row(index, row)
-        # self.__data_event_bus.on_next(bar)
 
     def unsubscribe_mktdata(self, *sub_reqs):
         pass

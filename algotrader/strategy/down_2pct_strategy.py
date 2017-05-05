@@ -9,7 +9,7 @@ class Down2PctStrategy(Strategy):
         self.day_count = 0
         self.order = None
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.qty = self._get_stg_config("qty", default=1)
 
         self.close = self.app_context.inst_data_mgr.get_series(
@@ -19,7 +19,7 @@ class Down2PctStrategy(Strategy):
         self.roc = ROC(self.close, 'close', 1)
         self.roc.start(app_context)
 
-        super(Down2PctStrategy, self)._start(app_context, **kwargs)
+        super(Down2PctStrategy, self)._start(app_context)
 
     def _stop(self):
         super(Down2PctStrategy, self)._stop()

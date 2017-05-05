@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division,
 from builtins import *
 from typing import Dict
 
-from algotrader.event.event_bus import EventBus
+from algotrader import Startable, HasId
 from algotrader.model.trade_data_pb2 import *
 from algotrader.trading.analyzer.drawdown import DrawDownAnalyzer
 from algotrader.trading.analyzer.performance import PerformanceAnalyzer
@@ -13,7 +13,7 @@ from algotrader.trading.position import HasPositions
 from algotrader.utils import logger
 
 
-class Portfolio(HasPositions):
+class Portfolio(HasPositions, Startable, HasId):
     def __init__(self, state: PortfolioState = None):
         super().__init__(state)
         self.__state = state
@@ -23,10 +23,10 @@ class Portfolio(HasPositions):
         self.__analyzers = [self.performance, self.pnl, self.drawdown]
         self.__ord_reqs = {}
 
-    def _start(self, app_context, **kwargs) -> None:
+    def _start(self, app_context) -> None:
         self.app_context.portf_mgr.add(self)
 
-        self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
+        self.event_subscription = app_context.event_bus.data_subject.subscribe(self.on_market_data_event)
 
         for order_req in self.app_context.order_mgr.get_portf_order_reqs(self.id()):
             self.__ord_reqs[order_req.cl_ord_id] = order_req

@@ -1,9 +1,9 @@
 import datetime
+from typing import Dict
 
 import numpy as np
 import pandas as pd
 from rx.subjects import Subject
-from typing import Dict
 
 from algotrader import Startable
 from algotrader.model.model_factory import ModelFactory
@@ -45,8 +45,7 @@ class DataSeries(Startable):
         else:
             pass
 
-
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         pass
 
     def _stop(self):
@@ -101,7 +100,7 @@ class DataSeries(Startable):
         self.time_series.end_time = timestamp
         self.data_list.append(enhanced_data)
         self.subject.on_next(DataSeriesEvent(name=DataSeries.get_name(self), timestamp=timestamp, data=data))
-        #self.subject.on_next(data)
+        # self.subject.on_next(data)
 
     def current_time(self):
         return self.time_series.end_time

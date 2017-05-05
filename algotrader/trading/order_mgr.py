@@ -1,14 +1,13 @@
-from algotrader import Manager
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.utils import logger
 from typing import List
 
-from algotrader.event.event_bus import EventBus
+from algotrader import Manager
 from algotrader.event.event_handler import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
+from algotrader.provider.persistence import PersistenceMode
 from algotrader.trading.order import Order
+from algotrader.utils import logger
 
 
 class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
@@ -23,14 +22,14 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         self.order_dict = {}
         self.ord_reqs_dict = {}
 
-    def _start(self, app_context, **kwargs):
-        self.store = self.app_context.get_data_store()
-        self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
+    def _start(self, app_context):
+        self.store = app_context.get_data_store()
+        self.persist_mode = app_context.app_config.get_app_config("persistenceMode")
         self.load_all()
         self.subscriptions = []
-        self.subscriptions.append(EventBus.data_subject.subscribe(self.on_next))
-        self.subscriptions.append(EventBus.order_subject.subscribe(self.on_next))
-        self.subscriptions.append(EventBus.execution_subject.subscribe(self.on_next))
+        self.subscriptions.append(app_context.event_bus.data_subject.subscribe(self.on_market_data_event))
+        self.subscriptions.append(app_context.event_bus.order_subject.subscribe(self.on_order_event))
+        self.subscriptions.append(app_context.event_bus.execution_subject.subscribe(self.on_execution_event))
 
     def _stop(self):
         if self.subscriptions:

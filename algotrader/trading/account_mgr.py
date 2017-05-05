@@ -8,7 +8,7 @@ class AccountManager(SimpleManager):
     def __init__(self):
         super(AccountManager, self).__init__()
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.store = self.app_context.get_data_store()
         self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
         self.load_all()

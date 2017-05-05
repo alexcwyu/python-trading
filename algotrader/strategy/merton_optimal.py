@@ -17,7 +17,7 @@ class MertonOptimalBaby(Strategy):
         super(MertonOptimalBaby, self).__init__(stg_id=stg_id, state=state)
         self.buy_order = None
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         self.arate = self._get_stg_config("arate", default=1)
         self.vol = self._get_stg_config("vol", default=1)
 
@@ -28,7 +28,7 @@ class MertonOptimalBaby(Strategy):
 
         self.optimal_weight = self.arate / self.vol ** 2  # assume risk free rate is zero
 
-        super(MertonOptimalBaby, self)._start(app_context, **kwargs)
+        super(MertonOptimalBaby, self)._start(app_context)
 
     def _stop(self):
         super(MertonOptimalBaby, self)._stop()

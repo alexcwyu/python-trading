@@ -1,5 +1,6 @@
 from rx import Observable
 
+from algotrader import Startable
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.model.model_factory import *
 from algotrader.trading.data_series import DataSeries, DataSeriesEvent
@@ -17,7 +18,7 @@ class BarInputType:
     Spread = 6
 
 
-class BarAggregator(MarketDataEventHandler):
+class BarAggregator(MarketDataEventHandler, Startable):
     def __init__(self, data_bus, clock, inst_id, input,
                  input_type=BarInputType.Trade,
                  output_bar_type=Bar.Time,
@@ -39,7 +40,7 @@ class BarAggregator(MarketDataEventHandler):
         self.__timestamp = clock.now()
         self.__reset()
 
-    def _start(self, app_context, **kwargs):
+    def _start(self, app_context):
         if self.__input is None:
             self.__input = app_context.inst_data_mgr.get_series(self.__input_name)
         self.__input.subject.subscribe(on_next=self.on_update)

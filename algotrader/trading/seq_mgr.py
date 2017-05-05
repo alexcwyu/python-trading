@@ -1,6 +1,5 @@
-from algotrader.provider.persistence import PersistenceMode
-
 from algotrader import SimpleManager
+from algotrader.provider.persistence import PersistenceMode
 
 
 class SequenceManager(SimpleManager):
@@ -9,8 +8,7 @@ class SequenceManager(SimpleManager):
     def __init__(self):
         super(SequenceManager, self).__init__()
 
-    def _start(self, app_context, **kwargs):
-        self.app_context = app_context
+    def _start(self, app_context):
         self.store = self.app_context.get_data_store()
         self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
         self.load_all()

@@ -1,9 +1,11 @@
 import _pickle as pickle
+
 import os
 
 from algotrader.model.model_helper import ModelHelper
 from algotrader.provider.datastore import DataStore, SimpleDataStore
 from algotrader.utils.date import date_to_unixtimemillis
+from algotrader.utils.ref_data import *
 
 
 class InMemoryDataStore(SimpleDataStore):
@@ -48,6 +50,11 @@ class InMemoryDataStore(SimpleDataStore):
 
         self.sequences = self._get_data('sequences')
 
+        self.load_from_csv(
+            self._get_datastore_config("instCSV"),
+            self._get_datastore_config("ccyCSV"),
+            self._get_datastore_config("exchCSV"))
+
     def _get_data(self, key):
         if key not in self.db:
             self.db[key] = {}
@@ -77,6 +84,11 @@ class InMemoryDataStore(SimpleDataStore):
             obj = ModelHelper.dict_to_model(clazz, data)
             result.append(obj)
         return result
+
+    def load_from_csv(self, inst_csv, ccy_csv, exch_csv):
+        load_inst_from_csv(self, inst_csv)
+        load_ccy_from_csv(self, ccy_csv)
+        load_exch_from_csv(self, exch_csv)
 
     def _serialize(self, serializable):
         return ModelHelper.get_model_id(serializable), ModelHelper.model_to_dict(serializable)

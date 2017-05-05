@@ -90,12 +90,13 @@ message MarketDataSubscriptionRequest {
     }
     MDType type = 1;
     string inst_id = 2;
-    string provider_id = 3;
-    Bar.Type bar_type = 4;
-    int32 bar_size = 5;
+    string feed_id = 3;
+    string md_provider_id = 4;
+    Bar.Type bar_type = 5;
+    int32 bar_size = 6;
 
-    int64 from_date = 6;
-    int64 to_date = 7;
+    int64 from_date = 7;
+    int64 to_date = 8;
 }
 
 message BarAggregationRequest {

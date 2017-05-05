@@ -1,7 +1,6 @@
-from typing import Dict, Callable, Union
-
 import numpy
 from bidict import bidict
+from typing import Dict, Callable, Union
 
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.protobuf_to_dict import *
@@ -11,6 +10,28 @@ from algotrader.model.trade_data_pb2 import *
 
 
 class ModelHelper(object):
+    model_str_map = {
+        Instrument: lambda inst: 'Inst {}'.format(inst.inst_id),
+        Exchange: lambda exchange: 'Exchange {}'.format(exchange.exch_id),
+        Currency: lambda currency: 'Currency {}'.format(currency.ccy_id),
+        Country: lambda country: 'Country {}'.format(country.country_id),
+
+        TimeSeries: lambda time_series: 'TimeSeries {}'.format(time_series.series_id),
+
+        Bar: lambda bar: 'Bar {} provider_id={}, type={}, size={}, timestamp={}, open={}, high={}, low={} ,close={}'
+            .format(bar.inst_id, bar.provider_id, bar.type, bar.size, bar.timestamp, bar.open, bar.high, bar.low,
+                    bar.close),
+
+        Quote: lambda quote: 'Quote {} provider_id={}, timestamp={}, bid={}, ask={}'.format(quote.inst_id,
+                                                                                            quote.provider_id,
+                                                                                            quote.timestamp, quote.bid,
+                                                                                            quote.ask),
+        Trade: lambda trade: 'Trade {} provider_id={}, timestamp={}, last={}'.format(trade.inst_id, trade.provider_id,
+                                                                                     trade.timestamp, trade.last),
+        MarketDepth: lambda md: 'MarketDepth {} provider_id={}, timestamp={}'.format(md.inst_id, md.provider_id,
+                                                                                     md.timestamp)
+    }
+
     model_id_map = {
         Instrument: lambda inst: inst.inst_id,
         Exchange: lambda exchange: exchange.exch_id,
@@ -92,6 +113,13 @@ class ModelHelper(object):
     @staticmethod
     def get_model_from_db_name(db):
         return ModelHelper.model_db_map.inv[db]
+
+    @staticmethod
+    def model_to_str(object) -> str:
+        t = type(object)
+        if t in ModelHelper.model_str_map:
+            return ModelHelper.model_str_map[t](object)
+        return object
 
     @staticmethod
     def model_to_dict(obj):

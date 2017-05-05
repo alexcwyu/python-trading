@@ -5,6 +5,7 @@ from rx.subjects import Subject
 
 from algotrader import Startable
 from algotrader.model.market_data_pb2 import Bar, Quote, Trade, MarketDepth
+from algotrader.model.model_helper import ModelHelper
 from algotrader.model.trade_data_pb2 import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
     ExecutionReport, AccountUpdate, PortfolioUpdate
 from algotrader.utils.logging import logger
@@ -184,41 +185,51 @@ class PortfolioEventHandler(EventHandler):
 
 class EventLogger(ExecutionEventHandler, MarketDataEventHandler, OrderEventHandler, PortfolioEventHandler,
                   AccountEventHandler, Startable):
+    def __init__(self):
+        from collections import Counter
+        self.count = Counter()
+        self.last_item = {}
+
     def _start(self, app_context):
         self.data_subject = app_context.event_bus.data_subject
         self.execution_subject = app_context.event_bus.execution_subject
         self.data_subject.subscribe(self.on_market_data_event)
         self.execution_subject.subscribe(self.on_execution_event)
 
+    def log(self, item) -> None:
+        logger.info(ModelHelper.model_to_str(item))
+        self.count[type(item)] += 1
+        self.last_item[type(item)] = item
+
     def on_bar(self, bar: Bar) -> None:
-        logger.info(bar)
+        self.log(bar)
 
     def on_quote(self, quote: Quote) -> None:
-        logger.info(quote)
+        self.log(quote)
 
     def on_trade(self, trade: Trade) -> None:
-        logger.info(trade)
+        self.log(trade)
 
     def on_market_depth(self, market_depth: MarketDepth) -> None:
-        logger.info(market_depth)
+        self.log(market_depth)
 
     def on_new_ord_req(self, new_ord_req: NewOrderRequest) -> None:
-        logger.info(new_ord_req)
+        self.log(new_ord_req)
 
     def on_ord_replace_req(self, ord_replace_req: OrderReplaceRequest) -> None:
-        logger.info(ord_replace_req)
+        self.log(ord_replace_req)
 
     def on_ord_cancel_req(self, ord_cancel_req: OrderCancelRequest) -> None:
-        logger.info(ord_cancel_req)
+        self.log(ord_cancel_req)
 
     def on_ord_upd(self, ord_upd: OrderStatusUpdate) -> None:
-        logger.info(ord_upd)
+        self.log(ord_upd)
 
     def on_exec_report(self, exec_report: ExecutionReport) -> None:
-        logger.info(exec_report)
+        self.log(exec_report)
 
     def on_acc_upd(self, acc_upd: AccountUpdate) -> None:
-        logger.info(acc_upd)
+        self.log(acc_upd)
 
     def on_portf_upd(self, portf_upd: PortfolioUpdate) -> None:
-        logger.info(portf_upd)
+        self.log(portf_upd)

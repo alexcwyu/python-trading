@@ -11,9 +11,9 @@ from algotrader.trading.config import Config
 from algotrader.trading.instrument_data import InstrumentDataManager
 from algotrader.trading.order import OrderManager
 from algotrader.trading.portfolio import PortfolioManager
-from algotrader.trading.ref_data import InMemoryRefDataManager, RefDataManager, DBRefDataManager
+from algotrader.trading.ref_data import RefDataManager
 from algotrader.trading.sequence import SequenceManager
-
+from algotrader.app import Application
 
 class ApplicationContext(Startable):
     def __init__(self, app_config: Config):
@@ -29,7 +29,7 @@ class ApplicationContext(Startable):
         self.seq_mgr = self.add_startable(SequenceManager())
 
         self.inst_data_mgr = self.add_startable(InstrumentDataManager())
-        self.ref_data_mgr = self.add_startable(self.__get_ref_data_mgr())
+        self.ref_data_mgr = self.add_startable(RefDataManager())
 
         self.order_mgr = self.add_startable(OrderManager())
         self.acct_mgr = self.add_startable(AccountManager())
@@ -44,14 +44,10 @@ class ApplicationContext(Startable):
         return startable
 
     def __get_clock(self) -> Clock:
-        if self.app_config.get_app_config("clockId") == Clock.RealTime:
+        if self.app_config.get_app_config("clockId", Clock.Simulation) == Clock.RealTime:
             return RealTimeClock()
         return SimulationClock()
 
-    def __get_ref_data_mgr(self) -> RefDataManager:
-        if self.app_config.get_app_config("dataStoreId") == DataStore.InMemory:
-            return InMemoryRefDataManager()
-        return DBRefDataManager()
 
     def _start(self, app_context):
         for startable in self.startables:

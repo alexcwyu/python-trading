@@ -2,18 +2,19 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 from builtins import *
+
 from typing import Dict
 
 from algotrader import Startable, HasId
-from algotrader.trading.event import ExecutionEventHandler
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
-from algotrader.provider.subscription import MarketDataSubscriber
+from algotrader.trading.event import ExecutionEventHandler
 from algotrader.trading.position import HasPositions
+from algotrader.utils.market_data import build_subscription_requests
 
 
-class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber, Startable, HasId):
+class Strategy(HasPositions, ExecutionEventHandler, Startable, HasId):
     def __init__(self, stg_id: str, state: StrategyState = None):
         self.stg_id = stg_id
         self.state = state if state else ModelFactory.build_strategy_state(stg_id=stg_id)
@@ -57,10 +58,11 @@ class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber, Starta
         if self.feed:
             self.feed.start(app_context)
 
-        self.subscript_market_data(self.feed, self.instruments,
-                                   self.app_config.get_app_config("subscriptionTypes"),
-                                   self.app_config.get_app_config("fromDate"),
-                                   self.app_config.get_app_config("toDate"))
+        for sub_req in build_subscription_requests(self.feed.id(), self.instruments,
+                                                   self.app_config.get_app_config("subscriptionTypes"),
+                                                   self.app_config.get_app_config("fromDate"),
+                                                   self.app_config.get_app_config("toDate")):
+            self.feed.subscribe_mktdata(sub_req)
 
     def _stop(self):
         if self.event_subscription:
@@ -174,8 +176,6 @@ class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber, Starta
         if not self.state:
             return None
         return self.state.portf_id
-
-
 
 
 from importlib import import_module

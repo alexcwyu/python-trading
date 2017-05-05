@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, OrderReplaceRequest
-from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType
+from algotrader.trading.subscription import SubscriptionKey, HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType
 from algotrader.config.app import RealtimeMarketDataImporterConfig
 from algotrader.config.broker import IBConfig
 from algotrader.config.persistence import MongoDBConfig
@@ -15,7 +15,7 @@ from algotrader.event.market_data import BarSize, BarType
 from algotrader.provider.broker import Broker
 from algotrader.provider.datastore import PersistenceMode
 from algotrader.provider.datastore import DataStore
-from algotrader.provider.subscription import BarSubscriptionType
+from algotrader.trading.subscription import BarSubscriptionType
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils import logger

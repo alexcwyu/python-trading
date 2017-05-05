@@ -321,10 +321,11 @@ class ModelFactory(object):
 
     @staticmethod
     def build_market_data_subscription_request(type: MarketDataSubscriptionRequest.MDType, inst_id: str,
-                                               provider_id: str,
+                                               feed_id: str,
+                                               md_provider_id: str,
                                                bar_type: Bar.Type = None, bar_size: int = None, from_date: int = None,
                                                to_date: int = None):
-        req = MarketDataSubscriptionRequest(type=type, inst_id=inst_id, provider_id=provider_id)
+        req = MarketDataSubscriptionRequest(type=type, inst_id=inst_id, feed_id=feed_id, md_provider_id=md_provider_id)
         if bar_type:
             req.bar_type = bar_type
         if bar_size:

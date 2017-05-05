@@ -10,10 +10,10 @@ from algotrader.event.market_data import BarSize, BarType
 from algotrader.chart.plotter import StrategyPlotter
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
-from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.strategy.sma_strategy import SMAStrategy
 from algotrader.trading import clock
 from algotrader.trading.portfolio import Portfolio
+from algotrader.trading.subscription import BarSubscriptionType
 from tests.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
 
 

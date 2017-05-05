@@ -1,17 +1,18 @@
 # TODO fix it
 from datetime import date
-from unittest import TestCase
 
-from algotrader.app.backtest_runner import BacktestRunner
 from algotrader.config.app import BacktestingConfig
 from algotrader.config.feed import CSVFeedConfig
 from algotrader.config.persistence import PersistenceConfig, PersistenceMode
+from unittest import TestCase
+
+from algotrader.app.backtest_runner import BacktestRunner
 from algotrader.provider.broker import Broker
-from algotrader.provider.feed import Feed
 from algotrader.provider.datastore import DataStore
-from algotrader.provider.subscription import BarSubscriptionType
+from algotrader.provider.feed import Feed
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
+from algotrader.trading.subscription import BarSubscriptionType
 
 
 class StrategyPersistenceTest(TestCase):

@@ -10,6 +10,7 @@ from algotrader.provider.broker import Broker
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.feed import Feed
+from algotrader.model.model_factory import ModelFactory
 from algotrader.utils.logging import logger
 
 
@@ -685,11 +686,11 @@ class IBBroker(IBSocket, Broker, Feed):
                      cd.putable, cd.coupon, cd.convertible, cd.issueDate,
                      cd.nextOptionDate, cd.nextOptionType, cd.nextOptionPartial, cd.notes)
 
-        self.ref_data_mgr.create_inst(name=cd.longName, type=sd.secType, symbol=sd.symbol, exch_id=sd.exchange,
-                                      ccy_id=sd.currency,
-                                      # alt_symbols = {Broker.IB: sd.symbol},
-                                      # alt_exch_id = {Broker.IB: sd.exchange},
+        inst = ModelFactory.build_instrument(symbol=sd.symbol,
+                                      type=sd.secType,
+                                      name = cd.longName,
                                       sector=cd.industry, industry=cd.category)
+        self.ref_data_mgr.add_inst(inst)
 
         logger.info("saved")
 

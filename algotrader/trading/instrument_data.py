@@ -1,10 +1,10 @@
 import numpy as np
 
 from algotrader import Manager
-from algotrader.trading.event import MarketDataEventHandler
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.datastore import PersistenceMode
 from algotrader.trading.data_series import DataSeries
+from algotrader.trading.event import MarketDataEventHandler
 from algotrader.utils.logging import logger
 from algotrader.utils.market_data import get_series_id
 
@@ -31,7 +31,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.reset()
 
     def load_all(self):
-        if hasattr(self, "store") and self.store:
+        if self.store:
             self.store.start(self.app_context)
             series_list = self.store.load_all('time_series')
             for series in series_list:
@@ -50,20 +50,21 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
                 self.__quote_dict[quote.id()] = quote
 
     def save_all(self):
-        if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.Batch:
-            for bar in self.__bar_dict.values():
-                self.store.save_bar(bar)
-            for quote in self.__quote_dict.values():
-                self.store.save_quote(quote)
-            for trade in self.__trade_dict.values():
-                self.store.save_trade(trade)
+        if self.store:
+            if self.persist_mode == PersistenceMode.Batch:
+                for bar in self.__bar_dict.values():
+                    self.store.save_bar(bar)
+                for quote in self.__quote_dict.values():
+                    self.store.save_quote(quote)
+                for trade in self.__trade_dict.values():
+                    self.store.save_trade(trade)
 
-        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
-            for series in self.__series_dict.values():
-                self.store.save_time_series(series)
+            elif self.persist_mode != PersistenceMode.Disable:
+                for series in self.__series_dict.values():
+                    self.store.save_time_series(series)
 
     def _is_realtime_persist(self):
-        return hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime
+        return self.store and self.persist_mode == PersistenceMode.RealTime
 
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))

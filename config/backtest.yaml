@@ -38,7 +38,10 @@ DataStore:
     dbname: "algotrader"
 
   InMemory:
-    file: "algotrader_db.p"
+    file: "../../data/algotrader_db.p"
+    instCSV: "../../data/refdata/instrument.csv"
+    ccyCSV: "../../data/refdata/ccy.csv"
+    exchCSV: "../../data/refdata/exch.csv"
 
 Feed:
   CSV:

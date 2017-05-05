@@ -3,6 +3,7 @@ import datetime
 from bidict import bidict
 
 from algotrader.model.market_data_pb2 import *
+from algotrader.model.model_factory import ModelFactory
 from algotrader.utils.date import datetime_to_unixtimemillis
 
 S1 = 1
@@ -115,3 +116,24 @@ def get_series_id(item) -> str:
         return "MarketDepth.%s" % (item.inst_id)
 
     raise RuntimeError("unknown series type")
+
+
+def build_subscription_requests(feed_id, instruments, subscription_types, from_date=None, to_date=None):
+    reqs = []
+    for instrument in instruments:
+        for subscription_type in subscription_types:
+            attrs = subscription_type.split(".")
+            md_type = get_subscription_type(attrs[0])
+            md_provider_id = attrs[1]
+            bar_type = get_bar_type(attrs[2]) if md_type == MarketDataSubscriptionRequest.Bar else None
+            bar_size = get_bar_size(attrs[3]) if md_type == MarketDataSubscriptionRequest.Bar else None
+
+            reqs.append(ModelFactory.build_market_data_subscription_request(type=md_type,
+                                                                            inst_id=instrument.inst_id,
+                                                                            feed_id=feed_id,
+                                                                            md_provider_id=md_provider_id,
+                                                                            bar_type=bar_type,
+                                                                            bar_size=bar_size,
+                                                                            from_date=from_date,
+                                                                            to_date=to_date))
+    return reqs

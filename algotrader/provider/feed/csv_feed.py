@@ -25,9 +25,10 @@ class CSVDataFeed(Feed):
         return Feed.CSV
 
     @staticmethod
-    def read_csv(inst_id, file):
+    def read_csv(inst_id, provider_id, file):
         df = pd.read_csv(file, index_col='Date', parse_dates=['Date'], date_parser=CSVDataFeed.dateparse)
         df['InstId'] = inst_id
+        df['ProviderId'] = provider_id
         df['BarSize'] = D1
         return df
 
@@ -47,7 +48,7 @@ class CSVDataFeed(Feed):
             ## TODO support different format, e.g. BAR, Quote, Trade csv files
             if sub_req.type == MarketDataSubscriptionRequest.Bar and sub_req.bar_type == Bar.Time and sub_req.bar_size == D1:
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_req.inst_id)
-                df = self.read_csv(sub_req.inst_id, '/mnt/data/dev/workspaces/python-trading/data/tradedata/%s.csv' % (
+                df = self.read_csv(sub_req.inst_id, sub_req.md_provider_id, '/mnt/data/dev/workspaces/python-trading/data/tradedata/%s.csv' % (
                     inst.symbol.lower()))
                 dfs.append(df)
 
@@ -62,7 +63,7 @@ class CSVDataFeed(Feed):
                     ModelFactory.build_bar(
                         inst_id=inst.inst_id,
                         type=Bar.Time,
-                        provider_id=self.id(),
+                        provider_id=row['ProviderId'],
                         timestamp=timestamp,
                         open=row['Open'],
                         high=row['High'],

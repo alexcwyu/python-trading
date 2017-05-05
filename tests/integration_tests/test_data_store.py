@@ -1,5 +1,4 @@
 from datetime import date, timedelta, datetime
-from unittest import TestCase
 
 from algotrader.config.app import ApplicationConfig, BacktestingConfig
 from algotrader.config.persistence import MongoDBConfig, CassandraConfig, PersistenceConfig, InMemoryStoreConfig
@@ -9,23 +8,24 @@ from algotrader.event.market_data import BarSize, BarType
 from algotrader.event.order import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
     ExecutionReport, TIF, \
     OrdStatus, OrdAction, OrdType
-from algotrader.strategy import Strategy
 from cassandra.cluster import Cluster
 from nose_parameterized import parameterized, param
+from unittest import TestCase
 
 from algotrader.provider.broker import Broker
-from algotrader.provider.feed import Feed
-from algotrader.provider.datastore import PersistenceMode
 from algotrader.provider.datastore import DataStore
-from algotrader.provider.subscription import BarSubscriptionType
-from algotrader.provider.subscription import HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType, \
-    MarketDepthSubscriptionType
+from algotrader.provider.datastore import PersistenceMode
+from algotrader.provider.feed import Feed
+from algotrader.strategy import Strategy
 from algotrader.technical.ma import SMA
 from algotrader.trading.account import Account
 from algotrader.trading.clock import Clock
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.order import Order
 from algotrader.trading.ref_data import Instrument, Exchange, Currency
+from algotrader.trading.subscription import BarSubscriptionType
+from algotrader.trading.subscription import HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType, \
+    MarketDepthSubscriptionType
 from algotrader.utils.date import date_to_unixtimemillis
 from poc.ser_deser import MapSerializer
 

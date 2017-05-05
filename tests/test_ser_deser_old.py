@@ -1,10 +1,11 @@
 import datetime
-from nose_parameterized import parameterized, param
 from unittest import TestCase
+
+from nose_parameterized import parameterized, param
 
 from algotrader.technical.ma import SMA
 from algotrader.trading.context import ApplicationContext
-from algotrader.utils.ser_deser import MsgPackSerializer, JsonSerializer, MapSerializer
+from poc.ser_deser import MsgPackSerializer, JsonSerializer, MapSerializer
 from tests.sample_factory import *
 
 params = [

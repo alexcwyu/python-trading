@@ -1,4 +1,5 @@
 from datetime import date, timedelta, datetime
+from unittest import TestCase
 
 from algotrader.config.app import ApplicationConfig, BacktestingConfig
 from algotrader.config.persistence import MongoDBConfig, CassandraConfig, PersistenceConfig, InMemoryStoreConfig
@@ -8,14 +9,13 @@ from algotrader.event.market_data import BarSize, BarType
 from algotrader.event.order import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
     ExecutionReport, TIF, \
     OrdStatus, OrdAction, OrdType
-from algotrader.provider.broker import Broker
-from algotrader.provider.feed import Feed
-from algotrader.provider.persistence import PersistenceMode
 from algotrader.strategy.strategy import Strategy
 from cassandra.cluster import Cluster
 from nose_parameterized import parameterized, param
-from unittest import TestCase
 
+from algotrader.provider.broker import Broker
+from algotrader.provider.feed import Feed
+from algotrader.provider.persistence import PersistenceMode
 from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.provider.subscription import HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType, \
@@ -26,8 +26,8 @@ from algotrader.trading.clock import Clock
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.order import Order
 from algotrader.trading.ref_data import Instrument, Exchange, Currency
-from algotrader.utils.date_utils import DateUtils
-from algotrader.utils.ser_deser import MapSerializer
+from algotrader.utils.date_utils import date_to_unixtimemillis
+from poc.ser_deser import MapSerializer
 
 print
 Cluster.port
@@ -93,7 +93,7 @@ class DataStoreTest(TestCase):
 
         expect_val = []
         for i in range(1, 5):
-            persistable = Bar(timestamp=DateUtils.date_to_unixtimemillis(date_val), type=BarType.Time, size=BarSize.D1,
+            persistable = Bar(timestamp=date_to_unixtimemillis(date_val), type=BarType.Time, size=BarSize.D1,
                               inst_id=10, open=18 + i, high=19 + i, low=17 + i, close=17.5 + i, vol=100)
             datastore.save_bar(persistable)
             expect_val.append(persistable)
@@ -114,7 +114,7 @@ class DataStoreTest(TestCase):
 
         expect_val = []
         for i in range(1, 5):
-            persistable = Quote(timestamp=DateUtils.date_to_unixtimemillis(date_val), bid=18 + i, ask=19 + i,
+            persistable = Quote(timestamp=date_to_unixtimemillis(date_val), bid=18 + i, ask=19 + i,
                                 bid_size=200, ask_size=500, inst_id=10)
             datastore.save_quote(persistable)
             expect_val.append(persistable)
@@ -135,7 +135,7 @@ class DataStoreTest(TestCase):
 
         expect_val = []
         for i in range(1, 5):
-            persistable = Trade(timestamp=DateUtils.date_to_unixtimemillis(date_val), price=20 + i, size=200 + i,
+            persistable = Trade(timestamp=date_to_unixtimemillis(date_val), price=20 + i, size=200 + i,
                                 inst_id=10)
             datastore.save_trade(persistable)
             expect_val.append(persistable)
@@ -156,7 +156,7 @@ class DataStoreTest(TestCase):
 
         expect_val = []
         for i in range(1, 5):
-            persistable = MarketDepth(timestamp=DateUtils.date_to_unixtimemillis(date_val), inst_id=10,
+            persistable = MarketDepth(timestamp=date_to_unixtimemillis(date_val), inst_id=10,
                                       provider_id='20', position=10 + i,
                                       operation=MDOperation.Insert, side=MDSide.Ask,
                                       price=10.1 + i, size=20)
@@ -188,37 +188,37 @@ class DataStoreTest(TestCase):
         expect_val = []
 
         # out of range
-        persistable = Bar(timestamp=DateUtils.date_to_unixtimemillis(date(2010, 12, 31)), type=BarType.Time,
+        persistable = Bar(timestamp=date_to_unixtimemillis(date(2010, 12, 31)), type=BarType.Time,
                           size=BarSize.D1, inst_id=99, open=18, high=19, low=17, close=17.5, vol=100)
         datastore.save_bar(persistable)
 
-        persistable = Bar(timestamp=DateUtils.date_to_unixtimemillis(date(2011, 1, 1)), type=BarType.Time,
+        persistable = Bar(timestamp=date_to_unixtimemillis(date(2011, 1, 1)), type=BarType.Time,
                           size=BarSize.D1, inst_id=99, open=28, high=29, low=27, close=27.5, vol=100)
         datastore.save_bar(persistable)
         expect_val.append(persistable)
 
-        persistable = Trade(timestamp=DateUtils.date_to_unixtimemillis(date(2011, 1, 2)), price=20, size=200,
+        persistable = Trade(timestamp=date_to_unixtimemillis(date(2011, 1, 2)), price=20, size=200,
                             inst_id=99)
         datastore.save_trade(persistable)
         expect_val.append(persistable)
 
-        persistable = Trade(timestamp=DateUtils.date_to_unixtimemillis(date(2011, 1, 3)), price=30, size=200,
+        persistable = Trade(timestamp=date_to_unixtimemillis(date(2011, 1, 3)), price=30, size=200,
                             inst_id=99)
         datastore.save_trade(persistable)
         expect_val.append(persistable)
 
         # not same instrument
-        persistable = Quote(timestamp=DateUtils.date_to_unixtimemillis(date(2011, 1, 3)), bid=18, ask=19, bid_size=200,
+        persistable = Quote(timestamp=date_to_unixtimemillis(date(2011, 1, 3)), bid=18, ask=19, bid_size=200,
                             ask_size=500, inst_id=11)
         datastore.save_quote(persistable)
 
-        persistable = Quote(timestamp=DateUtils.date_to_unixtimemillis(date(2011, 1, 4)), bid=18, ask=19, bid_size=200,
+        persistable = Quote(timestamp=date_to_unixtimemillis(date(2011, 1, 4)), bid=18, ask=19, bid_size=200,
                             ask_size=500, inst_id=99)
         datastore.save_quote(persistable)
         expect_val.append(persistable)
 
         # out of range
-        persistable = Quote(timestamp=DateUtils.date_to_unixtimemillis(date(2011, 1, 5)), bid=28, ask=29, bid_size=200,
+        persistable = Quote(timestamp=date_to_unixtimemillis(date(2011, 1, 5)), bid=28, ask=29, bid_size=200,
                             ask_size=500, inst_id=99)
         datastore.save_quote(persistable)
 

@@ -3,8 +3,8 @@ import pandas as pd
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
-from algotrader.utils.date_utils import DateUtils
-from algotrader.utils.market_data_utils import BarSize
+from algotrader.utils.date_utils import datetime_to_unixtimemillis, datestr_to_unixtimemillis
+from algotrader.utils.market_data_utils import D1
 
 
 class CSVDataFeed(Feed):
@@ -28,7 +28,7 @@ class CSVDataFeed(Feed):
     def read_csv(inst_id, file):
         df = pd.read_csv(file, index_col='Date', parse_dates=['Date'], date_parser=CSVDataFeed.dateparse)
         df['InstId'] = inst_id
-        df['BarSize'] = int(BarSize.D1)
+        df['BarSize'] = D1
         return df
 
     def subscribe_mktdata(self, *sub_reqs):
@@ -38,14 +38,14 @@ class CSVDataFeed(Feed):
 
         dfs = []
         sub_req_range = {sub_req.inst_id: (
-            DateUtils.datestr_to_unixtimemillis(str(sub_req.from_date)),
-            DateUtils.datestr_to_unixtimemillis(str(sub_req.to_date))) for
+            datestr_to_unixtimemillis(str(sub_req.from_date)),
+            datestr_to_unixtimemillis(str(sub_req.to_date))) for
             sub_req in sub_reqs}
 
         for sub_req in sub_reqs:
 
             ## TODO support different format, e.g. BAR, Quote, Trade csv files
-            if sub_req.type == MarketDataSubscriptionRequest.Bar and sub_req.bar_type == Bar.Time and sub_req.bar_size == BarSize.D1:
+            if sub_req.type == MarketDataSubscriptionRequest.Bar and sub_req.bar_type == Bar.Time and sub_req.bar_size == D1:
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_req.inst_id)
                 df = self.read_csv(sub_req.inst_id, '/mnt/data/dev/workspaces/python-trading/data/tradedata/%s.csv' % (
                     inst.symbol.lower()))
@@ -56,7 +56,7 @@ class CSVDataFeed(Feed):
 
             inst = self.ref_data_mgr.get_inst(row['InstId'])
             range = sub_req_range[inst.inst_id]
-            timestamp = DateUtils.datetime_to_unixtimemillis(index)
+            timestamp = datetime_to_unixtimemillis(index)
             if timestamp >= range[0] and (not range[1] or timestamp < range[1]):
                 self.data_event_bus.on_next(
                     ModelFactory.build_bar(

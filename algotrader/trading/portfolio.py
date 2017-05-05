@@ -10,7 +10,7 @@ from algotrader.trading.analyzer.drawdown import DrawDownAnalyzer
 from algotrader.trading.analyzer.performance import PerformanceAnalyzer
 from algotrader.trading.analyzer.pnl import PnlAnalyzer
 from algotrader.trading.position import HasPositions
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
 
 
 class Portfolio(HasPositions, Startable, HasId):

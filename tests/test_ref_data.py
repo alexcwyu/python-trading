@@ -1,12 +1,13 @@
 # protoc -I=model --python_out=generated model/*.proto
 
 from datetime import date
-from google.protobuf import json_format
-from algotrader.model.protobuf_to_dict import *
 from unittest import TestCase
 
+from google.protobuf import json_format
+
 import algotrader.model.ref_data_pb2 as ref_data
-from algotrader.utils.date_utils import DateUtils
+from algotrader.model.protobuf_to_dict import *
+from algotrader.utils.date_utils import date_to_unixtimemillis
 
 
 class RefDataTest(TestCase):
@@ -23,7 +24,7 @@ class RefDataTest(TestCase):
         inst.alt_symbols["BBG"] = "5"
         inst.sector = 'finance'
         inst.industry = 'bank'
-        inst.exp_date = DateUtils.date_to_unixtimemillis(date(2099, 12, 31))
+        inst.exp_date = date_to_unixtimemillis(date(2099, 12, 31))
         inst.option_type = ref_data.Instrument.Call
         inst.multiplier = 1.0
         inst.strike = 0.0
@@ -87,15 +88,15 @@ class RefDataTest(TestCase):
             holidays_id="6",
             holidays=[
                 ref_data.HolidaySeries.Holiday(trading_date=1992,
-                                                 start_date=19991222, start_time=900,
-                                                 end_date=19991222, end_time=1600,
-                                                 type=ref_data.HolidaySeries.Holiday.LateOpen,
-                                                 desc="regular"),
+                                               start_date=19991222, start_time=900,
+                                               end_date=19991222, end_time=1600,
+                                               type=ref_data.HolidaySeries.Holiday.LateOpen,
+                                               desc="regular"),
                 ref_data.HolidaySeries.Holiday(trading_date=1992,
-                                                 start_date=19991223, start_time=900,
-                                                 end_date=19991223, end_time=1600,
-                                                 type=ref_data.HolidaySeries.Holiday.LateOpen,
-                                                 desc="regular")
+                                               start_date=19991223, start_time=900,
+                                               end_date=19991223, end_time=1600,
+                                               type=ref_data.HolidaySeries.Holiday.LateOpen,
+                                               desc="regular")
             ]
 
         )

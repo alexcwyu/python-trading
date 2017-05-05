@@ -13,8 +13,8 @@ from rx.concurrency.mainloopscheduler import GEventScheduler
 from rx.concurrency.newthreadscheduler import NewThreadScheduler
 
 from algotrader.event.event_handler import MarketDataEventHandler
-from algotrader.utils import logger
-from algotrader.utils.date_utils import DateUtils
+from algotrader.utils.logging import logger
+from algotrader.utils.date_utils import unixtimemillis_to_datetime
 from algotrader import Startable, HasId
 
 
@@ -39,7 +39,7 @@ class Clock(Startable, HasId):
 
     def schedule_absolute(self, datetime, action, state=None):
         if isinstance(datetime, (int)):
-            datetime = DateUtils.unixtimemillis_to_datetime(datetime)
+            datetime = unixtimemillis_to_datetime(datetime)
         self.scheduler.schedule_absolute(datetime, action, state)
 
 
@@ -125,7 +125,7 @@ class SimulationClock(Clock, MarketDataEventHandler):
 
     def update_time(self, timestamp):
         self.__current_timestamp_mills = timestamp
-        self.scheduler.advance_to(DateUtils.unixtimemillis_to_datetime(timestamp))
+        self.scheduler.advance_to(unixtimemillis_to_datetime(timestamp))
 
     def reset(self):
         self.__current_timestamp_mills = 0

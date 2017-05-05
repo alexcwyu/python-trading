@@ -4,7 +4,7 @@ from rx import Observer
 
 from algotrader import Startable
 from algotrader.model.model_factory import *
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
 
 
 class EventHandler(Observer):

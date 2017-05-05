@@ -1,5 +1,6 @@
 from algotrader.model.model_factory import ModelFactory
-from algotrader.utils.market_data_utils import *
+from algotrader.utils.market_data_utils import get_subscription_type, get_bar_size, get_bar_type
+from algotrader.model.market_data_pb2 import MarketDataSubscriptionRequest
 
 
 class MarketDataSubscriber(object):
@@ -12,10 +13,10 @@ class MarketDataSubscriber(object):
         for instrument in instruments:
             for subscription_type in subscription_types:
                 attrs = subscription_type.split(".")
-                md_type = MarketDataSubscriptionType.type(attrs[0])
+                md_type = get_subscription_type(attrs[0])
                 provider_id = attrs[1]
-                bar_type = BarType.type(attrs[2]) if md_type == MarketDataSubscriptionRequest.Bar else None
-                bar_size = BarSize.value(attrs[3]) if md_type == MarketDataSubscriptionRequest.Bar else None
+                bar_type = get_bar_type(attrs[2]) if md_type == MarketDataSubscriptionRequest.Bar else None
+                bar_size = get_bar_size(attrs[3]) if md_type == MarketDataSubscriptionRequest.Bar else None
 
                 reqs.append(ModelFactory.build_market_data_subscription_request(type=md_type,
                                                                                 inst_id=instrument.inst_id,

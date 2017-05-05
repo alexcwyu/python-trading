@@ -4,8 +4,8 @@ from algotrader.model.model_helper import *
 from algotrader.model.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
 from algotrader.provider.persistence.data_store import RefDataStore, TimeSeriesDataStore, TradeDataStore, \
     SequenceDataStore
-from algotrader.utils import logger
-from algotrader.utils.date_utils import DateUtils
+from algotrader.utils.logging import logger
+from algotrader.utils.date_utils import date_to_unixtimemillis
 
 
 class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, SequenceDataStore):
@@ -55,7 +55,6 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
             StrategyState: self.db['strategy_states'],
             OrderState: self.db['order_states'],
 
-            Config: self.db['configs'],
             Sequence: self.db['sequences']
         }
 
@@ -172,14 +171,14 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
         return result
 
     def load_bars(self, sub_key):
-        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
-        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+        from_timestamp = date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = date_to_unixtimemillis(sub_key.to_date)
         return [self._deserialize(Bar, data)
                 for data in self.bars.find(self._build_bar_query(sub_key))]
 
     def _build_bar_query(self, sub_key):
-        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
-        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+        from_timestamp = date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = date_to_unixtimemillis(sub_key.to_date)
         return {"__slots__.inst_id": sub_key.inst_id,
                 "__slots__.type": sub_key.subscription_type.bar_type,
                 "__slots__.size": sub_key.subscription_type.bar_size,
@@ -188,8 +187,8 @@ class MongoDBDataStore(RefDataStore, TradeDataStore, TimeSeriesDataStore, Sequen
                 }
 
     def _build_query(self, sub_key):
-        from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
-        to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+        from_timestamp = date_to_unixtimemillis(sub_key.from_date)
+        to_timestamp = date_to_unixtimemillis(sub_key.to_date)
         return {"__slots__.inst_id": sub_key.inst_id,
                 "__slots__.timestamp": {"$gte": from_timestamp,
                                         "$lt": to_timestamp}

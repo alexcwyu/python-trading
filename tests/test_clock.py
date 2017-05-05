@@ -1,14 +1,14 @@
 import datetime
+import time
 import unittest
+from unittest import TestCase
 
 import gevent
-import time
 from nose.tools import nottest
-from unittest import TestCase
 
 from algotrader.model.model_factory import ModelFactory
 from algotrader.trading.clock import SimulationClock, RealTimeClock
-from algotrader.utils.date_utils import DateUtils
+from algotrader.utils.date_utils import datetime_to_unixtimemillis, unixtimemillis_to_datetime
 
 
 class ClockTest(TestCase):
@@ -99,21 +99,21 @@ class ClockTest(TestCase):
     @nottest
     def test_timestamp_conversion(self):
         dt = datetime.datetime(year=2000, month=1, day=1, hour=7, minute=30, second=30)
-        ts = DateUtils.datetime_to_unixtimemillis(dt)
+        ts = datetime_to_unixtimemillis(dt)
         self.assertEqual(946683030000, ts)
 
-        dt2 = DateUtils.unixtimemillis_to_datetime(ts)
+        dt2 = unixtimemillis_to_datetime(ts)
         self.assertEquals(dt, dt2)
 
         dt3 = datetime.datetime.fromtimestamp(0)
 
-        ts2 = DateUtils.datetime_to_unixtimemillis(dt3)
-        dt4 = DateUtils.unixtimemillis_to_datetime(ts2)
+        ts2 = datetime_to_unixtimemillis(dt3)
+        dt4 = unixtimemillis_to_datetime(ts2)
         self.assertEquals(0, ts2)
         self.assertEquals(dt3, dt4)
 
     def test_real_time_clock_now(self):
-        ts = DateUtils.datetime_to_unixtimemillis(datetime.datetime.now())
+        ts = datetime_to_unixtimemillis(datetime.datetime.now())
         ts2 = self.realtime_clock.now()
         self.assertTrue(abs(ts - ts2) <= 10)
         time.sleep(2)
@@ -123,7 +123,7 @@ class ClockTest(TestCase):
     @unittest.skip("fix abs scheduling later")
     def test_real_time_clock_schedule_absolute(self):
         start = self.realtime_clock.now()
-        dt = DateUtils.unixtimemillis_to_datetime(start)
+        dt = unixtimemillis_to_datetime(start)
         abs_time = dt + datetime.timedelta(seconds=1)
         self.realtime_clock.schedule_absolute(abs_time, self.realtime_action)
         self.assertEquals([], self.endtime)
@@ -143,6 +143,6 @@ class ClockTest(TestCase):
         s1 = gevent.core.time()
         s2 = datetime.datetime.fromtimestamp(s1)
         s3 = self.realtime_clock.now()
-        s4 = DateUtils.unixtimemillis_to_datetime(s3)
+        s4 = unixtimemillis_to_datetime(s3)
 
         self.assertAlmostEqual(s1 * 1000, s3, -2)

@@ -7,8 +7,7 @@
 # from algotrader.provider.persistence.data_store import DataStore, RefDataStore, TimeSeriesDataStore, TradeDataStore, \
 #     SequenceDataStore
 # from algotrader.trading.ref_data import Instrument, Currency, Exchange
-# from algotrader.utils import logger
-# from algotrader.utils.date_utils import DateUtils
+# from algotrader.utils.logging import logger
 # from algotrader.utils.ser_deser import MsgPackSerializer
 #
 #
@@ -219,8 +218,8 @@
 #         self._insert_blob_data(timeseries, self.insert_time_series_stmt)
 #
 #     def load_bars(self, sub_key):
-#         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
-#         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+#         from_timestamp = date_to_unixtimemillis(sub_key.from_date)
+#         to_timestamp = date_to_unixtimemillis(sub_key.to_date)
 #
 #         bound_stmt = self.query_bars_stmt.bind(
 #             [sub_key.inst_id, sub_key.subscription_type.bar_type, sub_key.subscription_type.bar_size,
@@ -232,8 +231,8 @@
 #                 result_list]
 #
 #     def load_quotes(self, sub_key):
-#         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
-#         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+#         from_timestamp = date_to_unixtimemillis(sub_key.from_date)
+#         to_timestamp = date_to_unixtimemillis(sub_key.to_date)
 #
 #         bound_stmt = self.query_quotes_stmt.bind([sub_key.inst_id, from_timestamp, to_timestamp])
 #         result_list = self.session.execute(bound_stmt)
@@ -242,16 +241,16 @@
 #                       ask_size=r.ask_size) for r in result_list]
 #
 #     def load_trades(self, sub_key):
-#         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
-#         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+#         from_timestamp = date_to_unixtimemillis(sub_key.from_date)
+#         to_timestamp = date_to_unixtimemillis(sub_key.to_date)
 #
 #         bound_stmt = self.query_trades_stmt.bind([sub_key.inst_id, from_timestamp, to_timestamp])
 #         result_list = self.session.execute(bound_stmt)
 #         return [Trade(inst_id=r.inst_id, timestamp=r.timestamp, price=r.price, size=r.size) for r in result_list]
 #
 #     def load_market_depths(self, sub_key):
-#         from_timestamp = DateUtils.date_to_unixtimemillis(sub_key.from_date)
-#         to_timestamp = DateUtils.date_to_unixtimemillis(sub_key.to_date)
+#         from_timestamp = date_to_unixtimemillis(sub_key.from_date)
+#         to_timestamp = date_to_unixtimemillis(sub_key.to_date)
 #
 #         bound_stmt = self.query_market_depths_stmt.bind([sub_key.inst_id, sub_key.subscription_type.provider_id, from_timestamp, to_timestamp])
 #         result_list = self.session.execute(bound_stmt)

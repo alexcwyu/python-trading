@@ -4,7 +4,7 @@ from rx.subjects import BehaviorSubject
 from algotrader.model.trade_data_pb2 import *
 from algotrader.technical.talib_wrapper import EMA, SMA
 from algotrader.trading.strategy import Strategy
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
 
 
 class VixVxvRatio(Strategy):

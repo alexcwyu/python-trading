@@ -3,7 +3,7 @@ from gevent import monkey
 monkey.patch_all()
 from algotrader.provider.subscription import MarketDataSubscriber
 from algotrader.app import Application
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
 import time
 from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext

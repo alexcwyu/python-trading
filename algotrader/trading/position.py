@@ -5,7 +5,7 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.model_helper import ModelHelper
 from algotrader.model.trade_data_pb2 import *
-from algotrader.utils.market_data_utils import MarketDataUtils
+from algotrader.utils.market_data_utils import get_quote_mid
 
 
 class HasPositions(MarketDataEventHandler):
@@ -59,7 +59,7 @@ class HasPositions(MarketDataEventHandler):
         self.update_price(bar.timestamp, bar.inst_id, bar.close)
 
     def on_quote(self, quote: Quote) -> None:
-        self.update_price(quote.timestamp, quote.inst_id, MarketDataUtils.get_mid(quote))
+        self.update_price(quote.timestamp, quote.inst_id, get_quote_mid(quote))
 
     def on_trade(self, trade: Trade) -> None:
         self.update_price(trade.timestamp, trade.inst_id, trade.price)

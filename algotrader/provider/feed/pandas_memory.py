@@ -3,8 +3,8 @@ import pandas as pd
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
-from algotrader.utils.date_utils import DateUtils
-from algotrader.utils.market_data_utils import BarSize
+from algotrader.utils.date_utils import datetime_to_unixtimemillis
+from algotrader.utils.market_data_utils import D1
 
 
 class PandasMemoryDataFeed(Feed):
@@ -46,7 +46,7 @@ class PandasMemoryDataFeed(Feed):
         return ModelFactory.build_bar(inst_id=inst.inst_id,
                                       provider_id=self.id(),
                                       type=Bar.Time,
-                                      timestamp=DateUtils.datetime_to_unixtimemillis(index),
+                                      timestamp=datetime_to_unixtimemillis(index),
                                       open=row['Open'],
                                       high=row['High'],
                                       low=row['Low'],
@@ -60,14 +60,14 @@ class PandasMemoryDataFeed(Feed):
         for sub_req in sub_reqs:
             if not sub_req.from_date:
                 raise RuntimeError("only HistDataSubscriptionKey is supported!")
-            if sub_req.type == MarketDataSubscriptionRequest.Bar and sub_req.bar_type == Bar.Time and sub_req.bar_size == BarSize.D1:
+            if sub_req.type == MarketDataSubscriptionRequest.Bar and sub_req.bar_type == Bar.Time and sub_req.bar_size == D1:
                 inst = self.ref_data_mgr.get_inst(inst_id=sub_req.inst_id)
                 symbol = inst.symbol
 
                 # df = web.DataReader("F", self.system, sub_req.from_date, sub_req.to_date)
                 df = self.dict_of_df[symbol]
                 df['Symbol'] = symbol
-                df['BarSize'] = int(BarSize.D1)
+                df['BarSize'] = D1
 
                 self.dfs.append(df)
 

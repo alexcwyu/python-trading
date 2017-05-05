@@ -9,15 +9,12 @@ from unittest import TestCase
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.model_factory import ModelFactory
-from algotrader.config.app import BacktestingConfig
-from algotrader.config.feed import PandasMemoryDataFeedConfig
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
-from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.strategy.sma_strategy import SMAStrategy
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
-from algotrader.utils.market_data_utils import BarType, BarSize
+from algotrader.utils.market_data_utils import *
 
 class TestCompareWithFunctionalBacktest(TestCase):
     num_days = 3000
@@ -84,7 +81,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
 
         config = BacktestingConfig(id=None, stg_id='sma', portfolio_id='test2',
                                    instrument_ids=[instrument],
-                                   subscription_types=[BarSubscriptionType(bar_type=Bar.Time, bar_size=BarSize.D1)],
+                                   subscription_types=[BarSubscriptionType(bar_type=Bar.Time, bar_size=D1)],
                                    from_date=TestCompareWithFunctionalBacktest.dates[0],
                                    to_date=TestCompareWithFunctionalBacktest.dates[-1],
                                    broker_id=Broker.Simulator,

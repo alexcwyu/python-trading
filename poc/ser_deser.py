@@ -1,6 +1,6 @@
 import datetime
 
-from algotrader.utils import msgpack_numpy as m
+from poc import msgpack_numpy as m
 
 m.patch()
 import importlib
@@ -8,7 +8,7 @@ import msgpack
 import abc
 import json
 from itertools import chain
-from algotrader.utils.date_utils import DateUtils
+from algotrader.utils.date_utils import datetime_to_timestamp, timestamp_to_date, timestamp_to_datetime, date_to_timestamp
 
 
 class SlotPickleMixin(object):
@@ -118,9 +118,9 @@ class MapSerializer(Serializer):
         elif isinstance(item, set):
             return set([MapSerializer._deep_serialize(i) for i in item])
         elif isinstance(item, datetime.datetime):
-            return {'__datetime__': DateUtils.datetime_to_timestamp(item)}
+            return {'__datetime__': datetime_to_timestamp(item)}
         elif isinstance(item, datetime.date):
-            return {'__date__': DateUtils.date_to_timestamp(item)}
+            return {'__date__': date_to_timestamp(item)}
         else:
             return item
 
@@ -128,13 +128,13 @@ class MapSerializer(Serializer):
     def deserialize(data):
         if isinstance(data, dict):
             if b'__datetime__' in data:
-                return DateUtils.timestamp_to_datetime(data[b'__datetime__'])
+                return timestamp_to_datetime(data[b'__datetime__'])
             elif b'__date__' in data:
-                return DateUtils.timestamp_to_date(data[b'__date__'])
+                return timestamp_to_date(data[b'__date__'])
             # elif '__datetime__' in data:
-            #     return DateUtils.timestamp_to_datetime(data["__datetime__"])
+            #     return timestamp_to_datetime(data["__datetime__"])
             # elif '__date__' in data:
-            #     return DateUtils.timestamp_to_date(data["__date__"])
+            #     return timestamp_to_date(data["__date__"])
             elif b'@t' in data:
                 data = data
                 module = data[b'@p']

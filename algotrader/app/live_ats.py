@@ -1,7 +1,7 @@
 from algotrader.app import Application
 from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
 
 
 class ATSRunner(Application):

@@ -10,7 +10,7 @@ from algotrader.provider.broker import Broker
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.feed import Feed
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
 
 
 class DataRecord(object):

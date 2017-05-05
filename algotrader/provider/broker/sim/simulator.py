@@ -6,7 +6,7 @@ from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker import Broker
 from algotrader.provider.broker.sim.commission import NoCommission
 from algotrader.provider.broker.sim.fill_strategy import DefaultFillStrategy
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
 
 
 class Simulator(Broker, MarketDataEventHandler):

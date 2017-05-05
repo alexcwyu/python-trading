@@ -6,8 +6,8 @@ from pandas_datareader import data
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
-from algotrader.utils.date_utils import DateUtils
-from algotrader.utils.market_data_utils import BarSize
+from algotrader.utils.date_utils import datetime_to_unixtimemillis
+from algotrader.utils.market_data_utils import D1
 
 
 class PandasWebDataFeed(Feed):
@@ -44,7 +44,7 @@ class PandasWebDataFeed(Feed):
                 # df = web.DataReader("F", self.system, sub_req.from_date, sub_req.to_date)
                 df = data.DataReader("F", self.system, sub_req.from_date, sub_req.to_date)
                 df['Symbol'] = symbol
-                df['BarSize'] = int(BarSize.D1)
+                df['BarSize'] = D1
 
                 self.dfs.append(df)
 
@@ -76,7 +76,7 @@ class YahooDataFeed(PandasWebDataFeed):
         return ModelFactory.build_bar(inst_id=inst.inst_id,
                                       provider_id=self.id(),
                                       type=Bar.Time,
-                                      timestamp=DateUtils.datetime_to_unixtimemillis(index),
+                                      timestamp=datetime_to_unixtimemillis(index),
                                       open=row['Open'],
                                       high=row['High'],
                                       low=row['Low'],
@@ -96,7 +96,7 @@ class GoogleDataFeed(PandasWebDataFeed):
     def process_row(self, index, row):
         inst = self.__ref_data_mgr.get_inst(symbol=row['Symbol'])
         return Bar(inst_id=inst.inst_id,
-                   timestamp=DateUtils.datetime_to_unixtimemillis(index),
+                   timestamp=datetime_to_unixtimemillis(index),
                    open=row['Open'],
                    high=row['High'],
                    low=row['Low'],

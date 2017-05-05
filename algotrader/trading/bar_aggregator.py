@@ -4,8 +4,8 @@ from algotrader import Startable
 from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.model.model_factory import *
 from algotrader.trading.data_series import DataSeries, DataSeriesEvent
-from algotrader.utils import logger
-from algotrader.utils.market_data_utils import BarSize, MarketDataUtils
+from algotrader.utils.logging import logger
+from algotrader.utils.market_data_utils import M1, get_next_bar_start_time, get_current_bar_end_time, get_current_bar_start_time
 
 
 class BarInputType:
@@ -22,7 +22,7 @@ class BarAggregator(MarketDataEventHandler, Startable):
     def __init__(self, data_bus, clock, inst_id, input,
                  input_type=BarInputType.Trade,
                  output_bar_type=Bar.Time,
-                 output_size=BarSize.M1):
+                 output_size=M1):
         self.__data_bus = data_bus
         self.__clock = clock
         self.__inst_id = inst_id
@@ -46,7 +46,7 @@ class BarAggregator(MarketDataEventHandler, Startable):
         self.__input.subject.subscribe(on_next=self.on_update)
         if self.__output_bar_type == Bar.Time:
             current_ts = self.__clock.now()
-            next_ts = MarketDataUtils.get_next_bar_start_time(current_ts, self.__output_size)
+            next_ts = get_next_bar_start_time(current_ts, self.__output_size)
             diff = next_ts - current_ts
             Observable.timer(int(diff), self.__output_size * 1000, self.__clock.scheduler).subscribe(
                 on_next=self.publish)
@@ -102,8 +102,8 @@ class BarAggregator(MarketDataEventHandler, Startable):
         if self.__new_bar:
 
             if self.__output_bar_type == Bar.Time:
-                self.__start_time = MarketDataUtils.get_current_bar_start_time(timestamp, self.__output_size)
-                self.__end_time = MarketDataUtils.get_current_bar_end_time(timestamp, self.__output_size)
+                self.__start_time = get_current_bar_start_time(timestamp, self.__output_size)
+                self.__end_time = get_current_bar_end_time(timestamp, self.__output_size)
             else:
                 self.__start_time = timestamp
             self.__open = open

@@ -6,8 +6,8 @@ from dateutil.relativedelta import relativedelta
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker import Broker
-from algotrader.utils.date_utils import DateUtils
-from algotrader.utils.market_data_utils import BarSize
+from algotrader.utils.date_utils import datetime_to_unixtimemillis
+from algotrader.utils.market_data_utils import *
 
 
 class IBModelFactory:
@@ -54,16 +54,16 @@ class IBModelFactory:
     }
 
     bar_size_mapping = {
-        BarSize.S1: "1 secs",
-        BarSize.S5: "5 secs",
-        BarSize.S15: "15 secs",
-        BarSize.S30: "30 secs",
-        BarSize.M1: "1 min",
-        BarSize.M5: "5 mins",
-        BarSize.M15: "15 mins",
-        BarSize.M30: "30 mins",
-        BarSize.H1: "1 hour",
-        BarSize.D1: "1 day",
+        S1: "1 secs",
+        S5: "5 secs",
+        S15: "15 secs",
+        S30: "30 secs",
+        M1: "1 min",
+        M5: "5 mins",
+        M15: "15 mins",
+        M30: "30 mins",
+        H1: "1 hour",
+        D1: "1 day",
 
     }
 
@@ -218,13 +218,13 @@ class IBModelFactory:
         return dt.strftime(self.IB_DATETIME_FORMAT)
 
     def convert_ib_date(self, ib_date_str):
-        return DateUtils.datetime_to_unixtimemillis(datetime.strptime(ib_date_str, self.IB_DATE_FORMAT))
+        return datetime_to_unixtimemillis(datetime.strptime(ib_date_str, self.IB_DATE_FORMAT))
 
     def convert_ib_datetime(self, ib_datetime_str):
-        return DateUtils.datetime_to_unixtimemillis(datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT2))
+        return datetime_to_unixtimemillis(datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT2))
 
     def convert_ib_time(self, ib_time):
-        return DateUtils.datetime_to_unixtimemillis(datetime.fromtimestamp(ib_time))
+        return datetime_to_unixtimemillis(datetime.fromtimestamp(ib_time))
 
     def convert_time_period(self, start_time, end_time):
         diff = relativedelta(end_time, start_time)

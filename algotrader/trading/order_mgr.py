@@ -7,7 +7,7 @@ from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.persistence import PersistenceMode
 from algotrader.trading.order import Order
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
 
 
 class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):

@@ -4,7 +4,7 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
 from algotrader.trading.clock import Clock
-from algotrader.utils.market_data_utils import BarSize
+from algotrader.utils.market_data_utils import D1
 
 
 class PandaH5DataFeed(Feed):
@@ -62,7 +62,7 @@ class PandaH5DataFeed(Feed):
                     # df = self.dict_of_df[symbol]
                     df = store[symbol]
                     df['Symbol'] = symbol
-                    df['BarSize'] = int(BarSize.D1)
+                    df['BarSize'] = D1
 
                     self.dfs.append(df)
 

@@ -1,5 +1,6 @@
-from algotrader.trading.analyzer import Analyzer
-from algotrader.trading.analyzer.performance import PerformanceAnalyzer
+from algotrader.analyzer import Analyzer
+
+from algotrader.analyzer.performance import PerformanceAnalyzer
 from algotrader.trading.data_series import DataSeries
 
 

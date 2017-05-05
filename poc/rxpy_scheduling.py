@@ -5,7 +5,7 @@ from algotrader.event.market_data import Bar, BarSize
 from rx.concurrency.historicalscheduler import HistoricalScheduler
 
 from algotrader.trading.clock import RealTimeClock
-from algotrader.utils.date_utils import unixtimemillis_to_datetime, datetime_to_unixtimemillis
+from algotrader.utils.date import unixtimemillis_to_datetime, datetime_to_unixtimemillis
 
 realtime_clock = RealTimeClock()
 

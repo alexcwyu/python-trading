@@ -3,7 +3,7 @@ import math
 
 from algotrader.model.market_data_pb2 import Trade
 from algotrader.provider.broker.sim.sim_config import SimConfig
-from algotrader.utils.trade_data_utils import is_buy, is_sell
+from algotrader.utils.trade_data import is_buy, is_sell
 
 
 class MarketDataProcessor(object):

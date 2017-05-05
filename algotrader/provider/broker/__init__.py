@@ -1,6 +1,6 @@
 import abc
 
-from algotrader.event.event_handler import OrderEventHandler
+from algotrader.trading.event import OrderEventHandler
 from algotrader.provider import Provider
 
 

@@ -4,7 +4,7 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
 from algotrader.trading.clock import Clock
-from algotrader.utils.market_data_utils import D1
+from algotrader.utils.market_data import D1
 
 
 class PandaH5DataFeed(Feed):

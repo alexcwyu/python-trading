@@ -2,9 +2,9 @@ from pymongo import MongoClient
 
 from algotrader.model.model_helper import *
 from algotrader.model.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
-from algotrader.provider.persistence import SimpleDataStore, DataStore
+from algotrader.provider.datastore import SimpleDataStore, DataStore
 from algotrader.utils.logging import logger
-from algotrader.utils.date_utils import date_to_unixtimemillis
+from algotrader.utils.date import date_to_unixtimemillis
 
 
 class MongoDBDataStore(SimpleDataStore):

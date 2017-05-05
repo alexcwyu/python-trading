@@ -1,8 +1,8 @@
 from algotrader import Startable
 
-from algotrader.event.event_bus import EventBus
+from algotrader.trading.event import EventBus
 from algotrader.model.model_factory import ModelFactory
-from algotrader.provider.persistence import DataStore
+from algotrader.provider.datastore import DataStore
 from algotrader.provider import ProviderManager
 from algotrader.strategy import StrategyManager
 from algotrader.trading.account import AccountManager

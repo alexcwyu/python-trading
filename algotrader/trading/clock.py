@@ -12,9 +12,9 @@ from rx.concurrency.historicalscheduler import HistoricalScheduler
 from rx.concurrency.mainloopscheduler import GEventScheduler
 from rx.concurrency.newthreadscheduler import NewThreadScheduler
 
-from algotrader.event.event_handler import MarketDataEventHandler
+from algotrader.trading.event import MarketDataEventHandler
 from algotrader.utils.logging import logger
-from algotrader.utils.date_utils import unixtimemillis_to_datetime
+from algotrader.utils.date import unixtimemillis_to_datetime
 from algotrader import Startable, HasId
 
 

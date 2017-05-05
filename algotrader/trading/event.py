@@ -1,10 +1,22 @@
 import abc
 
 from rx import Observer
+from rx.subjects import Subject
 
 from algotrader import Startable
-from algotrader.model.model_factory import *
+from algotrader.model.market_data_pb2 import Bar, Quote, Trade, MarketDepth
+from algotrader.model.trade_data_pb2 import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
+    ExecutionReport, AccountUpdate, PortfolioUpdate
 from algotrader.utils.logging import logger
+
+
+class EventBus(object):
+    def __init__(self):
+        self.data_subject = Subject()
+        self.order_subject = Subject()
+        self.execution_subject = Subject()
+        self.portfolio_subject = Subject()
+        self.account_subject = Subject()
 
 
 class EventHandler(Observer):

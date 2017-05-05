@@ -8,7 +8,7 @@ from nose.tools import nottest
 
 from algotrader.model.model_factory import ModelFactory
 from algotrader.trading.clock import SimulationClock, RealTimeClock
-from algotrader.utils.date_utils import datetime_to_unixtimemillis, unixtimemillis_to_datetime
+from algotrader.utils.date import datetime_to_unixtimemillis, unixtimemillis_to_datetime
 
 
 class ClockTest(TestCase):

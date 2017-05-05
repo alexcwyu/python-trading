@@ -16,9 +16,9 @@ from pymongo import MongoClient
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import MongoDBConfig, PersistenceConfig
 # from algotrader.config.trading import BacktestingConfig
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.provider.persistence import DataStore
-from algotrader.provider.persistence.mongodb import MongoDBDataStore
+from algotrader.provider.datastore import PersistenceMode
+from algotrader.provider.datastore import DataStore
+from algotrader.provider.datastore.mongodb import MongoDBDataStore
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.portfolio import Portfolio
 from algotrader.trading.sequence import SequenceManager

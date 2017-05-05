@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from algotrader.provider.persistence.mongodb import MongoDBDataStore
+from algotrader.provider.datastore.mongodb import MongoDBDataStore
 from tests.sample_factory import *
 
 

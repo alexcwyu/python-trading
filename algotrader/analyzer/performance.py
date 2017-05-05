@@ -1,4 +1,4 @@
-from algotrader.trading.analyzer import Analyzer
+from algotrader.analyzer import Analyzer
 from algotrader.trading.data_series import DataSeries
 
 

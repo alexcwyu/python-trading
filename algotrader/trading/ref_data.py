@@ -5,7 +5,7 @@ import os
 from algotrader import Manager
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.ref_data_pb2 import *
-from algotrader.provider.persistence import PersistenceMode
+from algotrader.provider.datastore import PersistenceMode
 
 
 class RefDataManager(Manager):

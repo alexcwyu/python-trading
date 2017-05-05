@@ -3,8 +3,8 @@ import pandas as pd
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.feed import Feed
-from algotrader.utils.date_utils import datetime_to_unixtimemillis
-from algotrader.utils.market_data_utils import D1
+from algotrader.utils.date import datetime_to_unixtimemillis
+from algotrader.utils.market_data import D1
 
 
 class PandasMemoryDataFeed(Feed):

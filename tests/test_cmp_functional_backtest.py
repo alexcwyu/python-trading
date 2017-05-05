@@ -14,7 +14,7 @@ from algotrader.provider.feed import Feed
 from algotrader.strategy.sma_strategy import SMAStrategy
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
-from algotrader.utils.market_data_utils import *
+from algotrader.utils.market_data import *
 
 class TestCompareWithFunctionalBacktest(TestCase):
     num_days = 3000

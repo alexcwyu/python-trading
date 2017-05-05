@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from algotrader.event.event_handler import MarketDataEventHandler
+from algotrader.trading.event import MarketDataEventHandler
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker import Broker

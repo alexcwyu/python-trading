@@ -4,14 +4,15 @@ from __future__ import (absolute_import, division,
 from builtins import *
 from typing import Dict
 
+from algotrader.analyzer.drawdown import DrawDownAnalyzer
+from algotrader.analyzer.pnl import PnlAnalyzer
+
 from algotrader import SimpleManager
 from algotrader import Startable, HasId
+from algotrader.analyzer.performance import PerformanceAnalyzer
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.trading.analyzer.drawdown import DrawDownAnalyzer
-from algotrader.trading.analyzer.performance import PerformanceAnalyzer
-from algotrader.trading.analyzer.pnl import PnlAnalyzer
+from algotrader.provider.datastore import PersistenceMode
 from algotrader.trading.position import HasPositions
 from algotrader.utils.logging import logger
 

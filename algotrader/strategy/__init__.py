@@ -5,7 +5,7 @@ from builtins import *
 from typing import Dict
 
 from algotrader import Startable, HasId
-from algotrader.event.event_handler import ExecutionEventHandler
+from algotrader.trading.event import ExecutionEventHandler
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
@@ -181,7 +181,7 @@ class Strategy(HasPositions, ExecutionEventHandler, MarketDataSubscriber, Starta
 from importlib import import_module
 
 from algotrader import SimpleManager
-from algotrader.provider.persistence import PersistenceMode
+from algotrader.provider.datastore import PersistenceMode
 
 
 class StrategyManager(SimpleManager):

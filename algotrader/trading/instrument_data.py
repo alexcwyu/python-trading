@@ -1,12 +1,12 @@
 import numpy as np
 
 from algotrader import Manager
-from algotrader.event.event_handler import MarketDataEventHandler
+from algotrader.trading.event import MarketDataEventHandler
 from algotrader.model.model_factory import ModelFactory
-from algotrader.provider.persistence import PersistenceMode
+from algotrader.provider.datastore import PersistenceMode
 from algotrader.trading.data_series import DataSeries
 from algotrader.utils.logging import logger
-from algotrader.utils.market_data_utils import get_series_id
+from algotrader.utils.market_data import get_series_id
 
 
 class InstrumentDataManager(MarketDataEventHandler, Manager):

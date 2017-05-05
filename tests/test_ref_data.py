@@ -7,7 +7,7 @@ from google.protobuf import json_format
 
 import algotrader.model.ref_data_pb2 as ref_data
 from algotrader.model.protobuf_to_dict import *
-from algotrader.utils.date_utils import date_to_unixtimemillis
+from algotrader.utils.date import date_to_unixtimemillis
 
 
 class RefDataTest(TestCase):

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from algotrader.trading.context import ApplicationContext
-from algotrader.utils.data_series_utils import parse_series, get_or_create_indicator
+from algotrader.utils.data_series import parse_series, get_or_create_indicator
 
 
 class IndicatorTest(TestCase):

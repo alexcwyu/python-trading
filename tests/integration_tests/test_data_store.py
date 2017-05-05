@@ -15,8 +15,8 @@ from nose_parameterized import parameterized, param
 
 from algotrader.provider.broker import Broker
 from algotrader.provider.feed import Feed
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.provider.persistence import DataStore
+from algotrader.provider.datastore import PersistenceMode
+from algotrader.provider.datastore import DataStore
 from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.provider.subscription import HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType, \
     MarketDepthSubscriptionType
@@ -26,7 +26,7 @@ from algotrader.trading.clock import Clock
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.order import Order
 from algotrader.trading.ref_data import Instrument, Exchange, Currency
-from algotrader.utils.date_utils import date_to_unixtimemillis
+from algotrader.utils.date import date_to_unixtimemillis
 from poc.ser_deser import MapSerializer
 
 print

@@ -1,5 +1,5 @@
 from algotrader import SimpleManager
-from algotrader.provider.persistence import PersistenceMode
+from algotrader.provider.datastore import PersistenceMode
 
 
 class SequenceManager(SimpleManager):

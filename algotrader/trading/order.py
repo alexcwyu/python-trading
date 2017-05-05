@@ -3,11 +3,11 @@ from typing import List
 
 from algotrader import Manager
 from algotrader import Startable
-from algotrader.event.event_handler import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
+from algotrader.trading.event import MarketDataEventHandler, OrderEventHandler, ExecutionEventHandler
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
-from algotrader.provider.persistence import PersistenceMode
+from algotrader.provider.datastore import PersistenceMode
 from algotrader.utils.logging import logger
 
 

@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from algotrader.model.market_data_pb2 import Bar, Quote, Trade
 from algotrader.provider.broker.sim.data_processor import BarProcessor, TradeProcessor, QuoteProcessor
-from algotrader.utils.trade_data_utils import is_buy, is_sell
+from algotrader.utils.trade_data import is_buy, is_sell
 
 
 class FillInfo(object):

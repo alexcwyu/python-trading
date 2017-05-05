@@ -3,7 +3,7 @@ import datetime
 from bidict import bidict
 
 from algotrader.model.market_data_pb2 import *
-from algotrader.utils.date_utils import datetime_to_unixtimemillis
+from algotrader.utils.date import datetime_to_unixtimemillis
 
 S1 = 1
 S5 = 5

@@ -1,11 +1,11 @@
 from rx import Observable
 
 from algotrader import Startable
-from algotrader.event.event_handler import MarketDataEventHandler
+from algotrader.trading.event import MarketDataEventHandler
 from algotrader.model.model_factory import *
 from algotrader.trading.data_series import DataSeries, DataSeriesEvent
 from algotrader.utils.logging import logger
-from algotrader.utils.market_data_utils import M1, get_next_bar_start_time, get_current_bar_end_time, get_current_bar_start_time
+from algotrader.utils.market_data import M1, get_next_bar_start_time, get_current_bar_end_time, get_current_bar_start_time
 
 
 class BarInputType:

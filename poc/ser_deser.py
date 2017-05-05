@@ -8,7 +8,7 @@ import msgpack
 import abc
 import json
 from itertools import chain
-from algotrader.utils.date_utils import datetime_to_timestamp, timestamp_to_date, timestamp_to_datetime, date_to_timestamp
+from algotrader.utils.date import datetime_to_timestamp, timestamp_to_date, timestamp_to_datetime, date_to_timestamp
 
 
 class SlotPickleMixin(object):

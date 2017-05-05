@@ -1,11 +1,11 @@
 import abc
 
-from algotrader.event.event_handler import MarketDataEventHandler
+from algotrader.trading.event import MarketDataEventHandler
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.model_helper import ModelHelper
 from algotrader.model.trade_data_pb2 import *
-from algotrader.utils.market_data_utils import get_quote_mid
+from algotrader.utils.market_data import get_quote_mid
 
 
 class HasPositions(MarketDataEventHandler):

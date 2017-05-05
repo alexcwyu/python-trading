@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from algotrader.event.event_handler import ExecutionEventHandler
+from algotrader.trading.event import ExecutionEventHandler
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker.sim.simulator import Simulator

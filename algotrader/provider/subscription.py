@@ -1,5 +1,5 @@
 from algotrader.model.model_factory import ModelFactory
-from algotrader.utils.market_data_utils import get_subscription_type, get_bar_size, get_bar_type
+from algotrader.utils.market_data import get_subscription_type, get_bar_size, get_bar_type
 from algotrader.model.market_data_pb2 import MarketDataSubscriptionRequest
 
 

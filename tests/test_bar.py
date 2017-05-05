@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from algotrader.utils.market_data_utils import *
+from algotrader.utils.market_data import *
 
 
 class BarTest(TestCase):

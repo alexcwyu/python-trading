@@ -1,6 +1,6 @@
 import abc
 
-from algotrader.utils.trade_data_utils import is_buy, is_sell
+from algotrader.utils.trade_data import is_buy, is_sell
 
 
 class Slippage(object):

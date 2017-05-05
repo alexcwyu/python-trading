@@ -8,8 +8,8 @@ from algotrader.config.broker import IBConfig
 from algotrader.config.persistence import MongoDBConfig
 from algotrader.config.persistence import PersistenceConfig
 from algotrader.provider.broker import Broker
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.provider.persistence import DataStore
+from algotrader.provider.datastore import PersistenceMode
+from algotrader.provider.datastore import DataStore
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.trading.clock import Clock

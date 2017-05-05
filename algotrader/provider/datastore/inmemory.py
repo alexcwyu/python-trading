@@ -2,8 +2,8 @@ import _pickle as pickle
 import os
 
 from algotrader.model.model_helper import ModelHelper
-from algotrader.provider.persistence import DataStore, SimpleDataStore
-from algotrader.utils.date_utils import date_to_unixtimemillis
+from algotrader.provider.datastore import DataStore, SimpleDataStore
+from algotrader.utils.date import date_to_unixtimemillis
 
 
 class InMemoryDataStore(SimpleDataStore):

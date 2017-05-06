@@ -9,13 +9,14 @@ class Provider(Startable, HasId):
     def __init__(self):
         super(Provider, self).__init__()
 
+
 from algotrader import SimpleManager
 
 from algotrader.provider.broker.ib.ib_broker import IBBroker
 from algotrader.provider.broker.sim.simulator import Simulator
-from algotrader.provider.feed.csv_feed import CSVDataFeed
+from algotrader.provider.feed.csv import CSVDataFeed
+from algotrader.provider.feed.pandas_web import PandasWebDataFeed
 from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
-from algotrader.provider.feed.pandas_web import GoogleDataFeed, YahooDataFeed
 from algotrader.provider.datastore.inmemory import InMemoryDataStore
 from algotrader.provider.datastore.mongodb import MongoDBDataStore
 
@@ -31,9 +32,8 @@ class ProviderManager(SimpleManager):
         self.add(InMemoryDataStore())
 
         self.add(CSVDataFeed())
+        self.add(PandasWebDataFeed())
         self.add(PandasMemoryDataFeed())
-        self.add(GoogleDataFeed())
-        self.add(YahooDataFeed())
 
     def id(self):
         return "ProviderManager"

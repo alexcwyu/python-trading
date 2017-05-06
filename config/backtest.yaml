@@ -45,7 +45,7 @@ DataStore:
 
 Feed:
   CSV:
-    path: "../data/tradedata"
+    path: "/mnt/data/dev/workspaces/python-trading/data/tradedata"
 
 Broker:
   Simulator:

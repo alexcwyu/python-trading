@@ -1,6 +1,5 @@
 from algotrader import Manager
 from algotrader.provider.datastore import PersistenceMode
-from algotrader.utils.ref_data import *
 
 
 class RefDataManager(Manager):
@@ -43,7 +42,6 @@ class RefDataManager(Manager):
         self._inst_dict = {}
         self._ccy_dict = {}
         self._exch_dict = {}
-
 
     # get all
     def get_all_insts(self):

@@ -6,7 +6,7 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.trade_data_pb2 import *
-from algotrader.utils.protobuf_to_dict import *
+from algotrader.utils.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
 
 model_str_map = {
     Instrument: lambda inst: 'Inst {}'.format(inst.inst_id),

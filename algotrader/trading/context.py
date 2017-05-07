@@ -1,19 +1,18 @@
 from algotrader import Startable
-
-from algotrader.trading.event import EventBus
 from algotrader.model.model_factory import ModelFactory
-from algotrader.provider.datastore import DataStore
 from algotrader.provider import ProviderManager
+from algotrader.provider.datastore import DataStore
 from algotrader.strategy import StrategyManager
 from algotrader.trading.account import AccountManager
 from algotrader.trading.clock import Clock, RealTimeClock, SimulationClock
 from algotrader.trading.config import Config
+from algotrader.trading.event import EventBus
 from algotrader.trading.instrument_data import InstrumentDataManager
 from algotrader.trading.order import OrderManager
 from algotrader.trading.portfolio import PortfolioManager
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.trading.sequence import SequenceManager
-from algotrader.app import Application
+
 
 class ApplicationContext(Startable):
     def __init__(self, app_config: Config):
@@ -47,7 +46,6 @@ class ApplicationContext(Startable):
         if self.app_config.get_app_config("clockId", Clock.Simulation) == Clock.RealTime:
             return RealTimeClock()
         return SimulationClock()
-
 
     def _start(self, app_context):
         for startable in self.startables:

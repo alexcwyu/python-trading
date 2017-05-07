@@ -1,7 +1,7 @@
 import abc
 
-from algotrader.trading.event import OrderEventHandler
 from algotrader.provider import Provider
+from algotrader.trading.event import OrderEventHandler
 
 
 class Broker(Provider, OrderEventHandler):

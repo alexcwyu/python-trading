@@ -1,6 +1,6 @@
 from algotrader.model.trade_data_pb2 import *
-from algotrader.technical.roc import ROC
 from algotrader.strategy import Strategy
+from algotrader.technical.roc import ROC
 
 
 class Down2PctStrategy(Strategy):

@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
+
 from algotrader.utils.data_series import convert_series_idx_to_datetime
+
 
 class TimeSeriesPlot:
     def __init__(self, time_series, marker=" ", color=None):

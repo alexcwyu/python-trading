@@ -1,6 +1,5 @@
-from collections import OrderedDict
-
 import numpy as np
+from collections import OrderedDict
 
 from algotrader.model.model_factory import ModelFactory
 from algotrader.technical import Indicator

@@ -2,14 +2,14 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 from builtins import *
-from typing import Dict
 
-from algotrader.analyzer.drawdown import DrawDownAnalyzer
-from algotrader.analyzer.pnl import PnlAnalyzer
+from typing import Dict
 
 from algotrader import SimpleManager
 from algotrader import Startable, HasId
+from algotrader.analyzer.drawdown import DrawDownAnalyzer
 from algotrader.analyzer.performance import PerformanceAnalyzer
+from algotrader.analyzer.pnl import PnlAnalyzer
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.datastore import PersistenceMode

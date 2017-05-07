@@ -1,5 +1,6 @@
 import abc
 import sys
+
 from collections import defaultdict
 
 from algotrader.model.market_data_pb2 import Bar, Quote, Trade

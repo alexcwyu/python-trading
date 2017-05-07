@@ -1,11 +1,11 @@
 from collections import defaultdict
 
-from algotrader.trading.event import MarketDataEventHandler
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker import Broker
 from algotrader.provider.broker.sim.commission import NoCommission
 from algotrader.provider.broker.sim.fill_strategy import DefaultFillStrategy
+from algotrader.trading.event import MarketDataEventHandler
 from algotrader.utils.logging import logger
 
 
@@ -56,7 +56,7 @@ class Simulator(Broker, MarketDataEventHandler):
         self.__process_event(trade)
 
     def __process_event(self, event):
-        #logger.debug("[%s] %s" % (self.__class__.__name__, event))
+        # logger.debug("[%s] %s" % (self.__class__.__name__, event))
         if event.inst_id in self.ord_req_map:
             executed_orders = []
             for new_ord_req in self.ord_req_map[event.inst_id].values():

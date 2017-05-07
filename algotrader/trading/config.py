@@ -1,7 +1,7 @@
 import json
-from typing import Dict
 
 import yaml
+from typing import Dict
 
 try:
     from yaml import CLoader as Loader, CDumper as Dumper

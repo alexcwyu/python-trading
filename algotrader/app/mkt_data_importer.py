@@ -9,6 +9,7 @@ from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
 from algotrader.utils.market_data import build_subscription_requests
 
+
 class MktDataImporter(Application, MarketDataSubscriber):
     def run(self):
         logger.info("importing data")

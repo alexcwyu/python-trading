@@ -3,11 +3,11 @@ from datetime import datetime
 import swigibpy
 from dateutil.relativedelta import relativedelta
 
-from algotrader.model.market_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
+from algotrader.model.market_data_pb2 import MarketDepth
 from algotrader.provider.broker import Broker
+from algotrader.utils.market_data import MarketDataSubscriptionRequest, S1, S5, S15, S30, M1, M5, M15, M30, H1, D1
 from algotrader.utils.date import datetime_to_unixtimemillis
-from algotrader.utils.market_data import *
 
 
 class IBModelFactory:

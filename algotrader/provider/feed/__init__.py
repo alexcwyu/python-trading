@@ -3,10 +3,10 @@ import abc
 import pandas as pd
 
 from algotrader.model.market_data_pb2 import *
+from algotrader.model.model_factory import ModelFactory
 from algotrader.provider import Provider
 from algotrader.utils.date import datestr_to_unixtimemillis, datetime_to_unixtimemillis
 from algotrader.utils.market_data import D1
-from algotrader.model.model_factory import ModelFactory
 
 
 class Feed(Provider):
@@ -82,7 +82,6 @@ class PandasDataFeed(Feed):
             vol=row['Volume'],
             adj_close=row['Adj Close'] if 'Adj Close' in row else None,
             size=row['BarSize'])
-
 
     @abc.abstractmethod
     def _load_dataframes(self, insts, *sub_reqs):

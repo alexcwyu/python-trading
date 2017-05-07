@@ -5,6 +5,7 @@ from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.datastore import PersistenceMode
 
+
 class Account(object):
     def __init__(self, acct_id: str, values: Dict[str, AccountValue] = None, positions: Dict[str, Position] = None):
         # TODO load from DB

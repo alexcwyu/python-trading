@@ -29,7 +29,6 @@ class BacktestRunner(Application):
         self.app_context.start()
         self.strategy.start(self.app_context)
 
-
         result = self.portfolio.get_result()
         print("Initial:", self.initial_result)
         print("Final:", result)

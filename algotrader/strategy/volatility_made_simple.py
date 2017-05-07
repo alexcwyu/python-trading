@@ -2,8 +2,8 @@ import rx
 from rx.subjects import BehaviorSubject
 
 from algotrader.model.trade_data_pb2 import *
-from algotrader.technical.talib_wrapper import EMA, SMA
 from algotrader.strategy import Strategy
+from algotrader.technical.talib_wrapper import EMA, SMA
 from algotrader.utils.logging import logger
 
 

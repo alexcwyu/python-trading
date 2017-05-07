@@ -1,10 +1,10 @@
 from typing import Dict, List, Union, Callable
 
 from algotrader.model.market_data_pb2 import *
-from algotrader.model.model_helper import ModelHelper
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.trade_data_pb2 import *
+from algotrader.utils.model import add_to_dict, add_to_list
 
 
 class ModelFactory(object):
@@ -35,7 +35,7 @@ class ModelFactory(object):
         if name:
             inst.name = name
 
-        ModelHelper.add_to_list(inst.exch_ids, exch_ids)
+        add_to_list(inst.exch_ids, exch_ids)
 
         if sector:
             inst.sector = sector
@@ -49,10 +49,10 @@ class ModelFactory(object):
         if tick_size:
             inst.tick_size = tick_size
 
-        ModelHelper.add_to_dict(inst.alt_symbols, alt_symbols)
-        ModelHelper.add_to_dict(inst.alt_ids, alt_ids)
-        ModelHelper.add_to_dict(inst.alt_sectors, alt_sectors)
-        ModelHelper.add_to_dict(inst.alt_industries, alt_industries)
+        add_to_dict(inst.alt_symbols, alt_symbols)
+        add_to_dict(inst.alt_ids, alt_ids)
+        add_to_dict(inst.alt_sectors, alt_sectors)
+        add_to_dict(inst.alt_industries, alt_industries)
 
         if underlying_type and underlying_ids:
             ModelFactory.build_underlying(inst, underlying_type, underlying_ids, underlying_weights)
@@ -107,7 +107,7 @@ class ModelFactory(object):
             exchange.trading_hours_id = str(trading_hours_id)
         if holidays_id:
             exchange.holidays_id = str(holidays_id)
-        ModelHelper.add_to_dict(exchange.alt_ids, alt_ids)
+        add_to_dict(exchange.alt_ids, alt_ids)
         return exchange
 
     @staticmethod
@@ -190,8 +190,8 @@ class ModelFactory(object):
             time_series.name = name
         if desc:
             time_series.desc = desc
-        ModelHelper.add_to_list(time_series.inputs, inputs)
-        ModelHelper.add_to_list(time_series.keys, keys)
+        add_to_list(time_series.inputs, inputs)
+        add_to_list(time_series.keys, keys)
         time_series.default_output_key = default_output_key
         time_series.missing_value_replace = missing_value_replace
         time_series.start_time = start_time
@@ -209,7 +209,7 @@ class ModelFactory(object):
     def update_time_series_item(item: TimeSeries.Item, timestamp: int = None,
                                 data: Dict[str, float] = None) -> TimeSeries.Item:
         item.timestamp = timestamp
-        ModelHelper.add_to_dict(item.data, data)
+        add_to_dict(item.data, data)
         return item
 
     @staticmethod
@@ -369,7 +369,7 @@ class ModelFactory(object):
             req.tif = tif
         if oca_tag:
             req.oca_tag = oca_tag
-        ModelHelper.add_to_dict(req.params, params)
+        add_to_dict(req.params, params)
 
         return req
 
@@ -397,7 +397,7 @@ class ModelFactory(object):
             req.tif = tif
         if oca_tag:
             req.oca_tag = oca_tag
-        ModelHelper.add_to_dict(req.params, params)
+        add_to_dict(req.params, params)
 
         return req
 
@@ -409,7 +409,7 @@ class ModelFactory(object):
         req.cl_id = str(cl_id)
         req.cl_ord_id = str(cl_ord_id)
         req.cl_orig_req_id = str(cl_orig_req_id)
-        ModelHelper.add_to_dict(req.params, params)
+        add_to_dict(req.params, params)
 
         return req
 
@@ -488,7 +488,7 @@ class ModelFactory(object):
     @staticmethod
     def update_account_value(value: AccountValue, key: str, ccy_values: Dict[str, float]) -> AccountValue:
         value.key = key
-        ModelHelper.add_to_dict(value.ccy_values, ccy_values)
+        add_to_dict(value.ccy_values, ccy_values)
         return value
 
     @staticmethod
@@ -608,7 +608,7 @@ class ModelFactory(object):
             order.tif = tif
         if oca_tag:
             order.oca_tag = oca_tag
-        ModelHelper.add_to_dict(order.params, params)
+        add_to_dict(order.params, params)
 
         if status:
             order.status = status

@@ -5,10 +5,10 @@ from rx.subjects import Subject
 
 from algotrader import Startable
 from algotrader.model.market_data_pb2 import Bar, Quote, Trade, MarketDepth
-from algotrader.model.model_helper import ModelHelper
 from algotrader.model.trade_data_pb2 import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
     ExecutionReport, AccountUpdate, PortfolioUpdate
 from algotrader.utils.logging import logger
+from algotrader.utils.model import model_to_str
 
 
 class EventBus(object):
@@ -197,7 +197,7 @@ class EventLogger(ExecutionEventHandler, MarketDataEventHandler, OrderEventHandl
         self.execution_subject.subscribe(self.on_execution_event)
 
     def log(self, item) -> None:
-        logger.info(ModelHelper.model_to_str(item))
+        logger.info(model_to_str(item))
         self.count[type(item)] += 1
         self.last_item[type(item)] = item
 

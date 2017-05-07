@@ -1,14 +1,14 @@
 import datetime
-from typing import Dict
 
 import numpy as np
 import pandas as pd
 from rx.subjects import Subject
+from typing import Dict
 
 from algotrader import Startable
 from algotrader.model.model_factory import ModelFactory
-from algotrader.model.model_helper import ModelHelper
 from algotrader.model.time_series_pb2 import TimeSeries
+from algotrader.utils.model import add_to_list
 
 
 class DataSeriesEvent(object):
@@ -58,7 +58,7 @@ class DataSeries(Startable):
         timestamp = timestamp if timestamp is not None else data.get(DataSeries.TIMESTAMP)
 
         if not self.time_series.keys:
-            ModelHelper.add_to_list(self.time_series.keys, data.keys())
+            add_to_list(self.time_series.keys, data.keys())
 
         if not self.time_series.start_time:
             self.time_series.start_time = timestamp

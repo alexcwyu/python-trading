@@ -1,13 +1,13 @@
 # protoc -I=model --python_out=generated model/*.proto
 
 from datetime import date
-from unittest import TestCase
 
 from google.protobuf import json_format
+from unittest import TestCase
 
 import algotrader.model.ref_data_pb2 as ref_data
-from algotrader.model.protobuf_to_dict import *
 from algotrader.utils.date import date_to_unixtimemillis
+from algotrader.utils.protobuf_to_dict import *
 
 
 class RefDataTest(TestCase):

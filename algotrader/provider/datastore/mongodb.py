@@ -1,10 +1,14 @@
 from pymongo import MongoClient
 
-from algotrader.model.model_helper import *
-from algotrader.model.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.ref_data_pb2 import *
+from algotrader.model.time_series_pb2 import *
+from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.datastore import SimpleDataStore, DataStore
-from algotrader.utils.logging import logger
 from algotrader.utils.date import date_to_unixtimemillis
+from algotrader.utils.logging import logger
+from algotrader.utils.model import get_model_id
+from algotrader.utils.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
 
 
 class MongoDBDataStore(SimpleDataStore):
@@ -74,7 +78,7 @@ class MongoDBDataStore(SimpleDataStore):
 
     def save(self, obj):
         logger.info("[%s] saving %s" % (self.__class__.__name__, obj))
-        id = ModelHelper.get_model_id(obj)
+        id = get_model_id(obj)
         packed_data = protobuf_to_dict(obj)
         t = type(obj)
         self.db_map[t].update({'_id': id}, packed_data, upsert=True)

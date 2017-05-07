@@ -2,9 +2,9 @@ import _pickle as pickle
 
 import os
 
-from algotrader.model.model_helper import ModelHelper
 from algotrader.provider.datastore import DataStore, SimpleDataStore
 from algotrader.utils.date import date_to_unixtimemillis
+from algotrader.utils.model import model_to_dict, get_model_from_db_name, dict_to_model, get_model_id
 from algotrader.utils.ref_data import *
 
 
@@ -79,9 +79,9 @@ class InMemoryDataStore(SimpleDataStore):
         result = []
         if db == 'sequences':
             return self.sequences
-        clazz = ModelHelper.get_model_from_db_name(db)
+        clazz = get_model_from_db_name(db)
         for id, data in self.db.get(db, {}).items():
-            obj = ModelHelper.dict_to_model(clazz, data)
+            obj = dict_to_model(clazz, data)
             result.append(obj)
         return result
 
@@ -91,7 +91,7 @@ class InMemoryDataStore(SimpleDataStore):
         load_exch_from_csv(self, exch_csv)
 
     def _serialize(self, serializable):
-        return ModelHelper.get_model_id(serializable), ModelHelper.model_to_dict(serializable)
+        return get_model_id(serializable), model_to_dict(serializable)
 
     # RefDataStore
     def save_instrument(self, instrument):

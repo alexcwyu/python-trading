@@ -1,3 +1,6 @@
+import pandas as pd
+from tzlocal import get_localzone
+
 from algotrader.technical import Indicator
 
 
@@ -40,3 +43,9 @@ def get_or_create_indicator(inst_data_mgr, cls, *args, **kwargs):
     if not inst_data_mgr.has_series(name):
         return globals()[cls](*args, **kwargs)
     return inst_data_mgr.get_series(name, create_if_missing=False)
+
+
+def convert_series_idx_to_datetime(series: pd.Series) -> pd.Series:
+    return pd.Series(series.values,
+                     index=pd.to_datetime(series.index, unit='ms').tz_localize('UTC')
+                     .tz_convert(get_localzone().zone))

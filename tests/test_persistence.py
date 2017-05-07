@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from unittest import TestCase
 
-from algotrader.model.protobuf_to_dict import *
+from algotrader.utils.protobuf_to_dict import *
 from tests.sample_factory import *
 
 

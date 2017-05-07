@@ -20,12 +20,11 @@ def timestamp_to_datetime(timestamp: int) -> datetime.datetime:
 
 
 def datestr_to_unixtimemillis(datestr: str) -> int:
-    return int(
-        (datetime.datetime.combine(datestr_to_date(datestr),
-                                   datetime.datetime.min.time()) - epoch).total_seconds() * 1000)
+    return date_to_unixtimemillis(datestr_to_date(datestr))
 
 
 def datestr_to_date(datestr: str) -> datetime.date:
+    datestr = str(datestr)
     return datetime.date(int(datestr[0:4]), int(datestr[4:6]), int(datestr[6:8]))
 
 

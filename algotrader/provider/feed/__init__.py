@@ -13,9 +13,9 @@ class Feed(Provider):
     CSV = "CSV"
     PandasMemory = "PandasMemory"
     PandasH5 = "PandasH5"
+    PandasWeb = "PandasWeb"
     Yahoo = "Yahoo"
     Google = "Google"
-    PandasWeb = "PandasWeb"
     Quandl = "Quandl"
 
     __metaclass__ = abc.ABCMeta

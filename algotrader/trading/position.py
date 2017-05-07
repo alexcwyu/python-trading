@@ -1,11 +1,11 @@
 import abc
 
-from algotrader.trading.event import MarketDataEventHandler
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
-from algotrader.model.model_helper import ModelHelper
 from algotrader.model.trade_data_pb2 import *
+from algotrader.trading.event import MarketDataEventHandler
 from algotrader.utils.market_data import get_quote_mid
+from algotrader.utils.model import add_to_list
 
 
 class HasPositions(MarketDataEventHandler):
@@ -39,7 +39,7 @@ class HasPositions(MarketDataEventHandler):
         position.filled_qty += qty
 
     def add_order(self, inst_id: str, cl_id: str, cl_ord_id: str, ordered_qty: float) -> None:
-        ModelHelper.add_to_list(self.state.cl_ord_ids, [cl_ord_id])
+        add_to_list(self.state.cl_ord_ids, [cl_ord_id])
 
         position = self.get_position(inst_id)
         order_position = self.__get_or_add_order(position=position, cl_id=cl_id,

@@ -2,11 +2,11 @@ from unittest import TestCase
 
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
-from algotrader.model.protobuf_to_dict import protobuf_to_dict
 from algotrader.model.time_series_pb2 import *
 from algotrader.trading.bar_aggregator import BarAggregator, BarInputType
 from algotrader.trading.clock import SimulationClock
 from algotrader.trading.data_series import DataSeries
+from algotrader.utils.protobuf_to_dict import protobuf_to_dict
 
 
 class BarAggregatorTest(TestCase):

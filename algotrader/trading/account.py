@@ -1,12 +1,12 @@
 from typing import Dict
 
-from algotrader import SimpleManager
+from algotrader import SimpleManager, Context, Startable, HasId
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.datastore import PersistenceMode
 
 
-class Account(object):
+class Account(Startable, HasId):
     def __init__(self, acct_id: str, values: Dict[str, AccountValue] = None, positions: Dict[str, Position] = None):
         # TODO load from DB
         self.__state = ModelFactory.build_account_state(acct_id=acct_id, values=values, positions=positions)
@@ -19,31 +19,36 @@ class Account(object):
     def id(self) -> str:
         return self.__state.acct_id
 
+    def _start(self, app_context: Context) -> None:
+        # TODO
+        pass
+
 
 class AccountManager(SimpleManager):
     def __init__(self):
         super(AccountManager, self).__init__()
+        self.store = None
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.store = self.app_context.get_data_store()
-        self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
+        self.persist_mode = self.app_context.config.get_app_config("persistenceMode")
         self.load_all()
 
     def load_all(self):
-        if hasattr(self, "store") and self.store:
+        if self.store:
             self.store.start(self.app_context)
             accounts = self.store.load_all('accounts')
             for account in accounts:
                 self.add(account)
 
     def save_all(self):
-        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
+        if self.store and self.persist_mode != PersistenceMode.Disable:
             for account in self.all_items():
                 self.store.save_account(account)
 
     def add(self, account):
         super(AccountManager, self).add(account)
-        if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
+        if self.store and self.persist_mode == PersistenceMode.RealTime:
             self.store.save_account(account)
 
     def id(self):

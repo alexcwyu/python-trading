@@ -1,3 +1,4 @@
+from algotrader import Context
 from algotrader.model.trade_data_pb2 import *
 from algotrader.strategy import Strategy
 from algotrader.technical.ma import SMA
@@ -9,8 +10,8 @@ class SMAStrategy(Strategy):
         super(SMAStrategy, self).__init__(stg_id=stg_id, state=state)
         self.buy_order = None
 
-    def _start(self, app_context):
-        self.instruments = app_context.app_config.get_app_config("instrumentIds")
+    def _start(self, app_context: Context) -> None:
+        self.instruments = app_context.config.get_app_config("instrumentIds")
         self.qty = self._get_stg_config("qty", default=1)
         self.bar = self.app_context.inst_data_mgr.get_series(
             "Bar.%s.Time.86400" % self.instruments[0])

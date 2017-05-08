@@ -1,7 +1,9 @@
-from algotrader import Startable
+from algotrader import Context
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider import ProviderManager
+from algotrader.provider.broker import Broker
 from algotrader.provider.datastore import DataStore
+from algotrader.provider.feed import Feed
 from algotrader.strategy import StrategyManager
 from algotrader.trading.account import AccountManager
 from algotrader.trading.clock import Clock, RealTimeClock, SimulationClock
@@ -9,18 +11,16 @@ from algotrader.trading.config import Config
 from algotrader.trading.event import EventBus
 from algotrader.trading.instrument_data import InstrumentDataManager
 from algotrader.trading.order import OrderManager
-from algotrader.trading.portfolio import PortfolioManager
+from algotrader.trading.portfolio import Portfolio, PortfolioManager
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.trading.sequence import SequenceManager
 
 
-class ApplicationContext(Startable):
-    def __init__(self, app_config: Config):
+class ApplicationContext(Context):
+    def __init__(self, config: Config = None):
         super(ApplicationContext, self).__init__()
 
-        self.startables = []
-
-        self.app_config = app_config
+        self.config = config if config else Config()
 
         self.clock = self.add_startable(self.__get_clock())
         self.provider_mgr = self.add_startable(ProviderManager())
@@ -38,31 +38,20 @@ class ApplicationContext(Startable):
         self.event_bus = EventBus()
         self.model_factory = ModelFactory
 
-    def add_startable(self, startable: Startable) -> Startable:
-        self.startables.append(startable)
-        return startable
-
     def __get_clock(self) -> Clock:
-        if self.app_config.get_app_config("clockId", Clock.Simulation) == Clock.RealTime:
+        if self.config.get_app_config("clockId", Clock.Simulation) == Clock.RealTime:
             return RealTimeClock()
         return SimulationClock()
 
-    def _start(self, app_context):
-        for startable in self.startables:
-            startable.start(self)
-
-    def _stop(self):
-        for startable in reversed(self.startables):
-            startable.stop()
-
     def get_data_store(self) -> DataStore:
-        return self.provider_mgr.get(self.app_config.get_app_config("dataStoreId"))
+        return self.provider_mgr.get(self.config.get_app_config("dataStoreId"))
 
-    def get_broker(self):
-        pass
+    def get_broker(self) -> Broker:
+        return self.provider_mgr.get(self.config.get_app_config("brokerId"))
 
-    def get_feed(self):
-        pass
+    def get_feed(self) -> Feed:
+        return self.provider_mgr.get(self.config.get_app_config("feedId"))
 
-    def get_portfolio(self):
-        pass
+    def get_portfolio(self) -> Portfolio:
+        return self.portf_mgr.get_or_new_portfolio(self.config.get_app_config("dataStoreId"),
+                                                   self.config.get_app_config("portfolioInitialcash"))

@@ -32,7 +32,7 @@ class Feed(Provider):
         raise NotImplementedError()
 
     def _get_feed_config(self, path: str, default=None):
-        return self.app_context.app_config.get_feed_config(self.id(), path, default=default)
+        return self.app_context.config.get_feed_config(self.id(), path, default=default)
 
 
 class PandasDataFeed(Feed):

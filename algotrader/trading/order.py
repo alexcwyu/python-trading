@@ -1,8 +1,7 @@
 from typing import Any
 from typing import List
 
-from algotrader import Manager
-from algotrader import Startable
+from algotrader import Manager, Startable, Context
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
@@ -17,7 +16,7 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
         self.__state = state
         self.events = events if events else []
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.model_factory = app_context.model_factory
 
     def on_new_ord_req(self, req: NewOrderRequest) -> None:
@@ -208,10 +207,11 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         super(OrderManager, self).__init__()
         self.order_dict = {}
         self.ord_reqs_dict = {}
+        self.store = None
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.store = app_context.get_data_store()
-        self.persist_mode = app_context.app_config.get_app_config("persistenceMode")
+        self.persist_mode = app_context.config.get_app_config("persistenceMode")
         self.load_all()
         self.subscriptions = []
         self.subscriptions.append(app_context.event_bus.data_subject.subscribe(self.on_market_data_event))
@@ -232,7 +232,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         return [order for order in self.order_dict.values()]
 
     def load_all(self):
-        if hasattr(self, "store") and self.store:
+        if self.store:
             self.store.start(self.app_context)
             orders = self.store.load_all('orders')
             for order in orders:
@@ -243,7 +243,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                 self.ord_reqs_dict[self._cl_ord_id(new_order_req)] = new_order_req
 
     def save_all(self):
-        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
+        if self.store and self.persist_mode != PersistenceMode.Disable:
             for order in self.all_orders():
                 self.store.save_order(order)
 
@@ -273,7 +273,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         super(OrderManager, self).on_ord_upd(ord_upd)
 
         # persist
-        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:
+        if self.store and self.persist_mode != PersistenceMode.RealTime:
             self.store.save_ord_status_upd(ord_upd)
 
         # update order
@@ -309,7 +309,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         super(OrderManager, self).on_exec_report(exec_report)
 
         # persist
-        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:
+        if self.store and self.persist_mode != PersistenceMode.RealTime:
             self.store.save_exec_report(exec_report)
 
         # update order
@@ -344,7 +344,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                 "ClientOrderId has been used!! ord_id = %s" % (ord_id))
 
         # persist
-        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:
+        if self.store and self.persist_mode != PersistenceMode.RealTime:
             self.store.save_new_order_req(new_ord_req)
 
         order = Order(ModelFactory.build_order_state_from_nos(new_ord_req))
@@ -370,7 +370,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                 ord_id))
 
         # persist
-        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:
+        if self.store and self.persist_mode != PersistenceMode.RealTime:
             self.store.save_ord_cancel_req(ord_cancel_req)
 
         order = self.order_dict[ord_id]
@@ -390,7 +390,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
                 ord_id))
 
         # persist
-        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.RealTime:
+        if self.store and self.persist_mode != PersistenceMode.RealTime:
             self.store.save_ord_replace_req(ord_replace_req)
 
         order = self.order_dict[ord_id]

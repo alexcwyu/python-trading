@@ -4,7 +4,7 @@ from collections import OrderedDict
 from algotrader.model.model_factory import ModelFactory
 from algotrader.technical import Indicator
 from algotrader.trading.data_series import DataSeries, DataSeriesEvent
-
+from algotrader import Context
 
 class PipeLine(DataSeries):
     VALUE = 'value'
@@ -107,7 +107,7 @@ class PipeLine(DataSeries):
         # self.cache = {} # key is input name, value is numpy array
         # self.update_all()
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         super(PipeLine, self)._start(self.app_context)
 
         # if not hasattr(self, 'inputs') or not self.inputs:

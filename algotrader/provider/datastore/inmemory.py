@@ -6,16 +6,17 @@ from algotrader.provider.datastore import DataStore, SimpleDataStore
 from algotrader.utils.date import date_to_unixtimemillis
 from algotrader.utils.model import model_to_dict, get_model_from_db_name, dict_to_model, get_model_id
 from algotrader.utils.ref_data import *
+from algotrader import Context
 
 
 class InMemoryDataStore(SimpleDataStore):
     def __init__(self):
         super(InMemoryDataStore, self).__init__()
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.file = self._get_datastore_config("file")
-        self.create_at_start = app_context.app_config.get_app_config("createDBAtStart")
-        self.delete_at_stop = app_context.app_config.get_app_config("deleteDBAtStop")
+        self.create_at_start = app_context.config.get_app_config("createDBAtStart")
+        self.delete_at_stop = app_context.config.get_app_config("deleteDBAtStop")
 
         try:
             self.db = pickle.load(open(self.file, "rb"))

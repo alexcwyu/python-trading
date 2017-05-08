@@ -1,5 +1,5 @@
 from algotrader.provider.feed import PandasDataFeed, Feed
-
+from algotrader import Context
 
 class PandasMemoryDataFeed(PandasDataFeed):
     """
@@ -9,7 +9,7 @@ class PandasMemoryDataFeed(PandasDataFeed):
     def __init__(self):
         super(PandasMemoryDataFeed, self).__init__()
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         pass
 
     def set_data_frame(self, dict_of_df):

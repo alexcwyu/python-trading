@@ -1,6 +1,7 @@
 import pandas as pd
 
 from algotrader.provider.feed import Feed, PandasDataFeed
+from algotrader import Context
 
 
 class CSVDataFeed(PandasDataFeed):
@@ -9,7 +10,7 @@ class CSVDataFeed(PandasDataFeed):
     def __init__(self):
         super(CSVDataFeed, self).__init__()
 
-    def _start(self, app_context):
+    def _start(self, app_context : Context) -> None:
         self.path = self._get_feed_config("path")
 
     def id(self):

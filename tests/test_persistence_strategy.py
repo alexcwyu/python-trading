@@ -17,7 +17,7 @@ from algotrader.trading.subscription import BarSubscriptionType
 
 class StrategyPersistenceTest(TestCase):
     def test(self):
-        backtest_config0 = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
+        config0 = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
                                              stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
                                              portfolio_id='test', portfolio_initial_cash=100000,
                                              instrument_ids=['SPY@NYSEARCA'],
@@ -31,7 +31,7 @@ class StrategyPersistenceTest(TestCase):
                                              persistence_config=PersistenceConfig(),
                                              provider_configs=CSVFeedConfig(path='data/tradedata')
                                              )
-        app_context0 = ApplicationContext(app_config=backtest_config0)
+        app_context0 = ApplicationContext(config=config0)
         runner = BacktestRunner(_=False)
 
         runner.start(app_context0)
@@ -39,7 +39,7 @@ class StrategyPersistenceTest(TestCase):
         total_begin_result = runner.initial_result
         total_end_result = runner.portfolio.get_result()
 
-        backtest_config1 = BacktestingConfig(id="down2%-test-config_1", stg_id="down2%_1",
+        config1 = BacktestingConfig(id="down2%-test-config_1", stg_id="down2%_1",
                                              stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
                                              portfolio_id='test_1', portfolio_initial_cash=100000,
                                              instrument_ids=['SPY@NYSEARCA'],
@@ -57,14 +57,14 @@ class StrategyPersistenceTest(TestCase):
                                                                trade_ds_id=DataStore.InMemory,
                                                                trade_persist_mode=PersistenceMode.Batch),
                                              provider_configs=CSVFeedConfig(path='data/tradedata'))
-        app_context1 = ApplicationContext(app_config=backtest_config1)
+        app_context1 = ApplicationContext(config=config1)
         runner1 = BacktestRunner(_=False)
         runner1.start(app_context1)
 
         part1_begin_result = runner1.initial_result
         part1_end_result = runner1.portfolio.get_result()
 
-        backtest_config2 = BacktestingConfig(id="down2%-test-config_1", stg_id="down2%_1",
+        config2 = BacktestingConfig(id="down2%-test-config_1", stg_id="down2%_1",
                                              stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
                                              portfolio_id='test_1', portfolio_initial_cash=100000,
                                              instrument_ids=[4],
@@ -82,7 +82,7 @@ class StrategyPersistenceTest(TestCase):
                                                                                   trade_ds_id=DataStore.InMemory,
                                                                                   trade_persist_mode=PersistenceMode.Batch),
                                              provider_configs=CSVFeedConfig(path='data/tradedata'))
-        app_context2 = ApplicationContext(app_config=backtest_config2)
+        app_context2 = ApplicationContext(config=config2)
         app_context2.start()
         db = app_context2.get_seq_data_store()
 

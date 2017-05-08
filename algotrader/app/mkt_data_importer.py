@@ -14,16 +14,16 @@ class MktDataImporter(Application, MarketDataSubscriber):
     def run(self):
         logger.info("importing data")
         self.app_context.start()
-        app_config = self.app_context.app_config
+        config = self.app_context.config
 
-        feed = self.app_context.provider_mgr.get(app_config.get_app_config("feedId"))
+        feed = self.app_context.provider_mgr.get(config.get_app_config("feedId"))
         feed.start(self.app_context)
-        instruments = self.app_context.ref_data_mgr.get_insts_by_ids(app_config.get_app_config("instrumentIds"))
+        instruments = self.app_context.ref_data_mgr.get_insts_by_ids(config.get_app_config("instrumentIds"))
 
         for sub_req in build_subscription_requests(feed.id(), instruments,
-                                                   app_config.get_app_config("subscriptionTypes"),
-                                                   app_config.get_app_config("fromDate"),
-                                                   app_config.get_app_config("toDate")):
+                                                   config.get_app_config("subscriptionTypes"),
+                                                   config.get_app_config("fromDate"),
+                                                   config.get_app_config("toDate")):
             feed.subscribe_mktdata(sub_req)
 
         logger.info("ATS started, presss Ctrl-C to stop")
@@ -33,9 +33,9 @@ class MktDataImporter(Application, MarketDataSubscriber):
 
 
 def main():
-    app_config = Config(load_from_yaml("../../config/data_import.yaml"),
+    config = Config(load_from_yaml("../../config/data_import.yaml"),
                         {"Application": {"feedId": "Yahoo"}})
-    app_context = ApplicationContext(app_config=app_config)
+    app_context = ApplicationContext(config=config)
     MktDataImporter().start(app_context)
 
 

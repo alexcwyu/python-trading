@@ -10,13 +10,13 @@ from algotrader.trading.clock import Clock
 from algotrader.trading.context import ApplicationContext
 
 
-class PersistenceTest(TestCase):
+class IndicatorPersistenceTest(TestCase):
     def new_app_context(self):
         name = "test"
         create_at_start = True
         delete_at_stop = False
 
-        app_config = ApplicationConfig("app", None, Clock.Simulation, PersistenceConfig(
+        config = ApplicationConfig("app", None, Clock.Simulation, PersistenceConfig(
             ref_ds_id=DataStore.InMemory, ref_persist_mode=PersistenceMode.RealTime,
             trade_ds_id=DataStore.InMemory, trade_persist_mode=PersistenceMode.RealTime,
             ts_ds_id=DataStore.InMemory, ts_persist_mode=PersistenceMode.RealTime,
@@ -24,7 +24,7 @@ class PersistenceTest(TestCase):
                                        InMemoryStoreConfig(file="%s_db.p" % name,
                                                            create_at_start=create_at_start,
                                                            delete_at_stop=delete_at_stop))
-        app_context = ApplicationContext(app_config=app_config)
+        app_context = ApplicationContext(config=config)
         app_context.start()
         return app_context
 

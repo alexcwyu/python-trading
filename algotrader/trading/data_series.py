@@ -5,7 +5,7 @@ import pandas as pd
 from rx.subjects import Subject
 from typing import Dict
 
-from algotrader import Startable
+from algotrader import Startable, Context
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.time_series_pb2 import TimeSeries
 from algotrader.utils.model import add_to_list
@@ -45,7 +45,7 @@ class DataSeries(Startable):
         else:
             pass
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         pass
 
     def _stop(self):

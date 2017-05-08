@@ -25,7 +25,7 @@ class IndicatorTest(TestCase):
         self.assertNotEquals(sma2, sma3)
         self.assertNotEquals(sma1, sma3)
 
-        sma4 = self.utils.get_or_create_indicator(self.app_context.inst_data_mgr, "SMA", "SMA('bar',close,3)", 10)
+        sma4 = get_or_create_indicator(self.app_context.inst_data_mgr, "SMA", "SMA('bar',close,3)", 10)
         sma4.start(self.app_context)
 
         self.assertEquals(sma4.input, sma2)

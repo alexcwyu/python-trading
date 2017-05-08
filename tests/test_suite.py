@@ -26,7 +26,8 @@ from tests.test_rolling import RollingApplyTest
 from tests.test_ser_deser import SerializationTest
 #from tests.test_strategy_persistence import StrategyPersistenceTest
 from tests.test_talib_wrapper import TALibSMATest
-
+from tests.test_feed import FeedTest
+from tests.test_plot import PlotTest
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -36,6 +37,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(BrokerManagerTest))
     test_suite.addTest(unittest.makeSuite(ClockTest))
     test_suite.addTest(unittest.makeSuite(DataSeriesTest))
+    test_suite.addTest(unittest.makeSuite(FeedTest))
     test_suite.addTest(unittest.makeSuite(IndicatorTest))
     test_suite.addTest(unittest.makeSuite(InstrumentDataTest))
     test_suite.addTest(unittest.makeSuite(MovingAverageTest))
@@ -43,13 +45,14 @@ def suite():
     test_suite.addTest(unittest.makeSuite(ModelFactoryTest))
     test_suite.addTest(unittest.makeSuite(OrderTest))
     test_suite.addTest(unittest.makeSuite(OrderHandlerTest))
-    test_suite.addTest(unittest.makeSuite(PortfolioTest))
-    test_suite.addTest(unittest.makeSuite(PositionTest))
     #test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
     test_suite.addTest(unittest.makeSuite(InMemoryDBTest))
-    test_suite.addTest(unittest.makeSuite(PersistenceTest))
+    #test_suite.addTest(unittest.makeSuite(PersistenceTest))
     #test_suite.addTest(unittest.makeSuite(PipelineTest))
     #test_suite.addTest(unittest.makeSuite(PairwiseTest))
+    test_suite.addTest(unittest.makeSuite(PlotTest))
+    test_suite.addTest(unittest.makeSuite(PortfolioTest))
+    test_suite.addTest(unittest.makeSuite(PositionTest))
     test_suite.addTest(unittest.makeSuite(RefDataTest))
     test_suite.addTest(unittest.makeSuite(RollingApplyTest))
     test_suite.addTest(unittest.makeSuite(SerializationTest))

@@ -53,7 +53,7 @@
 #
 #     def _start(self, app_context):
 #
-#         self.cass_config = app_context.app_config.get_config(CassandraConfig)
+#         self.cass_config = app_context.config.get_config(CassandraConfig)
 #         self.cluster = Cluster(contact_points=self.cass_config.contact_points)
 #
 #         self.session = self.cluster.connect()

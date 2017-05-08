@@ -34,7 +34,7 @@ class DataStore(Provider):
         pass
 
     def _get_datastore_config(self, path: str, default=None):
-        return self.app_context.app_config.get_datastore_config(self.id(), path, default=default)
+        return self.app_context.config.get_datastore_config(self.id(), path, default=default)
 
 
 class RefDataStore(DataStore):

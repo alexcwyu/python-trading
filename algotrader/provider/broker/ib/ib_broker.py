@@ -12,6 +12,7 @@ from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.feed import Feed
 from algotrader.utils.logging import logger
+from algotrader import Context
 
 
 class DataRecord(object):
@@ -150,7 +151,7 @@ class IBBroker(IBSocket, Broker, Feed):
         self.completed_reqs = []
         self.req_callback = {}
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
 
         self.next_request_id = self._get_broker_config("nextRequestId")
         self.next_order_id = self._get_broker_config("nextOrderId")

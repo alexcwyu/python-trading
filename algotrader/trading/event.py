@@ -3,7 +3,7 @@ import abc
 from rx import Observer
 from rx.subjects import Subject
 
-from algotrader import Startable
+from algotrader import Startable, Context
 from algotrader.model.market_data_pb2 import Bar, Quote, Trade, MarketDepth
 from algotrader.model.trade_data_pb2 import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
     ExecutionReport, AccountUpdate, PortfolioUpdate
@@ -48,7 +48,7 @@ class EventHandler(Observer):
     def on_completed(self):
         logger.debug("[%s] Completed" % self.__class__.__name__)
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         pass
 
     def _stop(self):
@@ -190,7 +190,7 @@ class EventLogger(ExecutionEventHandler, MarketDataEventHandler, OrderEventHandl
         self.count = Counter()
         self.last_item = {}
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.data_subject = app_context.event_bus.data_subject
         self.execution_subject = app_context.event_bus.execution_subject
         self.data_subject.subscribe(self.on_market_data_event)

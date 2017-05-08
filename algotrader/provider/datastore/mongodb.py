@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 
+from algotrader import Context
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
@@ -15,15 +16,15 @@ class MongoDBDataStore(SimpleDataStore):
     def __init__(self):
         super(MongoDBDataStore, self).__init__()
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
 
         self.host = self._get_datastore_config("host")
         self.port = self._get_datastore_config("port")
         self.username = self._get_datastore_config("username")
         self.password = self._get_datastore_config("password")
         self.dbname = self._get_datastore_config("dbname")
-        self.create_at_start = app_context.app_config.get_app_config("createDBAtStart")
-        self.delete_at_stop = app_context.app_config.get_app_config("deleteDBAtStop")
+        self.create_at_start = app_context.config.get_app_config("createDBAtStart")
+        self.delete_at_stop = app_context.config.get_app_config("deleteDBAtStop")
 
         self.client = MongoClient(host=self.host, port=self.port)
         self.db = self.client[self.dbname]

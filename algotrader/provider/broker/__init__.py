@@ -14,4 +14,4 @@ class Broker(Provider, OrderEventHandler):
         super(Provider, self).__init__()
 
     def _get_broker_config(self, path: str, default=None):
-        return self.app_context.app_config.get_broker_config(self.id(), path, default=default)
+        return self.app_context.config.get_broker_config(self.id(), path, default=default)

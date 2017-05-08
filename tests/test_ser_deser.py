@@ -1,7 +1,11 @@
 from unittest import TestCase
 
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.ref_data_pb2 import *
+from algotrader.model.time_series_pb2 import *
+from algotrader.model.trade_data_pb2 import *
 from algotrader.utils.protobuf_to_dict import *
-from tests.sample_factory import *
+from tests.sample_factory import SampleFactory
 
 
 class SerializationTest(TestCase):

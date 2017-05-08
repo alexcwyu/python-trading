@@ -5,6 +5,7 @@ from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.trading.context import ApplicationContext
+from tests import empty_config
 
 
 class SimulatorTest(TestCase):

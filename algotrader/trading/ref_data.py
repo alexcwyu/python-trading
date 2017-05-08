@@ -1,4 +1,4 @@
-from algotrader import Manager
+from algotrader import Manager, Context
 from algotrader.provider.datastore import PersistenceMode
 
 
@@ -9,10 +9,11 @@ class RefDataManager(Manager):
         self._inst_dict = {}
         self._ccy_dict = {}
         self._exch_dict = {}
+        self.store = None
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.store = self.app_context.get_data_store()
-        self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
+        self.persist_mode = self.app_context.config.get_app_config("persistenceMode")
         self.load_all()
 
     def _stop(self):

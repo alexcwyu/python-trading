@@ -2,6 +2,7 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
+from algotrader.model.time_series_pb2 import *
 
 
 class SampleFactory(object):

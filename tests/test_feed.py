@@ -1,10 +1,10 @@
 from nose_parameterized import parameterized, param
 from unittest import TestCase
 
-from algotrader.trading.config import Config
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.event import EventLogger
 from algotrader.utils.market_data import *
+from tests import config
 
 params = [
     param('CSV', ['Bar.Yahoo.Time.D1']),
@@ -16,24 +16,7 @@ params = [
 class FeedTest(TestCase):
     @parameterized.expand(params)
     def test_loaded_bar(self, feed_id, subscription_types):
-        app_config = Config({
-            "Application": {
-                "dataStoreId": "InMemory"
-            },
-            "DataStore": {"InMemory":
-                {
-                    "file": "../data/algotrader_db.p",
-                    "instCSV": "../data/refdata/instrument.csv",
-                    "ccyCSV": "../data/refdata/ccy.csv",
-                    "exchCSV": "../data/refdata/exch.csv"
-                }
-            },
-            "Feed": {"CSV":
-                         {"path": "/mnt/data/dev/workspaces/python-trading/data/tradedata"}
-                     }
-        })
-
-        app_context = ApplicationContext(app_config=app_config)
+        app_context = ApplicationContext(config=config)
         app_context.start()
 
         feed = app_context.provider_mgr.get(feed_id)

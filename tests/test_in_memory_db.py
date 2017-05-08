@@ -1,38 +1,21 @@
 import random
 
-from algotrader.config.app import ApplicationConfig
-from algotrader.config.persistence import PersistenceConfig, InMemoryStoreConfig
-from algotrader.provider.datastore import PersistenceMode
 from unittest import TestCase
 
 from algotrader.model.model_factory import ModelFactory
-from algotrader.provider.datastore import DataStore
 from algotrader.provider.datastore.inmemory import InMemoryDataStore
-from algotrader.trading.clock import Clock
 from algotrader.trading.context import ApplicationContext
+from tests import empty_config
 
 
 class InMemoryDBTest(TestCase):
     def setUp(self):
 
-        persistence_config = PersistenceConfig(None,
-                                               DataStore.InMemory, PersistenceMode.Batch,
-                                               DataStore.InMemory, PersistenceMode.Batch,
-                                               DataStore.InMemory, PersistenceMode.Batch,
-                                               DataStore.InMemory, PersistenceMode.Batch)
-
-        name = "test"
-        create_at_start = True
-        delete_at_stop = False
-
-        app_config = ApplicationConfig(None, None, Clock.RealTime, persistence_config,
-                                       InMemoryStoreConfig(file="%s_db.p" % name,
-                                                           create_at_start=create_at_start,
-                                                           delete_at_stop=delete_at_stop))
-        self.context = ApplicationContext(app_config=app_config)
+        self.app_context = ApplicationContext(config=empty_config)
+        self.app_context.start()
 
         self.db = InMemoryDataStore()
-        self.db.start(self.context)
+        self.db.start(self.app_context)
 
     def tearDown(self):
         self.db.remove_database()
@@ -50,7 +33,7 @@ class InMemoryDBTest(TestCase):
         self.db.stop()
 
         self.db = InMemoryDataStore()
-        self.db.start(self.context)
+        self.db.start(self.app_context)
 
         bars = self.db.load_all('bars')
         bars = sorted(bars, key=lambda x: x.timestamp, reverse=False)

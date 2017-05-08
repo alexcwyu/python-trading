@@ -1,7 +1,7 @@
 import pandas as pd
 
 from algotrader.provider.feed import Feed, PandasDataFeed
-
+from algotrader import Context
 
 class PandaH5DataFeed(PandasDataFeed):
     """
@@ -11,7 +11,7 @@ class PandaH5DataFeed(PandasDataFeed):
     def __init__(self):
         super(PandaH5DataFeed, self).__init__()
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.h5file = self._get_feed_config("path")
 
     def id(self):

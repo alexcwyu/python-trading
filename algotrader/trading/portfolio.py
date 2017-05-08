@@ -5,8 +5,7 @@ from builtins import *
 
 from typing import Dict
 
-from algotrader import SimpleManager
-from algotrader import Startable, HasId
+from algotrader import SimpleManager, Context, Startable, HasId
 from algotrader.analyzer.drawdown import DrawDownAnalyzer
 from algotrader.analyzer.performance import PerformanceAnalyzer
 from algotrader.analyzer.pnl import PnlAnalyzer
@@ -27,7 +26,7 @@ class Portfolio(HasPositions, Startable, HasId):
         self.__analyzers = [self.performance, self.pnl, self.drawdown]
         self.__ord_reqs = {}
 
-    def _start(self, app_context) -> None:
+    def _start(self, app_context: Context) -> None:
         self.app_context.portf_mgr.add(self)
 
         self.event_subscription = app_context.event_bus.data_subject.subscribe(self.on_market_data_event)
@@ -164,27 +163,28 @@ class Portfolio(HasPositions, Startable, HasId):
 class PortfolioManager(SimpleManager):
     def __init__(self):
         super(PortfolioManager, self).__init__()
+        self.store = None
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.store = self.app_context.get_data_store()
-        self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
+        self.persist_mode = self.app_context.config.get_app_config("persistenceMode")
         self.load_all()
 
     def load_all(self) -> None:
-        if hasattr(self, "store") and self.store:
+        if self.store:
             self.store.start(self.app_context)
             portfolios = self.store.load_all('portfolios')
             for portfolio in portfolios:
                 self.add(portfolio)
 
     def save_all(self) -> None:
-        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
+        if self.store and self.persist_mode != PersistenceMode.Disable:
             for portfolio in self.all_items():
                 self.store.save_portfolio(portfolio)
 
     def add(self, portfolio: Portfolio) -> None:
         super(PortfolioManager, self).add(portfolio)
-        if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
+        if self.store and self.persist_mode == PersistenceMode.RealTime:
             self.store.save_portfolio(portfolio)
 
     def id(self) -> str:

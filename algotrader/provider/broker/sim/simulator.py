@@ -7,6 +7,7 @@ from algotrader.provider.broker.sim.commission import NoCommission
 from algotrader.provider.broker.sim.fill_strategy import DefaultFillStrategy
 from algotrader.trading.event import MarketDataEventHandler
 from algotrader.utils.logging import logger
+from algotrader import Context
 
 
 class Simulator(Broker, MarketDataEventHandler):
@@ -23,7 +24,7 @@ class Simulator(Broker, MarketDataEventHandler):
     def get_commission(self, commission_id=None):
         return NoCommission()
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.clock = app_context.clock
         self.fill_strategy = self.get_fill_strategy(self._get_broker_config("fillStrategy"))
         self.commission = self.get_commission(self._get_broker_config("commission"))

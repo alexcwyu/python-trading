@@ -1,4 +1,4 @@
-from algotrader import Startable
+from algotrader import Startable, Context
 
 
 class Application(Startable):
@@ -6,18 +6,18 @@ class Application(Startable):
     LiveTrading = "LiveTrading"
     BackTesting = "BackTesting"
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         try:
             self.init()
             self.run()
         finally:
             self.stop()
 
-    def init(self):
+    def init(self) -> None:
         pass
 
-    def run(self):
+    def run(self) -> None:
         pass
 
-    def _stop(self):
+    def _stop(self) -> None:
         self.app_context.stop()

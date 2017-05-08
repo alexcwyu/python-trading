@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from algotrader.model.market_data_pb2 import *
+from algotrader.model.market_data_pb2 import Bar, Quote, Trade, BarAggregationRequest
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.time_series_pb2 import *
-from algotrader.trading.bar_aggregator import BarAggregator, BarInputType
+from algotrader.trading.bar_aggregator import BarAggregator
 from algotrader.trading.clock import SimulationClock
 from algotrader.trading.data_series import DataSeries
 from algotrader.utils.protobuf_to_dict import protobuf_to_dict
@@ -35,7 +35,7 @@ class BarAggregatorTest(TestCase):
 
     def test_time_bar_from_trade(self):
         agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id="1", input=self.input)
-        agg.start()
+        agg.start(None)
         self.assertEqual(0, len(self.event_bus.items))
 
         self.time += 10000
@@ -58,7 +58,7 @@ class BarAggregatorTest(TestCase):
 
     def test_time_bar_from_bid(self):
         agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id="1", input=self.input,
-                            input_type=BarInputType.Bid)
+                            input_type=BarAggregationRequest.Bid)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
 
@@ -97,7 +97,7 @@ class BarAggregatorTest(TestCase):
 
     def test_time_bar_from_ask(self):
         agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id="1", input=self.input,
-                            input_type=BarInputType.Ask)
+                            input_type=BarAggregationRequest.Ask)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
 
@@ -131,7 +131,7 @@ class BarAggregatorTest(TestCase):
 
     def test_time_bar_from_bidask(self):
         agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id="1", input=self.input,
-                            input_type=BarInputType.BidAsk)
+                            input_type=BarAggregationRequest.BidAsk)
         agg.start()
         self.assertEqual(0, len(self.event_bus.items))
 
@@ -159,8 +159,8 @@ class BarAggregatorTest(TestCase):
 
     def test_time_bar_from_mid(self):
         agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id="1", input=self.input,
-                            input_type=BarInputType.Middle)
-        agg.start()
+                            input_type=BarAggregationRequest.Middle)
+        agg.start(None)
         self.assertEqual(0, len(self.event_bus.items))
 
         self.time += 59999
@@ -206,7 +206,7 @@ class BarAggregatorTest(TestCase):
     def test_vol_bar_from_trade(self):
         agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id="1", input=self.input,
                             output_bar_type=Bar.Volume, output_size=1000)
-        agg.start()
+        agg.start(None)
         self.assertEqual(0, len(self.event_bus.items))
 
         self.time += 60000

@@ -2,6 +2,7 @@ import abc
 
 from pandas_datareader import data
 
+from algotrader import Context
 from algotrader.provider.feed import Feed, PandasDataFeed
 from algotrader.utils.date import *
 
@@ -12,7 +13,7 @@ class PandasWebDataFeed(PandasDataFeed):
     def __init__(self):
         super(PandasWebDataFeed, self).__init__()
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         pass
 
     def id(self):

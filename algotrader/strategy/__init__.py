@@ -5,7 +5,7 @@ from builtins import *
 
 from typing import Dict
 
-from algotrader import Startable, HasId
+from algotrader import Startable, HasId, Context
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
@@ -18,6 +18,7 @@ class Strategy(HasPositions, ExecutionEventHandler, Startable, HasId):
     def __init__(self, stg_id: str, state: StrategyState = None):
         self.stg_id = stg_id
         self.state = state if state else ModelFactory.build_strategy_state(stg_id=stg_id)
+        self.store = None
         super().__init__(self.state)
 
     def __get_next_req_id(self):
@@ -26,23 +27,20 @@ class Strategy(HasPositions, ExecutionEventHandler, Startable, HasId):
         return id
 
     def _get_stg_config(self, key, default=None):
-        return self.app_context.app_config.get_strategy_config(self.id(), key, default=default)
+        return self.app_context.config.get_strategy_config(self.id(), key, default=default)
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         app_context.stg_mgr.add(self)
         self.model_factory = app_context.model_factory
-        self.app_config = app_context.app_config
+        self.config = app_context.config
         self.ord_reqs = {}
 
-        # TODO
-        self.config = None
-
         self.ref_data_mgr = app_context.ref_data_mgr
-        self.portfolio = app_context.portf_mgr.get(self.app_config.get_app_config("portfolioId"))
-        self.feed = app_context.provider_mgr.get(self.app_config.get_app_config("feedId"))
-        self.broker = app_context.provider_mgr.get(self.app_config.get_app_config("brokerId"))
+        self.portfolio = app_context.portf_mgr.get(self.config.get_app_config("portfolioId"))
+        self.feed = app_context.provider_mgr.get(self.config.get_app_config("feedId"))
+        self.broker = app_context.provider_mgr.get(self.config.get_app_config("brokerId"))
 
-        self.instruments = self.ref_data_mgr.get_insts_by_ids(self.app_config.get_app_config("instrumentIds"))
+        self.instruments = self.ref_data_mgr.get_insts_by_ids(self.config.get_app_config("instrumentIds"))
         self.clock = app_context.clock
         self.event_subscription = app_context.event_bus.data_subject.subscribe(self.on_market_data_event)
 
@@ -59,9 +57,9 @@ class Strategy(HasPositions, ExecutionEventHandler, Startable, HasId):
             self.feed.start(app_context)
 
         for sub_req in build_subscription_requests(self.feed.id(), self.instruments,
-                                                   self.app_config.get_app_config("subscriptionTypes"),
-                                                   self.app_config.get_app_config("fromDate"),
-                                                   self.app_config.get_app_config("toDate")):
+                                                   self.config.get_app_config("subscriptionTypes"),
+                                                   self.config.get_app_config("fromDate"),
+                                                   self.config.get_app_config("toDate")):
             self.feed.subscribe_mktdata(sub_req)
 
     def _stop(self):
@@ -131,7 +129,7 @@ class Strategy(HasPositions, ExecutionEventHandler, Startable, HasId):
                                                          cl_id=self.state.stg_id,
                                                          cl_ord_id=self.__get_next_req_id(),
                                                          portf_id=self.portfolio.state.portf_id,
-                                                         broker_id=self.app_config.get_app_config("brokerId"),
+                                                         broker_id=self.config.get_app_config("brokerId"),
                                                          inst_id=inst_id,
                                                          action=action,
                                                          type=type,
@@ -189,26 +187,26 @@ class StrategyManager(SimpleManager):
         super(StrategyManager, self).__init__()
         self.stg_cls_dict = {}
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.store = self.app_context.get_data_store()
-        self.persist_mode = self.app_context.app_config.get_app_config("persistenceMode")
+        self.persist_mode = self.app_context.config.get_app_config("persistenceMode")
         self.load_all()
 
     def load_all(self):
-        if hasattr(self, "store") and self.store:
+        if self.store:
             self.store.start(self.app_context)
             strategies = self.store.load_all('strategies')
             for stg in strategies:
                 self.add(stg)
 
     def save_all(self):
-        if hasattr(self, "store") and self.store and self.persist_mode != PersistenceMode.Disable:
+        if self.store and self.persist_mode != PersistenceMode.Disable:
             for stg in self.all_items():
                 self.store.save_strategy(stg.state)
 
     def add(self, stg):
         super(StrategyManager, self).add(stg)
-        if hasattr(self, "store") and self.store and self.persist_mode == PersistenceMode.RealTime:
+        if self.store and self.persist_mode == PersistenceMode.RealTime:
             self.store.save_strategy(stg)
 
     def id(self):

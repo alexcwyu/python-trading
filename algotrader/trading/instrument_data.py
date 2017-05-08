@@ -1,6 +1,6 @@
 import numpy as np
 
-from algotrader import Manager
+from algotrader import Manager, Context
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.datastore import PersistenceMode
 from algotrader.trading.data_series import DataSeries
@@ -17,10 +17,11 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__trade_dict = {}
         self.__series_dict = {}
         self.subscription = None
+        self.store = None
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.store = app_context.get_data_store()
-        self.persist_mode = app_context.app_config.get_app_config("persistenceMode")
+        self.persist_mode = app_context.config.get_app_config("persistenceMode")
         self.load_all()
         self.subscription = app_context.event_bus.data_subject.subscribe(self.on_market_data_event)
 
@@ -39,15 +40,15 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
             bars = self.store.load_all('bars')
             for bar in bars:
-                self.__bar_dict[bar.id()] = bar
+                self.__bar_dict[get_series_id(bar)] = bar
 
             trades = self.store.load_all('trades')
             for trade in trades:
-                self.__trade_dict[trade.id()] = trade
+                self.__trade_dict[get_series_id(trade)] = trade
 
             quotes = self.store.load_all('quotes')
             for quote in quotes:
-                self.__quote_dict[quote.id()] = quote
+                self.__quote_dict[get_series_id(quote)] = quote
 
     def save_all(self):
         if self.store:

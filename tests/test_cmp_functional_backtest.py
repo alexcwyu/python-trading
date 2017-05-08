@@ -30,9 +30,9 @@ class TestCompareWithFunctionalBacktest(TestCase):
 
         return df
 
-    def init_context(self, symbols, asset, app_config):
+    def init_context(self, symbols, asset, config):
 
-        self.app_context = ApplicationContext(app_config=app_config)
+        self.app_context = ApplicationContext(config=config)
 
         inst_df = build_inst_dataframe_from_list(symbols)
         ccy_df = pd.DataFrame({"ccy_id": ["USD", "HKD"],
@@ -87,7 +87,7 @@ class TestCompareWithFunctionalBacktest(TestCase):
                                    ref_data_mgr_type=None, persistence_config=None,
                                    provider_configs=PandasMemoryDataFeedConfig(dict_df=dict_df))
 
-        self.init_context(symbols=symbols, asset=asset, app_config=config)
+        self.init_context(symbols=symbols, asset=asset, config=config)
 
         close = self.app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
         close.start(self.app_context)

@@ -5,7 +5,7 @@ from algotrader.model.trade_data_pb2 import *
 from algotrader.strategy import Strategy
 from algotrader.technical.talib_wrapper import EMA, SMA
 from algotrader.utils.logging import logger
-
+from algotrader import Context
 
 class VixVxvRatio(Strategy):
     def __init__(self, stg_id: str, state: StrategyState = None):
@@ -13,7 +13,7 @@ class VixVxvRatio(Strategy):
         self.day_count = 0
         self.order = None
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.qty = self._get_stg_config("qty", 1)
         self.threshold = self._get_stg_config("threshold", 1)
 
@@ -66,8 +66,7 @@ class VxvVxmtRatio(Strategy):
         self.day_count = 0
         self.order = None
 
-    def _start(self, app_context):
-
+    def _start(self, app_context: Context) -> None:
         self.qty = self._get_stg_config("qty", 1)
         self.threshold = self._get_stg_config("threshold", 1)
 

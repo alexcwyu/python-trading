@@ -5,6 +5,7 @@ from rx.subjects import BehaviorSubject
 
 from algotrader.model.trade_data_pb2 import *
 from algotrader.strategy import Strategy
+from algotrader import Context
 
 
 class PairTradingWithOUSpread(Strategy):
@@ -22,11 +23,11 @@ class PairTradingWithOUSpread(Strategy):
         super(PairTradingWithOUSpread, self).__init__(stg_id=stg_id, state=state)
         self.buy_order = None
 
-    def _start(self, app_context):
+    def _start(self, app_context: Context) -> None:
         self.ou_params = self._get_stg_config("ou_params", default=1)
         self.gamma = self._get_stg_config("gamma", default=1)
 
-        self.instruments = app_context.app_config.get_app_config("instrumentIds")
+        self.instruments = app_context.config.get_app_config("instrumentIds")
         self.bar_0 = self.app_context.inst_data_mgr.get_series(
             "Bar.%s.Time.86400" % self.instruments[0])
         self.bar_1 = self.app_context.inst_data_mgr.get_series(

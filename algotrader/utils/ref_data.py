@@ -1,5 +1,7 @@
 import csv
 
+import pandas as pd
+
 from algotrader.model.model_factory import ModelFactory
 
 
@@ -56,7 +58,7 @@ def load_exch_from_df(data_store, exch_df):
 
 def load_inst_from_row(data_store, row):
     alt_symbols = {}
-    if row['alt_symbols']:
+    if 'alt_symbols' in row and row['alt_symbols']:
         for item in row['alt_symbols'].split(";"):
             kv = item.split("=")
             alt_symbols[kv[0]] = kv[1]
@@ -85,3 +87,23 @@ def load_ccy_from_row(data_store, row):
 def load_exch_from_row(data_store, row):
     exch = ModelFactory.build_exchange(exch_id=row['exch_id'], name=row['name'])
     data_store.save_exchange(exch)
+
+
+def build_inst_dataframe_from_list(symbols, type='ETF', exch_id='NYSE', ccy_id='USD'):
+    inst_df = pd.DataFrame({'name': symbols})
+    inst_df['type'] = type
+    inst_df['symbol'] = inst_df['name']
+    inst_df['exch_id'] = exch_id
+    inst_df['ccy_id'] = ccy_id
+    inst_df['alt_symbol'] = ''
+    inst_df['alt_exch_id'] = ''
+    inst_df['sector'] = ''
+    inst_df['industry'] = ''
+    inst_df['put_call'] = ''
+    inst_df['expiry_date'] = ''
+    inst_df['und_inst_id'] = ''
+    inst_df['factor'] = ''
+    inst_df['strike'] = ''
+    inst_df['margin'] = ''
+    inst_df['inst_id'] = inst_df.index
+    return inst_df

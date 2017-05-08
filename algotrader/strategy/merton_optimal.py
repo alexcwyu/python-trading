@@ -1,6 +1,6 @@
+from algotrader import Context
 from algotrader.model.trade_data_pb2 import *
 from algotrader.strategy import Strategy
-from algotrader import Context
 
 
 class MertonOptimalBaby(Strategy):
@@ -14,8 +14,8 @@ class MertonOptimalBaby(Strategy):
     So now this class is used as testing purpose
     """
 
-    def __init__(self, stg_id: str, state: StrategyState = None):
-        super(MertonOptimalBaby, self).__init__(stg_id=stg_id, state=state)
+    def __init__(self, stg_id: str, stg_cls: str, state: StrategyState = None):
+        super(MertonOptimalBaby, self).__init__(stg_id=stg_id, stg_cls=stg_cls, state=state)
         self.buy_order = None
 
     def _start(self, app_context: Context) -> None:

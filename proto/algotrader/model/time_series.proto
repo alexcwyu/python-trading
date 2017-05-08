@@ -11,14 +11,15 @@ message TimeSeries{
         map<string, double> data = 3;
     }
     string series_id = 1;
-    string name = 2;
-    string desc = 3;
-    repeated string inputs = 4;
-    repeated string keys = 5;
-    string default_output_key = 6;
-    double missing_value_replace = 7;
-    int64 start_time = 8;
-    int64 end_time = 9;
-    repeated Item items = 10;
+    string series_cls = 2;
+    string name = 3;
+    string desc = 4;
+    repeated string inputs = 5;
+    repeated string keys = 6;
+    string default_output_key = 7;
+    double missing_value_replace = 8;
+    int64 start_time = 9;
+    int64 end_time = 10;
+    repeated Item items = 11;
 }
 

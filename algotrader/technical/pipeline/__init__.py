@@ -42,7 +42,7 @@ class PipeLine(DataSeries):
 
         return ",".join(str(part) for part in parts)
 
-    def __init__(self, name, inputs, input_keys, length=None, desc=None, *args, **kwargs):
+    def __init__(self, name, inputs, input_keys, length=None, desc=None, time_series=None, *args, **kwargs):
 
         # super(PipeLine, self).__init__(name=name, keys=None, desc=desc, *args, **kwargs)
 

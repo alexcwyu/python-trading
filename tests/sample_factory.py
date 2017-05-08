@@ -176,7 +176,7 @@ class SampleFactory(object):
         return portfolio
 
     def sample_strategy_state(self):
-        strategy = ModelFactory.build_strategy_state("BLSH")
+        strategy = ModelFactory.build_strategy_state("BLSH", "test")
 
         self.add_sample_position(strategy)
         return strategy

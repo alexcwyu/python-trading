@@ -101,7 +101,9 @@ model_db_map = bidict({
 
 def get_model_id(object):
     t = type(object)
-    return model_id_map[t](object)
+    if t in model_id_map:
+        return model_id_map[t](object)
+    return object.id()
 
 
 def get_model_db(object):

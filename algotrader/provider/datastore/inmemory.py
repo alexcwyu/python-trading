@@ -172,9 +172,9 @@ class InMemoryDataStore(SimpleDataStore):
         id, packed = self._serialize(strategy)
         self.strategies[id] = packed
 
-    def save_config(self, config):
-        id, packed = self._serialize(config)
-        self.configs[id] = packed
+    # def save_config(self, config):
+    #     id, packed = self._serialize(config)
+    #     self.configs[id] = packed
 
     def save_account_update(self, account_update):
         id, packed = self._serialize(account_update)

@@ -20,10 +20,14 @@ def timestamp_to_datetime(timestamp: int) -> datetime.datetime:
 
 
 def datestr_to_unixtimemillis(datestr: str) -> int:
+    if not datestr:
+        return None
     return date_to_unixtimemillis(datestr_to_date(datestr))
 
 
 def datestr_to_date(datestr: str) -> datetime.date:
+    if not datestr:
+        return None
     datestr = str(datestr)
     return datetime.date(int(datestr[0:4]), int(datestr[4:6]), int(datestr[6:8]))
 

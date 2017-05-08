@@ -1,5 +1,5 @@
 import abc
-
+from algotrader.utils.model import get_model_id
 
 class HasId(object):
     __metaclass__ = abc.ABCMeta
@@ -94,7 +94,7 @@ class SimpleManager(Manager):
         return self.item_dict.get(id, None)
 
     def add(self, item):
-        self.item_dict[item.id()] = item
+        self.item_dict[get_model_id(item)] = item
 
     def all_items(self):
         return [item for item in self.item_dict.values()]

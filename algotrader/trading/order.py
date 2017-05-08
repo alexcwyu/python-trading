@@ -13,16 +13,16 @@ from algotrader.utils.logging import logger
 class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
     def __init__(self, state: OrderState = None, events: List[Any] = None):
         super().__init__()
-        self.__state = state
+        self.state = state
         self.events = events if events else []
 
     def _start(self, app_context: Context) -> None:
         self.model_factory = app_context.model_factory
 
     def on_new_ord_req(self, req: NewOrderRequest) -> None:
-        if self.__state or len(self.events) > 0:
+        if self.state or len(self.events) > 0:
             raise Exception("NewOrderRequest cannot be added to already initialized order")
-        self.__state = self.model_factory.build_order_state_from_nos(req)
+        self.state = self.model_factory.build_order_state_from_nos(req)
         self.events.append(req)
 
     def on_ord_replace_req(self, req: OrderReplaceRequest) -> None:
@@ -32,7 +32,7 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
         self.events.append(req)
 
     def on_exec_report(self, exec_report: ExecutionReport) -> None:
-        state = self.__state
+        state = self.state
         if exec_report.broker_id != state.broker_id:
             raise Exception(
                 "exec_report [%s] broker_id [%s] is not same as current broker_id [%s]" % (
@@ -78,7 +78,7 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
         self.events.append(exec_report)
 
     def on_ord_upd(self, ord_upd: OrderStatusUpdate) -> None:
-        state = self.__state
+        state = self.state
 
         if ord_upd.broker_id != state.broker_id:
             raise Exception(
@@ -106,94 +106,94 @@ class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
         return [event for event in self.events if isinstance(event, type)]
 
     def is_buy(self) -> bool:
-        if not self.__state:
+        if not self.state:
             return False
 
-        return self.__state.action == Buy
+        return self.state.action == Buy
 
     def is_sell(self) -> bool:
-        if not self.__state:
+        if not self.state:
             return False
 
-        return self.__state.action == Sell
+        return self.state.action == Sell
 
     def is_done(self) -> bool:
-        if not self.__state:
+        if not self.state:
             return False
 
-        status = self.__state.status
+        status = self.state.status
         return status == Rejected or status == Cancelled or status == Filled
 
     def is_active(self) -> bool:
-        if not self.__state:
+        if not self.state:
             return False
 
-        status = self.__state.status
+        status = self.state.status
         return status == New or status == PendingSubmit or status == Submitted \
                or status == PartiallyFilled or status == Replaced
 
     def id(self) -> str:
-        return None if not self.__state else ModelFactory.build_cl_ord_id(self.__state.cl_id, self.__state.cl_ord_id)
+        return None if not self.state else ModelFactory.build_cl_ord_id(self.state.cl_id, self.state.cl_ord_id)
 
     def cl_id(self) -> str:
-        return None if not self.__state else self.__state.cl_id
+        return None if not self.state else self.state.cl_id
 
     def cl_ord_id(self) -> str:
-        return None if not self.__state else self.__state.cl_ord_id
+        return None if not self.state else self.state.cl_ord_id
 
     def portf_id(self) -> str:
-        return None if not self.__state else self.__state.portf_id
+        return None if not self.state else self.state.portf_id
 
     def broker_id(self) -> str:
-        return None if not self.__state else self.__state.broker_id
+        return None if not self.state else self.state.broker_id
 
     def broker_ord_id(self) -> str:
-        return None if not self.__state else self.__state.broker_ord_id
+        return None if not self.state else self.state.broker_ord_id
 
     def inst_id(self) -> str:
-        return None if not self.__state else self.__state.inst_id
+        return None if not self.state else self.state.inst_id
 
     def tif(self) -> TIF:
-        return None if not self.__state else self.__state.tif
+        return None if not self.state else self.state.tif
 
     def action(self) -> OrderAction:
-        return None if not self.__state else self.__state.action
+        return None if not self.state else self.state.action
 
     def type(self) -> OrderType:
-        return None if not self.__state else self.__state.type
+        return None if not self.state else self.state.type
 
     def status(self) -> OrderStatus:
-        return None if not self.__state else self.__state.status
+        return None if not self.state else self.state.status
 
     def qty(self) -> float:
-        return None if not self.__state else self.__state.qty
+        return None if not self.state else self.state.qty
 
     def limit_price(self) -> float:
-        return None if not self.__state else self.__state.limit_price
+        return None if not self.state else self.state.limit_price
 
     def stop_price(self) -> float:
-        return None if not self.__state else self.__state.stop_price
+        return None if not self.state else self.state.stop_price
 
     def filled_qty(self) -> float:
-        return None if not self.__state else self.__state.filled_qty
+        return None if not self.state else self.state.filled_qty
 
     def leave_qty(self) -> float:
-        return None if not self.__state else (self.__state.qty - self.__state.filled_qty)
+        return None if not self.state else (self.state.qty - self.state.filled_qty)
 
     def avg_price(self) -> float:
-        return None if not self.__state else self.__state.avg_price
+        return None if not self.state else self.state.avg_price
 
     def last_qty(self) -> float:
-        return None if not self.__state else self.__state.last_qty
+        return None if not self.state else self.state.last_qty
 
     def last_price(self) -> float:
-        return None if not self.__state else self.__state.last_price
+        return None if not self.state else self.state.last_price
 
     def stop_limit_ready(self) -> bool:
-        return None if not self.__state else self.__state.stop_limit_ready
+        return None if not self.state else self.state.stop_limit_ready
 
     def trailing_stop_exec_price(self) -> float:
-        return None if not self.__state else self.__state.trailing_stop_exec_price
+        return None if not self.state else self.state.trailing_stop_exec_price
 
 
 class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketDataEventHandler):
@@ -234,8 +234,9 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            orders = self.store.load_all('orders')
-            for order in orders:
+            order_states = self.store.load_all('orders')
+            for order_state in order_states:
+                order = Order(state=order_state)
                 self.order_dict[order.id()] = order
 
             new_order_reqs = self.store.load_all('new_order_reqs')
@@ -245,7 +246,7 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
     def save_all(self):
         if self.store and self.persist_mode != PersistenceMode.Disable:
             for order in self.all_orders():
-                self.store.save_order(order)
+                self.store.save_order(order.state)
 
             for new_order_req in self.ord_reqs_dict.values():
                 self.store.save_new_order_req(new_order_req)
@@ -419,9 +420,8 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
         return [new_ord_req for new_ord_req in self.ord_reqs_dict.values() if new_ord_req.cl_id == stg_id]
 
     def _save_order(self, order):
-        if hasattr(self,
-                   "store") and self.store and self.persist_mode != PersistenceMode.RealTime and self.persist_mode != PersistenceMode.Batch:
-            self.store.save_order(order)
+        if self.store and self.persist_mode != PersistenceMode.RealTime and self.persist_mode != PersistenceMode.Batch:
+            self.store.save_order(order.state)
 
     def _cl_ord_id(self, item):
         return ModelFactory.build_cl_ord_id(item.cl_id, item.cl_ord_id)

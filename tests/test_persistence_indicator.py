@@ -1,35 +1,46 @@
 import math
-from algotrader.config.app import ApplicationConfig
-from algotrader.config.persistence import PersistenceConfig, InMemoryStoreConfig
-from algotrader.provider.datastore import PersistenceMode
+
 from unittest import TestCase
 
-from algotrader.provider.datastore import DataStore
 from algotrader.technical.ma import SMA
-from algotrader.trading.clock import Clock
+from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
 
+from tests import test_override
 
 class IndicatorPersistenceTest(TestCase):
-    def new_app_context(self):
-        name = "test"
-        create_at_start = True
-        delete_at_stop = False
+    stg_override = {
+        "Strategy": {
+            "down2%": {
+                "qty": 1000
+            }
+        }
+    }
 
-        config = ApplicationConfig("app", None, Clock.Simulation, PersistenceConfig(
-            ref_ds_id=DataStore.InMemory, ref_persist_mode=PersistenceMode.RealTime,
-            trade_ds_id=DataStore.InMemory, trade_persist_mode=PersistenceMode.RealTime,
-            ts_ds_id=DataStore.InMemory, ts_persist_mode=PersistenceMode.RealTime,
-            seq_ds_id=DataStore.InMemory, seq_persist_mode=PersistenceMode.RealTime),
-                                       InMemoryStoreConfig(file="%s_db.p" % name,
-                                                           create_at_start=create_at_start,
-                                                           delete_at_stop=delete_at_stop))
-        app_context = ApplicationContext(config=config)
-        app_context.start()
-        return app_context
+    def create_app_context(self, conf):
+        return ApplicationContext(config=Config(
+            load_from_yaml("../config/backtest.yaml"),
+            load_from_yaml("../config/down2%.yaml"),
+            test_override,
+            {
+                "Application": {
+                    "ceateAtStart": True,
+                    "deleteDBAtStop": False,
+                    "persistenceMode": "RealTime"
+                }
+            },
+            conf
+        ))
 
     def test_save_and_load_indicator(self):
-        app_context = self.new_app_context()
+        app_context = self.create_app_context(conf={
+            "Application": {
+                "createDBAtStart": True,
+                "deleteDBAtStop": False,
+                "persistenceMode": "RealTime"
+            }
+        })
+        app_context.start()
 
         bar = app_context.inst_data_mgr.get_series("bar")
         bar.start(app_context)
@@ -56,7 +67,14 @@ class IndicatorPersistenceTest(TestCase):
 
         ## restart...:
 
-        app_context = self.new_app_context()
+        app_context = self.create_app_context(conf={
+            "Application": {
+                "createDBAtStart": False,
+                "deleteDBAtStop": True,
+                "persistenceMode": "RealTime"
+            }
+        })
+        app_context.start()
 
         bar_new = app_context.inst_data_mgr.get_series("bar")
         bar_new.start(app_context)

@@ -73,7 +73,7 @@ class TimeSeriesDataStore(DataStore, Feed):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def save_time_series(self, timeseries):
+    def save_time_series(self, time_series):
         raise NotImplementedError()
 
     def unsubscribe_mktdata(self, *sub_keys):
@@ -138,10 +138,10 @@ class TradeDataStore(DataStore):
     @abc.abstractmethod
     def save_strategy(self, strategy):
         raise NotImplementedError()
-
-    @abc.abstractmethod
-    def save_config(self, config):
-        raise NotImplementedError()
+    #
+    # @abc.abstractmethod
+    # def save_config(self, config):
+    #     raise NotImplementedError()
 
     @abc.abstractmethod
     def save_account_update(self, account_update):

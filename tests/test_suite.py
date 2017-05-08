@@ -24,7 +24,7 @@ from tests.test_position import PositionTest
 from tests.test_ref_data import RefDataTest
 from tests.test_rolling import RollingApplyTest
 from tests.test_ser_deser import SerializationTest
-#from tests.test_strategy_persistence import StrategyPersistenceTest
+from tests.test_persistence_strategy import StrategyPersistenceTest
 from tests.test_talib_wrapper import TALibSMATest
 from tests.test_feed import FeedTest
 from tests.test_plot import PlotTest
@@ -56,7 +56,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(RefDataTest))
     test_suite.addTest(unittest.makeSuite(RollingApplyTest))
     test_suite.addTest(unittest.makeSuite(SerializationTest))
-    #test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
+    test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
     test_suite.addTest(unittest.makeSuite(TALibSMATest))
     return test_suite
 

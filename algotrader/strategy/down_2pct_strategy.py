@@ -5,8 +5,8 @@ from algotrader.technical.roc import ROC
 
 
 class Down2PctStrategy(Strategy):
-    def __init__(self, stg_id: str, state: StrategyState = None):
-        super(Down2PctStrategy, self).__init__(stg_id=stg_id, state=state)
+    def __init__(self, stg_id: str, stg_cls: str, state: StrategyState = None):
+        super(Down2PctStrategy, self).__init__(stg_id=stg_id, stg_cls=stg_cls, state=state)
         self.day_count = 0
         self.order = None
 

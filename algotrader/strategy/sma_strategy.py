@@ -6,8 +6,8 @@ from algotrader.utils.logging import logger
 
 
 class SMAStrategy(Strategy):
-    def __init__(self, stg_id: str, state: StrategyState = None):
-        super(SMAStrategy, self).__init__(stg_id=stg_id, state=state)
+    def __init__(self, stg_id: str, stg_cls: str, state: StrategyState = None):
+        super(SMAStrategy, self).__init__(stg_id=stg_id, stg_cls=stg_cls, state=state)
         self.buy_order = None
 
     def _start(self, app_context: Context) -> None:

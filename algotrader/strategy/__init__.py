@@ -15,9 +15,9 @@ from algotrader.utils.market_data import build_subscription_requests
 
 
 class Strategy(HasPositions, ExecutionEventHandler, Startable, HasId):
-    def __init__(self, stg_id: str, state: StrategyState = None):
+    def __init__(self, stg_id: str, stg_cls: str, state: StrategyState = None):
         self.stg_id = stg_id
-        self.state = state if state else ModelFactory.build_strategy_state(stg_id=stg_id)
+        self.state = state if state else ModelFactory.build_strategy_state(stg_id=stg_id, stg_cls=stg_cls)
         self.store = None
         super().__init__(self.state)
 
@@ -186,6 +186,7 @@ class StrategyManager(SimpleManager):
     def __init__(self):
         super(StrategyManager, self).__init__()
         self.stg_cls_dict = {}
+        self.store = None
 
     def _start(self, app_context: Context) -> None:
         self.store = self.app_context.get_data_store()
@@ -196,8 +197,8 @@ class StrategyManager(SimpleManager):
         if self.store:
             self.store.start(self.app_context)
             strategies = self.store.load_all('strategies')
-            for stg in strategies:
-                self.add(stg)
+            for stg_state in strategies:
+                self.add(self.get_or_new_stg(stg_id=stg_state.stg_id, stg_cls=stg_state.stg_cls, state=stg_state))
 
     def save_all(self):
         if self.store and self.persist_mode != PersistenceMode.Disable:
@@ -207,12 +208,12 @@ class StrategyManager(SimpleManager):
     def add(self, stg):
         super(StrategyManager, self).add(stg)
         if self.store and self.persist_mode == PersistenceMode.RealTime:
-            self.store.save_strategy(stg)
+            self.store.save_strategy(stg.state)
 
     def id(self):
         return "StrategyManager"
 
-    def new_stg(self, stg_id, stg_cls):
+    def new_stg(self, stg_id, stg_cls, state=None):
         if self.has_item(stg_id):
             raise "Strategy Id %s already exist" % stg_id
 
@@ -223,12 +224,12 @@ class StrategyManager(SimpleManager):
             self.stg_cls_dict[stg_cls] = cls
 
         cls = self.stg_cls_dict[stg_cls]
-        strategy = cls(stg_id=stg_id)
+        strategy = cls(stg_id=stg_id, stg_cls=stg_cls, state=state)
         self.add(strategy)
         return strategy
 
-    def get_or_new_stg(self, stg_id, stg_cls):
+    def get_or_new_stg(self, stg_id, stg_cls, state=None):
         if self.has_item(stg_id):
             stg = self.get(stg_id)
             return stg
-        return self.new_stg(stg_id, stg_cls)
+        return self.new_stg(stg_id, stg_cls,state)

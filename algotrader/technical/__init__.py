@@ -1,6 +1,7 @@
+from algotrader import Context
 from algotrader.model.model_factory import ModelFactory
 from algotrader.trading.data_series import DataSeries
-from algotrader import Context
+
 
 class Indicator(DataSeries):
     VALUE = 'value'
@@ -36,20 +37,24 @@ class Indicator(DataSeries):
             return "'%s'" % input.name
         return "'%s'" % input
 
-    def __init__(self, name, input, input_keys, desc=None, **kwargs):
+    def __init__(self, name, input, input_keys, desc=None, time_series=None):
+        if time_series:
+            self.input_name = time_series.inputs
+            self.input = None
+        else:
+            if input:
+                if isinstance(input, DataSeries):
+                    self.input_name = input.name
+                    self.input = input
+                else:
+                    self.input_name = input
+                    self.input = None
+
+            time_series = ModelFactory.build_time_series(series_id=name, name=name, desc=desc, inputs=self.input_name)
 
         self.input_keys = self._get_key(input_keys, None)
         self.calculate = True
-
-        if input:
-            if isinstance(input, DataSeries):
-                self.input_name = input.name
-                self.input = input
-            else:
-                self.input_name = input
-                self.input = None
-        super(Indicator, self).__init__(
-            ModelFactory.build_time_series(series_id=name, name=name, desc=desc, inputs=self.input_name))
+        super(Indicator, self).__init__(time_series)
 
     def _start(self, app_context: Context) -> None:
         super(Indicator, self)._start(self.app_context)

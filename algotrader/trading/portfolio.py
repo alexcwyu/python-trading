@@ -173,29 +173,31 @@ class PortfolioManager(SimpleManager):
     def load_all(self) -> None:
         if self.store:
             self.store.start(self.app_context)
-            portfolios = self.store.load_all('portfolios')
-            for portfolio in portfolios:
+            portfolio_states = self.store.load_all('portfolios')
+            for portfolio_state in portfolio_states:
+                portfolio = self.get_or_new_portfolio(portf_id=portfolio_state.portf_id, state=portfolio_state)
                 self.add(portfolio)
 
     def save_all(self) -> None:
         if self.store and self.persist_mode != PersistenceMode.Disable:
             for portfolio in self.all_items():
-                self.store.save_portfolio(portfolio)
+                self.store.save_portfolio(portfolio.state)
 
     def add(self, portfolio: Portfolio) -> None:
         super(PortfolioManager, self).add(portfolio)
         if self.store and self.persist_mode == PersistenceMode.RealTime:
-            self.store.save_portfolio(portfolio)
+            self.store.save_portfolio(portfolio.state)
 
     def id(self) -> str:
         return "PortfolioManager"
 
-    def new_portfolio(self, portf_id: str, initial_cash: float = 1000000) -> Portfolio:
-        portfolio = Portfolio(ModelFactory.build_portfolio_state(portf_id=portf_id, cash=initial_cash))
+    def new_portfolio(self, portf_id: str, initial_cash: float = 1000000, state=None) -> Portfolio:
+        state = state if state else ModelFactory.build_portfolio_state(portf_id=portf_id, cash=initial_cash)
+        portfolio = Portfolio(state=state)
         self.add(portfolio)
         return portfolio
 
-    def get_or_new_portfolio(self, portf_id: str, initial_cash: float = 1000000) -> Portfolio:
+    def get_or_new_portfolio(self, portf_id: str, initial_cash: float = 1000000, state=None) -> Portfolio:
         if self.has_item(portf_id):
             return self.get(portf_id)
-        return self.new_portfolio(portf_id, 1000000)
+        return self.new_portfolio(portf_id, initial_cash, state)

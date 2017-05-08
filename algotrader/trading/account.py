@@ -7,17 +7,17 @@ from algotrader.provider.datastore import PersistenceMode
 
 
 class Account(Startable, HasId):
-    def __init__(self, acct_id: str, values: Dict[str, AccountValue] = None, positions: Dict[str, Position] = None):
+    def __init__(self, acct_id: str, values: Dict[str, AccountValue] = None, state=None):
         # TODO load from DB
-        self.__state = ModelFactory.build_account_state(acct_id=acct_id, values=values, positions=positions)
+        self.state = state if state else ModelFactory.build_account_state(acct_id=acct_id, values=values)
 
     def on_acc_upd(self, account_update: AccountUpdate) -> None:
         for update_value in account_update.values.values():
-            ModelFactory.update_account_value(self.__state.values[update_value.key], update_value.key,
+            ModelFactory.update_account_value(self.state.values[update_value.key], update_value.key,
                                               update_value.ccy_values)
 
     def id(self) -> str:
-        return self.__state.acct_id
+        return self.state.acct_id
 
     def _start(self, app_context: Context) -> None:
         # TODO
@@ -37,9 +37,9 @@ class AccountManager(SimpleManager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            accounts = self.store.load_all('accounts')
-            for account in accounts:
-                self.add(account)
+            account_states = self.store.load_all('accounts')
+            for account_state in account_states:
+                self.add(self.new_account(account_state.acct_id, state=account_state))
 
     def save_all(self):
         if self.store and self.persist_mode != PersistenceMode.Disable:
@@ -54,9 +54,7 @@ class AccountManager(SimpleManager):
     def id(self):
         return "AccountManager"
 
-    def new_account(self, name, values=None):
-        if not values:
-            values = {}
-        account = Account(name, values=values)
+    def new_account(self, acct_id, values=None, state=None):
+        account = Account(acct_id, values=values, state=state)
         self.add(account)
         return account

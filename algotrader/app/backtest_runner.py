@@ -9,17 +9,6 @@ from algotrader.utils.logging import logger
 class BacktestRunner(Application):
     def init(self):
         self.config = self.app_context.config
-        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.config.get_app_config("portfolioId"),
-                                                                         self.config.get_app_config(
-                                                                             "portfolioInitialcash"))
-
-        self.initial_result = self.portfolio.get_result()
-
-        self.app_context.add_startable(self.portfolio)
-
-        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.config.get_app_config("stgId"),
-                                                                self.config.get_app_config("stgCls"))
-        self.app_context.add_startable(self.strategy)
 
         self.is_plot = self.config.get_app_config("plot", default=True)
 
@@ -27,6 +16,15 @@ class BacktestRunner(Application):
         logger.info("starting BackTest")
 
         self.app_context.start()
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.config.get_app_config("portfolioId"),
+                                                                         self.config.get_app_config(
+                                                                             "portfolioInitialcash"))
+        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.config.get_app_config("stgId"),
+                                                                self.config.get_app_config("stgCls"))
+
+        self.initial_result = self.portfolio.get_result()
+        self.app_context.add_startable(self.portfolio)
+        self.portfolio.start(self.app_context)
         self.strategy.start(self.app_context)
 
         result = self.portfolio.get_result()

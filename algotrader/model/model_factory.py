@@ -568,9 +568,10 @@ class ModelFactory(object):
         return dd
 
     @staticmethod
-    def build_strategy_state(stg_id: str) -> StrategyState:
+    def build_strategy_state(stg_id: str, stg_cls:str) -> StrategyState:
         stg = StrategyState()
-        stg.stg_id = str(stg_id)
+        stg.stg_id = stg_id
+        stg.stg_cls = stg_cls
         return stg
 
     @staticmethod

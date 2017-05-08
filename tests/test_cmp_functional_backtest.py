@@ -1,16 +1,15 @@
 import math
-from unittest import TestCase
 
 import numpy as np
 import pandas as pd
 import talib
+from unittest import TestCase
 
-from algotrader.provider.broker import Broker
-from algotrader.provider.feed import Feed
 from algotrader.strategy.sma_strategy import SMAStrategy
+from algotrader.trading.config import Config
 from algotrader.trading.context import ApplicationContext
-from algotrader.utils.market_data import *
-from tests.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
+from algotrader.utils.ref_data import load_inst_from_df, load_ccy_from_df, load_exch_from_df, \
+    build_inst_dataframe_from_list
 
 
 class TestCompareWithFunctionalBacktest(TestCase):
@@ -39,13 +38,16 @@ class TestCompareWithFunctionalBacktest(TestCase):
                                "name": ["US Dollar", "HK Dollar"]})
         exchange_df = pd.DataFrame({"exch_id": ["NYSE"],
                                     "name": ["New York Stock Exchange"]})
-        ref_data_mgr = MockRefDataManager(inst_df=inst_df, ccy_df=ccy_df, exch_df=exchange_df)
-        self.app_context.ref_data_mgr = ref_data_mgr
 
         self.app_context.start()
 
+        datastore = self.app_context.get_data_store()
+        load_exch_from_df(datastore, exchange_df)
+        load_ccy_from_df(datastore, ccy_df)
+        load_inst_from_df(datastore, inst_df)
+
         self.portfolio = self.app_context.portf_mgr.new_portfolio(portf_id='test2',
-                                                                  cash=TestCompareWithFunctionalBacktest.init_cash)
+                                                                  initial_cash=TestCompareWithFunctionalBacktest.init_cash)
         self.portfolio.start(self.app_context)
 
     def tearDown(self):
@@ -76,23 +78,54 @@ class TestCompareWithFunctionalBacktest(TestCase):
         for symbol in symbols:
             dict_df[symbol] = self.df
 
-        config = BacktestingConfig(id=None, stg_id='sma', portfolio_id='test2',
-                                   instrument_ids=[instrument],
-                                   subscription_types=[BarSubscriptionType(bar_type=Bar.Time, bar_size=D1)],
-                                   from_date=TestCompareWithFunctionalBacktest.dates[0],
-                                   to_date=TestCompareWithFunctionalBacktest.dates[-1],
-                                   broker_id=Broker.Simulator,
-                                   feed_id=Feed.PandasMemory,
-                                   stg_configs={'qty': lot_size},
-                                   ref_data_mgr_type=None, persistence_config=None,
-                                   provider_configs=PandasMemoryDataFeedConfig(dict_df=dict_df))
+        config = Config({
+            "Application": {
+                "type": "BackTesting",
+
+                "clockId": "Simulation",
+
+                "dataStoreId": "InMemory",
+                "persistenceMode": "Disable",
+                "createDBAtStart": True,
+                "deleteDBAtStop": False,
+
+                "feedId": "PandasMemory",
+                "brokerId": "Simulator",
+                "portfolioId": "test2",
+                "stg": "down2%",
+                "stgCls": "algotrader.strategy.down_2pct_strategy.Down2PctStrategy",
+                "instrumentIds": ["0"],
+                "subscriptionTypes": ["Bar.Yahoo.Time.D1"],
+
+                "fromDate": TestCompareWithFunctionalBacktest.dates[0],
+                "toDate": TestCompareWithFunctionalBacktest.dates[-1],
+                "plot": False
+            },
+            "DataStore": {"InMemory":
+                {
+                    "file": "../data/algotrader_db.p",
+                    "instCSV": "../data/refdata/instrument.csv",
+                    "ccyCSV": "../data/refdata/ccy.csv",
+                    "exchCSV": "../data/refdata/exch.csv"
+                }
+            },
+
+            "Strategy": {
+                "down2%": {
+                    "qty": lot_size
+                }
+            }
+
+        })
 
         self.init_context(symbols=symbols, asset=asset, config=config)
 
+        feed = self.app_context.get_feed()
+        feed.set_data_frame(dict_df)
         close = self.app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % instrument)
         close.start(self.app_context)
 
-        strategy = SMAStrategy("sma", config.stg_configs)
+        strategy = SMAStrategy("sma")
         strategy.start(self.app_context)
 
         rets = strategy.get_portfolio().get_return()

@@ -1,0 +1,11 @@
+UnitTest
+    StrategyPersistenceTest
+    IndicatorPersistenceTest
+
+    PipelineTest
+    PairwiseTest
+    TestCompareWithFunctionalBacktest
+
+
+Integration Test
+    test_data_store

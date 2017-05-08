@@ -1,15 +1,16 @@
 import rx
 from rx.subjects import BehaviorSubject
 
+from algotrader import Context
 from algotrader.model.trade_data_pb2 import *
 from algotrader.strategy import Strategy
 from algotrader.technical.talib_wrapper import EMA, SMA
 from algotrader.utils.logging import logger
-from algotrader import Context
+
 
 class VixVxvRatio(Strategy):
-    def __init__(self, stg_id: str, state: StrategyState = None):
-        super(VixVxvRatio, self).__init__(stg_id=stg_id, state=state)
+    def __init__(self, stg_id: str, stg_cls: str, state: StrategyState = None):
+        super(VixVxvRatio, self).__init__(stg_id=stg_id, stg_cls=stg_cls, state=state)
         self.day_count = 0
         self.order = None
 
@@ -61,8 +62,8 @@ class VixVxvRatio(Strategy):
 
 
 class VxvVxmtRatio(Strategy):
-    def __init__(self, stg_id=None):
-        super(VxvVxmtRatio, self).__init__(stg_id=stg_id)
+    def __init__(self, stg_id: str = None, stg_cls: str = None):
+        super(VxvVxmtRatio, self).__init__(stg_id=stg_id, stg_cls=stg_cls)
         self.day_count = 0
         self.order = None
 

@@ -33,9 +33,9 @@ class PandasWebDataFeed(PandasDataFeed):
         dfs = []
         for sub_req in sub_reqs:
             inst = insts[sub_req.inst_id]
-            # df = web.DataReader("F", self.system, sub_req.from_date, sub_req.to_date)
-            df = data.DataReader("F", sub_req.md_provider_id.lower(), datestr_to_date(str(sub_req.from_date)),
-                                 (str(sub_req.to_date)))
+            df = data.DataReader(inst.symbol.lower(), sub_req.md_provider_id.lower(),
+                                 datestr_to_date(str(sub_req.from_date)),
+                                 datestr_to_date(str(sub_req.to_date)))
             df['InstId'] = sub_req.inst_id
             df['ProviderId'] = sub_req.md_provider_id
             df['BarSize'] = sub_req.bar_size

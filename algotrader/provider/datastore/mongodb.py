@@ -155,9 +155,9 @@ class MongoDBDataStore(SimpleDataStore):
 
     def save_order_state(self, order_state: OrderState):
         self.save(order_state)
-
-    def save_config(self, config):
-        self.save(config)
+    #
+    # def save_config(self, config):
+    #     self.save(config)
 
     # SequenceDataStore
     def save_sequence(self, key, seq):

@@ -7,7 +7,7 @@ from algotrader.trading.data_series import DataSeries
 from algotrader.trading.event import MarketDataEventHandler
 from algotrader.utils.logging import logger
 from algotrader.utils.market_data import get_series_id
-
+from algotrader.utils.model import get_full_cls_name, dynamic_import
 
 class InstrumentDataManager(MarketDataEventHandler, Manager):
     def __init__(self):
@@ -36,7 +36,11 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             self.store.start(self.app_context)
             series_states = self.store.load_all('time_series')
             for series_state in series_states:
-                series = DataSeries(time_series=series_state)
+                if hasattr(series_state, 'series_cls') and series_state.series_cls:
+                    cls = dynamic_import(series_state.series_cls)
+                    series = cls(time_series=series_state)
+                else:
+                    series = DataSeries(time_series=series_state)
                 self.__series_dict[series.id()] = series
 
             bars = self.store.load_all('bars')
@@ -127,7 +131,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         if type(key) == str:
             if key not in self.__series_dict:
                 self.__series_dict[key] = cls(
-                    time_series=ModelFactory.build_time_series(series_id=key, name=key, desc=desc,
+                    time_series=ModelFactory.build_time_series(series_id=key, series_cls=get_full_cls_name(cls), name=key, desc=desc,
                                                                missing_value_replace=missing_value))
             return self.__series_dict[key]
         raise AssertionError()

@@ -34,16 +34,12 @@ class DataSeries(Startable):
         self.data_time_dict = {}
         self.last_item = None
         self.subject = Subject()
+        self.time_series = time_series
+        self.name = time_series.name
 
-        if time_series:
-            self.time_series = time_series
-            self.name = time_series.name
-
-            if time_series and hasattr(time_series, 'items') and time_series.items:
-                for item in time_series.items:
-                    self.add(dict(item.data), item.timestamp, True)
-        else:
-            pass
+        if time_series and hasattr(time_series, 'items') and time_series.items:
+            for item in time_series.items:
+                self.add(dict(item.data), item.timestamp, True)
 
     def _start(self, app_context: Context) -> None:
         pass

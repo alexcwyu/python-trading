@@ -180,12 +180,14 @@ class ModelFactory(object):
         return timezone
 
     @staticmethod
-    def build_time_series(series_id: str, name: str = None, desc: str = None,
+    def build_time_series(series_id: str, series_cls: str, name: str = None, desc: str = None,
                           inputs: Union[str, List[str]] = None, keys: Union[str, List[str]] = None,
                           default_output_key: str = 'value', missing_value_replace: float = 0.0, start_time: int = 0,
                           end_time: int = 0) -> TimeSeries:
         time_series = TimeSeries()
         time_series.series_id = str(series_id)
+        if series_cls:
+            time_series.series_cls = series_cls
         if name:
             time_series.name = name
         if desc:

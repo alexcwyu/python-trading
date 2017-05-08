@@ -1,7 +1,7 @@
 from algotrader import Context
 from algotrader.model.model_factory import ModelFactory
 from algotrader.trading.data_series import DataSeries
-
+from algotrader.utils.model import get_full_cls_name
 
 class Indicator(DataSeries):
     VALUE = 'value'
@@ -49,8 +49,9 @@ class Indicator(DataSeries):
                 else:
                     self.input_name = input
                     self.input = None
-
-            time_series = ModelFactory.build_time_series(series_id=name, name=name, desc=desc, inputs=self.input_name)
+            else:
+                self.input_name = None
+            time_series = ModelFactory.build_time_series(series_id=name, series_cls=get_full_cls_name(self), name=name, desc=desc, inputs=self.input_name)
 
         self.input_keys = self._get_key(input_keys, None)
         self.calculate = True

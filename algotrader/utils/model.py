@@ -153,3 +153,18 @@ def add_to_list(attribute: Callable, list_item: Union[list, tuple, int, str, boo
                 attribute.add(**item)
             else:
                 raise RuntimeError
+
+
+def get_full_cls_name(obj):
+    if isinstance(obj, type):
+        return obj.__module__ + "." + obj.__name__
+    return obj.__module__ + "." + obj.__class__.__name__
+
+
+def dynamic_import(full_cls):
+    items = full_cls.split('.')
+    mod_name = ".".join(items[0:-1])
+    cls_name = items[-1]
+    mod = __import__(mod_name, fromlist=[cls_name])
+    cls = getattr(mod, cls_name)
+    return cls

@@ -5,6 +5,7 @@ from algotrader.model.model_factory import ModelFactory
 from algotrader.technical import Indicator
 from algotrader.trading.data_series import DataSeries, DataSeriesEvent
 from algotrader import Context
+from algotrader.utils.model import get_full_cls_name
 
 class PipeLine(DataSeries):
     VALUE = 'value'
@@ -101,7 +102,7 @@ class PipeLine(DataSeries):
         self.inputs = []
 
         super(PipeLine, self).__init__(
-            ModelFactory.build_time_series(series_id=name, name=name, desc=desc, inputs=self.input_names))
+            ModelFactory.build_time_series(series_id=name, series_cls=get_full_cls_name(self), name=name, desc=desc, inputs=self.input_names))
 
         # self.df = pd.DataFrame(index=range(self.length), columns=input_names)
         # self.cache = {} # key is input name, value is numpy array

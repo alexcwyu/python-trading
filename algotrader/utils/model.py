@@ -163,7 +163,10 @@ def get_full_cls_name(obj: object) -> str:
     return obj.__module__ + "." + obj.__class__.__name__
 
 
-def get_cls(full_cls_name: str) -> type:
+def get_cls(full_cls_name) -> type:
+    if isinstance(full_cls_name, type):
+        return full_cls_name
+
     if full_cls_name in cls_cache:
         return cls_cache[full_cls_name]
 

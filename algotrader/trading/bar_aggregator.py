@@ -163,8 +163,8 @@ class BarAggregator(MarketDataEventHandler, Startable):
                 self.__timestamp = self.__end_time
 
             bar = Bar(inst_id=self.__inst_id,
-                      begin_time=self.__start_time,
-                      timestamp=self.__timestamp,
+                      begin_time=int(self.__start_time),
+                      timestamp=int(self.__timestamp),
                       open=self.__open,
                       high=self.__high,
                       low=self.__low,

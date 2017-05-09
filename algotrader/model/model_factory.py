@@ -200,6 +200,7 @@ class ModelFactory(object):
         if desc:
             time_series.desc = desc
         add_to_list(time_series.keys, keys)
+        input_keys = input_keys if input_keys else {}
         if inputs:
             for input in inputs:
                 input_name = get_input_name(input)

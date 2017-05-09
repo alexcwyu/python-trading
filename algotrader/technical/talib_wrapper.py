@@ -58,19 +58,19 @@ class SMA(Indicator):
         'length'
     )
 
-    def __init__(self, input=None, input_key=None, length=0, desc="TALib Simple Moving Average", time_series=None):
-        self.length = int(length)
+    def __init__(self, inputs=None, input_keys=None, length=0, desc="TALib Simple Moving Average", time_series=None):
         if time_series:
             super(SMA, self).__init__(time_series=time_series)
         else:
-            super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc)
+            super(SMA, self).__init__(inputs=inputs, input_keys=input_keys, desc=desc, length=length)
+        self.length = int(length)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input.size() >= self.length:
+        if self.input_series[0].size() >= self.length:
             value = talib.SMA(
                 np.array(
-                    self.input.get_by_idx(keys=self.input_keys,
+                    self.input_series[0].get_by_idx(keys=self.get_input_keys(self.input_series[0].name),
                                           idx=slice(-self.length, None, None))), timeperiod=self.length)
 
             result[Indicator.VALUE] = value[-1]
@@ -92,10 +92,10 @@ class EMA(Indicator):
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input.size() >= self.length:
+        if self.input_series[0].size() >= self.length:
             value = talib.EMA(
                 np.array(
-                    self.input.get_by_idx(keys=self.input_keys,
+                    self.input_series[0].get_by_idx(keys=self.get_input_keys(self.input_series[0].name),
                                           idx=slice(-self.length, None, None))), timeperiod=self.length)
 
             result[Indicator.VALUE] = value[-1]

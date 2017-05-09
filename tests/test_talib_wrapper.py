@@ -17,13 +17,13 @@ class TALibSMATest(TestCase):
     def test_name(self):
         bar = self.app_context.inst_data_mgr.get_series("bar")
         bar.start(self.app_context)
-        sma = SMA(bar, input_key='close', length=3)
+        sma = SMA(inputs=bar, input_keys='close', length=3)
         sma.start(self.app_context)
 
-        self.assertEquals("SMA('bar',close,3)", sma.name)
+        self.assertEquals("SMA(bar[close],length=3)", sma.name)
 
-        sma2 = SMA(sma, input_key='value', length=10)
-        self.assertEquals("SMA(SMA('bar',close,3),value,10)", sma2.name)
+        sma2 = SMA(inputs=sma, input_keys='value', length=10)
+        self.assertEquals("SMA(SMA(bar[close],length=3)[value],length=10)", sma2.name)
 
     def test_empty_at_initialize(self):
         close = self.app_context.inst_data_mgr.get_series("bar")
@@ -38,33 +38,33 @@ class TALibSMATest(TestCase):
         bar = self.app_context.inst_data_mgr.get_series("bar")
         bar.start(self.app_context)
 
-        sma = SMA(bar, 'close', 3)
+        sma = SMA(inputs=bar, input_keys='close', length=3)
         sma.start(self.app_context)
 
         t1 = 1
         t2 = t1 + 3
         t3 = t2 + 3
 
-        bar.add(data={"timestamp": t1, "close": 2.0, "open": 0})
-        self.assertEquals([{"timestamp": t1, 'value': np.nan}],
+        bar.add(timestamp=t1, data={"close": 2.0, "open": 0})
+        self.assertEquals([{'value': np.nan}],
                           sma.get_data())
 
-        bar.add(data={"timestamp": t2, "close": 2.4, "open": 1.4})
-        self.assertEquals([{"timestamp": t1, 'value': np.nan},
-                           {"timestamp": t2, 'value': np.nan}],
+        bar.add(timestamp=t2, data={"close": 2.4, "open": 1.4})
+        self.assertEquals([{'value': np.nan},
+                           {'value': np.nan}],
                           sma.get_data())
 
-        bar.add(data={"timestamp": t3, "close": 2.8, "open": 1.8})
-        self.assertEquals([{"timestamp": t1, 'value': np.nan},
-                           {"timestamp": t2, 'value': np.nan},
-                           {"timestamp": t3, 'value': 2.4}],
+        bar.add(timestamp=t3, data={"close": 2.8, "open": 1.8})
+        self.assertEquals([{'value': np.nan},
+                           {'value': np.nan},
+                           {'value': 2.4}],
                           sma.get_data())
 
     def test_moving_average_calculation(self):
         bar = self.app_context.inst_data_mgr.get_series("bar")
         bar.start(self.app_context)
 
-        sma = SMA(bar, input_key='close', length=3)
+        sma = SMA(inputs=bar, input_keys='close', length=3)
         sma.start(self.app_context)
 
         t1 = 1
@@ -119,7 +119,7 @@ class TALibSMATest(TestCase):
         close.start(self.app_context)
 
         t = 1
-        sma = SMA(close, input_key='close', length=50)
+        sma = SMA(inputs=close, input_keys='close', length=50)
         sma.start(self.app_context)
 
         result = []

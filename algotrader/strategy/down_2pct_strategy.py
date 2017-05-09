@@ -17,7 +17,7 @@ class Down2PctStrategy(Strategy):
             "Bar.%s.Time.86400" % app_context.config.get_app_config("instrumentIds")[0])
         self.close.start(app_context)
 
-        self.roc = ROC(self.close, 'close', 1)
+        self.roc = ROC(inputs=self.close, input_keys='close', length=1)
         self.roc.start(app_context)
 
         super(Down2PctStrategy, self)._start(app_context)

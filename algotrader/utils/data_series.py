@@ -1,61 +1,10 @@
+import re
+
 import pandas as pd
 from typing import Dict, List
 from tzlocal import get_localzone
+
 from algotrader.utils.model import get_cls
-
-
-
-def parse_series(inst_data_mgr, name):
-    from algotrader.technical import Indicator
-    from algotrader.technical.ma import SMA
-    from algotrader.technical.atr import ATR
-    from algotrader.technical.bb import BB
-    from algotrader.technical.ma import SMA
-    from algotrader.technical.roc import ROC
-    from algotrader.technical.rsi import RSI
-    from algotrader.technical.stats import MAX
-    from algotrader.technical.stats import MIN
-    from algotrader.technical.stats import STD
-    from algotrader.technical.stats import VAR
-    if not inst_data_mgr.has_series(name):
-        count = name.count("(")
-        if count > 1:
-            lidx = name.find("(")
-            ridx = name.rfind(")", 0, -1)
-            assert name.endswith(")"), "invalid syntax, cannot parse %s" % name
-            assert lidx > -1, "invalid syntax, cannot parse %s" % name
-            assert ridx > lidx, "invalid syntax, cannot parse %s" % name
-
-            cls_str = name[0:lidx]
-            inner_str = name[lidx + 1: ridx + 1]
-            arg_str = name[ridx + 2:-1]
-            inner = parse_series(inst_data_mgr, inner_str)
-            arg = [inner]
-            arg += arg_str.split(',')
-            return globals()[cls_str](*arg)
-        elif count == 1:
-            lidx = name.find("(")
-            ridx = name.find(",")
-            assert name.endswith(")"), "invalid syntax, cannot parse %s" % name
-            assert lidx > -1, "invalid syntax, cannot parse %s" % name
-            assert ridx > lidx, "invalid syntax, cannot parse %s" % name
-
-            cls_str = name[0:lidx]
-            inner_str = name[lidx + 1: ridx].strip(' \'\"')
-            arg_str = name[ridx + 1:-1]
-            inner = parse_series(inst_data_mgr, inner_str)
-            arg = [inner]
-            arg += arg_str.split(',')
-            return globals()[cls_str](*arg)
-    return inst_data_mgr.get_series(name)
-
-
-def get_or_create_indicator(inst_data_mgr, cls, inputs=None, input_keys=None, **kwargs):
-    cls = get_cls(cls)
-    name = build_series_id(cls.__name__, inputs=inputs, input_keys=input_keys,**kwargs)
-    if not inst_data_mgr.has_series(name):
-        return cls(inputs=inputs, input_keys=input_keys, **kwargs)
-    return inst_data_mgr.get_series(name, create_if_missing=False)
 
 
 def convert_series_idx_to_datetime(series: pd.Series) -> pd.Series:
@@ -78,9 +27,9 @@ def convert_input_keys(inputs=None, input_keys=None) -> Dict[str, List[str]]:
         input_keys = input_keys if input_keys else {}
         if isinstance(input_keys, dict):
             for k, v in input_keys.items():
-                if isinstance(input_keys, list):
+                if isinstance(v, list):
                     result[k] = v
-                elif isinstance(input_keys, str):
+                elif isinstance(v, str):
                     result[k] = [v]
 
         if isinstance(input_keys, list):
@@ -101,7 +50,7 @@ def build_series_id(name: str, inputs=None, input_keys=None, **kwargs):
     if inputs:
         if not isinstance(inputs, list):
             inputs = [inputs]
-
+        input_keys = convert_input_keys(inputs, input_keys)
         for input in inputs:
             input_name = get_input_name(input)
             if input_name in input_keys:

@@ -4,7 +4,7 @@ from algotrader import Context
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.trading.data_series import DataSeries
-from algotrader.utils.data_series import build_series_id
+from algotrader.utils.data_series import build_series_id, convert_to_list, get_input_name, convert_input_keys
 from algotrader.utils.model import get_full_cls_name
 
 
@@ -15,30 +15,19 @@ class Indicator(DataSeries):
     def get_name(indicator_name, input, input_key, *args):
         if not input:
             return '%s' % indicator_name
-        parts = [Indicator.get_input_name(input)]
+        parts = [get_input_name(input)]
         if input_key:
-            parts.extend(DataSeries.convert_to_list(input_key))
+            parts.extend(convert_to_list(input_key))
         if args:
             parts.extend(args)
         content = ",".join(str(part) for part in parts)
         return '%s(%s)' % (indicator_name, content)
 
-    @staticmethod
-    def get_input_name(input):
-        if isinstance(input, Indicator):
-            return input.name
-        if isinstance(input, DataSeries):
-            return "'%s'" % input.name
-        return "'%s'" % input
-
-    def __init__(self, time_series=None, inputs=None, input_keys = None, desc=None, **kwargs):
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc=None, **kwargs):
         if inputs and not isinstance(inputs, list):
-            inputs = list(inputs)
-        self.calculate = True
-        self.input_series = []
-
-
+            inputs = [inputs]
         if not time_series:
+            input_keys = convert_input_keys(inputs, input_keys)
             series_id = build_series_id(self.__class__.__name__, inputs, input_keys, **kwargs)
             time_series = ModelFactory.build_time_series(series_id=series_id,
                                                          series_cls=get_full_cls_name(self),
@@ -47,9 +36,20 @@ class Indicator(DataSeries):
 
         super(Indicator, self).__init__(time_series=time_series)
 
+        self.calculate = True
+        self.input_series = []
+        self.input_keys = {}
+
         for input in inputs:
             if isinstance(input, DataSeries):
                 self.input_series.append(input)
+
+        for input in self.time_series.inputs:
+            if hasattr(input, 'keys') and input.keys:
+                self.input_keys[input.source] = list(input.keys)
+
+    def get_input_keys(self, source):
+        return self.input_keys.get(source, None)
 
     def _start(self, app_context: Context) -> None:
         super(Indicator, self)._start(self.app_context)

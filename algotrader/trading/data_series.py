@@ -8,17 +8,12 @@ from typing import Dict
 from algotrader import Startable, Context
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.time_series_pb2 import TimeSeries
+from algotrader.utils.data_series import convert_to_list
 from algotrader.utils.model import add_to_list
 
 
 class DataSeries(Startable):
     TIMESTAMP = 'timestamp'
-
-    @staticmethod
-    def get_name(input):
-        if isinstance(input, DataSeries):
-            return "'%s'" % input.time_series.series_id
-        return "'%s'" % input
 
     def __init__(self, time_series: TimeSeries = None, series_id: str = None):
 
@@ -28,7 +23,7 @@ class DataSeries(Startable):
         self.last_item = None
         self.subject = Subject()
         self.time_series = time_series if time_series else ModelFactory.build_time_series(series_id=series_id)
-        self.name = time_series.series_id
+        self.name = self.time_series.series_id
 
         if hasattr(time_series, 'items') and time_series.items:
             for item in time_series.items:
@@ -58,7 +53,7 @@ class DataSeries(Startable):
         timestamp = timestamp if timestamp is not None else data.get(DataSeries.TIMESTAMP)
 
         if not self.time_series.keys:
-            add_to_list(self.time_series.keys, data.keys())
+            add_to_list(self.time_series.keys, list(data.keys()))
 
         if not self.time_series.start_time:
             self.time_series.start_time = timestamp
@@ -140,13 +135,8 @@ class DataSeries(Startable):
 
     def _get_key(self, keys=None, default_keys=None):
         keys = keys if keys else default_keys
-        return DataSeries.convert_to_list(keys)
+        return convert_to_list(keys)
 
-    @staticmethod
-    def convert_to_list(items=None):
-        if items and type(items) != set and type(items) != list:
-            items = [items]
-        return items
 
     def get_by_idx(self, idx, keys=None):
         if (isinstance(idx, int) and (idx >= self.size() or idx < -self.size())) or idx == None:

@@ -43,4 +43,4 @@ class ATR(Indicator):
         result = {}
         # result['timestamp'] = data['timestamp']
         result[Indicator.VALUE] = self.__average.now(Indicator.VALUE)
-        self.add(timestamp=event.timestamp, data=result)
+        self.add(timestamp=timestamp, data=result)

@@ -5,6 +5,7 @@ from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.trade_data_pb2 import *
 from algotrader.utils.model import add_to_dict, add_to_list
+from algotrader.utils.data_series import get_input_name
 
 
 class ModelFactory(object):
@@ -199,25 +200,17 @@ class ModelFactory(object):
         if desc:
             time_series.desc = desc
         add_to_list(time_series.keys, keys)
-        if not input_keys:
-            input_keys = {}
         if inputs:
-            for input_name in inputs:
-                #input_name = get_input_name(input)
-                if isinstance(input_keys, dict):
-                    keys = input_keys.get(input_name, None)
-                else:
-                    keys = input_keys
-
-                if isinstance(keys, str):
-                    keys = list(keys)  # string
+            for input in inputs:
+                input_name = get_input_name(input)
+                keys = input_keys.get(input_name, None)
 
                 ModelFactory.add_time_series_input(time_series, input_name, keys)
         time_series.default_output_key = default_output_key
         time_series.missing_value_replace = missing_value_replace
 
         for key, value in kwargs.items():
-            time_series.config[key] = str(value)
+            time_series.configs[key] = str(value)
         return time_series
 
     @staticmethod

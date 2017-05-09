@@ -14,6 +14,6 @@ class ModelUtilsTest(TestCase):
 
 
     def test_dynamic_import(self):
-        bb = dynamic_import("algotrader.technical.ma.SMA")(input="null")
+        bb = get_cls("algotrader.technical.ma.SMA")(input="null")
 
         self.assertEqual("algotrader.technical.ma.SMA", get_full_cls_name(bb))

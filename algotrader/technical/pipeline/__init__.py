@@ -1,13 +1,15 @@
 import numpy as np
 from collections import OrderedDict
+from typing import Dict
 
+from algotrader import Context
 from algotrader.model.model_factory import ModelFactory
+from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.technical import Indicator
 from algotrader.trading.data_series import DataSeries
-from algotrader import Context
 from algotrader.utils.model import get_full_cls_name
-from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
-from typing import Dict
+from algotrader.utils.data_series import convert_to_list, get_input_name
+
 
 class PipeLine(DataSeries):
     VALUE = 'value'
@@ -25,10 +27,10 @@ class PipeLine(DataSeries):
     @staticmethod
     def get_name(indicator_name, inputs, input_key, *args):
         parts = []
-        parts.extend(DataSeries.convert_to_list(PipeLine.get_input_name(inputs)))
+        parts.extend(convert_to_list(PipeLine.get_input_name(inputs)))
 
         if input_key:
-            parts.extend(DataSeries.convert_to_list(input_key))
+            parts.extend(convert_to_list(input_key))
         if args:
             parts.extend(args)
         content = ",".join(str(part) for part in parts)
@@ -38,10 +40,10 @@ class PipeLine(DataSeries):
     def get_input_name(inputs):
         parts = []
         if isinstance(inputs, list):
-            parts.extend([Indicator.get_input_name(i) for i in inputs])
+            parts.extend([get_input_name(i) for i in inputs])
         else:
             # parts.extend(Indicator.get_input_name(inputs))
-            parts.append(Indicator.get_input_name(inputs))
+            parts.append(get_input_name(inputs))
 
         return ",".join(str(part) for part in parts)
 
@@ -62,7 +64,7 @@ class PipeLine(DataSeries):
         if isinstance(inputs, list):
             for i in inputs:
                 if isinstance(i, DataSeries):
-                    input_name = DataSeries.get_name(i)
+                    input_name = get_input_name(i)
                     input_names.append(input_name)
                     self.input_names_and_series[input_name] = i
                 elif isinstance(i, Indicator):
@@ -77,7 +79,7 @@ class PipeLine(DataSeries):
                     input_names.append(i)
         else:
             if isinstance(inputs, DataSeries):
-                input_name = DataSeries.get_name(inputs)
+                input_name = get_input_name(inputs)
                 input_names.append(input_name)
                 self.input_names_and_series[input_name] = inputs
             elif isinstance(inputs, Indicator):
@@ -104,7 +106,8 @@ class PipeLine(DataSeries):
         self.inputs = []
 
         super(PipeLine, self).__init__(
-            ModelFactory.build_time_series(series_id=name, series_cls=get_full_cls_name(self), desc=desc, inputs=self.input_names))
+            ModelFactory.build_time_series(series_id=name, series_cls=get_full_cls_name(self), desc=desc,
+                                           inputs=self.input_names))
 
         # self.df = pd.DataFrame(index=range(self.length), columns=input_names)
         # self.cache = {} # key is input name, value is numpy array
@@ -155,10 +158,8 @@ class PipeLine(DataSeries):
         # check_df = self.df.isnull()*1
         # return False if check_df.sum(axis=1).sum(axis=0) > 0 else True
 
-
     def on_update(self, event: TimeSeriesUpdateEvent):
         self._process_update(event.source, event.item.timestamp, event.item.data)
-
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         if timestamp != self.__curr_timestamp:

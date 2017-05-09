@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from algotrader.trading.context import ApplicationContext
 from algotrader.utils.data_series import parse_series, get_or_create_indicator
-
+from algotrader.technical.ma import SMA
 
 class IndicatorTest(TestCase):
     def setUp(self):
@@ -12,20 +12,24 @@ class IndicatorTest(TestCase):
         close = self.app_context.inst_data_mgr.get_series("bar")
         close.start(self.app_context)
 
-        sma1 = get_or_create_indicator(self.app_context.inst_data_mgr, "SMA", 'bar', 'close', 3)
+
+        sma1 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs='bar', input_keys='close',
+                                       length=3)
         sma1.start(self.app_context)
 
-        sma2 = get_or_create_indicator(self.app_context.inst_data_mgr, "SMA", 'bar', 'close', 3)
+        sma2 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs='bar', input_keys='close',
+                                       length=3)
         sma2.start(self.app_context)
 
-        sma3 = get_or_create_indicator(self.app_context.inst_data_mgr, "SMA", 'bar', 'close', 10)
+        sma3 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs='bar', input_keys='close',
+                                       length=10)
         sma3.start(self.app_context)
 
         self.assertEquals(sma1, sma2)
         self.assertNotEquals(sma2, sma3)
         self.assertNotEquals(sma1, sma3)
 
-        sma4 = get_or_create_indicator(self.app_context.inst_data_mgr, "SMA", "SMA('bar',close,3)", 10)
+        sma4 = get_or_create_indicator(self.app_context.inst_data_mgr, cls="SMA", inputs="SMA(bar[close],length=3)", length=10)
         sma4.start(self.app_context)
 
         self.assertEquals(sma4.input, sma2)
@@ -34,10 +38,10 @@ class IndicatorTest(TestCase):
         bar = parse_series(self.app_context.inst_data_mgr, "bar")
         bar.start(self.app_context)
 
-        sma1 = parse_series(self.app_context.inst_data_mgr, "SMA('bar',close,3)")
+        sma1 = parse_series(self.app_context.inst_data_mgr, "SMA(bar[close],length=3)")
         sma1.start(self.app_context)
 
-        sma2 = parse_series(self.app_context.inst_data_mgr, "SMA(SMA('bar',close,3),value,10)")
+        sma2 = parse_series(self.app_context.inst_data_mgr, "SMA(SMA(bar[close],3length=)[value],length=10)")
         sma2.start(self.app_context)
 
         rsi = parse_series(self.app_context.inst_data_mgr, "RSI(SMA(SMA('bar',close,3),value,10),value,14, 9)")

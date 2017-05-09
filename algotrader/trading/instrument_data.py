@@ -7,7 +7,7 @@ from algotrader.trading.data_series import DataSeries
 from algotrader.trading.event import MarketDataEventHandler
 from algotrader.utils.logging import logger
 from algotrader.utils.market_data import get_series_id
-from algotrader.utils.model import get_full_cls_name, dynamic_import
+from algotrader.utils.model import get_full_cls_name, get_cls
 
 class InstrumentDataManager(MarketDataEventHandler, Manager):
     def __init__(self):
@@ -37,7 +37,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             series_states = self.store.load_all('time_series')
             for series_state in series_states:
                 if hasattr(series_state, 'series_cls') and series_state.series_cls:
-                    cls = dynamic_import(series_state.series_cls)
+                    cls = get_cls(series_state.series_cls)
                     series = cls(time_series=series_state)
                 else:
                     series = DataSeries(time_series=series_state)

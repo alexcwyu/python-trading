@@ -9,6 +9,7 @@ from pykalman import KalmanFilter
 
 from algotrader.technical import Indicator
 from typing import Dict
+from algotrader.utils.data_series import get_input_name
 
 
 class KalmanFilteringPairRegression(Indicator):
@@ -21,7 +22,7 @@ class KalmanFilteringPairRegression(Indicator):
 
     @staticmethod
     def get_name(input, length):
-        return "KalmanFilteringPairRegression(%s,%s)" % (Indicator.get_input_name(input), length)
+        return "KalmanFilteringPairRegression(%s,%s)" % (get_input_name(input), length)
 
     def __init__(self, input=None, length=10, description="Kalman Filter Regression"):
         super(KalmanFilteringPairRegression, self) \

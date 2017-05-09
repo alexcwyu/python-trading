@@ -98,39 +98,41 @@ model_db_map = bidict({
 
 })
 
+cls_cache = {}
 
-def get_model_id(object):
-    t = type(object)
+
+def get_model_id(obj: object) -> str:
+    t = type(obj)
     if t in model_id_map:
-        return model_id_map[t](object)
-    return object.id()
+        return model_id_map[t](obj)
+    return obj.id()
 
 
-def get_model_db(object):
-    t = type(object)
+def get_model_db(obj: object) -> str:
+    t = type(obj)
     return model_db_map[t]
 
 
-def get_model_from_db_name(db):
+def get_model_from_db_name(db: str) -> type:
     return model_db_map.inv[db]
 
 
-def model_to_str(object) -> str:
-    t = type(object)
+def model_to_str(obj: object) -> str:
+    t = type(obj)
     if t in model_str_map:
-        return model_str_map[t](object)
-    return object
+        return model_str_map[t](obj)
+    return obj
 
 
-def model_to_dict(obj):
+def model_to_dict(obj: object) -> Dict:
     return protobuf_to_dict(obj)
 
 
-def dict_to_model(cls, data):
+def dict_to_model(cls: type, data: Dict) -> object:
     return dict_to_protobuf(cls, data)
 
 
-def add_to_dict(attribute: Callable, dict: Dict[str, str]):
+def add_to_dict(attribute: Callable, dict: Dict[str, str]) -> None:
     if dict:
         for key, value in dict.items():
             if isinstance(value, (int, str, bool, float)):
@@ -141,10 +143,10 @@ def add_to_dict(attribute: Callable, dict: Dict[str, str]):
                 raise RuntimeError
 
 
-def add_to_list(attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]):
+def add_to_list(attribute: Callable, list_item: Union[list, tuple, int, str, bool, float, int]) -> None:
     if list_item:
         if not isinstance(list_item, (list, tuple)):
-            list_item = list(list_item)
+            list_item = [list_item]
 
         for item in list_item:
             if isinstance(item, (int, str, bool, float)):
@@ -155,16 +157,22 @@ def add_to_list(attribute: Callable, list_item: Union[list, tuple, int, str, boo
                 raise RuntimeError
 
 
-def get_full_cls_name(obj):
+def get_full_cls_name(obj: object) -> str:
     if isinstance(obj, type):
         return obj.__module__ + "." + obj.__name__
     return obj.__module__ + "." + obj.__class__.__name__
 
 
-def dynamic_import(full_cls):
-    items = full_cls.split('.')
+def get_cls(full_cls_name: str) -> type:
+    if full_cls_name in cls_cache:
+        return cls_cache[full_cls_name]
+
+    items = full_cls_name.split('.')
     mod_name = ".".join(items[0:-1])
     cls_name = items[-1]
     mod = __import__(mod_name, fromlist=[cls_name])
     cls = getattr(mod, cls_name)
+
+    cls_cache[full_cls_name] = cls
+    cls_cache[cls_name] = cls
     return cls

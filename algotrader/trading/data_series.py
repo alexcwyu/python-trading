@@ -11,13 +11,6 @@ from algotrader.model.time_series_pb2 import TimeSeries
 from algotrader.utils.model import add_to_list
 
 
-class DataSeriesEvent(object):
-    def __init__(self, name: str, timestamp: int, data: Dict[str, float]):
-        self.name = name
-        self.timestamp = timestamp
-        self.data = data
-
-
 class DataSeries(Startable):
     TIMESTAMP = 'timestamp'
 
@@ -27,19 +20,30 @@ class DataSeries(Startable):
             return "'%s'" % input.time_series.series_id
         return "'%s'" % input
 
-    def __init__(self, time_series: TimeSeries = None):
+    def __init__(self, time_series: TimeSeries = None, series_id: str = None):
 
         self.data_list = []
         self.time_list = []
         self.data_time_dict = {}
         self.last_item = None
         self.subject = Subject()
-        self.time_series = time_series
-        self.name = time_series.name
+        self.time_series = time_series if time_series else ModelFactory.build_time_series(series_id=series_id)
+        self.name = time_series.series_id
 
-        if time_series and hasattr(time_series, 'items') and time_series.items:
+        if hasattr(time_series, 'items') and time_series.items:
             for item in time_series.items:
-                self.add(dict(item.data), item.timestamp, True)
+                self.add(timestamp=item.timestamp, data=dict(item.data), init=True)
+
+    def get_config(self, key, default_value=None):
+        if hasattr(self.time_series, 'configs') and self.time_series.configs and key in self.time_series.configs:
+            return self.time_series.configs[key]
+        return default_value
+
+    def get_int_config(self, key, default_value=0):
+        return int(self.get_config(key, default_value))
+
+    def get_float_config(self, key, default_value=0.0):
+        return float(self.get_config(key, default_value))
 
     def _start(self, app_context: Context) -> None:
         pass
@@ -50,7 +54,7 @@ class DataSeries(Startable):
     def id(self):
         return self.time_series.name
 
-    def add(self, data: Dict[str, float], timestamp: int = None, init: bool = False) -> None:
+    def add(self, timestamp: int = None, data: Dict[str, float] = None, init: bool = False) -> None:
         timestamp = timestamp if timestamp is not None else data.get(DataSeries.TIMESTAMP)
 
         if not self.time_series.keys:
@@ -73,7 +77,6 @@ class DataSeries(Startable):
                 self.data_time_dict[key][timestamp] = value
                 enhanced_data[key] = value
 
-            # self.data_list.append(enhanced_data)
             if not init:
                 self.last_item = ModelFactory.add_time_series_item(self.time_series, timestamp, enhanced_data)
 
@@ -95,8 +98,8 @@ class DataSeries(Startable):
 
         self.time_series.end_time = timestamp
         self.data_list.append(enhanced_data)
-        self.subject.on_next(DataSeriesEvent(name=DataSeries.get_name(self), timestamp=timestamp, data=data))
-        # self.subject.on_next(data)
+        self.subject.on_next(
+            ModelFactory.build_time_series_update_event(source=self.name, timestamp=timestamp, data=data))
 
     def current_time(self):
         return self.time_series.end_time
@@ -111,6 +114,9 @@ class DataSeries(Startable):
 
     def get_data(self):
         return self.data_list
+
+    def get_timestamp(self):
+        return self.time_list
 
     def get_data_frame(self, keys=None):
         df = pd.DataFrame(self.data_list, index=self.time_list)

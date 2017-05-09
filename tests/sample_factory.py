@@ -3,7 +3,7 @@ from algotrader.model.model_factory import ModelFactory
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
-
+from collections import OrderedDict
 
 class SampleFactory(object):
     def __init__(self):
@@ -64,10 +64,12 @@ class SampleFactory(object):
         return timezone
 
     def sample_time_series(self):
-        ds = ModelFactory.build_time_series("HSI.BAR.86400", name="HSI.BAR.86400", desc="HSI", inputs=["HSI.BAR.1"],
-                                            keys=["high", "low", "close"], default_output_key="close",
-                                            missing_value_replace=0, start_time=0, end_time=999,
-                                            )
+        ds = ModelFactory.build_time_series(series_id="HSI.BAR.86400",
+                                            desc="HSI",
+                                            keys=["high", "low", "close"],
+                                            inputs=OrderedDict([('HSI.BAR.1', ['close', 'open'])]),
+                                            default_output_key="close",
+                                            missing_value_replace=0)
         ModelFactory.add_time_series_item(ds, timestamp=0,
                                           data={"high": 350.00, "low": 200.45,
                                                 "close": 250.1})

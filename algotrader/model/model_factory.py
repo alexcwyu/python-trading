@@ -1,4 +1,4 @@
-from typing import Dict, List, Union, Callable
+from typing import Dict, List, Callable
 
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.ref_data_pb2 import *
@@ -180,39 +180,67 @@ class ModelFactory(object):
         return timezone
 
     @staticmethod
-    def build_time_series(series_id: str, series_cls: str, name: str = None, desc: str = None,
-                          inputs: Union[str, List[str]] = None, keys: Union[str, List[str]] = None,
-                          default_output_key: str = 'value', missing_value_replace: float = 0.0, start_time: int = 0,
-                          end_time: int = 0) -> TimeSeries:
+    def add_time_series_input(time_series: TimeSeries, source: str, keys: List[str] = None) -> TimeSeries.Input:
+        time_series_input = time_series.inputs.add()
+        time_series_input.source = source
+        if keys:
+            add_to_list(time_series_input.keys, keys)
+        return time_series_input
+
+    @staticmethod
+    def build_time_series(series_id: str, series_cls: str = None, desc: str = None, keys: List[str] = None,
+                          inputs: List = None, input_keys: Dict[str, List[str]] = None,
+                          default_output_key: str = 'value', missing_value_replace: float = 0.0,
+                          **kwargs) -> TimeSeries:
         time_series = TimeSeries()
-        time_series.series_id = str(series_id)
+        time_series.series_id = series_id
         if series_cls:
             time_series.series_cls = series_cls
-        if name:
-            time_series.name = name
         if desc:
             time_series.desc = desc
-        add_to_list(time_series.inputs, inputs)
         add_to_list(time_series.keys, keys)
+        if not input_keys:
+            input_keys = {}
+        if inputs:
+            for input_name in inputs:
+                #input_name = get_input_name(input)
+                if isinstance(input_keys, dict):
+                    keys = input_keys.get(input_name, None)
+                else:
+                    keys = input_keys
+
+                if isinstance(keys, str):
+                    keys = list(keys)  # string
+
+                ModelFactory.add_time_series_input(time_series, input_name, keys)
         time_series.default_output_key = default_output_key
         time_series.missing_value_replace = missing_value_replace
-        time_series.start_time = start_time
-        time_series.end_time = end_time
 
+        for key, value in kwargs.items():
+            time_series.config[key] = str(value)
         return time_series
 
     @staticmethod
-    def add_time_series_item(time_series: TimeSeries, timestamp: int, data: Dict[str, float] = None) -> TimeSeries.Item:
+    def add_time_series_item(time_series: TimeSeries, timestamp: int, data: Dict[str, float] = None) -> TimeSeriesItem:
         item = time_series.items.add()
         ModelFactory.update_time_series_item(item, timestamp=timestamp, data=data)
         return item
 
     @staticmethod
-    def update_time_series_item(item: TimeSeries.Item, timestamp: int = None,
-                                data: Dict[str, float] = None) -> TimeSeries.Item:
+    def update_time_series_item(item: TimeSeriesItem, timestamp: int = None,
+                                data: Dict[str, float] = None) -> TimeSeriesItem:
         item.timestamp = timestamp
         add_to_dict(item.data, data)
         return item
+
+    @staticmethod
+    def build_time_series_update_event(source: str, timestamp: int,
+                                       data: Dict[str, float] = None) -> TimeSeriesUpdateEvent:
+        event = TimeSeriesUpdateEvent()
+        event.source = source
+        item = event.item
+        ModelFactory.update_time_series_item(item, timestamp=timestamp, data=data)
+        return event
 
     @staticmethod
     def build_bar(inst_id: str, type: Bar.Type = None, size: int = None, provider_id: str = None, timestamp: int = None,
@@ -570,7 +598,7 @@ class ModelFactory(object):
         return dd
 
     @staticmethod
-    def build_strategy_state(stg_id: str, stg_cls:str) -> StrategyState:
+    def build_strategy_state(stg_id: str, stg_cls: str) -> StrategyState:
         stg = StrategyState()
         stg.stg_id = stg_id
         stg.stg_cls = stg_cls

@@ -1,18 +1,6 @@
 import pandas as pd
 from tzlocal import get_localzone
 
-from algotrader.technical import Indicator
-from algotrader.technical.ma import SMA
-from algotrader.technical.atr import ATR
-from algotrader.technical.bb import BB
-from algotrader.technical.ma import SMA
-from algotrader.technical.roc import ROC
-from algotrader.technical.rsi import RSI
-from algotrader.technical.stats import MAX
-from algotrader.technical.stats import MIN
-from algotrader.technical.stats import STD
-from algotrader.technical.stats import VAR
-
 
 def parse_series(inst_data_mgr, name):
     if not inst_data_mgr.has_series(name):
@@ -49,7 +37,8 @@ def parse_series(inst_data_mgr, name):
 
 
 def get_or_create_indicator(inst_data_mgr, cls, *args, **kwargs):
-    name = Indicator.get_name(cls, *args, **kwargs)
+    # name = get_name(cls, *args, **kwargs)
+    name = None
     if not inst_data_mgr.has_series(name):
         return globals()[cls](*args, **kwargs)
     return inst_data_mgr.get_series(name, create_if_missing=False)
@@ -61,3 +50,46 @@ def convert_series_idx_to_datetime(series: pd.Series) -> pd.Series:
                      .tz_convert(get_localzone().zone))
 
 
+def get_input_name(input):
+    if hasattr(input, 'time_series') and input.time_series:
+        return "%s" % input.time_series.series_id
+    return "%s" % input  # str
+
+
+def build_series_id(name: str, inputs=None, input_keys=None, **kwargs):
+    parts = []
+    if inputs:
+        if not isinstance(inputs, list):
+            inputs = [inputs]
+
+        input_keys = input_keys if input_keys else {}
+        for input in inputs:
+            input_name = get_input_name(input)
+            if isinstance(input_keys, dict):
+                if input_name in input_keys:
+                    keys = input_keys[input_name]
+
+                    if isinstance(keys, str):
+                        parts.append('%s[%s]' % (input_name, keys))
+                    else:
+                        parts.append('%s[%s]' % (input_name, ','.join(keys)))
+                else:
+                    parts.append(input_name)
+            elif isinstance(input_keys, str):
+                parts.append('%s[%s]' % (input_name, input_keys))
+            else:
+                parts.append('%s[%s]' % (input_name, ','.join(input_keys)))
+
+    if kwargs:
+        for key, value in kwargs.items():
+            parts.append('%s=%s' % (key, value))
+
+    if parts:
+        return "%s(%s)" % (name, ','.join(parts))
+    else:
+
+        return "%s()" % name
+
+
+def build_indicator(cls, name, input, input_keys, desc=None, time_series=None):
+    pass

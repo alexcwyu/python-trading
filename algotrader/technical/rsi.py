@@ -1,7 +1,7 @@
 import numpy as np
 
 from algotrader.technical import Indicator
-from algotrader.trading.data_series import DataSeriesEvent
+from typing import Dict
 
 
 def gain_loss(prev_value, next_value):
@@ -60,11 +60,10 @@ class RSI(Indicator):
         self.length = int(length)
         self.__prev_gain = None
         self.__prev_loss = None
-        super(RSI, self).update_all()
+        super(RSI, self)._update_from_inputs()
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() > self.length:
             if self.__prev_gain is None:
                 avg_gain, avg_loss = avg_gain_loss(self.input, self.input_keys[0], 0, self.input.size())
@@ -87,23 +86,23 @@ class RSI(Indicator):
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
 
-if __name__ == "__main__":
-    import datetime
-    from algotrader.trading.data_series import DataSeries
-
-    close = DataSeries("close")
-    rsi = RSI(close, input_key='close', length=14)
-    print(rsi.name)
-    t = datetime.datetime.now()
-
-    values = [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
-              45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
-
-    for idx, value in enumerate(values):
-        close.add({'timestamp': t, 'close': value})
-        t = t + datetime.timedelta(0, 3)
-
-        print(idx, rsi.now())
+# if __name__ == "__main__":
+#     import datetime
+#     from algotrader.trading.data_series import DataSeries
+#
+#     close = DataSeries("close")
+#     rsi = RSI(close, input_key='close', length=14)
+#     print(rsi.name)
+#     t = datetime.datetime.now()
+#
+#     values = [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
+#               45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
+#
+#     for idx, value in enumerate(values):
+#         close.add(timestamp=t, data={'close': value})
+#         t = t + datetime.timedelta(0, 3)
+#
+#         print(idx, rsi.now())

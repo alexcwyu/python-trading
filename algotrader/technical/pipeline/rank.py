@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+from typing import Dict
 
+from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.technical.pipeline import PipeLine
-from algotrader.trading.data_series import DataSeriesEvent
 
 
 class Rank(PipeLine):
@@ -16,10 +17,12 @@ class Rank(PipeLine):
                                    inputs, input_key, length=1, desc=desc)
         # super(Rank, self).update_all()
 
-    def on_update(self, event: DataSeriesEvent):
+    def on_update(self, event: TimeSeriesUpdateEvent):
         super(Rank, self).on_update(event)
+        self._process_update(event.source, event.item.timestamp, event.item.data)
+
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.all_filled():
             df = pd.DataFrame(self.cache)
             result[PipeLine.VALUE] = ((df.rank(axis=1, ascending=self.ascending) - 1) / (df.shape[1] - 1)).tail(
@@ -27,7 +30,7 @@ class Rank(PipeLine):
         else:
             result[PipeLine.VALUE] = self._default_output()
 
-        self.add(result)
+        self.add(timestamp=event.timestamp, data=result)
 
     def _default_output(self):
         na_array = np.empty(shape=self.shape())

@@ -1,7 +1,7 @@
 import numpy as np
 
 from algotrader.technical import Indicator
-from algotrader.trading.data_series import DataSeriesEvent
+from typing import Dict
 
 
 class MAX(Indicator):
@@ -14,15 +14,14 @@ class MAX(Indicator):
         super(MAX, self).__init__(Indicator.get_name(MAX.__class__, input, input_key, length), input, input_key,
                                   desc)
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             result[Indicator.VALUE] = self.input.max(-self.length, self.input_keys[0])
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
 
 class MIN(Indicator):
@@ -34,17 +33,16 @@ class MIN(Indicator):
         super(MIN, self).__init__(Indicator.get_name(MIN.__class__, input, input_key, length), input, input_key,
                                   desc)
         self.length = int(length)
-        super(MIN, self).update_all()
+        super(MIN, self)._update_from_inputs()
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             result[Indicator.VALUE] = self.input.min(-self.length, self.input_keys[0])
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
 
 class STD(Indicator):
@@ -56,17 +54,16 @@ class STD(Indicator):
         super(STD, self).__init__(Indicator.get_name(STD.__class__, input, input_key, length), input, input_key,
                                   desc)
         self.length = int(length)
-        super(STD, self).update_all()
+        super(STD, self)._update_from_inputs()
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             result[Indicator.VALUE] = self.input.std(-self.length, self.input_keys[0])
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
 
 class VAR(Indicator):
@@ -79,12 +76,11 @@ class VAR(Indicator):
                                   desc)
         self.length = int(length)
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             result[Indicator.VALUE] = self.input.std(-self.length, self.input_keys[0])
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)

@@ -1,9 +1,9 @@
 import math
 
 import numpy as np
+from typing import Dict
 
 from algotrader.technical import Indicator
-from algotrader.trading.data_series import DataSeriesEvent
 
 
 class HistoricalVolatility(Indicator):
@@ -18,9 +18,8 @@ class HistoricalVolatility(Indicator):
         super(HistoricalVolatility, self).__init__(
             Indicator.get_name(HistoricalVolatility.__name__, input, input_key, length), input, input_key, desc)
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             sum_ret_sq = 0.0
             for idx in range(self.input.size() - self.length + 1, self.input.size()):
@@ -32,4 +31,4 @@ class HistoricalVolatility(Indicator):
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)

@@ -3,7 +3,7 @@ import numpy as np
 from algotrader.technical import Indicator
 from algotrader.technical.ma import SMA
 from algotrader.technical.stats import STD
-from algotrader.trading.data_series import DataSeriesEvent
+from typing import Dict
 
 
 class BB(Indicator):
@@ -25,9 +25,8 @@ class BB(Indicator):
         super(BB, self).__init__(Indicator.get_name(BB.__name__, input, input_key, length, num_std), input, input_key,
                                  desc)
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         sma = self.__sma.now(self.input_keys[0])
         std = self.__std_dev.now(self.input_keys[0])
         if not np.isnan(sma):
@@ -42,4 +41,4 @@ class BB(Indicator):
             result[BB.LOWER] = np.nan
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)

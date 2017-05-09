@@ -8,7 +8,7 @@ import numpy as np
 from pykalman import KalmanFilter
 
 from algotrader.technical import Indicator
-from algotrader.trading.data_series import DataSeriesEvent
+from typing import Dict
 
 
 class KalmanFilteringPairRegression(Indicator):
@@ -33,11 +33,10 @@ class KalmanFilteringPairRegression(Indicator):
         self.length = int(length)
         delta = 1e-5
         self.trans_cov = delta / (1 - delta) * np.eye(2)
-        super(KalmanFilteringPairRegression, self).update_all()
+        super(KalmanFilteringPairRegression, self)._update_from_inputs()
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
 
             independent_var = self.input.get_by_idx_range(key=None, start_idx=0, end_idx=-1)
@@ -59,10 +58,10 @@ class KalmanFilteringPairRegression(Indicator):
             result[Indicator.VALUE] = slope
             result[KalmanFilteringPairRegression.SLOPE] = slope
             result[KalmanFilteringPairRegression.SLOPE] = state_means[:, 1][-1]
-            self.add(result)
+            self.add(timestamp=timestamp, data=result)
 
         else:
             result[Indicator.VALUE] = np.nan
             result[KalmanFilteringPairRegression.SLOPE] = np.nan
             result[KalmanFilteringPairRegression.SLOPE] = np.nan
-            self.add(result)
+            self.add(timestamp=timestamp, data=result)

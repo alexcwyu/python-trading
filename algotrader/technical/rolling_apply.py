@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from algotrader.technical import Indicator
-from algotrader.trading.data_series import DataSeriesEvent
+from typing import Dict
 
 
 class RollingApply(Indicator):
@@ -16,16 +16,15 @@ class RollingApply(Indicator):
         self.func = func
         super(RollingApply, self).__init__(name=name, input=input, input_keys=input_key, desc=desc, *args, **kwargs)
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             sliced = self.input.get_by_idx(keys=self.input_keys, idx=slice(-self.length, None, None))
             result[Indicator.VALUE] = self.func(sliced)
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
 
 class StdDev(RollingApply):

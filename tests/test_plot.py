@@ -14,11 +14,11 @@ class PlotTest(TestCase):
     factory = ModelFactory()
 
     def __create_plot(self):
-        series = DataSeries(TimeSeries())
+        series = DataSeries(time_series=TimeSeries())
         t = 20170101
         for idx, value in enumerate(self.values):
             ts = datestr_to_unixtimemillis(t)
-            series.add({"timestamp": ts, "value": value})
+            series.add(timestamp=ts, data={"value": value})
             t = t + 1
         values = series.get_series(["value"])
         plot = TimeSeriesPlot(values)

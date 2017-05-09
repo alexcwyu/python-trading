@@ -45,16 +45,16 @@ class TALibSMATest(TestCase):
         t2 = t1 + 3
         t3 = t2 + 3
 
-        bar.add({"timestamp": t1, "close": 2.0, "open": 0})
+        bar.add(data={"timestamp": t1, "close": 2.0, "open": 0})
         self.assertEquals([{"timestamp": t1, 'value': np.nan}],
                           sma.get_data())
 
-        bar.add({"timestamp": t2, "close": 2.4, "open": 1.4})
+        bar.add(data={"timestamp": t2, "close": 2.4, "open": 1.4})
         self.assertEquals([{"timestamp": t1, 'value': np.nan},
                            {"timestamp": t2, 'value': np.nan}],
                           sma.get_data())
 
-        bar.add({"timestamp": t3, "close": 2.8, "open": 1.8})
+        bar.add(data={"timestamp": t3, "close": 2.8, "open": 1.8})
         self.assertEquals([{"timestamp": t1, 'value': np.nan},
                            {"timestamp": t2, 'value': np.nan},
                            {"timestamp": t3, 'value': 2.4}],
@@ -73,20 +73,20 @@ class TALibSMATest(TestCase):
         t4 = t3 + 3
         t5 = t4 + 3
 
-        bar.add({"timestamp": t1, "close": 2.0, "open": 0})
+        bar.add(data={"timestamp": t1, "close": 2.0, "open": 0})
         self.assertTrue(math.isnan(sma.now('value')))
 
-        bar.add({"timestamp": t2, "close": 2.4, "open": 1.4})
+        bar.add(data={"timestamp": t2, "close": 2.4, "open": 1.4})
         self.assertTrue(math.isnan(sma.now('value')))
 
-        bar.add({"timestamp": t3, "close": 2.8, "open": 1.8})
+        bar.add(data={"timestamp": t3, "close": 2.8, "open": 1.8})
         self.assertEquals(2.4, sma.now('value'))
 
-        bar.add({"timestamp": t4, "close": 3.2, "open": 2.2})
+        bar.add(data={"timestamp": t4, "close": 3.2, "open": 2.2})
         # self.assertEquals(2.8, sma.now('value'))
         self.assertAlmostEqual(2.8, sma.now('value'), places=3)
 
-        bar.add({"timestamp": t5, "close": 3.6, "open": 2.6})
+        bar.add(data={"timestamp": t5, "close": 3.6, "open": 2.6})
         self.assertAlmostEqual(3.2, sma.now('value'), places=3)
         # self.assertEquals(3.2, sma.now('value'))
 
@@ -104,18 +104,18 @@ class TALibSMATest(TestCase):
 
     @staticmethod
     def create_series_by_list(valuelist):
-        close = DataSeries(ModelFactory.build_time_series(series_id="close",name="close"))
+        close = DataSeries(time_series=ModelFactory.build_time_series(series_id="close"))
 
         t = 1
 
         for value in valuelist:
-            close.add({"timestamp": t, "v1": value})
+            close.add(data={"timestamp": t, "v1": value})
             t = t + 3
         return close
 
     def test_compare_against_oneoff_calculation(self):
         rw = np.cumsum(np.random.normal(0, 2, 1000)) + 100
-        close = DataSeries(ModelFactory.build_time_series(series_id="close",name="close"))
+        close = DataSeries(time_series=ModelFactory.build_time_series(series_id="close"))
         close.start(self.app_context)
 
         t = 1
@@ -125,7 +125,7 @@ class TALibSMATest(TestCase):
         result = []
 
         for x in rw:
-            close.add({"timestamp": t, "close": x})
+            close.add(data={"timestamp": t, "close": x})
             result.append(sma.now('value'))
             t = t + 3
 

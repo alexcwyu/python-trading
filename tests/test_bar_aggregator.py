@@ -25,13 +25,13 @@ class BarAggregatorTest(TestCase):
         self.simluation_clock = SimulationClock()
         self.simluation_clock.reset()
         self.simluation_clock.update_time(self.time)
-        self.input = DataSeries(TimeSeries())
+        self.input = DataSeries(time_series=TimeSeries())
         self.event_bus = BarAggregatorTest.DummyEventBus()
 
     def update(self, input, data):
         self.simluation_clock.update_time(data.timestamp)
         dict_data = {k : y for k, y in protobuf_to_dict(data).items() if isinstance(y, (int, float))}
-        self.input.add(dict_data)
+        self.input.add(timestamp=data.timestamp, data=dict_data)
 
     def test_time_bar_from_trade(self):
         agg = BarAggregator(data_bus=self.event_bus, clock=self.simluation_clock, inst_id="1", input=self.input)

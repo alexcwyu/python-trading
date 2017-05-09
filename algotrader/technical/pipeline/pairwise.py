@@ -1,9 +1,10 @@
 import numpy as np
+from typing import Dict
 
+from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.technical import DataSeries
 from algotrader.technical import Indicator
 from algotrader.technical.pipeline import PipeLine
-from algotrader.trading.data_series import DataSeriesEvent
 
 
 class Pairwise(PipeLine):
@@ -46,10 +47,12 @@ class Pairwise(PipeLine):
 
         super(Pairwise, self).update_all()
 
-    def on_update(self, event: DataSeriesEvent):
+    def on_update(self, event: TimeSeriesUpdateEvent):
         super(Pairwise, self).on_update(event)
+        self._process_update(event.source, event.item.timestamp, event.item.data)
+
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.inputs[0].size() >= self.length:
             if self.all_filled():
                 x = self.cache[self.lhs_name][-self.length:] if self.length > 1 else self.cache[self.lhs_name][-1]
@@ -60,7 +63,7 @@ class Pairwise(PipeLine):
         else:
             result[PipeLine.VALUE] = self._default_output()
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
     def _default_output(self):
         na_array = np.empty(shape=self.shape())

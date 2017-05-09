@@ -1,7 +1,7 @@
 import numpy as np
+from typing import Dict
 
 from algotrader.technical import Indicator
-from algotrader.trading.data_series import DataSeriesEvent
 
 
 class SMA(Indicator):
@@ -9,14 +9,13 @@ class SMA(Indicator):
         'length'
     )
 
-    def __init__(self, input=None, input_key=None, length=0, desc="Simple Moving Average", **kwargs):
-        self.length = int(length)
-        super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc,
-                                  **kwargs)
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Simple Moving Average", length=0):
+        super(SMA, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length)
+        self.length = self.get_int_config("length", 10)
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             value = 0.0
             for idx in range(self.input.size() - self.length, self.input.size()):
@@ -26,4 +25,4 @@ class SMA(Indicator):
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)

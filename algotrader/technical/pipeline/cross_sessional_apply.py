@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 
 from algotrader.technical.pipeline import PipeLine
-from algotrader.trading.data_series import DataSeriesEvent
-
+from typing import Dict
+from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 
 # TODO: One output scalar
 # TODO: Output Vector Apply class
@@ -18,10 +18,12 @@ class CrossSessionalApply(PipeLine):
         self.np_func = np_func
         super(CrossSessionalApply, self).update_all()
 
-    def on_update(self, event: DataSeriesEvent):
+    def on_update(self, event: TimeSeriesUpdateEvent):
         super(CrossSessionalApply, self).on_update(event)
+        self._process_update(event.source, event.item.timestamp, event.item.data)
+
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.inputs[0].size() >= self.length:
             if self.all_filled():
                 # result[PipeLine.VALUE] = self.np_func(self.df.values)
@@ -36,7 +38,7 @@ class CrossSessionalApply(PipeLine):
         else:
             result[PipeLine.VALUE] = self._default_output()
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
     def _default_output(self):
         na_array = np.empty(shape=self.shape())
@@ -57,10 +59,13 @@ class CrossSessionalApplyScala(PipeLine):
         self.np_func = np_func
         super(CrossSessionalApplyScala, self).update_all()
 
-    def on_update(self, event: DataSeriesEvent):
+    def on_update(self, event: TimeSeriesUpdateEvent):
         super(CrossSessionalApplyScala, self).on_update(event)
+        self._process_update(event.source, event.item.timestamp, event.item.data)
+
+
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.inputs[0].size() >= self.length:
             if self.all_filled():
                 packed_matrix = np.transpose(np.array(self.cache.values()))
@@ -75,7 +80,7 @@ class CrossSessionalApplyScala(PipeLine):
         else:
             result[PipeLine.VALUE] = self._default_output()
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
     def _default_output(self):
         na_array = np.empty(shape=self.shape())

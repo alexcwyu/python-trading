@@ -2,12 +2,12 @@ from rx import Observable
 
 from algotrader import Startable, Context
 from algotrader.model.market_data_pb2 import Bar, Trade, Quote, BarAggregationRequest
-from algotrader.trading.data_series import DataSeries, DataSeriesEvent
+from algotrader.trading.data_series import DataSeries
 from algotrader.trading.event import MarketDataEventHandler
 from algotrader.utils.logging import logger
 from algotrader.utils.market_data import M1, get_next_bar_start_time, get_current_bar_end_time, \
     get_current_bar_start_time
-
+from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 
 class BarAggregator(MarketDataEventHandler, Startable):
     def __init__(self, data_bus, clock, inst_id,
@@ -112,12 +112,12 @@ class BarAggregator(MarketDataEventHandler, Startable):
         self.__close = close
         self.__volume += size
 
-    def on_update(self, event: DataSeriesEvent):
-        data = event.data
+    def on_update(self, event: TimeSeriesUpdateEvent):
+        data = event.item.data
         if isinstance(data, (Trade, Bar, Quote)):
             data = data.to_dict()
 
-        self.__timestamp = event.timestamp
+        self.__timestamp = event.item.timestamp
 
         ## Time Bar, need to check if require publish existing before handling new update
         if self.__output_bar_type == Bar.Time and self.__count > 0 and self.__timestamp > self.__end_time:

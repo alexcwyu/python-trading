@@ -13,7 +13,7 @@ class MovingAverageTest(TestCase):
 
     def test_name(self):
         bar = self.app_context.inst_data_mgr.get_series("bar")
-        sma = SMA(bar, input_key='close', length=3)
+        sma = SMA(inputs=bar, input_keys='close', length=3)
         self.assertEquals("SMA('bar',close,3)", sma.name)
 
         sma2 = SMA(sma, input_key='value', length=10)

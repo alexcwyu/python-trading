@@ -1,6 +1,7 @@
+from typing import Dict
+
 from algotrader.technical import Indicator
 from algotrader.technical.ma import SMA
-from algotrader.trading.data_series import DataSeriesEvent
 
 
 class ATR(Indicator):
@@ -19,10 +20,9 @@ class ATR(Indicator):
         super(ATR, self).__init__(Indicator.get_name(ATR.__name__, input, length), input, ['high', 'low', 'close'],
                                   desc)
 
-    def on_update(self, event: DataSeriesEvent):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         sma_input = {}
-        sma_input['timestamp'] = event.timestamp
-        data = event.data
+        # sma_input['timestamp'] = event.timestamp
         high = data['high']
         low = data['low']
         close = data['close']
@@ -38,9 +38,9 @@ class ATR(Indicator):
         self.__prev_close = close
 
         sma_input[Indicator.VALUE] = tr
-        self.__average.add(sma_input)
+        self.__average.add(timestamp=timestamp, data=sma_input)
 
         result = {}
-        result['timestamp'] = data['timestamp']
+        # result['timestamp'] = data['timestamp']
         result[Indicator.VALUE] = self.__average.now(Indicator.VALUE)
-        self.add(result)
+        self.add(timestamp=event.timestamp, data=result)

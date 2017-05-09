@@ -3,9 +3,11 @@ from collections import OrderedDict
 
 from algotrader.model.model_factory import ModelFactory
 from algotrader.technical import Indicator
-from algotrader.trading.data_series import DataSeries, DataSeriesEvent
+from algotrader.trading.data_series import DataSeries
 from algotrader import Context
 from algotrader.utils.model import get_full_cls_name
+from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
+from typing import Dict
 
 class PipeLine(DataSeries):
     VALUE = 'value'
@@ -102,7 +104,7 @@ class PipeLine(DataSeries):
         self.inputs = []
 
         super(PipeLine, self).__init__(
-            ModelFactory.build_time_series(series_id=name, series_cls=get_full_cls_name(self), name=name, desc=desc, inputs=self.input_names))
+            ModelFactory.build_time_series(series_id=name, series_cls=get_full_cls_name(self), desc=desc, inputs=self.input_names))
 
         # self.df = pd.DataFrame(index=range(self.length), columns=input_names)
         # self.cache = {} # key is input name, value is numpy array
@@ -153,17 +155,19 @@ class PipeLine(DataSeries):
         # check_df = self.df.isnull()*1
         # return False if check_df.sum(axis=1).sum(axis=0) > 0 else True
 
-    def on_update(self, event: DataSeriesEvent):
-        data = event.data
-        timestamp = event.timestamp
-        data_name = event.name
+
+    def on_update(self, event: TimeSeriesUpdateEvent):
+        self._process_update(event.source, event.item.timestamp, event.item.data)
+
+
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         if timestamp != self.__curr_timestamp:
             self.__curr_timestamp = timestamp
             self._flush_and_create()
 
-        if data_name in self.input_names:
-            j = self.input_names_pos[data_name]
-            self.cache[data_name] = self.inputs[j].get_by_idx(
+        if source in self.input_names:
+            j = self.input_names_pos[source]
+            self.cache[source] = self.inputs[j].get_by_idx(
                 keys=self.input_keys,
                 idx=slice(-self.length, None, None))
             # self.df[data_name] = self.inputs[j].get_by_idx(

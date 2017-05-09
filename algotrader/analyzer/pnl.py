@@ -10,7 +10,7 @@ class PnlAnalyzer(Analyzer):
     def __init__(self, portfolio, state):
         self.portfolio = portfolio
         self.state = state
-        self.series = DataSeries(self.state.pnl.series)
+        self.series = DataSeries(time_series=self.state.pnl.series)
 
     def update(self, timestamp: int, total_equity: float):
         performance_series = self.portfolio.performance.series
@@ -19,10 +19,10 @@ class PnlAnalyzer(Analyzer):
             self.state.pnl.last_pnl = performance_series.get_by_idx(-1, PerformanceAnalyzer.TotalEquity) - \
                                       performance_series.get_by_idx(-2, PerformanceAnalyzer.TotalEquity)
 
-            self.series.add(data={self.Pnl: self.state.pnl.last_pnl}, timestamp=timestamp)
+            self.series.add(timestamp=timestamp, data={self.Pnl: self.state.pnl.last_pnl})
         else:
             self.state.pnl.last_pnl = 0
-            self.series.add(data={self.Pnl: self.state.pnl.last_pnl}, timestamp=timestamp)
+            self.series.add(timestamp=timestamp, data={self.Pnl: self.state.pnl.last_pnl})
 
     def get_result(self):
         return {self.Pnl: self.state.pnl.last_pnl}

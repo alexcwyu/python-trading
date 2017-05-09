@@ -9,3 +9,30 @@ UnitTest
 
 Integration Test
     test_data_store
+
+
+SMA(Bar.HSI.Time.86400:[close], length=10)
+
+SMA({SMA({Bar.HSI.Time.86400:[close]}, 10 ,20):[value]}, 10 ,30)
+SMA([Bar.HSI.Time.86400[close], Bar.SP500.Time.86400[close]], 10 ,20)
+
+
+
+        if time_series:
+            self.input_name = time_series.inputs
+            self.input = None
+        else:
+            if input:
+                if isinstance(input, DataSeries):
+                    self.input_name = input.name
+                    self.input = input
+                else:
+                    self.input_name = input
+                    self.input = None
+            else:
+                self.input_name = None
+            time_series = ModelFactory.build_time_series(series_id=name, series_cls=get_full_cls_name(self), desc=desc,
+                                                         inputs=self.input_name)
+
+        self.input_keys = self._get_key(input_keys, None)
+        self.calculate = True

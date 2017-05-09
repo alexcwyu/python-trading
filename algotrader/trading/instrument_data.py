@@ -77,7 +77,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__bar_dict[bar.inst_id] = bar
 
         self.get_series(get_series_id(bar)).add(
-            {"timestamp": bar.timestamp, "open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
+            timestamp=bar.timestamp,
+            data={"open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
              "vol": bar.vol})
 
         if self._is_realtime_persist():
@@ -88,7 +89,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__quote_dict[quote.inst_id] = quote
 
         self.get_series(get_series_id(quote)).add(
-            {"timestamp": quote.timestamp, "bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
+            timestamp=quote.timestamp,
+            data={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
              "ask_size": quote.ask_size})
 
         if self._is_realtime_persist():
@@ -98,7 +100,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__trade_dict[trade.inst_id] = trade
         self.get_series(get_series_id(trade)).add(
-            {"timestamp": trade.timestamp, "price": trade.price, "size": trade.size})
+            timestamp=trade.timestamp,
+            data= {"price": trade.price, "size": trade.size})
 
         if self._is_realtime_persist():
             self.store.save_trade(trade)
@@ -131,7 +134,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         if type(key) == str:
             if key not in self.__series_dict:
                 self.__series_dict[key] = cls(
-                    time_series=ModelFactory.build_time_series(series_id=key, series_cls=get_full_cls_name(cls), name=key, desc=desc,
+                    time_series=ModelFactory.build_time_series(series_id=key, series_cls=get_full_cls_name(cls), desc=desc,
                                                                missing_value_replace=missing_value))
             return self.__series_dict[key]
         raise AssertionError()

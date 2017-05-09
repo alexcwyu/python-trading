@@ -2,7 +2,7 @@ import numpy as np
 import talib
 
 from algotrader.technical import Indicator
-from algotrader.trading.data_series import DataSeriesEvent
+from typing import Dict
 
 
 def ds_to_high_numpy(ds, idx):
@@ -65,10 +65,8 @@ class SMA(Indicator):
         else:
             super(SMA, self).__init__(Indicator.get_name(SMA.__name__, input, input_key, length), input, input_key, desc)
 
-    def on_update(self, event: DataSeriesEvent):
-
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             value = talib.SMA(
                 np.array(
@@ -79,7 +77,7 @@ class SMA(Indicator):
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
 
 class EMA(Indicator):
@@ -90,12 +88,10 @@ class EMA(Indicator):
     def __init__(self, input, input_key=None, length=0, desc="TALib Exponential Moving Average"):
         super(EMA, self).__init__(Indicator.get_name(EMA.__name__, input, input_key, length), input, input_key, desc)
         self.length = int(length)
-        super(EMA, self).update_all()
+        super(EMA, self)._update_from_inputs()
 
-    def on_update(self, event: DataSeriesEvent):
-
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.input.size() >= self.length:
             value = talib.EMA(
                 np.array(
@@ -106,7 +102,7 @@ class EMA(Indicator):
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
 
 single_ds_list = ["APO", "BBANDS", "CMO", "DEMA", "EMA", "HT_DCPERIOD", "HT_DCPHASE", "HT_PHASOR", "HT_SINE",

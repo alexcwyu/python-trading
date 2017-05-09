@@ -1,7 +1,8 @@
 import numpy as np
+from typing import Dict
 
+from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.technical.pipeline import PipeLine
-from algotrader.trading.data_series import DataSeriesEvent
 
 
 class MakeVector(PipeLine):
@@ -13,10 +14,12 @@ class MakeVector(PipeLine):
                                          inputs, input_key, length=1, desc=desc)
         super(MakeVector, self).update_all()
 
-    def on_update(self, event: DataSeriesEvent):
+    def on_update(self, event: TimeSeriesUpdateEvent):
         super(MakeVector, self).on_update(event)
+        self._process_update(event.source, event.item.timestamp, event.item.data)
+
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = event.timestamp
         if self.inputs[0].size() >= self.length:
             if self.all_filled():
                 packed_matrix = np.transpose(np.array(self.cache.values()))
@@ -26,7 +29,7 @@ class MakeVector(PipeLine):
         else:
             result[PipeLine.VALUE] = self._default_output()
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
     def _default_output(self):
         na_array = np.empty(shape=self.shape())

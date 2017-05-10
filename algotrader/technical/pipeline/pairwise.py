@@ -9,9 +9,9 @@ from algotrader.utils.data_series import get_input_name
 
 
 class Pairwise(PipeLine):
-    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Pairwise", func=None, length=1):
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Pairwise", func=None, length=1, **kwargs):
         super(Pairwise, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
-                                       length=length)
+                                       length=length, **kwargs)
         self.func = func
 
     def _start(self, app_context: Context) -> None:
@@ -42,7 +42,7 @@ class Pairwise(PipeLine):
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         super(Pairwise, self)._process_update(source=source, timestamp=timestamp, data=data)
         result = {}
-        if self.inputs[0].size() >= self.length:
+        if self.get_input(idx=1).size() >= self.length:
             if self.all_filled():
                 x = self.cache[self.lhs_name][-self.length:] if self.length > 1 else self.cache[self.lhs_name][-1]
                 y = self.cache[self.rhs_name][-self.length:] if self.length > 1 else self.cache[self.rhs_name][-1]
@@ -126,9 +126,9 @@ class Max(Pairwise):
 
 
 class PairCorrelation(Pairwise):
-    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Pairwise PairCorrelation"):
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Pairwise PairCorrelation", length=1):
         super(PairCorrelation, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
-                                   func=lambda x, y: np.corrcoef(x, y)[0, 1])
+                                   func=lambda x, y: np.corrcoef(x, y)[0, 1],length=length)
 
 #
 # from jinja2 import Template

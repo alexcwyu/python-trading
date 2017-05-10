@@ -21,13 +21,13 @@ class PairwiseTest(TestCase):
         bar0_plus_bar1 = Plus(inputs=[bar0, bar1], input_keys='close')
         bar0_plus_bar1.start(self.app_context)
 
-        self.assertEquals("Plus(bar0[close],bar1[close])",
+        self.assertEquals("Plus(bar0[close],bar1[close],length=1)",
                           bar0_plus_bar1.name)
 
         spread = Minus(inputs=[bar0, bar1], input_keys='close')
         spread.start(self.app_context)
 
-        self.assertEquals("Minus(bar0[close],bar1[close])",
+        self.assertEquals("Minus(bar0[close],bar1[close],length=1)",
                           spread.name)
 
     def test_empty_at_initialize(self):
@@ -69,7 +69,7 @@ class PairwiseTest(TestCase):
         minus = Minus(inputs=[bar0, bar1], input_keys='close')
         times = Times(inputs=[bar0, bar1], input_keys='close')
         divides = Divides(inputs=[bar0, bar1], input_keys='close')
-        pcorr = PairCorrelation(inputs=[bar0, bar1], length=4, input_keys='close')
+        pcorr = PairCorrelation(inputs=[bar0, bar1], input_keys='close', length=4)
 
         plus.start(self.app_context)
         minus.start(self.app_context)
@@ -86,26 +86,26 @@ class PairwiseTest(TestCase):
         x_t_y = x * y
         x_d_y = x / y
 
-        bar0.add({"timestamp": ts[0], "close": x[0], "open": 0})
-        bar1.add({"timestamp": ts[0], "close": y[0], "open": 0})
+        bar0.add(data={"timestamp": ts[0], "close": x[0], "open": 0})
+        bar1.add(data={"timestamp": ts[0], "close": y[0], "open": 0})
 
         self.assertEqual(plus.now('value'), 175.0)
         self.assertEqual(minus.now('value'), -15.0)
         self.assertEqual(times.now('value'), 7600.0)
         self.assertEqual(divides.now('value'), 80.0 / 95.0)
 
-        bar0.add({"timestamp": ts[1], "close": x[1], "open": 0})
-        bar1.add({"timestamp": ts[1], "close": y[1], "open": 0})
+        bar0.add(data={"timestamp": ts[1], "close": x[1], "open": 0})
+        bar1.add(data={"timestamp": ts[1], "close": y[1], "open": 0})
 
         self.assertEqual(plus.now('value'), 200.0)
         self.assertEqual(minus.now('value'), 4.0)
         self.assertEqual(times.now('value'), 102.0 * 98.0)
         self.assertEqual(divides.now('value'), 102.0 / 98.0)
 
-        bar0.add({"timestamp": ts[2], "close": x[2], "open": 0})
-        bar1.add({"timestamp": ts[2], "close": y[2], "open": 0})
+        bar0.add(data={"timestamp": ts[2], "close": x[2], "open": 0})
+        bar1.add(data={"timestamp": ts[2], "close": y[2], "open": 0})
 
-        bar0.add({"timestamp": ts[3], "close": x[3], "open": 0})
-        bar1.add({"timestamp": ts[3], "close": y[3], "open": 0})
+        bar0.add(data={"timestamp": ts[3], "close": x[3], "open": 0})
+        bar1.add(data={"timestamp": ts[3], "close": y[3], "open": 0})
 
         self.assertEqual(pcorr.now('value'), np.corrcoef(x, y)[0, 1])

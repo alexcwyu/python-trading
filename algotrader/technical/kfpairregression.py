@@ -6,10 +6,9 @@ __author__ = 'jchan'
 
 import numpy as np
 from pykalman import KalmanFilter
+from typing import Dict
 
 from algotrader.technical import Indicator
-from typing import Dict
-from algotrader.utils.data_series import get_input_name
 
 
 class KalmanFilteringPairRegression(Indicator):
@@ -20,30 +19,26 @@ class KalmanFilteringPairRegression(Indicator):
         'length'
     )
 
-    @staticmethod
-    def get_name(input, length):
-        return "KalmanFilteringPairRegression(%s,%s)" % (get_input_name(input), length)
-
-    def __init__(self, input=None, length=10, description="Kalman Filter Regression"):
-        super(KalmanFilteringPairRegression, self) \
-            .__init__(KalmanFilteringPairRegression.get_name(input, length),
-                      input=input,
-                      keys=['slope', 'intercept'],
-                      default_key='slope',
-                      description=description)
-        self.length = int(length)
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Kalman Filter Regression", length=10):
+        super(KalmanFilteringPairRegression, self).__init__(time_series=time_series, inputs=inputs,
+                                                            input_keys=input_keys, desc=desc,
+                                                            keys=['slope', 'intercept'],
+                                                            default_key='slope',
+                                                            length=length)
+        self.length = self.get_int_config("length", 10)
         delta = 1e-5
         self.trans_cov = delta / (1 - delta) * np.eye(2)
-        super(KalmanFilteringPairRegression, self)._update_from_inputs()
+        # super(KalmanFilteringPairRegression, self)._update_from_inputs()
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input.size() >= self.length:
 
-            independent_var = self.input.get_by_idx_range(key=None, start_idx=0, end_idx=-1)
-            symbol_set = set(self.input.keys)
-            depend_symbol = symbol_set.difference(self.input.default_key)
-            depend_var = self.input.get_by_idx_range(key=depend_symbol, start_idx=0, end_idx=-1)
+        if input.size() >= self.length:
+
+            independent_var = self.first_input.get_by_idx_range(key=None, start_idx=0, end_idx=-1)
+            symbol_set = set(self.first_input.keys)
+            depend_symbol = symbol_set.difference(self.first_input.default_key)
+            depend_var = self.first_input.get_by_idx_range(key=depend_symbol, start_idx=0, end_idx=-1)
 
             obs_mat = np.vstack([independent_var.values, np.ones(independent_var.values.shape)]).T[:, np.newaxis]
             model = KalmanFilter(n_dim_obs=1, n_dim_state=2,

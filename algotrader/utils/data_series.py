@@ -1,10 +1,6 @@
-import re
-
 import pandas as pd
 from typing import Dict, List
 from tzlocal import get_localzone
-
-from algotrader.utils.model import get_cls
 
 
 def convert_series_idx_to_datetime(series: pd.Series) -> pd.Series:
@@ -21,9 +17,21 @@ def get_input_name(input):
     raise Exception("only str or DataSeries is supported")
 
 
+def convert_input(inputs=None) -> List[str]:
+    result = []
+    if inputs:
+        if not isinstance(inputs, list):
+            inputs = [inputs]
+
+        result = [get_input_name(input) for input in inputs]
+
+    return result
+
+
 def convert_input_keys(inputs=None, input_keys=None) -> Dict[str, List[str]]:
     result = {}
-    if inputs:
+    if inputs and input_keys:
+        inputs = convert_input(inputs)
         input_keys = input_keys if input_keys else {}
         if isinstance(input_keys, dict):
             for k, v in input_keys.items():
@@ -47,17 +55,15 @@ def convert_input_keys(inputs=None, input_keys=None) -> Dict[str, List[str]]:
 
 def build_series_id(name: str, inputs=None, input_keys=None, **kwargs):
     parts = []
-    if inputs:
-        if not isinstance(inputs, list):
-            inputs = [inputs]
-        input_keys = convert_input_keys(inputs, input_keys)
-        for input in inputs:
-            input_name = get_input_name(input)
-            if input_name in input_keys:
-                keys = input_keys[input_name]
-                parts.append('%s[%s]' % (input_name, ','.join(keys)))
-            else:
-                parts.append(input_name)
+    inputs = convert_input(inputs)
+    input_keys = convert_input_keys(inputs, input_keys)
+    for input in inputs:
+        input_name = get_input_name(input)
+        if input_name in input_keys:
+            keys = input_keys[input_name]
+            parts.append('%s[%s]' % (input_name, ','.join(keys)))
+        else:
+            parts.append(input_name)
 
     if kwargs:
         for key, value in kwargs.items():
@@ -67,11 +73,10 @@ def build_series_id(name: str, inputs=None, input_keys=None, **kwargs):
         return "%s(%s)" % (name, ','.join(parts))
     else:
 
-        return "%s()" % name  #
+        return "%s()" % name  # # def build_indicator(cls, inputs=None, input_keys=None, desc=None, time_series=None, **kwargs):
 
 
-# def build_indicator(cls, inputs=None, input_keys=None, desc=None, time_series=None, **kwargs):
-#     if isinstance(cls, str):
+# if isinstance(cls, str):
 #         if cls in cls_cache:
 #             cls = cls_cache[cls]
 #         else:

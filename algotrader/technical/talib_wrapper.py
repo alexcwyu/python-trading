@@ -1,8 +1,8 @@
 import numpy as np
 import talib
+from typing import Dict
 
 from algotrader.technical import Indicator
-from typing import Dict
 
 
 def ds_to_high_numpy(ds, idx):
@@ -58,20 +58,20 @@ class SMA(Indicator):
         'length'
     )
 
-    def __init__(self, inputs=None, input_keys=None, length=0, desc="TALib Simple Moving Average", time_series=None):
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="TALib Simple Moving Average", length=0):
         if time_series:
             super(SMA, self).__init__(time_series=time_series)
         else:
             super(SMA, self).__init__(inputs=inputs, input_keys=input_keys, desc=desc, length=length)
-        self.length = int(length)
+        self.length = self.get_int_config("length", 0)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input_series[0].size() >= self.length:
+        if self.first_input.size() >= self.length:
             value = talib.SMA(
                 np.array(
-                    self.input_series[0].get_by_idx(keys=self.get_input_keys(self.input_series[0].name),
-                                          idx=slice(-self.length, None, None))), timeperiod=self.length)
+                    self.first_input.get_by_idx(keys=self.first_input_keys,
+                                                idx=slice(-self.length, None, None))), timeperiod=self.length)
 
             result[Indicator.VALUE] = value[-1]
         else:
@@ -85,18 +85,21 @@ class EMA(Indicator):
         'length'
     )
 
-    def __init__(self, input, input_key=None, length=0, desc="TALib Exponential Moving Average"):
-        super(EMA, self).__init__(Indicator.get_name(EMA.__name__, input, input_key, length), input, input_key, desc)
-        self.length = int(length)
-        super(EMA, self)._update_from_inputs()
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="TALib Exponential Moving Average",
+                 length=0):
+        if time_series:
+            super(EMA, self).__init__(time_series=time_series)
+        else:
+            super(EMA, self).__init__(inputs=inputs, input_keys=input_keys, desc=desc, length=length)
+        self.length = self.get_int_config("length", 0)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input_series[0].size() >= self.length:
+        if self.first_input.size() >= self.length:
             value = talib.EMA(
                 np.array(
-                    self.input_series[0].get_by_idx(keys=self.get_input_keys(self.input_series[0].name),
-                                          idx=slice(-self.length, None, None))), timeperiod=self.length)
+                    self.first_input.get_by_idx(keys=self.first_input_keys,
+                                                idx=slice(-self.length, None, None))), timeperiod=self.length)
 
             result[Indicator.VALUE] = value[-1]
         else:

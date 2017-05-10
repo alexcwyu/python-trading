@@ -17,10 +17,10 @@ class SMA(Indicator):
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input_series[0].size() >= self.length:
+        if self.first_input.size() >= self.length:
             value = 0.0
-            for idx in range(self.input_series[0].size() - self.length, self.input_series[0].size()):
-                value += self.input_series[0].get_by_idx(idx, self.get_input_keys(self.input_series[0].name))
+            for idx in range(self.first_input.size() - self.length, self.first_input.size()):
+                value += self.first_input.get_by_idx(idx, self.first_input_keys)
             value = round(value / float(self.length), 8)
             result[Indicator.VALUE] = value
         else:

@@ -22,9 +22,9 @@ class ROC(Indicator):
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input_series[0].size() > self.length:
-            prev_value = self.input_series[0].ago(self.length, self.get_input_keys(self.input_series[0].name))
-            curr_value = self.input_series[0].now(self.get_input_keys(self.input_series[0].name))
+        if self.first_input.size() > self.length:
+            prev_value = self.first_input.ago(self.length, self.first_input_keys)
+            curr_value = self.first_input.now(self.first_input_keys)
             result[Indicator.VALUE] = roc(prev_value, curr_value)
         else:
             result[Indicator.VALUE] = np.nan

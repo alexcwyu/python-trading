@@ -38,7 +38,7 @@ class ModelFactoryTest(TestCase):
     def test_time_series(self):
         ts = self.factory.sample_time_series()
         self.assertEqual("HSI.BAR.86400", get_model_id(ts))
-        self.assertTrue(len(ts.inputs) == 1)
+        self.assertTrue(len(list(ts.inputs)) == 1)
         input = ts.inputs[0]
         self.assertEqual("HSI.BAR.1", input.source)
         self.assertEqual(['close', 'open'], list(input.keys))

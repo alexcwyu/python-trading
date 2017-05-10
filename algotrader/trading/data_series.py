@@ -47,7 +47,7 @@ class DataSeries(Startable):
         pass
 
     def id(self):
-        return self.time_series.name
+        return self.time_series.series_id
 
     def add(self, timestamp: int = None, data: Dict[str, float] = None, init: bool = False) -> None:
         timestamp = timestamp if timestamp is not None else data.get(DataSeries.TIMESTAMP)

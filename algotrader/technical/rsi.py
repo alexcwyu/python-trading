@@ -1,7 +1,7 @@
 import numpy as np
+from typing import Dict
 
 from algotrader.technical import Indicator
-from typing import Dict
 
 
 def gain_loss(prev_value, next_value):
@@ -55,21 +55,22 @@ class RSI(Indicator):
         '__prev_loss'
     )
 
-    def __init__(self, input=None, input_key=None, length=14, desc="Relative Strength Indicator"):
-        super(RSI, self).__init__(Indicator.get_name(RSI.__name__, input, input_key, length), input, input_key, desc)
-        self.length = int(length)
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Relative Strength Indicator", length=14):
+        super(RSI, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length)
+        self.length = self.get_int_config("length", 14)
         self.__prev_gain = None
         self.__prev_loss = None
-        super(RSI, self)._update_from_inputs()
+        #super(RSI, self)._update_from_inputs()
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input.size() > self.length:
+        if self.first_input.size() > self.length:
             if self.__prev_gain is None:
-                avg_gain, avg_loss = avg_gain_loss(self.input, self.input_keys[0], 0, self.input.size())
+                avg_gain, avg_loss = avg_gain_loss(self.first_input, self.first_input_keys[0], 0, self.first_input.size())
             else:
-                prev_value = self.input.ago(1, self.input_keys[0])
-                curr_value = self.input.now(self.input_keys[0])
+                prev_value = self.first_input.ago(1, self.first_input_keys[0])
+                curr_value = self.first_input.now(self.first_input_keys[0])
                 curr_gain, curr_loss = gain_loss(prev_value, curr_value)
                 avg_gain = (self.__prev_gain * (self.length - 1) + curr_gain) / float(self.length)
                 avg_loss = (self.__prev_loss * (self.length - 1) + curr_loss) / float(self.length)
@@ -87,7 +88,6 @@ class RSI(Indicator):
             result[Indicator.VALUE] = np.nan
 
         self.add(timestamp=timestamp, data=result)
-
 
 # if __name__ == "__main__":
 #     import datetime

@@ -29,7 +29,7 @@ class TALibSMATest(TestCase):
         close = self.app_context.inst_data_mgr.get_series("bar")
         close.start(self.app_context)
 
-        sma = SMA(close, 'close', 3)
+        sma = SMA(inputs=close, input_keys='close', length=3)
         sma.start(self.app_context)
 
         self.assertEquals(0, len(sma.get_data()))

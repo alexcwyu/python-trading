@@ -1,7 +1,7 @@
 import numpy as np
+from typing import Dict
 
 from algotrader.technical import Indicator
-from typing import Dict
 
 
 class MAX(Indicator):
@@ -9,15 +9,15 @@ class MAX(Indicator):
         'length'
     )
 
-    def __init__(self, input=None, input_key=None, length=0, desc="Maximum"):
-        self.length = int(length)
-        super(MAX, self).__init__(Indicator.get_name(MAX.__class__, input, input_key, length), input, input_key,
-                                  desc)
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Maximum", length=0):
+        super(MAX, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length)
+        self.length = self.get_int_config("length", 0)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input.size() >= self.length:
-            result[Indicator.VALUE] = self.input.max(-self.length, self.input_keys[0])
+        if self.self.first_input.size() >= self.length:
+            result[Indicator.VALUE] = self.self.first_input.max(-self.length, self.first_input_keys[0])
         else:
             result[Indicator.VALUE] = np.nan
 
@@ -29,16 +29,15 @@ class MIN(Indicator):
         'length'
     )
 
-    def __init__(self, input, input_key=None, length=0, desc="Minimum"):
-        super(MIN, self).__init__(Indicator.get_name(MIN.__class__, input, input_key, length), input, input_key,
-                                  desc)
-        self.length = int(length)
-        super(MIN, self)._update_from_inputs()
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Minimum", length=0):
+        super(MIN, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length)
+        self.length = self.get_int_config("length", 0)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input.size() >= self.length:
-            result[Indicator.VALUE] = self.input.min(-self.length, self.input_keys[0])
+        if self.first_input.size() >= self.length:
+            result[Indicator.VALUE] = self.first_input.min(-self.length, self.first_input_keys[0])
         else:
             result[Indicator.VALUE] = np.nan
 
@@ -50,16 +49,15 @@ class STD(Indicator):
         'length'
     )
 
-    def __init__(self, input, input_key=None, length=0, desc="Standard Deviation"):
-        super(STD, self).__init__(Indicator.get_name(STD.__class__, input, input_key, length), input, input_key,
-                                  desc)
-        self.length = int(length)
-        super(STD, self)._update_from_inputs()
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Standard Deviation", length=0):
+        super(STD, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length)
+        self.length = self.get_int_config("length", 0)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input.size() >= self.length:
-            result[Indicator.VALUE] = self.input.std(-self.length, self.input_keys[0])
+        if self.first_input.size() >= self.length:
+            result[Indicator.VALUE] = self.first_input.std(-self.length, self.first_input_keys[0])
         else:
             result[Indicator.VALUE] = np.nan
 
@@ -71,15 +69,15 @@ class VAR(Indicator):
         'length'
     )
 
-    def __init__(self, input, input_key=None, length=0, desc="Variance"):
-        super(VAR, self).__init__(Indicator.get_name(VAR.__class__, input, input_key, length), input, input_key,
-                                  desc)
-        self.length = int(length)
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Variance", length=0):
+        super(VAR, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length)
+        self.length = self.get_int_config("length", 0)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input.size() >= self.length:
-            result[Indicator.VALUE] = self.input.std(-self.length, self.input_keys[0])
+        if self.first_input.size() >= self.length:
+            result[Indicator.VALUE] = self.first_input.std(-self.length, self.first_input_keys[0])
         else:
             result[Indicator.VALUE] = np.nan
 

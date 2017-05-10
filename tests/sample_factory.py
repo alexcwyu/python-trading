@@ -67,7 +67,8 @@ class SampleFactory(object):
         ds = ModelFactory.build_time_series(series_id="HSI.BAR.86400",
                                             desc="HSI",
                                             keys=["high", "low", "close"],
-                                            inputs=OrderedDict([('HSI.BAR.1', ['close', 'open'])]),
+                                            inputs='HSI.BAR.1',
+                                            input_keys=['close', 'open'],
                                             default_output_key="close",
                                             missing_value_replace=0)
         ModelFactory.add_time_series_item(ds, timestamp=0,

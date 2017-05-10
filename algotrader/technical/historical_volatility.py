@@ -12,19 +12,19 @@ class HistoricalVolatility(Indicator):
         'ann_factor'
     )
 
-    def __init__(self, input=None, input_key=None, length=0, ann_factor=252, desc="Historical Volatility"):
-        self.length = int(length)
-        self.ann_factor = ann_factor
-        super(HistoricalVolatility, self).__init__(
-            Indicator.get_name(HistoricalVolatility.__name__, input, input_key, length), input, input_key, desc)
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Historical Volatility", length=0, ann_factor=252):
+        super(HistoricalVolatility, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length,ann_factor=ann_factor)
+        self.length = self.get_int_config("length", 0)
+        self.ann_factor = self.get_int_config("ann_factor", 252)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        if self.input.size() >= self.length:
+        if self.first_input.size() >= self.length:
             sum_ret_sq = 0.0
-            for idx in range(self.input.size() - self.length + 1, self.input.size()):
-                x_t = self.input.get_by_idx(idx, self.input_keys[0])
-                x_t_1 = self.input.get_by_idx(idx - 1, self.input_keys[0])
+            for idx in range(self.first_input.size() - self.length + 1, self.first_input.size()):
+                x_t = self.first_input.get_by_idx(idx, self.first_input_keys[0])
+                x_t_1 = self.first_input.get_by_idx(idx - 1, self.first_input_keys[0])
                 ret = math.log(x_t / x_t_1)
                 sum_ret_sq += ret ** 2
             result[Indicator.VALUE] = math.sqrt(self.ann_factor * sum_ret_sq / self.length)

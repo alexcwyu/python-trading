@@ -12,17 +12,17 @@ class ATR(Indicator):
         '__average',
     )
 
-    def __init__(self, input=None, length=14, desc="Average True Range"):
-        self.length = int(length)
+    def __init__(self, time_series=None, inputs=None, input_keys=['high', 'low', 'close'], desc="Average True Range",
+                 length=14):
+        super(ATR, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length)
+        self.length = self.get_int_config("length", 14)
         self.__prev_close = None
         self.__value = None
-        self.__average = SMA(input, self.length)
-        super(ATR, self).__init__(Indicator.get_name(ATR.__name__, input, length), input, ['high', 'low', 'close'],
-                                  desc)
+        self.__average = SMA(inputs=inputs, length=self.length)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         sma_input = {}
-        # sma_input['timestamp'] = event.timestamp
         high = data['high']
         low = data['low']
         close = data['close']

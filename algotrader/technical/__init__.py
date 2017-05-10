@@ -44,17 +44,21 @@ class Indicator(DataSeries):
             if hasattr(time_series_input, 'keys') and time_series_input.keys:
                 self.input_keys[time_series_input.source] = list(time_series_input.keys)
 
+        self.input_names_pos = {}
         self.input_series = []
         # get input_keys from __raw_inputs, otherwise, get from timeseries
         if self.__raw_inputs:
-            for __raw_input in self.__raw_inputs:
+            for idx, __raw_input in enumerate(self.__raw_inputs):
                 if isinstance(__raw_input, DataSeries):
                     self.input_series.append(__raw_input)
+                    self.input_names_pos[__raw_input.name] = idx
                 elif isinstance(__raw_input, str):
                     self.input_series.append(self.app_context.inst_data_mgr.get_series(__raw_input))
+                    self.input_names_pos[__raw_input] = idx
         else:
-            for time_series_input in self.time_series.inputs:
+            for idx, time_series_input in enumerate(self.time_series.inputs):
                 self.input_series.append(self.app_context.inst_data_mgr.get_series(time_series_input.source))
+                self.input_names_pos[time_series_input.source] = idx
 
         self.first_input = self.get_input(idx=0)
         self.first_input_keys = self.get_input_keys(idx=0)

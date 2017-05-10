@@ -18,16 +18,16 @@ class PairwiseTest(TestCase):
         bar0.start(self.app_context)
         bar1.start(self.app_context)
 
-        bar0_plus_bar1 = Plus(bar0, bar1, input_key='close')
+        bar0_plus_bar1 = Plus(inputs=[bar0, bar1], input_keys='close')
         bar0_plus_bar1.start(self.app_context)
 
-        self.assertEquals("Plus('bar0','bar1',close)",
+        self.assertEquals("Plus(bar0[close],bar1[close])",
                           bar0_plus_bar1.name)
 
-        spread = Minus(bar0, bar1, input_key='close')
+        spread = Minus(inputs=[bar0, bar1], input_keys='close')
         spread.start(self.app_context)
 
-        self.assertEquals("Minus('bar0','bar1',close)",
+        self.assertEquals("Minus(bar0[close],bar1[close])",
                           spread.name)
 
     def test_empty_at_initialize(self):
@@ -37,7 +37,7 @@ class PairwiseTest(TestCase):
         bar0.start(self.app_context)
         bar1.start(self.app_context)
 
-        bar0_plus_bar1 = Plus(bar0, bar1, input_key='close')
+        bar0_plus_bar1 = Plus(inputs=[bar0, bar1], input_keys='close')
         bar0_plus_bar1.start(self.app_context)
 
         self.assertEquals(0, len(bar0_plus_bar1.get_data()))
@@ -49,7 +49,7 @@ class PairwiseTest(TestCase):
         bar0.start(self.app_context)
         bar1.start(self.app_context)
 
-        bar0_plus_bar1 = Plus(bar0, bar1, input_key='close')
+        bar0_plus_bar1 = Plus(inputs=[bar0, bar1], input_keys='close')
         bar0_plus_bar1.start(self.app_context)
 
         try:
@@ -65,11 +65,11 @@ class PairwiseTest(TestCase):
         bar0.start(self.app_context)
         bar1.start(self.app_context)
 
-        plus = Plus(bar0, bar1, input_key='close')
-        minus = Minus(bar0, bar1, input_key='close')
-        times = Times(bar0, bar1, input_key='close')
-        divides = Divides(bar0, bar1, input_key='close')
-        pcorr = PairCorrelation(bar0, bar1, length=4, input_key='close')
+        plus = Plus(inputs=[bar0, bar1], input_keys='close')
+        minus = Minus(inputs=[bar0, bar1], input_keys='close')
+        times = Times(inputs=[bar0, bar1], input_keys='close')
+        divides = Divides(inputs=[bar0, bar1], input_keys='close')
+        pcorr = PairCorrelation(inputs=[bar0, bar1], length=4, input_keys='close')
 
         plus.start(self.app_context)
         minus.start(self.app_context)

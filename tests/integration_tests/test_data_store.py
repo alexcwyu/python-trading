@@ -62,7 +62,7 @@ inmemory = context.provider_mgr.get(DataStore.InMemory)
 
 params = [
     param('Mongo', mongo),
-    param('Cassandra', cassandra),
+    #param('Cassandra', cassandra),
     param('InMemory', inmemory)
 ]
 

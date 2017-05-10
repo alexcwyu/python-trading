@@ -5,7 +5,7 @@ from algotrader.utils.protobuf_to_dict import *
 from tests.sample_factory import *
 
 
-class PersistenceTest(TestCase):
+class MongoPersistenceTest(TestCase):
     host = "localhost"
     port = 27017
     dbname = "test"
@@ -28,10 +28,10 @@ class PersistenceTest(TestCase):
         pass
 
     def tearDown(self):
-        PersistenceTest.tests.remove()
+        MongoPersistenceTest.tests.remove()
 
     def test_instrument(self):
-        inst = PersistenceTest.factory.sample_instrument()
+        inst = MongoPersistenceTest.factory.sample_instrument()
         self.__test_persistence(Instrument, inst)
 
     def test_exchange(self):
@@ -112,8 +112,8 @@ class PersistenceTest(TestCase):
 
     def __test_persistence(self, cls, obj):
         data = protobuf_to_dict(obj)
-        PersistenceTest.tests.update({'_id': 1}, data, upsert=True)
-        result = PersistenceTest.tests.find_one({"_id": 1})
+        MongoPersistenceTest.tests.update({'_id': 1}, data, upsert=True)
+        result = MongoPersistenceTest.tests.find_one({"_id": 1})
         del result['_id']
         new_obj = dict_to_protobuf(cls, result)
         self.assertEqual(obj, new_obj)

@@ -40,6 +40,15 @@ class DataSeries(Startable):
     def get_float_config(self, key, default_value=0.0):
         return float(self.get_config(key, default_value))
 
+    def get_bool_config(self, key, default_value=False):
+        value = self.get_config(key, default_value)
+        if value:
+            if 'TRUE' == value.upper():
+                return True
+            if 'FALSE' == value.upper():
+                return False
+        return default_value
+
     def _start(self, app_context: Context) -> None:
         pass
 

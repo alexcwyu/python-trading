@@ -2,26 +2,18 @@ import numpy as np
 import pandas as pd
 from typing import Dict
 
-from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.technical.pipeline import PipeLine
 
 
 class Rank(PipeLine):
-    _slots__ = (
-        'ascending'
-    )
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Rank", ascending=True):
+        super(Rank, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                   ascending=ascending)
 
-    def __init__(self, inputs, ascending=True, input_key='close', desc="Rank"):
-        self.ascending = ascending
-        super(Rank, self).__init__(PipeLine.get_name(Rank.__name__, inputs, input_key),
-                                   inputs, input_key, length=1, desc=desc)
-        # super(Rank, self).update_all()
-
-    def on_update(self, event: TimeSeriesUpdateEvent):
-        super(Rank, self).on_update(event)
-        self._process_update(event.source, event.item.timestamp, event.item.data)
+        self.ascending = self.get_bool_config("ascending", True)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
+        super(Rank, self)._process_update(source=source, timestamp=timestamp, data=data)
         result = {}
         if self.all_filled():
             df = pd.DataFrame(self.cache)

@@ -1,26 +1,19 @@
 import numpy as np
 from typing import Dict
 
-from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.technical.pipeline import PipeLine
 
 
 class MakeVector(PipeLine):
-    _slots__ = (
-    )
-
-    def __init__(self, inputs, input_key='close', desc="Bundle and Sync DataSeries to Vector"):
-        super(MakeVector, self).__init__(PipeLine.get_name(MakeVector.__name__, inputs, input_key),
-                                         inputs, input_key, length=1, desc=desc)
-        super(MakeVector, self).update_all()
-
-    def on_update(self, event: TimeSeriesUpdateEvent):
-        super(MakeVector, self).on_update(event)
-        self._process_update(event.source, event.item.timestamp, event.item.data)
+    def __init__(self, time_series=None, inputs=None, input_keys='close',
+                 desc="Bundle and Sync DataSeries to Vector"):
+        super(MakeVector, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                         length=1)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
+        super(MakeVector, self)._process_update(source=source, timestamp=timestamp, data=data)
         result = {}
-        if self.inputs[0].size() >= self.length:
+        if self.get_input(0).size() >= self.length:
             if self.all_filled():
                 packed_matrix = np.transpose(np.array(self.cache.values()))
                 result[PipeLine.VALUE] = packed_matrix

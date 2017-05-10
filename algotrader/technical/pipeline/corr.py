@@ -1,19 +1,17 @@
 import numpy as np
+from typing import Dict
 
 from algotrader.technical.pipeline import PipeLine
-from typing import Dict
 
 
 class Corr(PipeLine):
-    _slots__ = (
-    )
-
-    def __init__(self, inputs, input_key='close', length=30, desc="Correlation"):
-        super(Corr, self).__init__(PipeLine.get_name(Corr.__name__, input),
-                                   input, input_key, length, desc)
-        super(Corr, self).update_all()
+    def __init__(self, time_series=None, inputs=None, input_keys='close',
+                 desc="Correlation", length=30):
+        super(Corr, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                   length=length)
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
+        super(Corr, self)._process_update(source=source, timestamp=timestamp, data=data)
         result = {}
         if self.inputs[0].size() > self.length:
             if self.all_filled():

@@ -1,22 +1,21 @@
 import numpy as np
 import pandas as pd
-
-from algotrader.technical.pipeline import PipeLine
 from typing import Dict
+
 from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
+from algotrader.technical.pipeline import PipeLine
+
 
 # TODO: One output scalar
 # TODO: Output Vector Apply class
 
 class CrossSessionalApply(PipeLine):
-    _slots__ = (
-        'np_func'
-    )
-
-    def __init__(self, inputs, np_func, name, input_key='close', length=30, desc="Cross Sessional Apply"):
-        super(CrossSessionalApply, self).__init__(name, inputs, input_key, length, desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close',
+                 desc="Bundle and Sync DataSeries to Vector", np_func=None, length=30, **kwargs):
+        super(CrossSessionalApply, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys,
+                                                  desc=desc,
+                                                  length=length, **kwargs)
         self.np_func = np_func
-        super(CrossSessionalApply, self).update_all()
 
     def on_update(self, event: TimeSeriesUpdateEvent):
         super(CrossSessionalApply, self).on_update(event)
@@ -50,21 +49,15 @@ class CrossSessionalApply(PipeLine):
 
 
 class CrossSessionalApplyScala(PipeLine):
-    _slots__ = (
-        'np_func'
-    )
-
-    def __init__(self, inputs, np_func, name, input_key='close', length=30, desc="Cross Sessional Apply"):
-        super(CrossSessionalApplyScala, self).__init__(name, inputs, input_key, length=1, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close',
+                 desc="Cross Sessional Apply", np_func=None, length=30):
+        super(CrossSessionalApplyScala, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys,
+                                                       desc=desc,
+                                                       length=length)
         self.np_func = np_func
-        super(CrossSessionalApplyScala, self).update_all()
-
-    def on_update(self, event: TimeSeriesUpdateEvent):
-        super(CrossSessionalApplyScala, self).on_update(event)
-        self._process_update(event.source, event.item.timestamp, event.item.data)
-
 
     def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
+        super(CrossSessionalApplyScala, self)._process_update(source=source, timestamp=timestamp, data=data)
         result = {}
         if self.inputs[0].size() >= self.length:
             if self.all_filled():
@@ -92,26 +85,23 @@ class CrossSessionalApplyScala(PipeLine):
 
 
 class Average(CrossSessionalApplyScala):
-    def __init__(self, inputs, input_key='close', desc="Cross Sessional Average"):
-        super(Average, self).__init__(inputs=inputs, np_func=np.average,
-                                      name=PipeLine.get_name(Average.__name__, inputs, input_key),
-                                      input_key=input_key, length=1, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional Average"):
+        super(Average, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                      np_func=np.average, length=1)
 
 
 class Sum(CrossSessionalApplyScala):
-    def __init__(self, inputs, input_key='close', desc="Cross Sessional Sum"):
-        super(Sum, self).__init__(inputs=inputs, np_func=np.sum,
-                                  name=PipeLine.get_name(Sum.__name__, inputs, input_key),
-                                  input_key=input_key, length=1, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional Sum"):
+        super(Sum, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  np_func=np.sum, length=1)
 
 
 # TODO: Add Count , Abs, Sum,
 
 class Abs(CrossSessionalApply):
-    def __init__(self, inputs, input_key='close', desc="Cross Sessional Abs"):
-        super(Abs, self).__init__(inputs=inputs, np_func=np.abs,
-                                  name=PipeLine.get_name(Abs.__name__, inputs, input_key),
-                                  input_key=input_key, length=1, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional Abs"):
+        super(Abs, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  np_func=np.abs, length=1)
 
 
 def np_assign_on_mask(x, lb, ub, newval):
@@ -135,77 +125,82 @@ def timeseries_rank_helper(x, ascending):
 
 
 class Tail(CrossSessionalApply):
-    def __init__(self, inputs, lb, ub, newval, input_key='close', desc="Cross Sessional Tail"):
-        super(Tail, self).__init__(inputs=inputs, np_func=lambda x: np_assign_on_mask(x, lb, ub, newval),
-                                   name=PipeLine.get_name(Tail.__name__, inputs, input_key),
-                                   input_key=input_key, length=1, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional Tail", lb=None, ub=None,
+                 newval=None):
+        super(Tail, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                   np_func=None, length=1, lb=lb, ub=ub, newval=newval)
+        lb = self.get_float_config('lb', lb)
+        ub = self.get_float_config('ub', ub)
+        newval = self.get_float_config('newval', newval)
+        self.np_func = lambda x: np_assign_on_mask(x, lb, ub, newval)
 
 
 class Sign(CrossSessionalApply):
-    def __init__(self, inputs, input_key='close', desc="Cross Sessional Sign"):
-        super(Sign, self).__init__(inputs=inputs, np_func=lambda x: np_sign_to_value(x),
-                                   name=PipeLine.get_name(Sign.__name__, inputs, input_key),
-                                   input_key=input_key, length=1, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional Sign"):
+        super(Sign, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                   np_func=lambda x: np_sign_to_value(x), length=1)
 
 
 class Log(CrossSessionalApply):
-    def __init__(self, inputs, input_key='close', desc="Cross Sessional Log"):
-        super(Log, self).__init__(inputs=inputs, np_func=lambda x: np.log(x),
-                                  name=PipeLine.get_name(Log.__name__, inputs, input_key),
-                                  input_key=input_key, length=1, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional Log"):
+        super(Log, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  np_func=lambda x: np.log(x), length=1)
 
 
 class Scale(CrossSessionalApply):
-    def __init__(self, inputs, input_key='close', desc="Cross Sessional Scale"):
-        super(Scale, self).__init__(inputs=inputs, np_func=lambda x: x / np.sum(np.abs(x)),
-                                    name=PipeLine.get_name(Scale.__name__, inputs, input_key),
-                                    input_key=input_key, length=1, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional Scale"):
+        super(Scale, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                    np_func=lambda x: x / np.sum(np.abs(x)), length=1)
 
 
 class DecayLinear(CrossSessionalApply):
-    def __init__(self, inputs, length=20, input_key='close', desc="Cross Sessional DecayLinear"):
-        super(DecayLinear, self).__init__(inputs=inputs,
-                                          np_func=lambda x: np.dot(np.arange(length, 0, -1), x)
-                                                            / np.sum(np.arange(length, 0, -1)),
-                                          name=PipeLine.get_name(DecayLinear.__name__, inputs, input_key),
-                                          input_key=input_key, length=length, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional DecayLinear",length=20):
+        super(DecayLinear, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                          np_func=lambda x: np.dot(np.arange(self.length, 0, -1), x)
+                                                            / np.sum(np.arange(self.length, 0, -1)), length=length)
 
 
 class DecayExp(CrossSessionalApply):
-    def __init__(self, inputs, f=0.9, length=20, input_key='close', desc="Cross Sessional DecayExp"):
-        super(DecayExp, self).__init__(inputs=inputs,
-                                       np_func=lambda x: np.dot(np.power(f, np.arange(length)), x) / np.sum(
-                                           np.power(f, np.arange(length))),
-                                       name=PipeLine.get_name(DecayExp.__name__, inputs, input_key),
-                                       input_key=input_key, length=length, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional DecayExp", f=0.9,
+                 length=20):
+        super(DecayExp, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                       np_func=None, f=f, length=length)
+
+        f = self.get_float_config('f', f)
+        self.np_func = lambda x: np.dot(np.power(f, np.arange(self.length)), x) / np.sum(
+            np.power(f, np.arange(self.length)))
 
 
 class TsRank(CrossSessionalApply):
-    def __init__(self, inputs, ascending=True, length=20, input_key='close', desc="Cross Sessional Timeseries Rank"):
-        super(TsRank, self).__init__(inputs=inputs, np_func=lambda x: timeseries_rank_helper(x, ascending=ascending),
-                                     name=PipeLine.get_name(TsRank.__name__, inputs, input_key),
-                                     input_key=input_key, length=length, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional Timeseries Rank",
+                 ascending=True,
+                 length=20):
+        super(TsRank, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                     np_func=None, length=length, ascending=ascending)
+
+        ascending = self.get_bool_config('ascending', ascending)
+        self.np_func = lambda x: timeseries_rank_helper(x, ascending=ascending)
 
 
 class SignPower(CrossSessionalApply):
-    def __init__(self, inputs, input_key='close', desc="Cross Sessional SignPower"):
-        super(SignPower, self).__init__(inputs=inputs, np_func=lambda x: np_sign_to_value(x) * np.power(x, e),
-                                        name=PipeLine.get_name(SignPower.__name__, inputs, input_key),
-                                        input_key=input_key, length=1, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional SignPower", e=2):
+        super(SignPower, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                        np_func=None, length=1, e=e)
+        e = self.get_int_config("e", e)
+        self.np_func = lambda x: np_sign_to_value(x) * np.power(x, e)
 
 
 class Delta(CrossSessionalApply):
-    def __init__(self, inputs, length, input_key='close', desc="Cross Sessional Delta"):
-        super(Delta, self).__init__(inputs=inputs, np_func=lambda x: x[-1, :] - x[0, :],
-                                    name=PipeLine.get_name(Delta.__name__, inputs, input_key),
-                                    input_key=input_key, length=length, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional Delta", length=1):
+        super(Delta, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                    np_func=lambda x: np.prod(x, axis=0), length=length)
 
 
 class Product(CrossSessionalApply):
-    def __init__(self, inputs, length, input_key='close', desc="Cross Sessional Product"):
-        super(Product, self).__init__(inputs=inputs, np_func=lambda x: np.prod(x, axis=0),
-                                      name=PipeLine.get_name(Product.__name__, inputs, input_key),
-                                      input_key=input_key, length=length, desc=desc)
+    def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Cross Sessional Product", length=1):
+        super(Product, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                      np_func=lambda x: np.dot(np.arange(self.length, 0, -1), x)
+                                                        / np.sum(np.arange(self.length, 0, -1)), length=length)
 
 
 from jinja2 import Template

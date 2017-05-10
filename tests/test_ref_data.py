@@ -30,30 +30,30 @@ class RefDataTest(TestCase):
         inst.strike = 0.0
         inst.margin = 0.0
         inst.tick_size = 0.01
-        print("##########")
-        print(inst)
+        #print("##########")
+        #print(inst)
 
         string = inst.SerializeToString()
-        print("##########")
-        print(string)
+        #print("##########")
+        #print(string)
         inst2 = ref_data.Instrument()
         inst2.ParseFromString(string)
         self.assertEqual(inst, inst2)
 
         json_string = json_format.MessageToJson(inst)
-        print("##########")
-        print(json_string)
+        #print("##########")
+        #print(json_string)
 
         d = protobuf_to_dict(inst)
-        print("##########")
-        print(d)
+        #print("##########")
+        #print(d)
         inst3 = dict_to_protobuf(ref_data.Instrument, d)
         self.assertEqual(inst, inst3)
 
     def test_currency(self):
         currency = ref_data.Currency(ccy_id="HKD", name="Hong Kong Dollar")
 
-        print(currency)
+        #print(currency)
 
         b = currency.SerializeToString()
         currency2 = ref_data.Currency()
@@ -64,7 +64,7 @@ class RefDataTest(TestCase):
     def test_exchange(self):
         exchange = ref_data.Exchange(exch_id="SEHK", name="The Stock Exchange of Hong Kong Limited")
 
-        print(exchange)
+        #print(exchange)
 
         b = exchange.SerializeToString()
         exchange2 = ref_data.Exchange()
@@ -75,7 +75,7 @@ class RefDataTest(TestCase):
     def test_country(self):
         country = ref_data.Country(country_id="HK", name="Hong Kong")
 
-        print(country)
+        #print(country)
 
         b = country.SerializeToString()
         country2 = ref_data.Country()
@@ -101,7 +101,7 @@ class RefDataTest(TestCase):
 
         )
 
-        print(holidays)
+        #print(holidays)
 
         b = holidays.SerializeToString()
         holidays2 = ref_data.HolidaySeries()
@@ -128,7 +128,7 @@ class RefDataTest(TestCase):
 
         )
 
-        print(hours)
+        #print(hours)
 
         b = hours.SerializeToString()
         hours2 = ref_data.TradingHours()

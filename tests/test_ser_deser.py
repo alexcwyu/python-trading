@@ -93,7 +93,7 @@ class SerializationTest(TestCase):
         self.__test_serializaion(Sequence, self.factory.sample_sequence())
 
     def __test_serializaion(self, cls, obj):
-        print(obj)
+        #print(obj)
 
         obj2 = cls()
         obj2.ParseFromString(obj.SerializeToString())

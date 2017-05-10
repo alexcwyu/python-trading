@@ -30,7 +30,7 @@ class Rank(PipeLine):
         else:
             result[PipeLine.VALUE] = self._default_output()
 
-        self.add(timestamp=event.timestamp, data=result)
+        self.add(timestamp=timestamp, data=result)
 
     def _default_output(self):
         na_array = np.empty(shape=self.shape())

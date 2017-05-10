@@ -68,11 +68,11 @@ class PipeLine(DataSeries):
                     input_names.append(input_name)
                     self.input_names_and_series[input_name] = i
                 elif isinstance(i, Indicator):
-                    input_name = get_input_name(i)
+                    input_name = Indicator.get_name(i)
                     input_names.append(input_name)
                     self.input_names_and_series[input_name] = i
                 elif isinstance(i, PipeLine):
-                    input_name = get_input_name(i)
+                    input_name = PipeLine.get_name(i)
                     input_names.append(input_name)
                     self.input_names_and_series[input_name] = i
                 else:
@@ -83,11 +83,11 @@ class PipeLine(DataSeries):
                 input_names.append(input_name)
                 self.input_names_and_series[input_name] = inputs
             elif isinstance(inputs, Indicator):
-                input_name = get_input_name(inputs)
+                input_name = Indicator.get_name(inputs)
                 input_names.append(input_name)
                 self.input_names_and_series[input_name] = inputs
             elif isinstance(inputs, PipeLine):
-                input_name = get_input_name(inputs)
+                input_name = PipeLine.get_name(inputs)
                 input_names.append(input_name)
                 self.input_names_and_series[input_name] = inputs
             else:

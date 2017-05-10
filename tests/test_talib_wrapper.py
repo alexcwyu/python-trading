@@ -73,20 +73,20 @@ class TALibSMATest(TestCase):
         t4 = t3 + 3
         t5 = t4 + 3
 
-        bar.add(data={"timestamp": t1, "close": 2.0, "open": 0})
+        bar.add(timestamp=t1, data={"close": 2.0, "open": 0})
         self.assertTrue(math.isnan(sma.now('value')))
 
-        bar.add(data={"timestamp": t2, "close": 2.4, "open": 1.4})
+        bar.add(timestamp=t2, data={"close": 2.4, "open": 1.4})
         self.assertTrue(math.isnan(sma.now('value')))
 
-        bar.add(data={"timestamp": t3, "close": 2.8, "open": 1.8})
+        bar.add(timestamp=t3, data={"close": 2.8, "open": 1.8})
         self.assertEquals(2.4, sma.now('value'))
 
-        bar.add(data={"timestamp": t4, "close": 3.2, "open": 2.2})
+        bar.add(timestamp=t4, data={"close": 3.2, "open": 2.2})
         # self.assertEquals(2.8, sma.now('value'))
         self.assertAlmostEqual(2.8, sma.now('value'), places=3)
 
-        bar.add(data={"timestamp": t5, "close": 3.6, "open": 2.6})
+        bar.add(timestamp=t5, data={"close": 3.6, "open": 2.6})
         self.assertAlmostEqual(3.2, sma.now('value'), places=3)
         # self.assertEquals(3.2, sma.now('value'))
 
@@ -109,7 +109,7 @@ class TALibSMATest(TestCase):
         t = 1
 
         for value in valuelist:
-            close.add(data={"timestamp": t, "v1": value})
+            close.add(timestamp=t, data={"v1": value})
             t = t + 3
         return close
 
@@ -125,7 +125,7 @@ class TALibSMATest(TestCase):
         result = []
 
         for x in rw:
-            close.add(data={"timestamp": t, "close": x})
+            close.add(timestamp=t, data={"close": x})
             result.append(sma.now('value'))
             t = t + 3
 

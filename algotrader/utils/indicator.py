@@ -5,7 +5,7 @@ from algotrader.utils.model import get_cls
 
 
 def parse_inner(inner_str, level):
-    print(level, inner_str)
+    #print(level, inner_str)
     inputs = []
     input_keys = {}
     kwargs = {}

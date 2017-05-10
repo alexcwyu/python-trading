@@ -25,36 +25,56 @@ class Indicator(DataSeries):
                                                          **kwargs)
 
         super(Indicator, self).__init__(time_series=time_series)
-
         self.calculate = True
+        self.__raw_inputs = self._convert_raw_input(inputs=inputs)
 
-        self.__raw_inputs = []
-
+    def _convert_raw_input(self, inputs):
         if inputs:
             if not isinstance(inputs, list):
-                self.__raw_inputs = [inputs]
-            else:
-                self.__raw_inputs = inputs
+                return [inputs]
+        else:
+            return inputs
+        return []
 
     def _init_inputs(self):
 
         self.input_keys = {}
+        # get input_keys from time_series.inputs
         for time_series_input in self.time_series.inputs:
             if hasattr(time_series_input, 'keys') and time_series_input.keys:
                 self.input_keys[time_series_input.source] = list(time_series_input.keys)
 
         self.input_series = []
-        for __raw_input in self.__raw_inputs:
-            if isinstance(__raw_input, DataSeries):
-                self.input_series.append(__raw_input)
-            elif isinstance(__raw_input, str):
-                self.input_series.append(self.app_context.inst_data_mgr.get_series(__raw_input))
-
-        self._update_from_inputs()
-        self._subscribe_inputs()
+        # get input_keys from __raw_inputs, otherwise, get from timeseries
+        if self.__raw_inputs:
+            for __raw_input in self.__raw_inputs:
+                if isinstance(__raw_input, DataSeries):
+                    self.input_series.append(__raw_input)
+                elif isinstance(__raw_input, str):
+                    self.input_series.append(self.app_context.inst_data_mgr.get_series(__raw_input))
+        else:
+            for time_series_input in self.time_series.inputs:
+                self.input_series.append(self.app_context.inst_data_mgr.get_series(time_series_input.source))
 
         self.first_input = self.get_input(idx=0)
         self.first_input_keys = self.get_input_keys(idx=0)
+
+        self._load_and_subscribe_inputs()
+
+    def _load_and_subscribe_inputs(self):
+        for input in self.input_series:
+            for timestamp, data in zip(input.get_timestamp(), input.get_data()):
+                # TODO handle multiple input_series....
+                # if timestamp has been processed, we should skipped the update.....
+                if timestamp not in self.time_list:
+                    # TODO don't think we should put this filter logic here, the logic should be move to `_process_update`
+                    if input.time_series.keys:
+                        filtered_data = {key: data[key] for key in input.time_series.keys}
+                        self._process_update(source=input.id(), timestamp=timestamp, data=filtered_data)
+                    else:
+                        self._process_update(source=input.id(), timestamp=timestamp, data=data)
+
+            input.subject.subscribe(self.on_update)
 
     def get_input(self, idx: int) -> str:
         return self.input_series[idx]
@@ -72,23 +92,6 @@ class Indicator(DataSeries):
 
     def _stop(self):
         pass
-
-    def _subscribe_inputs(self):
-        for input in self.input_series:
-            input.subject.subscribe(self.on_update)
-
-    def _update_from_inputs(self):
-        for input in self.input_series:
-            for timestamp, data in zip(input.get_timestamp(), input.get_data()):
-                # TODO handle multiple input_series....
-                # if timestamp has been processed, we should skipped the update.....
-                if timestamp not in self.time_list:
-                    # TODO don't think we should put this filter logic here, the logic should be move to `_process_update`
-                    if hasattr(input, 'keys') and input.keys:
-                        filtered_data = {key: data[key] for key in input.keys}
-                        self._process_update(source=input.id(), timestamp=timestamp, data=filtered_data)
-                    else:
-                        self._process_update(source=input.id(), timestamp=timestamp, data=data)
 
     def on_update(self, event: TimeSeriesUpdateEvent):
         self._process_update(event.source, event.item.timestamp, event.item.data)

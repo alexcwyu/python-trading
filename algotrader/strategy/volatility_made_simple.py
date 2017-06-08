@@ -1,21 +1,22 @@
 import rx
 from rx.subjects import BehaviorSubject
 
-from algotrader.event.order import OrdAction
-from algotrader.strategy.strategy import Strategy
+from algotrader import Context
+from algotrader.model.trade_data_pb2 import *
+from algotrader.strategy import Strategy
 from algotrader.technical.talib_wrapper import EMA, SMA
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
 
 
 class VixVxvRatio(Strategy):
-    def __init__(self, stg_id=None, stg_configs=None):
-        super(VixVxvRatio, self).__init__(stg_id=stg_id, stg_configs=stg_configs)
+    def __init__(self, stg_id: str, stg_cls: str, state: StrategyState = None):
+        super(VixVxvRatio, self).__init__(stg_id=stg_id, stg_cls=stg_cls, state=state)
         self.day_count = 0
         self.order = None
 
-    def _start(self, app_context, **kwargs):
-        self.qty = self.get_stg_config_value("qty", 1)
-        self.threshold = self.get_stg_config_value("threshold", 1)
+    def _start(self, app_context: Context) -> None:
+        self.qty = self._get_stg_config("qty", 1)
+        self.threshold = self._get_stg_config("threshold", 1)
 
         self.xiv = app_context.ref_data_mgr.get_inst('XIV', 'SMART')
         self.vxx = app_context.ref_data_mgr.get_inst('VXX', 'SMART')
@@ -33,7 +34,7 @@ class VixVxvRatio(Strategy):
             .zip(self.vix_strm, self.vxv_strm, lambda x, y: x / y) \
             .subscribe(self.on_ratio)
 
-        super(VixVxvRatio, self)._start(app_context, **kwargs)
+        super(VixVxvRatio, self)._start(app_context)
 
     def _stop(self):
         super(VixVxvRatio, self)._stop()
@@ -52,24 +53,23 @@ class VixVxvRatio(Strategy):
             if ratio < self.threshold[0]:
                 # logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
                 self.order = self.market_order(inst_id=self.xiv.id(),
-                                               action=OrdAction.BUY,
+                                               action=Buy,
                                                qty=self.qty)
             # long VXX when ratio > 1.08
             elif ratio > self.threshold[1]:
                 # logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
-                self.order = self.market_order(inst_id=self.vxx, action=OrdAction.BUY, qty=self.qty)
+                self.order = self.market_order(inst_id=self.vxx, action=Buy, qty=self.qty)
 
 
 class VxvVxmtRatio(Strategy):
-    def __init__(self, stg_id=None):
-        super(VxvVxmtRatio, self).__init__(stg_id=stg_id)
+    def __init__(self, stg_id: str = None, stg_cls: str = None):
+        super(VxvVxmtRatio, self).__init__(stg_id=stg_id, stg_cls=stg_cls)
         self.day_count = 0
         self.order = None
 
-    def _start(self, app_context, **kwargs):
-
-        self.qty = self.get_stg_config_value("qty", 1)
-        self.threshold = self.get_stg_config_value("threshold", 1)
+    def _start(self, app_context: Context) -> None:
+        self.qty = self._get_stg_config("qty", 1)
+        self.threshold = self._get_stg_config("threshold", 1)
 
         self.xiv = app_context.ref_data_mgr.get_inst('XIV', 'SMART')
         self.vxx = app_context.ref_data_mgr.get_inst('VXX', 'SMART')
@@ -83,7 +83,7 @@ class VxvVxmtRatio(Strategy):
         self.ema_60 = EMA()
         self.sma_fast = SMA(self.bar, 'close', 10)
 
-        super(VxvVxmtRatio, self)._start(app_context, **kwargs)
+        super(VxvVxmtRatio, self)._start(app_context)
 
     def on_bar(self, bar):
         ratio = self.vix_close.now('value') / self.vxv_close.now('close')
@@ -94,10 +94,10 @@ class VxvVxmtRatio(Strategy):
             if ratio < self.threshold[0]:
                 logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
                 if bar.inst_id == self.xiv.id():
-                    self.order = self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=self.qty)
+                    self.order = self.market_order(inst_id=bar.inst_id, action=Buy, qty=self.qty)
 
             # long VXX when ratio > 1.08
             elif ratio > self.threshold[1]:
                 logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
                 if bar.inst_id == self.vxx.id():
-                    self.order = self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=self.qty)
+                    self.order = self.market_order(inst_id=bar.inst_id, action=Buy, qty=self.qty)

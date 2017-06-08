@@ -9,25 +9,20 @@ import csv
 import datetime
 import pandas as pd
 from algotrader.trading.ref_data import RefDataManager, \
-    DBRefDataManager, Instrument, Currency, Exchange, InstType
-from algotrader.trading.context import ApplicationConfig, ApplicationContext
-from algotrader.utils.clock import Clock
+    Instrument, Currency, Exchange, InstType
+from algotrader.trading.clock import Clock
 import random
 import time
 from pymongo import MongoClient
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.persistence import MongoDBConfig, PersistenceConfig
 # from algotrader.config.trading import BacktestingConfig
-from algotrader.event.market_data import Bar
-from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.provider.persistence.data_store import DataStore
-from algotrader.provider.persistence.mongodb import MongoDBDataStore
-from algotrader.trading.account_mgr import AccountManager
+from algotrader.provider.datastore import PersistenceMode
+from algotrader.provider.datastore import DataStore
+from algotrader.provider.datastore.mongodb import MongoDBDataStore
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.portfolio import Portfolio
-from algotrader.trading.seq_mgr import SequenceManager
-from algotrader.utils.ser_deser import JsonSerializer, MapSerializer
+from algotrader.trading.sequence import SequenceManager
 from algotrader.provider.feed import Feed
 
 import sys
@@ -279,7 +274,7 @@ def build_vix_future(expiry_date_str, seq_mgr):
     return Instrument(inst_id, "VIX Future %s %s" % (tokens[1], tokens[2]), type=InstType.Future,
                       symbol=symbol,
                       exch_id='CBOE', ccy_id='USD',
-                      alt_symbol={"Quandl": "CBOE/%s" % symbol, "IB": "VIX"}, expiry_date=expiry_date, factor=1000)
+                      alt_symbols={"Quandl": "CBOE/%s" % symbol, "IB": "VIX"}, expiry_date=expiry_date, factor=1000)
 
 
 

@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Dict
 
 from algotrader.technical import Indicator
 
@@ -22,7 +23,7 @@ def avg_gain_loss(series, input_key, begin, end):
 
     gain = 0
     loss = 0
-    for i in xrange(begin + 1, end):
+    for i in range(begin + 1, end):
         curr_gain, curr_loss = gain_loss(series[i - 1, input_key], series[i, input_key])
         gain += curr_gain
         loss += curr_loss
@@ -34,7 +35,7 @@ def rsi(values, input_key, length):
     if len(values) > length:
 
         avg_gain, avg_loss = avg_gain_loss(values, input_key, 0, length)
-        for i in xrange(length, len(values)):
+        for i in range(length, len(values)):
             gain, loss = gain_loss(values[i - 1, input_key], values[i, input_key])
             avg_gain = (avg_gain * (length - 1) + gain) / float(length)
             avg_loss = (avg_loss * (length - 1) + loss) / float(length)
@@ -54,22 +55,22 @@ class RSI(Indicator):
         '__prev_loss'
     )
 
-    def __init__(self, input=None, input_key=None, length=14, desc="Relative Strength Indicator"):
-        super(RSI, self).__init__(Indicator.get_name(RSI.__name__, input, input_key, length), input, input_key, desc)
-        self.length = int(length)
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Relative Strength Indicator", length=14):
+        super(RSI, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length)
+        self.length = self.get_int_config("length", 14)
         self.__prev_gain = None
         self.__prev_loss = None
-        super(RSI, self).update_all()
+        #super(RSI, self)._update_from_inputs()
 
-    def on_update(self, data):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = data['timestamp']
-        if self.input.size() > self.length:
+        if self.first_input.size() > self.length:
             if self.__prev_gain is None:
-                avg_gain, avg_loss = avg_gain_loss(self.input, self.input_keys[0], 0, self.input.size())
+                avg_gain, avg_loss = avg_gain_loss(self.first_input, self.first_input_keys[0], 0, self.first_input.size())
             else:
-                prev_value = self.input.ago(1, self.input_keys[0])
-                curr_value = self.input.now(self.input_keys[0])
+                prev_value = self.first_input.ago(1, self.first_input_keys[0])
+                curr_value = self.first_input.now(self.first_input_keys[0])
                 curr_gain, curr_loss = gain_loss(prev_value, curr_value)
                 avg_gain = (self.__prev_gain * (self.length - 1) + curr_gain) / float(self.length)
                 avg_loss = (self.__prev_loss * (self.length - 1) + curr_loss) / float(self.length)
@@ -86,23 +87,22 @@ class RSI(Indicator):
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)
 
-
-if __name__ == "__main__":
-    import datetime
-    from algotrader.utils.time_series import DataSeries
-
-    close = DataSeries("close")
-    rsi = RSI(close, input_key='close', length=14)
-    print rsi.name
-    t = datetime.datetime.now()
-
-    values = [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
-              45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
-
-    for idx, value in enumerate(values):
-        close.add({'timestamp': t, 'close': value})
-        t = t + datetime.timedelta(0, 3)
-
-        print idx, rsi.now()
+# if __name__ == "__main__":
+#     import datetime
+#     from algotrader.trading.data_series import DataSeries
+#
+#     close = DataSeries("close")
+#     rsi = RSI(close, input_key='close', length=14)
+#     print(rsi.name)
+#     t = datetime.datetime.now()
+#
+#     values = [44.34, 44.09, 44.15, 43.61, 44.33, 44.83, 45.10, 45.42,
+#               45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.00]
+#
+#     for idx, value in enumerate(values):
+#         close.add(timestamp=t, data={'close': value})
+#         t = t + datetime.timedelta(0, 3)
+#
+#         print(idx, rsi.now())

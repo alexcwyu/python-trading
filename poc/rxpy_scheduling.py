@@ -1,13 +1,11 @@
 from datetime import datetime, timedelta
 
 import gevent
+from algotrader.event.market_data import Bar, BarSize
 from rx.concurrency.historicalscheduler import HistoricalScheduler
 
-from algotrader.event.market_data import Bar, BarSize
-from algotrader.utils.clock import RealTimeClock
-from algotrader.utils.date_utils import DateUtils
-
-
+from algotrader.trading.clock import RealTimeClock
+from algotrader.utils.date import unixtimemillis_to_datetime, datetime_to_unixtimemillis
 
 realtime_clock = RealTimeClock()
 
@@ -43,20 +41,19 @@ class HistoricalScheduler2(HistoricalScheduler):
 
 starttime = datetime.now()
 scheduler1 = HistoricalScheduler2(initial_clock=starttime)
-from algotrader.utils.clock import RealTimeScheduler
+from algotrader.trading.clock import RealTimeScheduler
 
 scheduler2 = RealTimeScheduler()
 endtime = [None]
 
 
 def action(*arg):
-    print DateUtils.unixtimemillis_to_datetime(realtime_clock.now())
+    print(unixtimemillis_to_datetime(realtime_clock.now()))
 
 
 from rx import Observable
 import time
 
-print "starting....", starttime
 
 from gevent.greenlet import Greenlet
 
@@ -73,7 +70,7 @@ class MyNoopGreenlet(Greenlet):
         return 'MyNoopGreenlet(%s)' % self.seconds
 
 
-current_ts = DateUtils.datetime_to_unixtimemillis(starttime)
+current_ts = datetime_to_unixtimemillis(starttime)
 next_ts = Bar.get_next_bar_start_time(current_ts, BarSize.S5)
 diff = next_ts - current_ts
 # Observable.timer(int(diff), BarSize.S5 * 1000, scheduler2).subscribe(action)
@@ -90,7 +87,7 @@ diff = next_ts - current_ts
 # print "5", scheduler1.now()
 
 
-current_ts = DateUtils.datetime_to_unixtimemillis(starttime)
+current_ts = datetime_to_unixtimemillis(starttime)
 next_ts = Bar.get_next_bar_start_time(current_ts, BarSize.S5)
 diff = next_ts - current_ts
 

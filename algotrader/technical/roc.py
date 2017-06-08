@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Dict
 
 from algotrader.technical import Indicator
 
@@ -14,18 +15,18 @@ class ROC(Indicator):
         'length'
     )
 
-    def __init__(self, input=None, input_key=None, length=1, desc="Rate Of Change"):
-        self.length = int(length)
-        super(ROC, self).__init__(Indicator.get_name(ROC.__name__, input, input_key, length), input, input_key, desc)
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Rate Of Change", length=1):
+        super(ROC, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length)
+        self.length = self.get_int_config("length", 1)
 
-    def on_update(self, data):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = data['timestamp']
-        if self.input.size() > self.length:
-            prev_value = self.input.ago(self.length, self.input_keys[0])
-            curr_value = self.input.now(self.input_keys[0])
+        if self.first_input.size() > self.length:
+            prev_value = self.first_input.ago(self.length, self.first_input_keys)
+            curr_value = self.first_input.now(self.first_input_keys)
             result[Indicator.VALUE] = roc(prev_value, curr_value)
         else:
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)

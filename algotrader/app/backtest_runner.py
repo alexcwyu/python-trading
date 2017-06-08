@@ -1,76 +1,59 @@
-
-
-from datetime import date
-
 from algotrader.app import Application
+
 from algotrader.chart.plotter import StrategyPlotter
-from algotrader.config.app import ApplicationConfig, BacktestingConfig
-from algotrader.config.persistence import PersistenceConfig
-from algotrader.event.market_data import BarSize, BarType
-from algotrader.provider.broker import Broker
-from algotrader.provider.feed import Feed
-from algotrader.provider.subscription import BarSubscriptionType
+from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
-from algotrader.trading.ref_data import RefDataManager
-from algotrader.utils.clock import Clock
-from algotrader.provider.broker import Broker
-from algotrader.config.feed import CSVFeedConfig
-from algotrader.config.persistence import MongoDBConfig
-from algotrader.config.builder import *
+from algotrader.utils.logging import logger
+
 
 class BacktestRunner(Application):
-    def __init__(self, isplot=False):
-        self.isplot = isplot
-
     def init(self):
-        self.app_config = self.app_context.app_config
-        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.portfolio_id,
-                                                                         self.app_config.portfolio_initial_cash)
+        self.config = self.app_context.config
 
-        self.initial_result = self.portfolio.get_result()
-
-        self.app_context.add_startable(self.portfolio)
-
-        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.app_config)
-        self.app_context.add_startable(self.strategy)
+        self.is_plot = self.config.get_app_config("plot", default=True)
 
     def run(self):
+        logger.info("starting BackTest")
+
         self.app_context.start()
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.config.get_app_config("portfolioId"),
+                                                                         self.config.get_app_config(
+                                                                             "portfolioInitialcash"))
+        self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.config.get_app_config("stgId"),
+                                                                self.config.get_app_config("stgCls"))
+
+        self.initial_result = self.portfolio.get_result()
+        self.app_context.add_startable(self.portfolio)
+        self.portfolio.start(self.app_context)
         self.strategy.start(self.app_context)
-        if self.isplot:
+
+        result = self.portfolio.get_result()
+        print("Initial:", self.initial_result)
+        print("Final:", result)
+        if self.is_plot:
             self.plot()
 
     def plot(self):
-        print self.portfolio.get_result()
-
         # pyfolio
-        rets = self.portfolio.get_return()
+        ret = self.portfolio.get_return()
         # import pyfolio as pf
-        # pf.create_returns_tear_sheet(rets)
-        # pf.create_full_tear_sheet(rets)
+        # pf.create_returns_tear_sheet(ret)
+        # pf.create_full_tear_sheet(ret)
 
         # build in plot
+
         plotter = StrategyPlotter(self.strategy)
-        plotter.plot(instrument=self.app_context.app_config.instrument_ids[0])
+        plotter.plot(instrument=self.app_context.config.get_app_config("instrumentIds")[0])
 
 
 def main():
-    backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
-                                        stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
-                                        portfolio_id='test', portfolio_initial_cash=100000,
-                                        instrument_ids=[1],
-                                        subscription_types=[
-                                            BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
-                                        from_date=date(2010, 1, 1), to_date=date.today(),
-                                        broker_id=Broker.Simulator,
-                                        feed_id=Feed.CSV,
-                                        stg_configs={'qty': 1000},
-                                        ref_data_mgr_type=RefDataManager.DB,
-                                        persistence_config= backtest_mongo_persistance_config(),
-                                        provider_configs=[MongoDBConfig(), CSVFeedConfig(path='../../data/tradedata')])
-    app_context = ApplicationContext(app_config=backtest_config)
+    config = Config(
+        load_from_yaml("../../config/backtest.yaml"),
+        load_from_yaml("../../config/down2%.yaml"))
 
-    BacktestRunner(True).start(app_context)
+    app_context = ApplicationContext(config=config)
+
+    BacktestRunner().start(app_context)
 
 
 if __name__ == "__main__":

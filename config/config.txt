@@ -1,0 +1,118 @@
+ApplicationConfig
+    ref_data_mgr_type
+        RefDataManager.InMemory
+        RefDataManager.DB
+        RefDataManager.Mock
+
+    clock_type
+        Clock.Simulation
+        Clock.RealTime
+
+    persistence_config
+        ref_ds_id
+        ref_persist_mode
+            PersistenceMode.Disable
+            PersistenceMode.Batch
+            PersistenceMode.RealTime
+
+        trade_ds_id
+        trade_persist_mode
+
+        ts_ds_id
+        ts_persist_mode
+
+        seq_ds_id
+        seq_persist_mode
+
+
+    provider_configs
+        {provider_config.__class__ : provider_config}
+
+
+RealtimeMarketDataImporterConfig
+    feed_id
+    instrument_ids
+    subscription_types
+
+
+HistoricalMarketDataImporterConfig
+    feed_id
+    instrument_ids
+    subscription_types
+    from_date
+    to_date
+
+####
+TradingConfig
+    stg_id
+    stg_cls
+    stg_configs
+
+    feed_id
+    instrument_ids
+    subscription_types
+
+    portfolio_id : str
+    broker_id : str
+
+
+LiveTradingConfig : TradingConfig
+
+
+
+BacktestingConfig : TradingConfig
+    from_date : int
+    to_date : int
+    portfolio_initial_cash : float
+
+#### data store
+DataStoreConfig
+    create_at_start : bool
+    delete_at_stop : bool
+
+CassandraConfig
+    contact_points = List[str]
+    port : int
+    username : str
+    password : str
+    keyspace : str = 'algotrader'
+    cql_script_path : str = '../../../scripts/cassandra/algotrader.cql'
+
+
+MongoDBConfig
+    host : str = 'localhost'
+    port : int = 27107
+    username : str
+    password : str
+    dbname : str = 'algotrader'
+
+
+InMemoryStoreConfig
+    file : str = 'algotrader_db.p'
+
+## Feed
+CSVFeedConfig
+    path : str = '../data/tradedata'
+
+
+PandasMemoryDataFeedConfig
+    dict_df : dataframe
+
+
+## Broker
+IBConfig
+    host : str = 'localhost'
+    port : int = 4001
+    client_id : int = 0
+    account
+    daemon
+    use_gevent
+    next_request_id : int = 1
+    next_order_id
+
+
+SimulatorConfig
+    commission_id = Commission.Default
+    fill_strategy_id = FillStrategy.Default
+    next_ord_id : int = 0
+    next_exec_id : int = 0

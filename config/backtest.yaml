@@ -1,0 +1,55 @@
+Application:
+
+  type: "BackTesting"
+
+  clockId: "Simulation"
+
+  dataStoreId: "InMemory"
+  persistenceMode: "Disable"
+  createDBAtStart : false
+  deleteDBAtStop : false
+
+  feedId: "CSV"
+  brokerId: "Simulator"
+  portfolioId: "test"
+
+  fromDate : 20100101
+  toDate : 20170101
+  portfolioInitialcash : 100000
+  plot : true
+
+
+DataStore:
+
+  Cassandra:
+    contactPoints:
+      - "127.0.0.1"
+    port:
+    username:
+    password:
+    keyspace: "algotrader"
+    scriptPath: "../../../scripts/cassandra/algotrader.cql"
+
+  Mongo:
+    host: "localhost"
+    port: 27107
+    username:
+    password:
+    dbname: "algotrader"
+
+  InMemory:
+    file: "../../data/algotrader_db.p"
+    instCSV: "../../data/refdata/instrument.csv"
+    ccyCSV: "../../data/refdata/ccy.csv"
+    exchCSV: "../../data/refdata/exch.csv"
+
+Feed:
+  CSV:
+    path: "/mnt/data/dev/workspaces/python-trading/data/tradedata"
+
+Broker:
+  Simulator:
+    commission: "Default"
+    fillStrategy: "Default"
+    nextOrderId: 1
+    nextExecId: 1

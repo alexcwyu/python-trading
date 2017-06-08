@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package algotrader.model;
+
+message Bar {
+    enum Type {
+        Time = 0;
+        Tick = 1;
+        Volume = 2;
+        Dynamic = 3;
+    }
+
+    string inst_id = 1;
+    string provider_id = 2;
+    Type type = 3;
+    int32 size = 4;
+    int64 timestamp = 5;
+
+    int64 utc_time = 6;
+    int64 begin_time = 7;
+
+    double open = 9;
+    double high = 10;
+    double low = 11;
+    double close = 12;
+    double vol = 13;
+    double adj_close = 14;
+    double open_interest = 15;
+}
+
+message Quote {
+
+    string inst_id = 1;
+    string provider_id = 2;
+    int64 timestamp = 3;
+
+    int64 utc_time = 4;
+
+    double bid = 5;
+    double bid_size = 6;
+    double ask = 7;
+    double ask_size = 8;
+}
+
+message Trade {
+
+    string inst_id = 1;
+    string provider_id = 2;
+    int64 timestamp = 3;
+
+    int64 utc_time = 4;
+
+    double price = 5;
+    double size = 6;
+}
+
+message MarketDepth {
+    enum Side {
+        Ask = 0;
+        Bid = 1;
+    }
+
+    enum Operation {
+        Insert = 0;
+        Update = 1;
+        Delete = 2;
+    }
+
+    string inst_id = 1;
+    string provider_id = 2;
+    int64 timestamp = 3;
+
+    int64 utc_time = 4;
+
+    string md_provider = 5;
+    int64 position = 6;
+    Operation operation = 7;
+    Side side = 8;
+    double price = 9;
+    double size = 10;
+}
+
+
+message MarketDataSubscriptionRequest {
+    enum MDType {
+        Bar = 0;
+        Trade = 1;
+        Quote = 2;
+        MarketDepth = 3;
+    }
+    MDType type = 1;
+    string inst_id = 2;
+    string feed_id = 3;
+    string md_provider_id = 4;
+    Bar.Type bar_type = 5;
+    int32 bar_size = 6;
+
+    int64 from_date = 7;
+    int64 to_date = 8;
+}
+
+message BarAggregationRequest {
+    enum InputType {
+        Bar = 0;
+        Trade = 1;
+        Bid = 2;
+        Ask = 3;
+        BidAsk = 4;
+        Middle = 5;
+        Spread = 6;
+    }
+
+    string inst_id = 1;
+    string provider_id = 2;
+    InputType input_type = 3;
+    int32 input_bar_size = 4;
+    Bar.Type output_type = 5;
+    int32 output_size = 6;
+
+}

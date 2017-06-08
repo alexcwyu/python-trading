@@ -1,7 +1,7 @@
 import msgpack
 from zerorpc.events import Event
 
-from algotrader.utils.ser_deser import encode, decode
+from poc.ser_deser import encode, decode
 
 
 def pack(self):

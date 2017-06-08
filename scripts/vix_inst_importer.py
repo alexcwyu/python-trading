@@ -7,6 +7,7 @@ __author__ = 'jchan'
 import os
 import csv
 import datetime
+import pandas as pd
 from algotrader.trading.ref_data import RefDataManager, \
     Instrument, Currency, Exchange, InstType
 from algotrader.trading.clock import Clock
@@ -23,6 +24,17 @@ from algotrader.trading.context import ApplicationContext
 from algotrader.trading.portfolio import Portfolio
 from algotrader.trading.sequence import SequenceManager
 from algotrader.provider.feed import Feed
+
+import sys
+from threading import Event
+from swigibpy import EWrapper, EPosixClientSocket, Contract, Order, TagValue, TagValueList
+WAIT_TIME = 60.0
+try:
+    # Python 2 compatibility
+    input = raw_input
+    from Queue import Queue
+except:
+    from queue import Queue
 
 def get_default_app_context():
     config = MongoDBConfig()
@@ -41,6 +53,133 @@ def get_default_app_context():
     # app_config = ApplicationConfig(None, None, None, persistence_config,
     #                                config)
     return ApplicationContext(app_config=app_config)
+
+
+context = get_default_app_context()
+client = MongoClient('localhost', 27017)
+
+store = context.provider_mgr.get(DataStore.Mongo)
+store.start(app_context=context)
+
+ref_data_mgr = context.ref_data_mgr
+ref_data_mgr.start(app_context=context)
+
+seq_mgr = SequenceManager()
+seq_mgr.start(app_context=context)
+
+class SwigIBClientForInstrument(EWrapper):
+    '''Callback object passed to TWS, these functions will be called directly
+    by TWS.
+    '''
+
+    def __init__(self, port=4001, client_id=12):
+        super(SwigIBClientForInstrument, self).__init__()
+
+        self.tws = EPosixClientSocket(self)
+        self.port = port
+        self.client_id = client_id
+
+        self.got_history = Event()
+        self.got_contract = Event()
+        self.got_err = Event()
+        self.order_filled = Event()
+        self.order_ids = Queue()
+
+    def execDetails(self, id, contract, execution):
+        pass
+
+    def managedAccounts(self, openOrderEnd):
+        pass
+
+    ### Order
+    def nextValidId(self, validOrderId):
+        '''Capture the next order id'''
+        self.order_ids.put(validOrderId)
+
+
+    def request_contract_details(self, contract):
+        today = datetime.today()
+
+        print("Requesting contract details...")
+
+        # Perform the request
+        self.tws.reqContractDetails(
+            43,  # reqId,
+            contract,  # contract,
+        )
+
+        print("\n====================================================================")
+        print(" Contract details requested, waiting %ds for TWS responses" % WAIT_TIME)
+        print("====================================================================\n")
+
+        try:
+            self.got_contract.wait(timeout=WAIT_TIME)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            if not self.got_contract.is_set():
+                print('Failed to get contract within %d seconds' % WAIT_TIME)
+
+    def contractDetails(self, reqId, contractDetails):
+        print("Contract details received (request id %i):" % reqId)
+        print("callable: %s" % contractDetails.callable)
+        print("category: %s" % contractDetails.category)
+        print("contractMonth: %s" % contractDetails.contractMonth)
+        print("convertible: %s" % contractDetails.convertible)
+        print("coupon: %s" % contractDetails.coupon)
+        print("industry: %s" % contractDetails.industry)
+        print("liquidHours: %s" % contractDetails.liquidHours)
+        print("longName: %s" % contractDetails.longName)
+        print("marketName: %s" % contractDetails.marketName)
+        print("minTick: %s" % contractDetails.minTick)
+        print("nextOptionPartial: %s" % contractDetails.nextOptionPartial)
+        print("orderTypes: %s" % contractDetails.orderTypes)
+        print("priceMagnifier: %s" % contractDetails.priceMagnifier)
+        print("putable: %s" % contractDetails.putable)
+        if contractDetails.secIdList is not None:
+            for secId in contractDetails.secIdList:
+                print("secIdList: %s" % secId)
+        else:
+            print("secIdList: None")
+
+        print("subcategory: %s" % contractDetails.subcategory)
+        print("tradingHours: %s" % contractDetails.tradingHours)
+        print("timeZoneId: %s" % contractDetails.timeZoneId)
+        print("underConId: %s" % contractDetails.underConId)
+        print("evRule: %s" % contractDetails.evRule)
+        print("evMultiplier: %s" % contractDetails.evMultiplier)
+
+        contract = contractDetails.summary
+
+        print("\nContract Summary:")
+        print("exchange: %s" % contract.exchange)
+        print("symbol: %s" % contract.symbol)
+        print("secType: %s" % contract.secType)
+        print("currency: %s" % contract.currency)
+        print("tradingClass: %s" % contract.tradingClass)
+        if contract.comboLegs is not None:
+            for comboLeg in contract.comboLegs:
+                print("comboLegs: %s - %s" %
+                      (comboLeg.action, comboLeg.exchange))
+        else:
+            print("comboLegs: None")
+
+        # inst_id = seq_mgr.get_next_sequence("instruments")
+        print("\nBond Values:")
+        print("bondType: %s" % contractDetails.bondType)
+        print("couponType: %s" % contractDetails.couponType)
+        print("cusip: %s" % contractDetails.cusip)
+        print("descAppend: %s" % contractDetails.descAppend)
+        print("issueDate: %s" % contractDetails.issueDate)
+        print("maturity: %s" % contractDetails.maturity)
+        print("nextOptionDate: %s" % contractDetails.nextOptionDate)
+        print("nextOptionType: %s" % contractDetails.nextOptionType)
+        print("notes: %s" % contractDetails.notes)
+        print("ratings: %s" % contractDetails.ratings)
+        print("validExchanges: %s" % contractDetails.validExchanges)
+
+        self.got_contract.set()
+
 
 
 
@@ -159,7 +298,37 @@ def import_vix_future():
     ref_data_mgr.save_all()
 
 
-setup_exchange_currency()
-test_get()
+# setup_exchange_currency()
+# test_get()
 
-import_vix_future()
+# import_vix_future()
+
+# with open('/Users/jchan/workspace/data/NYSE.txt') as f:
+
+
+def import_eod_nyse():
+    nysedef = pd.read_csv('/Users/jchan/workspace/data/NYSE.txt', delimiter='\t')
+
+    for index, row in nysedef.iterrows():
+        print row
+        inst_id = seq_mgr.get_next_sequence("instruments")
+        inst = Instrument(inst_id, name=row['Description'], type=InstType.Stock, symbol=row['Symbol'], exch_id='NYSE', ccy_id='USD')
+        ref_data_mgr.add_inst(inst)
+
+    ref_data_mgr.save_all()
+
+import_eod_nyse()
+
+#
+# in case need to syn back the instruments sequences, do the following:
+#
+# find the max of inst_id by
+# db.instruments.distinct("__slots__.inst_id")
+#
+# db.sequences.update(
+# { _id: "instruments"},
+#  { $set:
+#  { seq : 161}})
+
+
+

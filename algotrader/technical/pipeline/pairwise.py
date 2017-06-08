@@ -20,6 +20,7 @@ class Pairwise(PipeLine):
         input_rhs = self.get_input(1)
         self.lhs_name = get_input_name(input_lhs)
         self.rhs_name = get_input_name(input_rhs)
+        self.is_input_pipeline = True
 
         if isinstance(input_lhs, PipeLine) and not isinstance(input_rhs, PipeLine):
             raise TypeError("input_lhs has to be the same type as input_rhs as Pipeline")
@@ -31,6 +32,7 @@ class Pairwise(PipeLine):
             raise TypeError("input_lhs has to be the same type as input_rhs as DataSeries")
 
         if isinstance(input_lhs, PipeLine):
+            self.is_input_pipeline = True
             try:
                 np.testing.assert_almost_equal(input_lhs.shape(), input_rhs.shape(), 10)
                 self.__shape = input_lhs.shape()
@@ -46,7 +48,12 @@ class Pairwise(PipeLine):
             if self.all_filled():
                 x = self.cache[self.lhs_name][-self.length:] if self.length > 1 else self.cache[self.lhs_name][-1]
                 y = self.cache[self.rhs_name][-self.length:] if self.length > 1 else self.cache[self.rhs_name][-1]
-                result[PipeLine.VALUE] = self.func(x, y)
+                if self.is_input_pipeline:
+                    xstk = np.vstack(x)
+                    ystk = np.vstack(y)
+                    result[PipeLine.VALUE] = self.func(xstk, ystk)
+                else:
+                    result[PipeLine.VALUE] = self.func(x, y)
             else:
                 result[PipeLine.VALUE] = self._default_output()
         else:
@@ -128,7 +135,7 @@ class Max(Pairwise):
 class PairCorrelation(Pairwise):
     def __init__(self, time_series=None, inputs=None, input_keys='close', desc="Pairwise PairCorrelation", length=1):
         super(PairCorrelation, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
-                                   func=lambda x, y: np.corrcoef(x, y)[0, 1],length=length)
+                                   func=lambda x, y: np.corrcoef(np.transpose(x), np.transpose(y))[0, 1],length=length)
 
 #
 # from jinja2 import Template

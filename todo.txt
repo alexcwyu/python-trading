@@ -1,13 +1,83 @@
-# Conflicts:
-#	algotrader/provider/feed/csv_feed.py
-#	algotrader/provider/feed/pandas_web.py
-#	algotrader/provider/persistence/mongodb.py
-#	algotrader/provider/subscription.py
-#	algotrader/strategy/alpha_formula.py
-#	algotrader/technical/pipeline/__init__.py
-#	algotrader/technical/pipeline/pairwise.py
-#	algotrader/technical/pipeline/rank.py
-#	algotrader/trading/portfolio.py
-#	requirements.txt
-#	tests/test_pipeline.py
-#	tests/test_pipeline_pairwise.py
+### Dataframe / Series
+- to and from pandas
+- to and from Protobuf
+
+- persist to and from DB
+- serialize and deserialize via network
+
+
+
+- register to globalcontext
+
+
+- offline (batch) vs online (realtime update) mode
+    - DAG (batch mode, pull from child, recursively up to the root)
+        - parent
+            store lasttimestamp
+            return value since timestamp (can be empty array)
+
+        - child
+            store parentId
+            store last update timestamp & last result (conflated into a dict) from each parent
+            store last updatetimestamp
+            batch calculate and store the result.
+
+            when compute / evaluate, check lastcomputed timestamp
+
+
+
+    - subscribe (realtime update, push from parent)
+        - rxpy
+        - publish
+        - when subscriber receive update, update the parent timestamp
+
+
+
+- multi-index
+
+
+
+DataFrame
+    - holding multiple series
+
+
+EvaluationContext (global)
+    def evaluate():
+        - for each input:
+            input[self.last_ts:] -> timeseries
+            put the ts into a dict
+
+        if the dict of timeseries is empty:
+            no further update.
+
+        if the dict of timeseries is non empty:
+            merge into a DF
+            iterate the DF (backfill for na?)
+            call the update method
+
+        acutally....
+            covert to pandas in global context
+            just use pandas to calculate the value
+            convert back to series
+
+Expression
+    def evaluate():
+        create a EvaluationContext
+        slice for each parent since last calculate into a series, add to EvaluationContext
+        EvaluationContext.evaluate()
+        call the compute()
+
+
+    def on_event(timestamp: long, input: str, data: Dict):
+
+
+    def compute(timestamp: long, input_data: Dict[str, double]):
+
+
+    def publish(timestamp, output_data:Dict[str, double]):
+
+
+
+    - slice for each parebnt
+
+def update(input, ):

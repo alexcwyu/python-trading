@@ -21,7 +21,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_pb=_b('\n\"algotrader/model/time_series.proto\x12\x10\x61lgotrader.model\"\x8a\x01\n\x0eTimeSeriesItem\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x38\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32*.algotrader.model.TimeSeriesItem.DataEntry\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"W\n\x15TimeSeriesUpdateEvent\x12\x0e\n\x06source\x18\x01 \x01(\t\x12.\n\x04item\x18\x02 \x01(\x0b\x32 .algotrader.model.TimeSeriesItem\"\xa8\x03\n\nTimeSeries\x12\x11\n\tseries_id\x18\x01 \x01(\t\x12\x12\n\nseries_cls\x18\x02 \x01(\t\x12\x0c\n\x04keys\x18\x03 \x03(\t\x12\x0c\n\x04\x64\x65sc\x18\x04 \x01(\t\x12\x32\n\x06inputs\x18\x05 \x03(\x0b\x32\".algotrader.model.TimeSeries.Input\x12\x1a\n\x12\x64\x65\x66\x61ult_output_key\x18\x06 \x01(\t\x12\x1d\n\x15missing_value_replace\x18\x07 \x01(\x01\x12\x12\n\nstart_time\x18\x08 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\t \x01(\x03\x12/\n\x05items\x18\n \x03(\x0b\x32 .algotrader.model.TimeSeriesItem\x12:\n\x07\x63onfigs\x18\x0b \x03(\x0b\x32).algotrader.model.TimeSeries.ConfigsEntry\x1a%\n\x05Input\x12\x0e\n\x06source\x18\x01 \x01(\t\x12\x0c\n\x04keys\x18\x02 \x03(\t\x1a.\n\x0c\x43onfigsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x62\x06proto3')
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -324,6 +323,7 @@ _TIMESERIES.fields_by_name['configs'].message_type = _TIMESERIES_CONFIGSENTRY
 DESCRIPTOR.message_types_by_name['TimeSeriesItem'] = _TIMESERIESITEM
 DESCRIPTOR.message_types_by_name['TimeSeriesUpdateEvent'] = _TIMESERIESUPDATEEVENT
 DESCRIPTOR.message_types_by_name['TimeSeries'] = _TIMESERIES
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 TimeSeriesItem = _reflection.GeneratedProtocolMessageType('TimeSeriesItem', (_message.Message,), dict(
 

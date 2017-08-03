@@ -16,7 +16,7 @@ message Series {
 
 
     string series_id = 1;
-    string parent_id = 2;
+    string df_id = 2;
     string col_id = 3;
     string inst_id = 4;
     DataType dtype = 5;

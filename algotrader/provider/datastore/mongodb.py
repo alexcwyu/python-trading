@@ -169,10 +169,16 @@ class MongoDBDataStore(SimpleDataStore):
         return obj
 
     def load_all(self, clazz):
-        result = []
-        for data in self.db_map[clazz].find():
-            result.append(self._deserialize(clazz, data))
-        return result
+        if clazz == "sequences":
+            result = {}
+            for data in self.db['sequences'].find():
+                result[data["_id"]] = data["seq"]
+            return result
+        else:
+            result = []
+            for data in self.db_map[clazz].find():
+                result.append(self._deserialize(clazz, data))
+            return result
 
     def load_bars(self, sub_key):
         from_timestamp = date_to_unixtimemillis(sub_key.from_date)

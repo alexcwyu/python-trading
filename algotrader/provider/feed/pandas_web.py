@@ -1,6 +1,6 @@
 import abc
 
-from pandas_datareader import data
+#from pandas_datareader import data
 
 from algotrader import Context
 from algotrader.provider.feed import Feed, PandasDataFeed
@@ -30,14 +30,15 @@ class PandasWebDataFeed(PandasDataFeed):
                 raise RuntimeError("only yahoo and goolge is supported!")
 
     def _load_dataframes(self, insts, *sub_reqs):
-        dfs = []
-        for sub_req in sub_reqs:
-            inst = insts[sub_req.inst_id]
-            df = data.DataReader(inst.symbol.lower(), sub_req.md_provider_id.lower(),
-                                 datestr_to_date(str(sub_req.from_date)),
-                                 datestr_to_date(str(sub_req.to_date)))
-            df['InstId'] = sub_req.inst_id
-            df['ProviderId'] = sub_req.md_provider_id
-            df['BarSize'] = sub_req.bar_size
-            dfs.append(df)
-        return dfs
+        pass
+        # dfs = []
+        # for sub_req in sub_reqs:
+        #     inst = insts[sub_req.inst_id]
+        #     df = data.DataReader(inst.symbol.lower(), sub_req.md_provider_id.lower(),
+        #                          datestr_to_date(str(sub_req.from_date)),
+        #                          datestr_to_date(str(sub_req.to_date)))
+        #     df['InstId'] = sub_req.inst_id
+        #     df['ProviderId'] = sub_req.md_provider_id
+        #     df['BarSize'] = sub_req.bar_size
+        #     dfs.append(df)
+        # return dfs

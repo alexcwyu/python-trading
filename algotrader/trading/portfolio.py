@@ -15,6 +15,8 @@ from algotrader.provider.datastore import PersistenceMode
 from algotrader.trading.position import HasPositions
 from algotrader.utils.logging import logger
 
+from algotrader.model.trade_data_pb2 import *
+
 
 class Portfolio(HasPositions, Startable, HasId):
     def __init__(self, state: PortfolioState = None):
@@ -173,7 +175,7 @@ class PortfolioManager(SimpleManager):
     def load_all(self) -> None:
         if self.store:
             self.store.start(self.app_context)
-            portfolio_states = self.store.load_all('portfolios')
+            portfolio_states = self.store.load_all(PortfolioState)
             for portfolio_state in portfolio_states:
                 portfolio = self.get_or_new_portfolio(portf_id=portfolio_state.portf_id, state=portfolio_state)
                 self.add(portfolio)

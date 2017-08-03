@@ -1,6 +1,7 @@
 from algotrader import Manager, Context
 from algotrader.provider.datastore import PersistenceMode
 
+from algotrader.model.ref_data_pb2 import *
 
 class RefDataManager(Manager):
     def __init__(self):
@@ -23,11 +24,11 @@ class RefDataManager(Manager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            for inst in self.store.load_all('instruments'):
+            for inst in self.store.load_all(Instrument):
                 self._inst_dict[inst.inst_id] = inst
-            for ccy in self.store.load_all('currencies'):
+            for ccy in self.store.load_all(Currency):
                 self._ccy_dict[ccy.ccy_id] = ccy
-            for exch in self.store.load_all('exchanges'):
+            for exch in self.store.load_all(Exchange):
                 self._exch_dict[exch.exch_id] = exch
 
     def save_all(self):

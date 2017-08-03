@@ -5,6 +5,7 @@ from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.datastore import PersistenceMode
 
+from algotrader.model.trade_data_pb2 import *
 
 class Account(Startable, HasId):
     def __init__(self, acct_id: str, values: Dict[str, AccountValue] = None, state=None):
@@ -37,7 +38,7 @@ class AccountManager(SimpleManager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            account_states = self.store.load_all('accounts')
+            account_states = self.store.load_all(AccountState)
             for account_state in account_states:
                 self.add(self.new_account(account_state.acct_id, state=account_state))
 

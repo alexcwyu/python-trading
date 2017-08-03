@@ -10,6 +10,9 @@ from algotrader.trading.event import MarketDataEventHandler, OrderEventHandler, 
 from algotrader.utils.logging import logger
 
 
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.trade_data_pb2 import *
+
 class Order(MarketDataEventHandler, ExecutionEventHandler, Startable):
     def __init__(self, state: OrderState = None, events: List[Any] = None):
         super().__init__()
@@ -234,12 +237,12 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            order_states = self.store.load_all('orders')
+            order_states = self.store.load_all(OrderState)
             for order_state in order_states:
                 order = Order(state=order_state)
                 self.order_dict[order.id()] = order
 
-            new_order_reqs = self.store.load_all('new_order_reqs')
+            new_order_reqs = self.store.load_all(NewOrderRequest)
             for new_order_req in new_order_reqs:
                 self.ord_reqs_dict[self._cl_ord_id(new_order_req)] = new_order_req
 

@@ -14,6 +14,10 @@ from algotrader.trading.position import HasPositions
 from algotrader.utils.market_data import build_subscription_requests
 
 
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.trade_data_pb2 import *
+
+
 class Strategy(HasPositions, ExecutionEventHandler, Startable, HasId):
     def __init__(self, stg_id: str, stg_cls: str, state: StrategyState = None):
         self.stg_id = stg_id
@@ -196,8 +200,8 @@ class StrategyManager(SimpleManager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            strategies = self.store.load_all('strategies')
-            for stg_state in strategies:
+            stg_states = self.store.load_all(StrategyState)
+            for stg_state in stg_states:
                 self.add(self.get_or_new_stg(stg_id=stg_state.stg_id, stg_cls=stg_state.stg_cls, state=stg_state))
 
     def save_all(self):

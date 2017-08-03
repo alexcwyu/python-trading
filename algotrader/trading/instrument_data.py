@@ -9,6 +9,9 @@ from algotrader.utils.logging import logger
 from algotrader.utils.market_data import get_series_id
 from algotrader.utils.model import get_full_cls_name, get_cls
 
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.time_series_pb2 import *
+
 class InstrumentDataManager(MarketDataEventHandler, Manager):
     def __init__(self):
         super(InstrumentDataManager, self).__init__()
@@ -34,7 +37,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            series_states = self.store.load_all('time_series')
+            series_states = self.store.load_all(TimeSeries)
             for series_state in series_states:
                 if hasattr(series_state, 'series_cls') and series_state.series_cls:
                     cls = get_cls(series_state.series_cls)
@@ -43,15 +46,15 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
                     series = DataSeries(time_series=series_state)
                 self.__series_dict[series.id()] = series
 
-            bars = self.store.load_all('bars')
+            bars = self.store.load_all(Bar)
             for bar in bars:
                 self.__bar_dict[get_series_id(bar)] = bar
 
-            trades = self.store.load_all('trades')
+            trades = self.store.load_all(Trade)
             for trade in trades:
                 self.__trade_dict[get_series_id(trade)] = trade
 
-            quotes = self.store.load_all('quotes')
+            quotes = self.store.load_all(Quote)
             for quote in quotes:
                 self.__quote_dict[get_series_id(quote)] = quote
 

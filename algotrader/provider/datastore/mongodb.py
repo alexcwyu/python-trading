@@ -40,6 +40,7 @@ class MongoDBDataStore(SimpleDataStore):
 
             TimeSeries: self.db['time_series'],
 
+
             Bar: self.db['bars'],
             Trade: self.db['trades'],
             Quote: self.db['quotes'],
@@ -161,7 +162,7 @@ class MongoDBDataStore(SimpleDataStore):
 
     # SequenceDataStore
     def save_sequence(self, key, seq):
-        self.sequences.update({'_id': key}, {'seq': seq}, upsert=True)
+        self.db['sequences'].update({'_id': key}, {'seq': seq}, upsert=True)
 
     def _deserialize(self, clazz, data):
         del data['_id']

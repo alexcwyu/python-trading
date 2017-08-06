@@ -37,3 +37,15 @@ DataStore:
 Feed:
   CSV:
     path: "../data/tradedata"
+
+
+Broker:
+  IB:
+    host: "localhost"
+    port: 4001
+    clientId: 0
+    daemon: True
+    useGevent: True
+    nextRequestId: 1
+    nextOrderId: 1
+    geventSleep: 0.5

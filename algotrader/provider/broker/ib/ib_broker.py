@@ -682,7 +682,7 @@ class IBBroker(IBSocket, Broker, Feed):
                      sd.multiplier, sd.currency, sd.localSymbol, sd.secIdType,
                      sd.secId, sd.includeExpired, sd.comboLegsDescrip, sd.comboLegs,
                      sd.underComp,
-                     cd.marketName, cd.tradingClass, cd.minTick, cd.orderTypes,
+                     cd.marketName, sd.tradingClass, cd.minTick, cd.orderTypes,
                      cd.validExchanges, cd.priceMagnifier, cd.underConId, cd.longName,
                      cd.longName, cd.contractMonth, cd.industry, cd.category,
                      cd.timeZoneId, cd.tradingHours, cd.liquidHours, cd.evRule,
@@ -694,7 +694,9 @@ class IBBroker(IBSocket, Broker, Feed):
         inst = ModelFactory.build_instrument(symbol=sd.symbol,
                                              type=sd.secType,
                                              name=cd.longName,
-                                             sector=cd.industry, industry=cd.category)
+                                             sector=cd.industry, industry=cd.category,
+                                             primary_exch_id=sd.primaryExchange,
+                                             ccy_id=sd.currency)
         self.ref_data_mgr.add_inst(inst)
 
         logger.info("saved")

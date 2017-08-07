@@ -160,15 +160,19 @@ class IBBroker(IBSocket, Broker, Feed):
         self.account = self._get_broker_config("account")
         self.daemon = self._get_broker_config("daemon")
         self.use_gevent = self._get_broker_config("useGevent")
+        self.gevent_sleep = self._get_broker_config("geventSleep")
+        if self.gevent_sleep is None:
+            self.gevent_sleep = 1
+        logger.info("user gevent = %s" % self.use_gevent)
 
-        self.tws = swigibpy.EPosixClientSocket(self)
+        self.tws = swigibpy.EPosixClientSocket(self, poll_auto=False)
 
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
         self.execution_event_bus = self.app_context.event_bus.execution_subject
         self.model_factory = IBModelFactory(self.app_context.ref_data_mgr)
 
-        if not self.tws.eConnect("", self.port, self.client_id, poll_auto=False):
+        if not self.tws.eConnect("", self.port, self.client_id):
             raise RuntimeError('Failed to connect TWS')
 
         if self.use_gevent:
@@ -197,7 +201,7 @@ class IBBroker(IBSocket, Broker, Feed):
 
             if ok and (not self.tws or not self.tws.isConnected()):
                 ok = False
-            gevent.sleep(0)
+            gevent.sleep(self.gevent_sleep)
 
     def _stop(self):
         self.tws.eDisconnect()
@@ -678,7 +682,7 @@ class IBBroker(IBSocket, Broker, Feed):
                      sd.multiplier, sd.currency, sd.localSymbol, sd.secIdType,
                      sd.secId, sd.includeExpired, sd.comboLegsDescrip, sd.comboLegs,
                      sd.underComp,
-                     cd.marketName, cd.tradingClass, cd.minTick, cd.orderTypes,
+                     cd.marketName, sd.tradingClass, cd.minTick, cd.orderTypes,
                      cd.validExchanges, cd.priceMagnifier, cd.underConId, cd.longName,
                      cd.longName, cd.contractMonth, cd.industry, cd.category,
                      cd.timeZoneId, cd.tradingHours, cd.liquidHours, cd.evRule,
@@ -690,7 +694,9 @@ class IBBroker(IBSocket, Broker, Feed):
         inst = ModelFactory.build_instrument(symbol=sd.symbol,
                                              type=sd.secType,
                                              name=cd.longName,
-                                             sector=cd.industry, industry=cd.category)
+                                             sector=cd.industry, industry=cd.category,
+                                             primary_exch_id=sd.primaryExchange,
+                                             ccy_id=sd.currency)
         self.ref_data_mgr.add_inst(inst)
 
         logger.info("saved")

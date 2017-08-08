@@ -24,11 +24,11 @@ class RefDataManager(Manager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            for inst in self.store.load_all(Instrument):
+            for inst in self.store.load_all("instruments"):
                 self._inst_dict[inst.inst_id] = inst
-            for ccy in self.store.load_all(Currency):
+            for ccy in self.store.load_all("currencies"):
                 self._ccy_dict[ccy.ccy_id] = ccy
-            for exch in self.store.load_all(Exchange):
+            for exch in self.store.load_all("exchanges"):
                 self._exch_dict[exch.exch_id] = exch
 
     def save_all(self):

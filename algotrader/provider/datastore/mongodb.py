@@ -8,7 +8,7 @@ from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.datastore import SimpleDataStore, DataStore
 from algotrader.utils.date import date_to_unixtimemillis
 from algotrader.utils.logging import logger
-from algotrader.utils.model import get_model_id
+from algotrader.utils.model import get_model_id, get_model_from_db_name
 from algotrader.utils.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
 
 
@@ -169,14 +169,15 @@ class MongoDBDataStore(SimpleDataStore):
         obj = dict_to_protobuf(clazz, data)
         return obj
 
-    def load_all(self, clazz):
-        if clazz == "sequences":
+    def load_all(self, db):
+        if db == "sequences":
             result = {}
             for data in self.db['sequences'].find():
                 result[data["_id"]] = data["seq"]
             return result
         else:
             result = []
+            clazz = get_model_from_db_name(db)
             for data in self.db_map[clazz].find():
                 result.append(self._deserialize(clazz, data))
             return result

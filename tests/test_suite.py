@@ -48,8 +48,6 @@ def suite():
     #test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
     test_suite.addTest(unittest.makeSuite(InMemoryDBTest))
     #test_suite.addTest(unittest.makeSuite(PersistenceTest))
-    #test_suite.addTest(unittest.makeSuite(PipelineTest))
-    #test_suite.addTest(unittest.makeSuite(PairwiseTest))
     test_suite.addTest(unittest.makeSuite(PlotTest))
     test_suite.addTest(unittest.makeSuite(PortfolioTest))
     test_suite.addTest(unittest.makeSuite(PositionTest))

@@ -175,7 +175,7 @@ class PortfolioManager(SimpleManager):
     def load_all(self) -> None:
         if self.store:
             self.store.start(self.app_context)
-            portfolio_states = self.store.load_all(PortfolioState)
+            portfolio_states = self.store.load_all("portfolios")
             for portfolio_state in portfolio_states:
                 portfolio = self.get_or_new_portfolio(portf_id=portfolio_state.portf_id, state=portfolio_state)
                 self.add(portfolio)

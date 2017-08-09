@@ -38,7 +38,7 @@ class AccountManager(SimpleManager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            account_states = self.store.load_all(AccountState)
+            account_states = self.store.load_all("accounts")
             for account_state in account_states:
                 self.add(self.new_account(account_state.acct_id, state=account_state))
 

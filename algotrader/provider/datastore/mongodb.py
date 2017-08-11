@@ -124,19 +124,19 @@ class MongoDBDataStore(SimpleDataStore):
         self.save(market_depth)
 
     # TradeDataStore
-    def save_new_order_requests(self, new_order_request: NewOrderRequest):
+    def save_new_order_req(self, new_order_request: NewOrderRequest):
         self.save(new_order_request)
 
-    def save_order_replace_requests(self, order_replace_request: OrderReplaceRequest):
+    def save_order_replace_req(self, order_replace_request: OrderReplaceRequest):
         self.save(order_replace_request)
 
-    def save_order_cancel_request(self, order_cancel_request: OrderCancelRequest):
+    def save_order_cancel_req(self, order_cancel_request: OrderCancelRequest):
         self.save(order_cancel_request)
 
-    def save_execution_report(self, execution_report: ExecutionReport):
+    def save_exec_report(self, execution_report: ExecutionReport):
         self.save(execution_report)
 
-    def save_order_status_update(self, order_status_update: OrderStatusUpdate):
+    def save_ord_status_upd(self, order_status_update: OrderStatusUpdate):
         self.save(order_status_update)
 
     def save_account_update(self, account_update: AccountUpdate):

@@ -237,12 +237,12 @@ class OrderManager(Manager, OrderEventHandler, ExecutionEventHandler, MarketData
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            order_states = self.store.load_all(OrderState)
+            order_states = self.store.load_all("orders")
             for order_state in order_states:
                 order = Order(state=order_state)
                 self.order_dict[order.id()] = order
 
-            new_order_reqs = self.store.load_all(NewOrderRequest)
+            new_order_reqs = self.store.load_all("new_order_reqs")
             for new_order_req in new_order_reqs:
                 self.ord_reqs_dict[self._cl_ord_id(new_order_req)] = new_order_req
 

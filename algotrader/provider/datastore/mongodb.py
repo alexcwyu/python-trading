@@ -8,7 +8,7 @@ from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.datastore import SimpleDataStore, DataStore
 from algotrader.utils.date import date_to_unixtimemillis
 from algotrader.utils.logging import logger
-from algotrader.utils.model import get_model_id
+from algotrader.utils.model import get_model_id, get_model_from_db_name
 from algotrader.utils.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
 
 
@@ -124,19 +124,19 @@ class MongoDBDataStore(SimpleDataStore):
         self.save(market_depth)
 
     # TradeDataStore
-    def save_new_order_requests(self, new_order_request: NewOrderRequest):
+    def save_new_order_req(self, new_order_request: NewOrderRequest):
         self.save(new_order_request)
 
-    def save_order_replace_requests(self, order_replace_request: OrderReplaceRequest):
+    def save_order_replace_req(self, order_replace_request: OrderReplaceRequest):
         self.save(order_replace_request)
 
-    def save_order_cancel_request(self, order_cancel_request: OrderCancelRequest):
+    def save_order_cancel_req(self, order_cancel_request: OrderCancelRequest):
         self.save(order_cancel_request)
 
-    def save_execution_report(self, execution_report: ExecutionReport):
+    def save_exec_report(self, execution_report: ExecutionReport):
         self.save(execution_report)
 
-    def save_order_status_update(self, order_status_update: OrderStatusUpdate):
+    def save_ord_status_upd(self, order_status_update: OrderStatusUpdate):
         self.save(order_status_update)
 
     def save_account_update(self, account_update: AccountUpdate):
@@ -169,14 +169,15 @@ class MongoDBDataStore(SimpleDataStore):
         obj = dict_to_protobuf(clazz, data)
         return obj
 
-    def load_all(self, clazz):
-        if clazz == "sequences":
+    def load_all(self, db):
+        if db == "sequences":
             result = {}
             for data in self.db['sequences'].find():
                 result[data["_id"]] = data["seq"]
             return result
         else:
             result = []
+            clazz = get_model_from_db_name(db)
             for data in self.db_map[clazz].find():
                 result.append(self._deserialize(clazz, data))
             return result

@@ -19,7 +19,8 @@ class InMemoryDataStore(SimpleDataStore):
         self.delete_at_stop = app_context.config.get_app_config("deleteDBAtStop")
 
         try:
-            self.db = pickle.load(open(self.file, "rb"))
+            with open(self.file, "rb") as ifile:
+                self.db = pickle.load(ifile)
         except:
             self.db = {}
 
@@ -65,7 +66,8 @@ class InMemoryDataStore(SimpleDataStore):
         if self.delete_at_stop:
             self.remove_database()
         else:
-            pickle.dump(self.db, open(self.file, "wb+"))
+            with open(self.file, "wb+") as ofile:
+                pickle.dump(self.db, ofile)
 
     def remove_database(self):
         try:

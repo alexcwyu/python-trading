@@ -16,8 +16,6 @@ from tests.test_market_data_processor import MarketDataProcessorTest
 from tests.test_model_factory import ModelFactoryTest
 from tests.test_order import OrderTest
 from tests.test_order_handler import OrderHandlerTest
-#from tests.test_pipeline import PipelineTest
-#from tests.test_pipeline_pairwise import PairwiseTest
 from tests.test_portfolio import PortfolioTest
 from tests.test_position import PositionTest
 from tests.test_ref_data import RefDataTest
@@ -28,6 +26,7 @@ from tests.test_persistence_indicator import IndicatorPersistenceTest
 from tests.test_talib_wrapper import TALibSMATest
 from tests.test_feed import FeedTest
 from tests.test_plot import PlotTest
+from tests.test_data_frame import DataFrameTest
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -57,6 +56,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(IndicatorPersistenceTest))
     test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
     test_suite.addTest(unittest.makeSuite(TALibSMATest))
+    test_suite.addTest(unittest.makeSuite(DataFrameTest))
     return test_suite
 
 

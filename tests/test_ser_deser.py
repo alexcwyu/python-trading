@@ -3,6 +3,7 @@ from unittest import TestCase
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
+from algotrader.model.time_series2_pb2 import Series
 from algotrader.model.trade_data_pb2 import *
 from algotrader.utils.protobuf_to_dict import *
 from tests.sample_factory import SampleFactory
@@ -40,9 +41,13 @@ class SerializationTest(TestCase):
         timezone = self.factory.sample_timezone()
         self.__test_serializaion(TimeZone, timezone)
 
-    def test_time_series(self):
-        ds = self.factory.sample_time_series()
-        self.__test_serializaion(TimeSeries, ds)
+    # def test_time_series(self):
+    #     ds = self.factory.sample_time_series()
+    #     self.__test_serializaion(TimeSeries, ds)
+
+    def test_series(self):
+        ds = self.factory.sample_series()
+        self.__test_serializaion(Series, ds)
 
     def test_bar(self):
         self.__test_serializaion(Bar, self.factory.sample_bar())

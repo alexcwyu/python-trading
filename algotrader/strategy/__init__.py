@@ -200,7 +200,7 @@ class StrategyManager(SimpleManager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            stg_states = self.store.load_all(StrategyState)
+            stg_states = self.store.load_all("strategies")
             for stg_state in stg_states:
                 self.add(self.get_or_new_stg(stg_id=stg_state.stg_id, stg_cls=stg_state.stg_cls, state=stg_state))
 

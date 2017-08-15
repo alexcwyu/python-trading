@@ -37,7 +37,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            series_states = self.store.load_all(TimeSeries)
+            series_states = self.store.load_all('time_series')
             for series_state in series_states:
                 if hasattr(series_state, 'series_cls') and series_state.series_cls:
                     cls = get_cls(series_state.series_cls)
@@ -46,15 +46,15 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
                     series = DataSeries(time_series=series_state)
                 self.__series_dict[series.id()] = series
 
-            bars = self.store.load_all(Bar)
+            bars = self.store.load_all("bars")
             for bar in bars:
                 self.__bar_dict[get_series_id(bar)] = bar
 
-            trades = self.store.load_all(Trade)
+            trades = self.store.load_all("trades")
             for trade in trades:
                 self.__trade_dict[get_series_id(trade)] = trade
 
-            quotes = self.store.load_all(Quote)
+            quotes = self.store.load_all("quotes")
             for quote in quotes:
                 self.__quote_dict[get_series_id(quote)] = quote
 

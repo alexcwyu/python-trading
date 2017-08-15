@@ -33,7 +33,7 @@ from algotrader.trading.clock import Clock
 #     return app_context
 
 config = Config(
-    load_from_yaml("../config/data_import.yaml"))
+   load_from_yaml("../config/data_import.yaml"))
 
 app_context = ApplicationContext(config=config)
 

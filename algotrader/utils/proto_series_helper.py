@@ -1,15 +1,5 @@
-from typing import Dict
-
 import numpy as np
-import pandas as pd
-import raccoon as rc
-from rx.subjects import Subject
-from algotrader import Startable, Context
-
 import algotrader.model.time_series2_pb2 as proto
-from algotrader.model.model_factory import ModelFactory
-from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
-
 
 def get_proto_series_data(proto_series: proto.Series):
     if proto_series.dtype == proto.DTFloat:

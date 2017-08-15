@@ -26,7 +26,7 @@ from tests.test_persistence_indicator import IndicatorPersistenceTest
 from tests.test_talib_wrapper import TALibSMATest
 from tests.test_feed import FeedTest
 from tests.test_plot import PlotTest
-from tests.test_data_frame import DataFrameTest
+from tests.test_series import SeriesTest
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -56,7 +56,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(IndicatorPersistenceTest))
     test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
     test_suite.addTest(unittest.makeSuite(TALibSMATest))
-    test_suite.addTest(unittest.makeSuite(DataFrameTest))
+    test_suite.addTest(unittest.makeSuite(SeriesTest))
     return test_suite
 
 

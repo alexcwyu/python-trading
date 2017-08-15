@@ -2,6 +2,8 @@ from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.trade_data_pb2 import *
+from algotrader.trading.series import Series
+import algotrader.model.time_series2_pb2 as proto
 from algotrader.model.time_series_pb2 import *
 from collections import OrderedDict
 
@@ -62,6 +64,26 @@ class SampleFactory(object):
     def sample_timezone(self):
         timezone = ModelFactory.build_timezone("Venezuela Standard Time")
         return timezone
+
+    def sample_series(self):
+        # df_id = "Bar.Daily"
+        # inst_id ="HSI@SEHK"
+        # proto_series2 = proto.Series()
+        # proto_series2.series_id = "Bar.Daily.open-HSI@SEHK"
+        # proto_series2.df_id = df_id
+        # proto_series2.col_id = "open"
+        # proto_series2.inst_id = inst_id
+        # proto_series2.dtype = proto.DTDouble
+        # proto_series2.index.extend(list(range(1499787464853, 1499887464853, 10000000)))
+        # proto_series2.double_data.extend(SeriesTest.value10)
+        # ds = ModelFactory.build_series(series_id="Bar.Daily.open-HSI@HKFE", "Bar.Daily", "open", "HSI@HKFE")
+        import pandas as pd
+        series = Series(series_id="Bar.Daily.open-HSI@HKFE", df_id="Bar.Daily", col_id="open", inst_id="HSI@HKFE")
+        series.add(pd.to_datetime(1499787464853, unit='ms'), 20123)
+        series.add(pd.to_datetime(1499788464853, unit='ms'), 20277)
+        series.add(pd.to_datetime(1499798464853, unit='ms'), 20199)
+        return series.to_proto_series()
+
 
     def sample_time_series(self):
         ds = ModelFactory.build_time_series(series_id="HSI.BAR.86400",

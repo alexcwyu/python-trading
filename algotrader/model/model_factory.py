@@ -3,9 +3,12 @@ from typing import Dict, List, Callable
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
+import algotrader.model.time_series2_pb2 as proto
 from algotrader.model.trade_data_pb2 import *
 from algotrader.utils.data_series import get_input_name, convert_input_keys, convert_input
 from algotrader.utils.model import add_to_dict, add_to_list
+from algotrader.utils.proto_series_helper import get_proto_series_data, set_proto_series_data, to_np_type, from_np_type
+
 
 
 class ModelFactory(object):
@@ -187,6 +190,25 @@ class ModelFactory(object):
         if keys:
             add_to_list(time_series_input.keys, keys)
         return time_series_input
+
+    @staticmethod
+    def build_series(series_id:str, df_id : str, col_id : str, inst_id :str, dtype = proto.DTDouble):
+        proto_series = proto.Series()
+        proto_series.series_id = series_id
+        proto_series.df_id = df_id
+        proto_series.col_id = col_id
+        proto_series.inst_id = inst_id
+        proto_series.dtype = to_np_type(dtype)
+        return proto_series
+
+    @staticmethod
+    def build_series_update_event(source: str, timestamp: int,
+                                       data: Dict[str, float] = None) -> proto.TimeSeriesUpdateEvent:
+        event = proto.TimeSeriesUpdateEvent()
+        event.source = source
+        item = event.item
+        ModelFactory.update_time_series_item(item, timestamp=timestamp, data=data)
+        return event
 
     @staticmethod
     def build_time_series(series_id: str, series_cls: str = None, desc: str = None, keys: List[str] = None,

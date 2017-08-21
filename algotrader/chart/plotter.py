@@ -50,10 +50,11 @@ class StrategyPlotter:
         plt.show()
 
     def _plot_bar_chart(self, fig, instrument=None):
-        key = "Bar.%s.Time.86400" % instrument
+        key = "Bar.%s.close.Time.86400" % instrument
         series = self.strategy.app_context.inst_data_mgr.get_series(key)
         # key = series_dict.keys()[0]
 
+        # TODO: axisbg is deprecated
         ax_stock = fig.add_axes(rect_stock, axisbg=axescolor)  # left, bottom, width, height
 
         # pmax = series.max()
@@ -62,8 +63,10 @@ class StrategyPlotter:
         # ax_stock.set_ylim(0, 1.1 * pmax)
 
         # series = series_dict[key]
-        if series.size() > 0:
-            series = TimeSeriesPlot(series.get_series('close'))
+        # if series.size() > 0:
+        if len(series) > 0:
+            # series = TimeSeriesPlot(series.get_series('close'))
+            series = TimeSeriesPlot(series.to_pd_series())
             series.plot(ax=ax_stock)
 
         ## Plot volume

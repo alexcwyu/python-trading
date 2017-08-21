@@ -4,6 +4,7 @@ from algotrader import Context
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.trading.data_series import DataSeries
+from algotrader.trading.series import Series
 from algotrader.utils.data_series import build_series_id
 from algotrader.utils.model import get_full_cls_name
 

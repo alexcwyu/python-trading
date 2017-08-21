@@ -48,4 +48,4 @@ Broker:
     useGevent: True
     nextRequestId: 1
     nextOrderId: 1
-    geventSleep: 0.5
+    geventSleep: 1

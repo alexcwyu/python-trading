@@ -201,6 +201,7 @@ class ModelFactory(object):
         proto_series.dtype = to_np_type(dtype)
         return proto_series
 
+    # TODO: Review this, probably we should keep it a while
     @staticmethod
     def build_series_update_event(source: str, timestamp: int,
                                        data: Dict[str, float] = None) -> proto.TimeSeriesUpdateEvent:

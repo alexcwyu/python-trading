@@ -105,9 +105,9 @@ def get_quote_mid(quote: Quote) -> float:
     return quote.ask
 
 
-def get_series_id(item) -> str:
+def get_series_id(item, tags: str = None) -> str:
     if isinstance(item, Bar):
-        return "Bar.%s.%s.%s" % (item.inst_id, get_bar_type_name(item.type), item.size)
+        return "Bar.%s.%s.%s.%s" % (item.inst_id, tags, get_bar_type_name(item.type), item.size)
     if isinstance(item, Trade):
         return "Trade.%s" % (item.inst_id)
     if isinstance(item, Quote):

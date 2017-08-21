@@ -5,6 +5,7 @@ from typing import Dict, Callable, Union
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
+from algotrader.model.time_series2_pb2 import Series
 from algotrader.model.trade_data_pb2 import *
 from algotrader.utils.protobuf_to_dict import protobuf_to_dict, dict_to_protobuf
 
@@ -15,6 +16,7 @@ model_str_map = {
     Country: lambda country: 'Country {}'.format(country.country_id),
 
     TimeSeries: lambda time_series: 'TimeSeries {}'.format(time_series.series_id),
+    Series: lambda series: 'Series {}'.format(series.series_id),
 
     Bar: lambda bar: 'Bar {} provider_id={}, type={}, size={}, timestamp={}, open={}, high={}, low={} ,close={}'
         .format(bar.inst_id, bar.provider_id, bar.type, bar.size, bar.timestamp, bar.open, bar.high, bar.low,
@@ -40,6 +42,7 @@ model_id_map = {
     TimeZone: lambda timezone: timezone.timezone_id,
 
     TimeSeries: lambda time_series: time_series.series_id,
+    Series: lambda series: series.series_id,
 
     Bar: lambda bar: 'Bar.{}.{}.{}.{}.{}'.format(bar.inst_id, bar.type, bar.size, bar.provider_id, bar.timestamp),
     Quote: lambda quote: 'Quote.{}.{}.{}'.format(quote.inst_id, quote.provider_id, quote.timestamp),
@@ -74,6 +77,7 @@ model_db_map = bidict({
     # TimeZone: "time_zones",
 
     TimeSeries: "time_series",
+    Series: "series",
 
     Bar: "bars",
     Quote: "quotes",

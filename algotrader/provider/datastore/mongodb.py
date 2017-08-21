@@ -4,6 +4,7 @@ from algotrader import Context
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
+from algotrader.model.time_series2_pb2 import Series
 from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.datastore import SimpleDataStore, DataStore
 from algotrader.utils.date import date_to_unixtimemillis
@@ -39,6 +40,7 @@ class MongoDBDataStore(SimpleDataStore):
             TimeZone: self.db['timezones'],
 
             TimeSeries: self.db['time_series'],
+            Series: self.db['series'],
 
 
             Bar: self.db['bars'],
@@ -110,6 +112,9 @@ class MongoDBDataStore(SimpleDataStore):
     # TimeSeriesDataStore
     def save_time_series(self, time_series: TimeSeries):
         self.save(time_series)
+
+    def save_series(self, series: Series):
+        self.save(series)
 
     def save_bar(self, bar: Bar):
         self.save(bar)

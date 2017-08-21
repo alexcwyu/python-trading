@@ -3,6 +3,7 @@ from unittest import TestCase
 
 from algotrader.utils.protobuf_to_dict import *
 from tests.sample_factory import *
+import algotrader.model.time_series2_pb2 as proto
 
 
 class MongoPersistenceTest(TestCase):
@@ -58,9 +59,13 @@ class MongoPersistenceTest(TestCase):
         timezone = self.factory.sample_timezone()
         self.__test_persistence(TimeZone, timezone)
 
-    def test_time_series(self):
-        ds = self.factory.sample_time_series()
-        self.__test_persistence(TimeSeries, ds)
+    # def test_time_series(self):
+    #     ds = self.factory.sample_time_series()
+    #     self.__test_persistence(TimeSeries, ds)
+
+    def test_series(self):
+        ds = self.factory.sample_series()
+        self.__test_persistence(proto.Series, ds)
 
     def test_bar(self):
         self.__test_persistence(Bar, self.factory.sample_bar())

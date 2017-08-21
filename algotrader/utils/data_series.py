@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from typing import Dict, List
 from tzlocal import get_localzone
@@ -100,3 +101,8 @@ def convert_to_list(items=None):
     if items and type(items) != set and type(items) != list:
         items = [items]
     return items
+
+
+
+def iterable_to_np_array(iterable, dtype=np.float64):
+    return np.fromiter(iterable, dtype=dtype)

@@ -11,6 +11,9 @@ from algotrader.trading.series import Series
 import algotrader.model.time_series2_pb2 as proto
 from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.utils.proto_series_helper import get_proto_series_data, set_proto_series_data, to_np_type, from_np_type
+from algotrader.trading.config import Config, load_from_yaml
+from algotrader.trading.context import ApplicationContext
+from tests import test_override
 
 
 class SeriesTest(TestCase):
@@ -51,6 +54,22 @@ class SeriesTest(TestCase):
         df_id = "Bar.Daily"
         inst_id ="HSI@SEHK"
         series = Series()
+
+
+    def create_app_context(self, conf):
+        return ApplicationContext(config=Config(
+            load_from_yaml("../config/backtest.yaml"),
+            load_from_yaml("../config/down2%.yaml"),
+            test_override,
+            {
+                "Application": {
+                    "ceateAtStart": True,
+                    "deleteDBAtStop": False,
+                    "persistenceMode": "RealTime"
+                }
+            },
+            conf
+        ))
 
     def test_empty_series_ctor(self):
         try:
@@ -110,6 +129,23 @@ class SeriesTest(TestCase):
         pd_series_out = series.to_pd_series()
         self.assertListEqual(list(pd_series_out.index), list(np.linspace(0,19,20)))
         self.__np_assert_almost_equal(orig_data, pd_series_out.data)
+
+
+    # def test_bind(self):
+    #     import numpy as np
+    #     proto_series = self.__create_proto_series1()
+    #     series = Series.from_proto_series(proto_series)
+    #
+    #     ds = series.bind(np.sqrt)
+    #
+    #     self.assertEqual("Bar.Daily.close-HSI@SEHK", series.series_id)
+    #     self.assertEqual("Bar.Daily", series.df_id)
+    #     self.assertEqual("close", series.col_id)
+    #     self.assertEqual("HSI@SEHK", series.inst_id)
+    #     self.assertEqual(to_np_type(proto.DTDouble), series.dtype)
+    #
+    #     ds2 = series >> np.sqrt
+
 
 
     def __np_assert_almost_equal(self, target, output, precision=10):

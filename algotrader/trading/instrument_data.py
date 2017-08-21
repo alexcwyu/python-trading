@@ -5,6 +5,7 @@ from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.datastore import PersistenceMode
 from algotrader.trading.data_series import DataSeries
 from algotrader.trading.event import MarketDataEventHandler
+from algotrader.trading.series import Series
 from algotrader.utils.logging import logger
 from algotrader.utils.market_data import get_series_id
 from algotrader.utils.model import get_full_cls_name, get_cls
@@ -37,14 +38,18 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            series_states = self.store.load_all('time_series')
-            for series_state in series_states:
-                if hasattr(series_state, 'series_cls') and series_state.series_cls:
-                    cls = get_cls(series_state.series_cls)
-                    series = cls(time_series=series_state)
-                else:
-                    series = DataSeries(time_series=series_state)
-                self.__series_dict[series.id()] = series
+            proto_series_list = self.store.load_all('series')
+            for ps in proto_series_list:
+                series = Series.from_proto_series(ps)
+                self.__series_dict[series.series_id] = series
+            # series_states = self.store.load_all('time_series')
+            # for series_state in series_states:
+            #     if hasattr(series_state, 'series_cls') and series_state.series_cls:
+            #         cls = get_cls(series_state.series_cls)
+            #         series = cls(time_series=series_state)
+            #     else:
+            #         series = DataSeries(time_series=series_state)
+            #     self.__series_dict[series.id()] = series
 
             bars = self.store.load_all("bars")
             for bar in bars:
@@ -79,10 +84,29 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
         self.__bar_dict[bar.inst_id] = bar
 
-        self.get_series(get_series_id(bar)).add(
+        # self.get_series(get_series_id(bar)).add(
+        #     timestamp=bar.timestamp,
+        #     data={"open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
+        #      "vol": bar.vol})
+        self.get_series(get_series_id(bar, tags='close')).add(
             timestamp=bar.timestamp,
-            data={"open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
-             "vol": bar.vol})
+            value=bar.close)
+
+        self.get_series(get_series_id(bar, tags='open')).add(
+            timestamp=bar.timestamp,
+            value=bar.open)
+
+        self.get_series(get_series_id(bar, tags='high')).add(
+            timestamp=bar.timestamp,
+            value=bar.high)
+
+        self.get_series(get_series_id(bar, tags='low')).add(
+            timestamp=bar.timestamp,
+            value=bar.low)
+
+        self.get_series(get_series_id(bar, tags='volume')).add(
+            timestamp=bar.timestamp,
+            value=bar.vol)
 
         if self._is_realtime_persist():
             self.store.save_bar(bar)
@@ -133,22 +157,24 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             return self.__bar_dict[inst_id].close
         return None
 
-    def get_series(self, key, create_if_missing=True, cls=DataSeries, desc=None, missing_value=np.nan):
+    # def get_series(self, key, create_if_missing=True, cls=DataSeries, desc=None, missing_value=np.nan):
+    def get_series(self, key, df_id=None, col_id=None, inst_id=None):
         if type(key) == str:
             if key not in self.__series_dict:
-                self.__series_dict[key] = cls(
-                    time_series=ModelFactory.build_time_series(series_id=key, series_cls=get_full_cls_name(cls), desc=desc,
-                                                               missing_value_replace=missing_value))
+                # self.__series_dict[key] = cls(
+                #     time_series=ModelFactory.build_time_series(series_id=key, series_cls=get_full_cls_name(cls), desc=desc,
+                #                                                missing_value_replace=missing_value))
+                self.__series_dict[key] = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64)
             return self.__series_dict[key]
         raise AssertionError()
 
     def add_series(self, series, raise_if_duplicate=False):
-        if series.name not in self.__series_dict:
-            self.__series_dict[series.name] = series
+        if series.series_id not in self.__series_dict:
+            self.__series_dict[series.series_id] = series
             if self._is_realtime_persist():
                 self.store.save_time_series(series.time_series)
-        elif raise_if_duplicate and self.__series_dict[series.name] != series:
-            raise AssertionError("Series [%s] already exist" % series.name)
+        elif raise_if_duplicate and self.__series_dict[series.series_id] != series:
+            raise AssertionError("Series [%s] already exist" % series.series_id)
 
     def has_series(self, name):
         return name in self.__series_dict

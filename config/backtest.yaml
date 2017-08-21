@@ -5,6 +5,7 @@ Application:
   clockId: "Simulation"
 
   dataStoreId: "InMemory"
+#  dataStoreId: "Mongo"
   persistenceMode: "Disable"
   createDBAtStart : false
   deleteDBAtStop : false
@@ -32,7 +33,7 @@ DataStore:
 
   Mongo:
     host: "localhost"
-    port: 27107
+    port: 27017
     username:
     password:
     dbname: "algotrader"

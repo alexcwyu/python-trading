@@ -13,7 +13,7 @@ class HasId(object):
 class Startable(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.started = False
 
     def start(self, app_context = None) -> None:

@@ -22,3 +22,4 @@ pyfolio
 
 nose
 nose_parameterized
+PyMonad

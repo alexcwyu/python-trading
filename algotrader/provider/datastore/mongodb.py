@@ -6,6 +6,7 @@ from algotrader.model.ref_data_pb2 import *
 from algotrader.model.time_series_pb2 import *
 from algotrader.model.time_series2_pb2 import Series
 from algotrader.model.trade_data_pb2 import *
+from algotrader.model.series_bundle_pb2 import *
 from algotrader.provider.datastore import SimpleDataStore, DataStore
 from algotrader.utils.date import date_to_unixtimemillis
 from algotrader.utils.logging import logger
@@ -41,6 +42,7 @@ class MongoDBDataStore(SimpleDataStore):
 
             TimeSeries: self.db['time_series'],
             Series: self.db['series'],
+            SeriesBundle: self.db['series_bundle'],
 
 
             Bar: self.db['bars'],
@@ -115,6 +117,9 @@ class MongoDBDataStore(SimpleDataStore):
 
     def save_series(self, series: Series):
         self.save(series)
+
+    def save_frame(self, frame: SeriesBundle):
+        self.save(frame)
 
     def save_bar(self, bar: Bar):
         self.save(bar)

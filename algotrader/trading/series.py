@@ -20,15 +20,15 @@ class UpdateMode(Enum):
     PASSIVE_PATCH = 1,
     ACTIVE_SUBSCRIBE = 2
 
-
 class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
     def __init__(self, proto_series: proto.Series = None,
                  series_id: str = None, df_id: str = None,
                  col_id: str = None, inst_id: str = None,
+                 source_id: str = None,
                  dtype: np.dtype = np.float64,
                  func=None,
                  parent_series_id: str = None,
-                 update_mode : UpdateMode = UpdateMode.ACTIVE_SUBSCRIBE,
+                 update_mode: UpdateMode = UpdateMode.ACTIVE_SUBSCRIBE,
                  *args,
                  **kwargs
                  ):
@@ -48,6 +48,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
             self.df_id = proto_series.df_id
             self.col_id = proto_series.col_id
             self.inst_id = proto_series.inst_id
+            self.source_id = proto_series.source_id
             self.dtype = to_np_type(proto_series.dtype)
         else:
             super(Series, self).__init__(data_name=col_id, index_name="timestamp", use_blist=True, value=None,
@@ -58,12 +59,12 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
             self.df_id = df_id
             self.col_id = col_id
             self.inst_id = inst_id
+            self.source_id = source_id
             self.dtype = dtype
 
         self.func = func
         self.parent_series_id = parent_series_id
         self.update_mode = update_mode
-
 
     def _start(self, app_context = None):
 
@@ -92,23 +93,51 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         # TODO: It seems to be bind that it bind the function to series itself and replace series content?
         #  in this case we have no interest in that, try to use fmap
         func_name = func.__name__
-        drv_series_id = "%s(self.series_id)" % func_name
-        series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id, func=func,
+        drv_series_id = "%s(%s,%s)" % (func_name, self.series_id, func.periods)
+
+        if self.app_context.inst_data_mgr.has_series(drv_series_id):
+            series = self.app_context.inst_data_mgr.get_series(drv_series_id)
+            series.func = func
+            return series
+        else:
+            series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id, func=func,
                         parent_series_id=self.series_id, dtype=self.dtype, update_mode=self.update_mode)
-        return series
+
+            self.app_context.inst_data_mgr.add_series(series, raise_if_duplicate=True)
+            return series
 
     def fmap(self, func: FunctionWithPeriodsName):
         """
         Applies 'function' to the contents of the functor and returns a new functor value.
         :param func:
-        :return:
-        """
-        func_name = func.name
-        drv_series_id = "%s(self.series_id)" % func_name
+        :return: Series as Monad
 
-        series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id, func=func,
-                        parent_series_id=self.series_id, dtype=self.dtype, update_mode=self.update_mode)
-        return series
+        Examle usage
+        ema20 = emafunc * close
+        where the ema20 is the new Monad that came the binding of emafunc and close Monad.
+
+        Since function itself is not serialized in algotrading environment, eventhough we can directly
+        retrieve the ema20 series from DB, it is not recommended to do so as the "function" part is missing.
+
+        It is recommended to declare the
+                ema20 = emafunc * close
+        again in the _start of the stategy so that here we load it from DB for you and the user assign back the
+        relationship between two Monads by function.
+        """
+        func_name = func.__name__
+        drv_series_id = "%s(%s,%s)" % (func_name, self.series_id, func.periods)
+
+        if self.app_context.inst_data_mgr.has_series(drv_series_id):
+            series = self.app_context.inst_data_mgr.get_series(drv_series_id)
+            series.func = func
+            return series
+        else:
+            series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id, func=func,
+                            parent_series_id=self.series_id, dtype=self.dtype, update_mode=self.update_mode)
+
+            self.app_context.inst_data_mgr.add_series(series, raise_if_duplicate=True)
+            return series
+
 
     def __rmul__(self, func: FunctionWithPeriodsName):
         """
@@ -138,7 +167,6 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
 
     def evaluate(self):
         """
-        Only need in lazy mode,
         :return:
         """
         if self.parent_series_id is None:
@@ -189,6 +217,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         proto_series.df_id = self.df_id
         proto_series.col_id = self.col_id
         proto_series.inst_id = self.inst_id
+        proto_series.source_id = self.source_id if self.source_id else ''
         proto_series.dtype = from_np_type(self.dtype)
         proto_series.index.extend([ts.value // 10 ** 6 for ts in list(self.index)])
         set_proto_series_data(proto_series, self.data)
@@ -212,6 +241,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         series.df_id = proto_series.df_id
         series.col_id = proto_series.col_id
         series.inst_id = proto_series.inst_id
+        series.source_id = proto_series.source_id
         return series
 
     def to_pd_series(self) -> pd.Series:
@@ -229,7 +259,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         return pd_series
 
     @classmethod
-    def from_pd_series(cls, pd_series: pd.Series, series_id=None, df_id=None, col_id=None, inst_id=None):
+    def from_pd_series(cls, pd_series: pd.Series, series_id=None, df_id=None, col_id=None, inst_id=None, source_id=None):
         """
         Construct Series from pandas's Series
 
@@ -244,27 +274,43 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         if hasattr(pd_series, 'series_id'):
             series.series_id = pd_series.series_id
         else:
+            if not series_id:
+                raise RuntimeError("Please provide series_id")
             series.series_id = series_id
 
         if hasattr(pd_series, 'df_id'):
             series.df_id = pd_series.df_id
         else:
+            if not df_id:
+                raise RuntimeError("Please provide df_id")
             series.df_id = df_id
 
         if hasattr(pd_series, 'col_id'):
             series.col_id = pd_series.col_id
         else:
+            if not col_id:
+                raise RuntimeError("Please provide col_id")
             series.col_id = col_id
 
         if hasattr(pd_series, 'inst_id'):
             series.inst_id = pd_series.inst_id
         else:
+            if not inst_id:
+                raise RuntimeError("Please provide inst_id")
             series.inst_id = inst_id
+
+        if hasattr(pd_series, 'source_id'):
+            series.source_id = pd_series.source_id
+        else:
+            if not source_id:
+                raise RuntimeError("Please provide sourcd_id")
+            series.source_id = source_id
 
         return series
 
     @classmethod
-    def from_np_array(cls, ndarray: np.array, index=None, series_id=None, df_id=None, col_id=None, inst_id=None):
+    def from_np_array(cls, ndarray: np.array,
+                      index=None, series_id=None, df_id=None, col_id=None, inst_id=None, source_id=None):
         """
         Construct Series from numpy array
 
@@ -282,6 +328,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         series.df_id = df_id
         series.col_id = col_id
         series.inst_id = inst_id
+        series.source_id = source_id
 
         return series
 
@@ -291,3 +338,26 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         :return: numpy array
         """
         return np.fromiter(self._data, dtype=to_np_type(self.dtype))
+
+    @classmethod
+    def from_list(cls, dlist: list, dtype, index=None, series_id=None, df_id=None, col_id=None, inst_id=None, source_id=None):
+        """
+        Construct Series from list
+
+        :param dlist: double list
+        :return:
+        """
+        if not index:
+            raise Exception("index cannot be None")
+
+        series = cls()
+        series.append_rows(index, dlist)
+        series.data_name = col_id
+        series.dtype = from_np_type(dtype)
+        series.series_id = series_id
+        series.df_id = df_id
+        series.col_id = col_id
+        series.inst_id = inst_id
+        series.source_id = source_id
+
+        return series

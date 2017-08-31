@@ -75,7 +75,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
             elif self.persist_mode != PersistenceMode.Disable:
                 for series in self.__series_dict.values():
-                    self.store.save_time_series(series.time_series)
+                    self.store.save_series(series.to_proto_series())
 
     def _is_realtime_persist(self):
         return self.store and self.persist_mode == PersistenceMode.RealTime
@@ -172,7 +172,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         if series.series_id not in self.__series_dict:
             self.__series_dict[series.series_id] = series
             if self._is_realtime_persist():
-                self.store.save_time_series(series.time_series)
+                self.store.save_series(series.to_proto_series())
+                # self.store.save_time_series(series.time_series)
         elif raise_if_duplicate and self.__series_dict[series.series_id] != series:
             raise AssertionError("Series [%s] already exist" % series.series_id)
 

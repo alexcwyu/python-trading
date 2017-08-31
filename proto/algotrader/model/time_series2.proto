@@ -19,7 +19,8 @@ message Series {
     string df_id = 2;
     string col_id = 3;
     string inst_id = 4;
-    DataType dtype = 5;
+    string source_id = 5;
+    DataType dtype = 6;
 
     // int64 start_time = 5;
     // int64 end_time = 6;

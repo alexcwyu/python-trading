@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='algotrader/model/time_series2.proto',
   package='algotrader.model2',
   syntax='proto3',
-  serialized_pb=_b('\n#algotrader/model/time_series2.proto\x12\x11\x61lgotrader.model2\"\x93\x02\n\x06Series\x12\x11\n\tseries_id\x18\x01 \x01(\t\x12\r\n\x05\x64\x66_id\x18\x02 \x01(\t\x12\x0e\n\x06\x63ol_id\x18\x03 \x01(\t\x12\x0f\n\x07inst_id\x18\x04 \x01(\t\x12*\n\x05\x64type\x18\x05 \x01(\x0e\x32\x1b.algotrader.model2.DataType\x12\r\n\x05index\x18\x0b \x03(\x03\x12\x12\n\nfloat_data\x18\x14 \x03(\x02\x12\x13\n\x0b\x64ouble_data\x18\x15 \x03(\x01\x12\x12\n\nint32_data\x18\x16 \x03(\x05\x12\x12\n\nint64_data\x18\x17 \x03(\x03\x12\x11\n\tbool_data\x18\x18 \x03(\x08\x12\x13\n\x0bstring_data\x18\x19 \x03(\t\x12\x12\n\nbytes_data\x18\x1a \x03(\x0c\"\x8b\x01\n\x0eTimeSeriesItem\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x39\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32+.algotrader.model2.TimeSeriesItem.DataEntry\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"X\n\x15TimeSeriesUpdateEvent\x12\x0e\n\x06source\x18\x01 \x01(\t\x12/\n\x04item\x18\x02 \x01(\x0b\x32!.algotrader.model2.TimeSeriesItem*j\n\x08\x44\x61taType\x12\x0b\n\x07\x44TFloat\x10\x00\x12\x0c\n\x08\x44TDouble\x10\x01\x12\x0b\n\x07\x44TInt32\x10\x02\x12\x0b\n\x07\x44TInt64\x10\x03\x12\n\n\x06\x44TBool\x10\x04\x12\x0c\n\x08\x44TString\x10\x05\x12\x0f\n\x0b\x44TByteArray\x10\x06\x62\x06proto3')
+  serialized_pb=_b('\n#algotrader/model/time_series2.proto\x12\x11\x61lgotrader.model2\"\xa6\x02\n\x06Series\x12\x11\n\tseries_id\x18\x01 \x01(\t\x12\r\n\x05\x64\x66_id\x18\x02 \x01(\t\x12\x0e\n\x06\x63ol_id\x18\x03 \x01(\t\x12\x0f\n\x07inst_id\x18\x04 \x01(\t\x12\x11\n\tsource_id\x18\x05 \x01(\t\x12*\n\x05\x64type\x18\x06 \x01(\x0e\x32\x1b.algotrader.model2.DataType\x12\r\n\x05index\x18\x0b \x03(\x03\x12\x12\n\nfloat_data\x18\x14 \x03(\x02\x12\x13\n\x0b\x64ouble_data\x18\x15 \x03(\x01\x12\x12\n\nint32_data\x18\x16 \x03(\x05\x12\x12\n\nint64_data\x18\x17 \x03(\x03\x12\x11\n\tbool_data\x18\x18 \x03(\x08\x12\x13\n\x0bstring_data\x18\x19 \x03(\t\x12\x12\n\nbytes_data\x18\x1a \x03(\x0c\"\x8b\x01\n\x0eTimeSeriesItem\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x39\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32+.algotrader.model2.TimeSeriesItem.DataEntry\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"X\n\x15TimeSeriesUpdateEvent\x12\x0e\n\x06source\x18\x01 \x01(\t\x12/\n\x04item\x18\x02 \x01(\x0b\x32!.algotrader.model2.TimeSeriesItem*j\n\x08\x44\x61taType\x12\x0b\n\x07\x44TFloat\x10\x00\x12\x0c\n\x08\x44TDouble\x10\x01\x12\x0b\n\x07\x44TInt32\x10\x02\x12\x0b\n\x07\x44TInt64\x10\x03\x12\n\n\x06\x44TBool\x10\x04\x12\x0c\n\x08\x44TString\x10\x05\x12\x0f\n\x0b\x44TByteArray\x10\x06\x62\x06proto3')
 )
 
 _DATATYPE = _descriptor.EnumDescriptor(
@@ -60,8 +60,8 @@ _DATATYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=568,
-  serialized_end=674,
+  serialized_start=587,
+  serialized_end=693,
 )
 _sym_db.RegisterEnumDescriptor(_DATATYPE)
 
@@ -112,63 +112,70 @@ _SERIES = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='dtype', full_name='algotrader.model2.Series.dtype', index=4,
-      number=5, type=14, cpp_type=8, label=1,
+      name='source_id', full_name='algotrader.model2.Series.source_id', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='dtype', full_name='algotrader.model2.Series.dtype', index=5,
+      number=6, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='index', full_name='algotrader.model2.Series.index', index=5,
+      name='index', full_name='algotrader.model2.Series.index', index=6,
       number=11, type=3, cpp_type=2, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='float_data', full_name='algotrader.model2.Series.float_data', index=6,
+      name='float_data', full_name='algotrader.model2.Series.float_data', index=7,
       number=20, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='double_data', full_name='algotrader.model2.Series.double_data', index=7,
+      name='double_data', full_name='algotrader.model2.Series.double_data', index=8,
       number=21, type=1, cpp_type=5, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='int32_data', full_name='algotrader.model2.Series.int32_data', index=8,
+      name='int32_data', full_name='algotrader.model2.Series.int32_data', index=9,
       number=22, type=5, cpp_type=1, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='int64_data', full_name='algotrader.model2.Series.int64_data', index=9,
+      name='int64_data', full_name='algotrader.model2.Series.int64_data', index=10,
       number=23, type=3, cpp_type=2, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='bool_data', full_name='algotrader.model2.Series.bool_data', index=10,
+      name='bool_data', full_name='algotrader.model2.Series.bool_data', index=11,
       number=24, type=8, cpp_type=7, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='string_data', full_name='algotrader.model2.Series.string_data', index=11,
+      name='string_data', full_name='algotrader.model2.Series.string_data', index=12,
       number=25, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='bytes_data', full_name='algotrader.model2.Series.bytes_data', index=12,
+      name='bytes_data', full_name='algotrader.model2.Series.bytes_data', index=13,
       number=26, type=12, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -187,7 +194,7 @@ _SERIES = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=59,
-  serialized_end=334,
+  serialized_end=353,
 )
 
 
@@ -224,8 +231,8 @@ _TIMESERIESITEM_DATAENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=433,
-  serialized_end=476,
+  serialized_start=452,
+  serialized_end=495,
 )
 
 _TIMESERIESITEM = _descriptor.Descriptor(
@@ -261,8 +268,8 @@ _TIMESERIESITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=337,
-  serialized_end=476,
+  serialized_start=356,
+  serialized_end=495,
 )
 
 
@@ -299,8 +306,8 @@ _TIMESERIESUPDATEEVENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=478,
-  serialized_end=566,
+  serialized_start=497,
+  serialized_end=585,
 )
 
 _SERIES.fields_by_name['dtype'].enum_type = _DATATYPE

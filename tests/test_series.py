@@ -31,6 +31,7 @@ class SeriesTest(TestCase):
         proto_series1.df_id = df_id
         proto_series1.col_id = "close"
         proto_series1.inst_id = inst_id
+        proto_series1.source_id = "Dummy Provider"
         proto_series1.dtype = proto.DTDouble
         proto_series1.index.extend(list(range(1499787464853, 1499887464853, 20000000)))
         proto_series1.double_data.extend(SeriesTest.value5)
@@ -44,6 +45,7 @@ class SeriesTest(TestCase):
         proto_series2.df_id = df_id
         proto_series2.col_id = "open"
         proto_series2.inst_id = inst_id
+        proto_series2.source_id = "Dummy Provider2"
         proto_series2.dtype = proto.DTDouble
         proto_series2.index.extend(list(range(1499787464853, 1499887464853, 10000000)))
         proto_series2.double_data.extend(SeriesTest.value10)
@@ -54,6 +56,13 @@ class SeriesTest(TestCase):
         df_id = "Bar.Daily"
         inst_id ="HSI@SEHK"
         series = Series()
+
+
+    def __create_pd_series(self):
+        df = pd.DataFrame({"a" : [60*i for i in range(20)], "x" : np.random.normal(0,1,20).tolist()})
+        df['timestamp'] = pd.to_datetime(df['a'], unit='s', origin=pd.Timestamp('2010-01-01'))
+        df = df.set_index('timestamp')
+        return df['x']
 
 
     def create_app_context(self, conf):
@@ -116,12 +125,8 @@ class SeriesTest(TestCase):
     def test_ctor_from_to_pandas(self):
         orig_data = np.random.uniform(0,1,20)
         pd_series = pd.Series(index=np.linspace(0,19,20), data=orig_data)
-        series = Series.from_pd_series(pd_series=pd_series)
-
-        self.assertIsNone(series.series_id)
-        self.assertIsNone(series.df_id)
-        self.assertIsNone(series.col_id)
-        self.assertIsNone(series.inst_id)
+        series = Series.from_pd_series(pd_series, "test_series", "test_df", "test_col",
+                                       "test_inst", "test_source")
 
         res_data = np.array(series.data)
         self.__np_assert_almost_equal(orig_data, res_data)
@@ -129,6 +134,19 @@ class SeriesTest(TestCase):
         pd_series_out = series.to_pd_series()
         self.assertListEqual(list(pd_series_out.index), list(np.linspace(0,19,20)))
         self.__np_assert_almost_equal(orig_data, pd_series_out.data)
+
+    def test_pd_rc_proto(self):
+        pd_series = self.__create_pd_series()
+
+        series = Series.from_pd_series(pd_series, "test_series", "test_df", "test_col", "test_inst", "test_source")
+        proto_series = series.to_proto_series()
+
+        series_r = Series.from_proto_series(proto_series)
+        pd_series_r = series_r.to_pd_series()
+
+        self.assertTrue(pd_series.equals(pd_series_r))
+
+
 
 
     # def test_bind(self):

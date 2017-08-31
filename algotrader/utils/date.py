@@ -47,3 +47,19 @@ def date_to_timestamp(d: datetime.date) -> int:
 
 def timestamp_to_date(timestamp: int) -> datetime.date:
     return datetime.datetime.fromtimestamp(timestamp).date()
+
+"""
+ if the input is pandas's Timestamp
+ 
+ how we convert is 
+ [t.value // 10 ** 9 for t in tsframe.index]
+ 
+ but we have to aware that , the index is assumed to be UTC time and the converted datetime will automatically convert 
+ to your time zone!
+ 
+ so better we use this (after Python 3.3)
+ 
+ [ t.to_pydatetime().timestamp() for t in df.index]
+ 
+"""
+

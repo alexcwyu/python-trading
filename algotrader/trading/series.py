@@ -353,7 +353,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         series = cls()
         series.append_rows(index, dlist)
         series.data_name = col_id
-        series.dtype = from_np_type(dtype)
+        series.dtype = dtype
         series.series_id = series_id
         series.df_id = df_id
         series.col_id = col_id

@@ -4,8 +4,9 @@ package algotrader.model2;
 message SeriesBundle {
 
     string df_id = 1;
-    repeated int64 index = 2;
+    string source_id = 2;
+    string inst_id = 3;
 
-    repeated string series_id_list = 3;
-    map<string, string> parent_and_cls= 4;
+    repeated string series_id_list = 10;
+    map<string, string> parent_and_cls= 11;
 }

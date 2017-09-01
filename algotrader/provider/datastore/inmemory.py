@@ -28,7 +28,9 @@ class InMemoryDataStore(SimpleDataStore):
         self.quotes = self._get_data('quotes')
         self.trades = self._get_data('trades')
         self.market_depths = self._get_data('market_depths')
-        self.time_series = self._get_data('time_series')
+        # self.time_series = self._get_data('time_series')
+        self.series = self._get_data('series')
+        self.frame= self._get_data('series_bundle')
 
         self.instruments = self._get_data('instruments')
         self.currencies = self._get_data('currencies')
@@ -129,6 +131,15 @@ class InMemoryDataStore(SimpleDataStore):
     def save_time_series(self, timeseries):
         id, packed = self._serialize(timeseries)
         self.time_series[id] = packed
+
+    def save_series(self, series):
+        id, packed = self._serialize(series)
+        self.series[id] = packed
+
+    def save_frame(self, frame):
+        id, packed = self._serialize(frame)
+        self.frame[id] = packed
+
 
     def __matches_data(self, data, inst_id, from_timestamp, to_timestamp):
         return inst_id == data.inst_id and data.timestamp >= from_timestamp and data.timestamp < to_timestamp

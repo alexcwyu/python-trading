@@ -146,7 +146,20 @@ class SeriesTest(TestCase):
 
         self.assertTrue(pd_series.equals(pd_series_r))
 
+    def test_from_list(self):
+        data_list = np.random.normal(0, 1, 20)
 
+        series = Series.from_list(data_list.tolist(), np.float64,
+                                  index=list(range(20)),
+                                  series_id="test_series",
+                                  df_id="test", col_id="col",
+                                  inst_id="test_inst",
+                                  source_id="test_source")
+
+        out_arr = series.to_np_array()
+        self.__np_assert_almost_equal(data_list, out_arr)
+
+        # proto_series = series.to_proto_series()
 
 
     # def test_bind(self):

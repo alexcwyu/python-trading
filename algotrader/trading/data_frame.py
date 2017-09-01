@@ -11,7 +11,7 @@ from pymonad import Monad, Monoid
 from algotrader.trading.subscribable import Subscribable
 from rx.subjects import Subject
 from algotrader import Startable, Context
-from algotrader.trading.context import ApplicationContext
+# from algotrader.trading.context import ApplicationContext
 import algotrader.model.time_series2_pb2 as proto
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
@@ -30,47 +30,39 @@ class CombineMode(Enum):
 
 
 class DataFrame(Subscribable, Startable, Monad, Monoid):
-    def __init__(self, df_id : str, series_list : list = None,
-                 rc_df : rc.DataFrame = None,
-                 mode: CombineMode = CombineMode.ALL_SYNC_ZIP,
-                 *args, **kwargs):
-        if series_list and rc_df is not None:
-            warnings.warn("Cannot enter both series_list and rc_df, rc_df is ignored!", UserWarning)
+    def __init__(self, *args, **kwargs):
+        """
+        We discourage user call the contor, please use from_ method to construct
+        :param args:
+        :param kwargs:
+        """
 
-        self.series_bundle = SeriesBundle()
-        self.series_bundle.df_id = df_id
-        for id in series_list:
-            self.series_bundle.series_list.append(id)
+        # if series_dict and rc_df is not None:
+        #     warnings.warn("Cannot enter both series_dict and rc_df, rc_df is ignored!", UserWarning)
 
-        self.rc_df = rc_df
-        self.mode = mode
-
-        # TODO: Review this
-        df_index_name = "Timestamp"
-
-        dfa = rc.DataFrame()
-        if rc_df is None:
-            pd_df = pd.DataFrame(data={series.col_id: series.to_pd_series() for series in series_list})
-            self.rc_df = DataFrame.pd_df_to_rc_df(pd_df)
-
-        if not series_list:
-            result = rc_df.to_dict(index=False, ordered=True)
-            for col, dlist in rc_df.to_dict(index=False, ordered=True).items():
-                # TODO: Review this series_id construction
-                self._series_list.append(Series.from_list(dlist, np.float64, index=rc_df.index, series_id="%s-%s" % (df_id, col), df_id=df_id,
-                                 col_id=col, inst_id=None))
+        self.df_id = None
+        self.source_id = None
+        self.inst_id = None
+        self.rc_df = None
+        self.series_dict = None
 
     def append_row(self, index, values, new_cols=True):
         self.rc_df.append_row(index, values, new_cols)
+        for col, val in values.items():
+            series = self.series_dict[col]
+            series.add(index, val)
+
+
 
     def _start(self, app_context = None):
-        self.stream = rx.Observable.zip_list(*[s.subject for s in self._series_list]) \
-            .subscribe(self.on_frame_slice)
+        pass
+        # self.stream = rx.Observable.zip_list(*[s.subject for s in self._series_list]) \
+        #     .subscribe(self.on_frame_slice)
 
-    def on_frame_slice(self, dummy):
-        logger.debug("[%s] synchronized" % (self.__class__.__name__ ))
-        self.rc_df.append_row({s.series_id: s.get_location(-1)['value'] for s in self._series_list})
-        self.notify_downstream()
+    # def on_frame_slice(self, dummy):
+    #     logger.debug("[%s] synchronized" % (self.__class__.__name__ ))
+    #     self.rc_df.append_row({s.series_id: s.get_location(-1)['value'] for s in self._series_list})
+    #     self.notify_downstream()
 
     def bind(self, func: FunctionWithPeriodsName):
         """
@@ -132,6 +124,8 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         data_dict = self.to_dict(index=False, value_as_series=False)
         return pd.DataFrame(data_dict, columns=self.columns, index=self.index)
 
+
+
     @staticmethod
     def pd_df_to_rc_df(pd_df: pd.DataFrame) -> rc.DataFrame:
         columns = pd_df.columns.tolist()
@@ -153,9 +147,40 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         pd_df = pd.DataFrame(data={series.col_id: series.to_pd_series() for series in series_list})
         return DataFrame.pd_df_to_rc_df(pd_df)
 
+    @classmethod
+    def from_series_dict(cls, series_dict: dict):
+        """
+
+        :param series_dict:
+        :return:
+        """
+        df = cls()
+        df.series_dict = series_dict
+        pd_df = pd.DataFrame(data={series.col_id: series.to_pd_series() for series in series_dict.values()})
+
+        series = series_dict.values()[0]
+        df.df_id = series.df_id
+        df.source_id = series.source_id
+        df.inst_id = series.inst_id
+
+        df.rc_df = DataFrame.pd_df_to_rc_df(pd_df)
+        return df
 
     @classmethod
-    def from_pd_dataframe(cls, pd_df: pd.DataFrame):
+    def from_rc_dataframe(cls, rc_df: rc.DataFrame, df_id: str, source_id: str):
+        """
+
+        :param rc_df:
+        :return:
+        """
+        df = cls()
+        df.rc_df = rc_df
+        df.df_id = df_id
+        df.source_id = source_id
+        return df
+
+    @classmethod
+    def from_pd_dataframe(cls, pd_df: pd.DataFrame, df_id:str, source_id: str, inst_id:str = None):
         """
         Convert a pandas dataframe to dataframe
 
@@ -164,16 +189,65 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         """
         df = cls()
         df.rc_df = DataFrame.pd_df_to_rc_df(pd_df)
+        df.df_id = df_id
+        df.source_id = source_id
+        df.inst_id = '' if inst_id is None else inst_id
+
         return df
 
-    @classmethod
-    def from_proto_series_bundle(cls, bundle: SeriesBundle, app_context: ApplicationContext= None):
-        df = cls()
-        df.series_bundle = bundle
+    def to_series_dict(self, app_context = None):
+        """
+        :return:
+        """
+        if self.series_dict:
+            return self.series_dict
+        else:
+            # we 've got fuck here, we have to store the inst_id
+            # as we may have dataframe of series with different inst_id
+            series_dict = {}
+            for col, dlist in self.rc_df.to_dict(index=False, ordered=True).items():
+                # TODO: Review this series_id construction
+                df_id = self.df_id
+                source_id = self.source_id
+                inst_id = self.inst_id
+                series_id = "%s.%s.%s" % (df_id, source_id, col)
 
-        if app_context is not None:
-            series_list = [app_context.inst_data_mgr.get_series(series_id) for series_id in bundle.series_id_list]
-            df.rc_df = DataFrame.series_list_to_rc_df(series_list)
+                series = Series.from_list(dlist, dtype=np.float64, index=self.rc_df.index,
+                                                          series_id=series_id, df_id=df_id,
+                                                          source_id=source_id,
+                                                          inst_id=inst_id,
+                                                          col_id=col)
+
+
+                if app_context is not None:
+                    if app_context.inst_data_mgr.has_series(series_id):
+                        raise RuntimeError("Series id=%s already exist!" % series_id)
+                    else:
+                        app_context.inst_data_mgr.add_series(series)
+
+                series_dict[col] = series
+            return series_dict
+            #                          col_id=col, inst_id=None)
+
+    def to_proto_series_bundle(self, app_context):
+        bd = SeriesBundle()
+        bd.df_id = self.df_id
+        bd.source_id = self.source_id
+        bd.inst_id = self.inst_id
+
+        if self.series_dict is None:
+            self.series_dict = self.to_series_dict(app_context)
+
+        for col, series in self.series_dict.items():
+            bd.series_id_list.append(series.series_id)
+
+        return bd
+
+    @classmethod
+    def from_proto_series_bundle(cls, bundle: SeriesBundle, app_context):
+        series_list = [app_context.inst_data_mgr.get_series(series_id) for series_id in bundle.series_id_list]
+        series_dict = {series.col_id: series for series in series_list}
+        return DataFrame.from_series_dict(series_dict)
 
 #
 #

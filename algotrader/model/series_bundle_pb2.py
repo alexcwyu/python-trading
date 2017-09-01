@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='algotrader/model/series_bundle.proto',
   package='algotrader.model2',
   syntax='proto3',
-  serialized_pb=_b('\n$algotrader/model/series_bundle.proto\x12\x11\x61lgotrader.model2\"\xc4\x01\n\x0cSeriesBundle\x12\r\n\x05\x64\x66_id\x18\x01 \x01(\t\x12\r\n\x05index\x18\x02 \x03(\x03\x12\x16\n\x0eseries_id_list\x18\x03 \x03(\t\x12I\n\x0eparent_and_cls\x18\x04 \x03(\x0b\x32\x31.algotrader.model2.SeriesBundle.ParentAndClsEntry\x1a\x33\n\x11ParentAndClsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x62\x06proto3')
+  serialized_pb=_b('\n$algotrader/model/series_bundle.proto\x12\x11\x61lgotrader.model2\"\xd9\x01\n\x0cSeriesBundle\x12\r\n\x05\x64\x66_id\x18\x01 \x01(\t\x12\x11\n\tsource_id\x18\x02 \x01(\t\x12\x0f\n\x07inst_id\x18\x03 \x01(\t\x12\x16\n\x0eseries_id_list\x18\n \x03(\t\x12I\n\x0eparent_and_cls\x18\x0b \x03(\x0b\x32\x31.algotrader.model2.SeriesBundle.ParentAndClsEntry\x1a\x33\n\x11ParentAndClsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x62\x06proto3')
 )
 
 
@@ -58,8 +58,8 @@ _SERIESBUNDLE_PARENTANDCLSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=205,
-  serialized_end=256,
+  serialized_start=226,
+  serialized_end=277,
 )
 
 _SERIESBUNDLE = _descriptor.Descriptor(
@@ -77,22 +77,29 @@ _SERIESBUNDLE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='index', full_name='algotrader.model2.SeriesBundle.index', index=1,
-      number=2, type=3, cpp_type=2, label=3,
+      name='source_id', full_name='algotrader.model2.SeriesBundle.source_id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='inst_id', full_name='algotrader.model2.SeriesBundle.inst_id', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='series_id_list', full_name='algotrader.model2.SeriesBundle.series_id_list', index=3,
+      number=10, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='series_id_list', full_name='algotrader.model2.SeriesBundle.series_id_list', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='parent_and_cls', full_name='algotrader.model2.SeriesBundle.parent_and_cls', index=3,
-      number=4, type=11, cpp_type=10, label=3,
+      name='parent_and_cls', full_name='algotrader.model2.SeriesBundle.parent_and_cls', index=4,
+      number=11, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -110,7 +117,7 @@ _SERIESBUNDLE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=60,
-  serialized_end=256,
+  serialized_end=277,
 )
 
 _SERIESBUNDLE_PARENTANDCLSENTRY.containing_type = _SERIESBUNDLE

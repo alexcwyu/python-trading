@@ -42,30 +42,64 @@ class DataFrameTest(TestCase):
         conf
     ))
 
-    def test_sync_series(self):
-        app_context = self.create_app_context(conf={
-            "Application": {
-                "createDBAtStart": True,
-                "deleteDBAtStop": False,
-                "persistenceMode": "RealTime"
-            }
-        })
-        app_context.start()
+    def __create_rc_dataframe(self):
+        rc_df = rc.DataFrame({"a": [1.2, 2.3, 3.4],
+                           "b": [1.6, 3.3, 6.6],
+                           "c": [2.4, 6.3, -2.7]})
 
-        series0 = app_context.inst_data_mgr.get_series("series0")
-        series1 = app_context.inst_data_mgr.get_series("series1")
-        series2 = app_context.inst_data_mgr.get_series("series2")
+        return rc_df
 
-        series0.start(app_context)
-        series1.start(app_context)
-        series2.start(app_context)
 
-        df = DataFrame([series0, series1, series2])
-        df.start(app_context)
+    def test_rc_df_to_df(self):
+        rc_df = self.__create_rc_dataframe()
+        df = DataFrame.from_rc_dataframe(rc_df, "test_df", "test_source")
+        series_dict = df.to_series_dict()
 
-        series0.add(0, 100)
-        series1.add(0, 50)
-        series2.add(0, 80)
+        self.assertTrue('a' in series_dict.keys())
+        self.assertTrue('b' in series_dict.keys())
+        self.assertTrue('c' in series_dict.keys())
+
+        self.assertEqual("a", series_dict['a'].col_id)
+        self.assertEqual("b", series_dict['b'].col_id)
+        self.assertEqual("c", series_dict['c'].col_id)
+        series_a = series_dict['a']
+        self.assertEqual("test_df", series_a.df_id)
+        self.assertEqual("test_df.test_source.a", series_a.series_id)
+        self.assertEqual("test_source", series_a.source_id)
+
+        series_b = series_dict['b']
+        series_c = series_dict['c']
+        self.assertListEqual(list(series_a.data), [1.2, 2.3, 3.4])
+        self.assertListEqual(list(series_b.data), [1.6, 3.3, 6.6])
+        self.assertListEqual(list(series_c.data), [2.4, 6.3, -2.7])
+
+
+
+
+    # def test_sync_series(self):
+    #     app_context = self.create_app_context(conf={
+    #         "Application": {
+    #             "createDBAtStart": True,
+    #             "deleteDBAtStop": False,
+    #             "persistenceMode": "RealTime"
+    #         }
+    #     })
+    #     app_context.start()
+    #
+    #     series0 = app_context.inst_data_mgr.get_series("series0")
+    #     series1 = app_context.inst_data_mgr.get_series("series1")
+    #     series2 = app_context.inst_data_mgr.get_series("series2")
+    #
+    #     series0.start(app_context)
+    #     series1.start(app_context)
+    #     series2.start(app_context)
+    #
+    #     df = DataFrame([series0, series1, series2])
+    #     df.start(app_context)
+    #
+    #     series0.add(0, 100)
+    #     series1.add(0, 50)
+    #     series2.add(0, 80)
 
 
 

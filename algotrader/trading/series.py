@@ -24,7 +24,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
     def __init__(self, proto_series: proto.Series = None,
                  series_id: str = None, df_id: str = None,
                  col_id: str = None, inst_id: str = None,
-                 source_id: str = None,
+                 provider_id: str = None,
                  dtype: np.dtype = np.float64,
                  func=None,
                  parent_series_id: str = None,
@@ -48,7 +48,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
             self.df_id = proto_series.df_id
             self.col_id = proto_series.col_id
             self.inst_id = proto_series.inst_id
-            self.source_id = proto_series.source_id
+            self.provider_id = proto_series.provider_id
             self.dtype = to_np_type(proto_series.dtype)
         else:
             super(Series, self).__init__(data_name=col_id, index_name="timestamp", use_blist=True, value=None,
@@ -59,7 +59,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
             self.df_id = df_id
             self.col_id = col_id
             self.inst_id = inst_id
-            self.source_id = source_id
+            self.provider_id = provider_id
             self.dtype = dtype
 
         self.func = func
@@ -217,7 +217,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         proto_series.df_id = self.df_id
         proto_series.col_id = self.col_id
         proto_series.inst_id = self.inst_id
-        proto_series.source_id = self.source_id if self.source_id else ''
+        proto_series.provider_id = self.provider_id if self.provider_id else ''
         proto_series.dtype = from_np_type(self.dtype)
         proto_series.index.extend([ts.value // 10 ** 6 for ts in list(self.index)])
         set_proto_series_data(proto_series, self.data)
@@ -241,7 +241,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         series.df_id = proto_series.df_id
         series.col_id = proto_series.col_id
         series.inst_id = proto_series.inst_id
-        series.source_id = proto_series.source_id
+        series.provider_id = proto_series.provider_id
         return series
 
     def to_pd_series(self) -> pd.Series:
@@ -259,7 +259,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         return pd_series
 
     @classmethod
-    def from_pd_series(cls, pd_series: pd.Series, series_id=None, df_id=None, col_id=None, inst_id=None, source_id=None):
+    def from_pd_series(cls, pd_series: pd.Series, series_id=None, df_id=None, col_id=None, inst_id=None, provider_id=None):
         """
         Construct Series from pandas's Series
 
@@ -299,18 +299,18 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
                 raise RuntimeError("Please provide inst_id")
             series.inst_id = inst_id
 
-        if hasattr(pd_series, 'source_id'):
-            series.source_id = pd_series.source_id
+        if hasattr(pd_series, 'provider_id'):
+            series.provider_id = pd_series.provider_id
         else:
-            if not source_id:
+            if not provider_id:
                 raise RuntimeError("Please provide sourcd_id")
-            series.source_id = source_id
+            series.provider_id = provider_id
 
         return series
 
     @classmethod
     def from_np_array(cls, ndarray: np.array,
-                      index=None, series_id=None, df_id=None, col_id=None, inst_id=None, source_id=None):
+                      index=None, series_id=None, df_id=None, col_id=None, inst_id=None, provider_id=None):
         """
         Construct Series from numpy array
 
@@ -328,7 +328,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         series.df_id = df_id
         series.col_id = col_id
         series.inst_id = inst_id
-        series.source_id = source_id
+        series.provider_id = provider_id
 
         return series
 
@@ -340,7 +340,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         return np.fromiter(self._data, dtype=to_np_type(self.dtype))
 
     @classmethod
-    def from_list(cls, dlist: list, dtype, index=None, series_id=None, df_id=None, col_id=None, inst_id=None, source_id=None):
+    def from_list(cls, dlist: list, dtype, index=None, series_id=None, df_id=None, col_id=None, inst_id=None, provider_id=None):
         """
         Construct Series from list
 
@@ -358,6 +358,6 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         series.df_id = df_id
         series.col_id = col_id
         series.inst_id = inst_id
-        series.source_id = source_id
+        series.provider_id = provider_id
 
         return series

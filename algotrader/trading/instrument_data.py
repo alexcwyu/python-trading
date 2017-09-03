@@ -119,7 +119,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
         self.get_series(get_series_id(quote)).add(
             timestamp=quote.timestamp,
-            data={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
+            value={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
              "ask_size": quote.ask_size})
 
         if self._is_realtime_persist():
@@ -130,7 +130,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__trade_dict[trade.inst_id] = trade
         self.get_series(get_series_id(trade)).add(
             timestamp=trade.timestamp,
-            data= {"price": trade.price, "size": trade.size})
+            value={"price": trade.price, "size": trade.size})
 
         if self._is_realtime_persist():
             self.store.save_trade(trade)

@@ -65,7 +65,7 @@ class DataFrameTest(TestCase):
         series_a = series_dict['a']
         self.assertEqual("test_df", series_a.df_id)
         self.assertEqual("test_df.test_source.a", series_a.series_id)
-        self.assertEqual("test_source", series_a.source_id)
+        self.assertEqual("test_source", series_a.provider_id)
 
         series_b = series_dict['b']
         series_c = series_dict['c']

@@ -4,7 +4,7 @@ package algotrader.model2;
 message SeriesBundle {
 
     string df_id = 1;
-    string source_id = 2;
+    string provider_id = 2;
     string inst_id = 3;
 
     repeated string series_id_list = 10;

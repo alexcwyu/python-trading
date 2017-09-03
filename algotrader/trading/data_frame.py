@@ -41,7 +41,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         #     warnings.warn("Cannot enter both series_dict and rc_df, rc_df is ignored!", UserWarning)
 
         self.df_id = None
-        self.source_id = None
+        self.provider_id = None
         self.inst_id = None
         self.rc_df = None
         self.series_dict = None
@@ -160,14 +160,14 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
 
         series = series_dict.values()[0]
         df.df_id = series.df_id
-        df.source_id = series.source_id
+        df.provider_id = series.provider_id
         df.inst_id = series.inst_id
 
         df.rc_df = DataFrame.pd_df_to_rc_df(pd_df)
         return df
 
     @classmethod
-    def from_rc_dataframe(cls, rc_df: rc.DataFrame, df_id: str, source_id: str):
+    def from_rc_dataframe(cls, rc_df: rc.DataFrame, df_id: str, provider_id: str):
         """
 
         :param rc_df:
@@ -176,11 +176,11 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         df = cls()
         df.rc_df = rc_df
         df.df_id = df_id
-        df.source_id = source_id
+        df.provider_id = provider_id
         return df
 
     @classmethod
-    def from_pd_dataframe(cls, pd_df: pd.DataFrame, df_id:str, source_id: str, inst_id:str = None):
+    def from_pd_dataframe(cls, pd_df: pd.DataFrame, df_id:str, provider_id: str, inst_id:str = None):
         """
         Convert a pandas dataframe to dataframe
 
@@ -190,7 +190,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         df = cls()
         df.rc_df = DataFrame.pd_df_to_rc_df(pd_df)
         df.df_id = df_id
-        df.source_id = source_id
+        df.provider_id = provider_id
         df.inst_id = '' if inst_id is None else inst_id
 
         return df
@@ -208,13 +208,13 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
             for col, dlist in self.rc_df.to_dict(index=False, ordered=True).items():
                 # TODO: Review this series_id construction
                 df_id = self.df_id
-                source_id = self.source_id
+                provider_id = self.provider_id
                 inst_id = self.inst_id
-                series_id = "%s.%s.%s" % (df_id, source_id, col)
+                series_id = "%s.%s.%s" % (df_id, provider_id, col)
 
                 series = Series.from_list(dlist, dtype=np.float64, index=self.rc_df.index,
                                                           series_id=series_id, df_id=df_id,
-                                                          source_id=source_id,
+                                                          provider_id=provider_id,
                                                           inst_id=inst_id,
                                                           col_id=col)
 
@@ -232,7 +232,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
     def to_proto_series_bundle(self, app_context):
         bd = SeriesBundle()
         bd.df_id = self.df_id
-        bd.source_id = self.source_id
+        bd.provider_id = self.provider_id
         bd.inst_id = self.inst_id
 
         if self.series_dict is None:

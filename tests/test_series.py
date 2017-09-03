@@ -31,7 +31,7 @@ class SeriesTest(TestCase):
         proto_series1.df_id = df_id
         proto_series1.col_id = "close"
         proto_series1.inst_id = inst_id
-        proto_series1.source_id = "Dummy Provider"
+        proto_series1.provider_id= "Dummy Provider"
         proto_series1.dtype = proto.DTDouble
         proto_series1.index.extend(list(range(1499787464853, 1499887464853, 20000000)))
         proto_series1.double_data.extend(SeriesTest.value5)
@@ -45,7 +45,7 @@ class SeriesTest(TestCase):
         proto_series2.df_id = df_id
         proto_series2.col_id = "open"
         proto_series2.inst_id = inst_id
-        proto_series2.source_id = "Dummy Provider2"
+        proto_series2.provider_id= "Dummy Provider2"
         proto_series2.dtype = proto.DTDouble
         proto_series2.index.extend(list(range(1499787464853, 1499887464853, 10000000)))
         proto_series2.double_data.extend(SeriesTest.value10)
@@ -154,7 +154,7 @@ class SeriesTest(TestCase):
                                   series_id="test_series",
                                   df_id="test", col_id="col",
                                   inst_id="test_inst",
-                                  source_id="test_source")
+                                  provider_id="test_source")
 
         out_arr = series.to_np_array()
         self.__np_assert_almost_equal(data_list, out_arr)

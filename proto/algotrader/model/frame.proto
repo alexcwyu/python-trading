@@ -1,12 +1,11 @@
 syntax = "proto3";
 package algotrader.model2;
 
-message SeriesBundle {
+message Frame {
 
     string df_id = 1;
     string provider_id = 2;
     string inst_id = 3;
 
     repeated string series_id_list = 10;
-    map<string, string> parent_and_cls= 11;
 }

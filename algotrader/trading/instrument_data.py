@@ -47,7 +47,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
             proto_frame_list = self.store.load_all("series_bundle")
             for bd in proto_frame_list:
-                df = DataFrame.from_proto_series_bundle(bd, app_context=self.app_context)
+                df = DataFrame.from_proto_frame(bd, app_context=self.app_context)
                 self.__frame_dict[df.df_id] = df
 
             bars = self.store.load_all("bars")
@@ -77,7 +77,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
                     self.store.save_series(series.to_proto_series())
 
                 for df in self.__frame_dict.values():
-                    self.store.save_frame(df.to_proto_series_bundle(self.app_context))
+                    self.store.save_frame(df.to_proto_frame(self.app_context))
 
     def _is_realtime_persist(self):
         return self.store and self.persist_mode == PersistenceMode.RealTime
@@ -190,7 +190,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         if df.df_id not in self.__frame_dict:
             self.__frame_dict[df.df_id] = df
             if self._is_realtime_persist():
-                self.store.save_frame(df.to_proto_series_bundle(self.app_context))
+                self.store.save_frame(df.to_proto_frame(self.app_context))
         # elif raise_if_duplicate and self.__frame_dict[df.df_id] != df:
         else:
             raise AssertionError("Dataframe [%s] already exist" % df.df_id)

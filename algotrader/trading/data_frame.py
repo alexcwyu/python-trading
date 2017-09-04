@@ -15,7 +15,7 @@ from algotrader import Startable, Context
 import algotrader.model.time_series2_pb2 as proto
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
-from algotrader.model.series_bundle_pb2 import SeriesBundle
+from algotrader.model.frame_pb2 import Frame
 from algotrader.utils.proto_series_helper import get_proto_series_data, set_proto_series_data, to_np_type, from_np_type
 from algotrader.trading.series import Series
 from algotrader.utils.function_wrapper import FunctionWithPeriodsName
@@ -229,8 +229,8 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
             return series_dict
             #                          col_id=col, inst_id=None)
 
-    def to_proto_series_bundle(self, app_context):
-        bd = SeriesBundle()
+    def to_proto_frame(self, app_context):
+        bd = Frame()
         bd.df_id = self.df_id
         bd.provider_id = self.provider_id
         bd.inst_id = self.inst_id
@@ -244,7 +244,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         return bd
 
     @classmethod
-    def from_proto_series_bundle(cls, bundle: SeriesBundle, app_context):
+    def from_proto_frame(cls, bundle: Frame, app_context):
         series_list = [app_context.inst_data_mgr.get_series(series_id) for series_id in bundle.series_id_list]
         series_dict = {series.col_id: series for series in series_list}
         return DataFrame.from_series_dict(series_dict)

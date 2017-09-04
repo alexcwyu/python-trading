@@ -124,7 +124,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         again in the _start of the stategy so that here we load it from DB for you and the user assign back the
         relationship between two Monads by function.
         """
-        func_name = func.__name__
+        func_name = func.name
         drv_series_id = "%s(%s,%s)" % (func_name, self.series_id, func.periods)
 
         if self.app_context.inst_data_mgr.has_series(drv_series_id):

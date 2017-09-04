@@ -1,8 +1,9 @@
 from unittest import TestCase
 
 from algotrader.trading.context import ApplicationContext
-from algotrader.utils.indicator import parse_series, get_or_create_indicator
-from algotrader.technical.ma import SMA
+from algotrader.technical.historical_volatility import hvol30, hvol60
+# from algotrader.utils.indicator import parse_series, get_or_create_indicator
+# from algotrader.technical.ma import SMA
 
 class IndicatorTest(TestCase):
     def setUp(self):
@@ -12,27 +13,29 @@ class IndicatorTest(TestCase):
         close = self.app_context.inst_data_mgr.get_series("bar")
         close.start(self.app_context)
 
+        hvol30_series = hvol30 * close
 
-        sma1 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs='bar', input_keys='close',
-                                       length=3)
-        sma1.start(self.app_context)
-
-        sma2 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs='bar', input_keys='close',
-                                       length=3)
-        sma2.start(self.app_context)
-
-        sma3 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs='bar', input_keys='close',
-                                       length=10)
-        sma3.start(self.app_context)
-
-        self.assertEquals(sma1, sma2)
-        self.assertNotEquals(sma2, sma3)
-        self.assertNotEquals(sma1, sma3)
-
-        sma4 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs=sma3, length=10)
-        sma4.start(self.app_context)
-
-        self.assertEquals(sma4.input_series[0], sma3)
+        #
+        # sma1 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs='bar', input_keys='close',
+        #                                length=3)
+        # sma1.start(self.app_context)
+        #
+        # sma2 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs='bar', input_keys='close',
+        #                                length=3)
+        # sma2.start(self.app_context)
+        #
+        # sma3 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs='bar', input_keys='close',
+        #                                length=10)
+        # sma3.start(self.app_context)
+        #
+        # self.assertEquals(sma1, sma2)
+        # self.assertNotEquals(sma2, sma3)
+        # self.assertNotEquals(sma1, sma3)
+        #
+        # sma4 = get_or_create_indicator(self.app_context.inst_data_mgr, cls=SMA, inputs=sma3, length=10)
+        # sma4.start(self.app_context)
+        #
+        # self.assertEquals(sma4.input_series[0], sma3)
 
     # def test_parse(self):
     #     bar = parse_series(self.app_context.inst_data_mgr, "bar")

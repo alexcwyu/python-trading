@@ -134,9 +134,9 @@ class ClockTest(TestCase):
     def test_real_time_clock_schedule_relative(self):
         start = self.realtime_clock.now()
         self.realtime_clock.schedule_relative(datetime.timedelta(seconds=1), self.realtime_action)
-        self.assertEquals([], self.endtime)
+        self.assertEqual([], self.endtime)
         time.sleep(1.1)
-        self.assertEquals(1, len(self.endtime))
+        self.assertEqual(1, len(self.endtime))
         self.assertAlmostEqual(1000, self.endtime[0] - start, -2)
 
     def test_real_time_clock_now(self):

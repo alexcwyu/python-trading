@@ -1,6 +1,7 @@
 from typing import Dict
 
 import bisect
+import datetime
 import numpy as np
 import pandas as pd
 import raccoon as rc
@@ -19,6 +20,7 @@ from algotrader.trading.subscribable import Subscribable
 class UpdateMode(Enum):
     PASSIVE_PATCH = 1,
     ACTIVE_SUBSCRIBE = 2
+
 
 class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
     def __init__(self, proto_series: proto.Series = None,
@@ -66,7 +68,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         self.parent_series_id = parent_series_id
         self.update_mode = update_mode
 
-    def _start(self, app_context = None):
+    def _start(self, app_context=None):
 
         # TODO: Probably this is useless
         super(Series, self)._start(self.app_context)
@@ -75,7 +77,6 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         if self.parent_series_id is not None and self.update_mode == UpdateMode.ACTIVE_SUBSCRIBE:
             parent_series = self.app_context.inst_data_mgr.get_series(self.parent_series_id)
             self.subcribe_upstream(parent_series)
-
 
     def add(self, timestamp, value):
         self.append_row(timestamp, value)
@@ -100,8 +101,9 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
             series.func = func
             return series
         else:
-            series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id, func=func,
-                        parent_series_id=self.series_id, dtype=self.dtype, update_mode=self.update_mode)
+            series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id,
+                            func=func,
+                            parent_series_id=self.series_id, dtype=self.dtype, update_mode=self.update_mode)
 
             self.app_context.inst_data_mgr.add_series(series, raise_if_duplicate=True)
             return series
@@ -132,12 +134,12 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
             series.func = func
             return series
         else:
-            series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id, func=func,
+            series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id,
+                            func=func,
                             parent_series_id=self.series_id, dtype=self.dtype, update_mode=self.update_mode)
 
             self.app_context.inst_data_mgr.add_series(series, raise_if_duplicate=True)
             return series
-
 
     def __rmul__(self, func: FunctionWithPeriodsName):
         """
@@ -188,15 +190,13 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
             # missing_size = parent_len - idx + periods
 
             if parent_len < periods:
-                self.append_rows(parent_series.index[idx:], [np.nan for i in range(parent_len-idx)])
+                self.append_rows(parent_series.index[idx:], [np.nan for i in range(parent_len - idx)])
             else:
                 start = idx - periods if idx >= periods else 0
                 val = self.func(
-                    self.func.array_utils(parent_series.tail(parent_len-start).data))
+                    self.func.array_utils(parent_series.tail(parent_len - start).data))
 
-                self.append_rows(parent_series.index[idx:], val[-parent_len+idx:].tolist())
-
-
+                self.append_rows(parent_series.index[idx:], val[-parent_len + idx:].tolist())
 
     # def push_to_downstream(self, event):
     #     self.subject.on_next(event)
@@ -219,7 +219,8 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         proto_series.inst_id = self.inst_id
         proto_series.provider_id = self.provider_id if self.provider_id else ''
         proto_series.dtype = from_np_type(self.dtype)
-        proto_series.index.extend([ts.value // 10 ** 6 for ts in list(self.index)])
+        # proto_series.index.extend([ts.value // 10 ** 6 for ts in list(self.index)])
+        proto_series.index.extend(list(self.index))
         set_proto_series_data(proto_series, self.data)
         return proto_series
 
@@ -232,8 +233,10 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         :return:
         """
         series = cls()
-        series.append_rows(pd.to_datetime(list(proto_series.index), unit='ms').tolist(),
-                           get_proto_series_data(proto_series))
+        series.append_rows(
+            # pd.to_datetime(list(proto_series.index), unit='ms').tolist(),
+            list(proto_series.index),
+            get_proto_series_data(proto_series))
         series.data_name = proto_series.col_id
         series.dtype = to_np_type(proto_series.dtype)
 
@@ -251,7 +254,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         """
         data = self._data
         index = self._index
-        pd_series = pd.Series(data=data, index=index, name=self.data_name, dtype=self.dtype)
+        pd_series = pd.Series(data=data, index=pd.to_datetime(np.array(index), unit='ms'), name=self.data_name, dtype=self.dtype)
         pd_series.series_id = self.series_id
         pd_series.df_id = self.df_id
         pd_series.col_id = self.col_id
@@ -259,7 +262,8 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         return pd_series
 
     @classmethod
-    def from_pd_series(cls, pd_series: pd.Series, series_id=None, df_id=None, col_id=None, inst_id=None, provider_id=None):
+    def from_pd_series(cls, pd_series: pd.Series, series_id=None, df_id=None, col_id=None, inst_id=None,
+                       provider_id=None):
         """
         Construct Series from pandas's Series
 
@@ -267,7 +271,10 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         :return:
         """
         series = cls()
-        series.append_rows(pd_series.index.tolist(), pd_series.values.tolist())
+        series.append_rows(
+            # pd_series.index.tolist(),
+            [t.value // 10 ** 6 for t in pd_series.index.tolist()],
+            pd_series.values.tolist())
         series.data_name = pd_series.name
         series.dtype = pd_series.dtype
 
@@ -340,7 +347,8 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         return np.fromiter(self._data, dtype=to_np_type(self.dtype))
 
     @classmethod
-    def from_list(cls, dlist: list, dtype, index=None, series_id=None, df_id=None, col_id=None, inst_id=None, provider_id=None):
+    def from_list(cls, dlist: list, dtype, index=None, series_id=None, df_id=None, col_id=None, inst_id=None,
+                  provider_id=None):
         """
         Construct Series from list
 

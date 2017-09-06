@@ -45,7 +45,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
                 series = Series.from_proto_series(ps)
                 self.__series_dict[series.series_id] = series
 
-            proto_frame_list = self.store.load_all("series_bundle")
+            proto_frame_list = self.store.load_all("frame")
             for bd in proto_frame_list:
                 df = DataFrame.from_proto_frame(bd, app_context=self.app_context)
                 self.__frame_dict[df.df_id] = df

@@ -2,8 +2,17 @@ from unittest import TestCase
 
 from algotrader.trading.context import ApplicationContext
 from algotrader.technical.historical_volatility import hvol30, hvol60
-# from algotrader.utils.indicator import parse_series, get_or_create_indicator
-# from algotrader.technical.ma import SMA
+from algotrader.utils.function_wrapper import *
+import numpy as np
+
+
+def average(arr: np.ndarray):
+    return np.average(arr)
+
+avg1 = periods_function(periods=1, name='avg1')(average)
+avg2 = periods_function(periods=2, name='avg2')(average)
+avg3 = periods_function(periods=3, name='avg3')(average)
+
 
 class IndicatorTest(TestCase):
     def setUp(self):

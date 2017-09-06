@@ -3,10 +3,28 @@ import numpy as np
 
 from algotrader.utils.function_wrapper import *
 
-def historical_volatility(arr: np.ndarray, days_in_year=252) -> float:
-    n = arr.shape[0]
-    log_ret = np.log(arr[:-1]/arr[1:])
-    return days_in_year / n * np.sum(log_ret**2)
+def rolling_window(arr, periods):
+    shape = arr.shape[:-1] + (arr.shape[-1] - periods + 1, periods)
+    strides = arr.strides + (arr.strides[-1],)
+    return np.lib.stride_tricks.as_strided(arr, shape=shape, strides=strides)
+
+def historical_volatility_function(arr, days_in_year=252):
+    if arr.ndim == 1:
+        n = arr.shape[0]
+        log_ret = np.log(arr[:-1]/arr[1:])
+        return np.sqrt(days_in_year / n * np.sum(log_ret**2))
+    else:
+        n = arr.shape[1]
+        log_ret = np.log(arr[:,:-1]/arr[:,1:])
+        return np.sqrt(days_in_year / n * np.sum(log_ret**2, axis=1))
+
+
+def historical_volatility(arr, periods, days_in_year=252):
+    result_arr = np.empty_like(arr)
+    result_arr[:] = np.NAN
+    result_arr[periods-1:] = historical_volatility_function(rolling_window(arr, periods), days_in_year=days_in_year)
+    return result_arr
+
 
 # decorate the function
 hvol30 = periods_function(periods=30, name='hvol30')(historical_volatility) # 30 days historical volatility

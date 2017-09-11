@@ -3,9 +3,10 @@ import numpy as np
 from algotrader import Manager, Context
 from algotrader.model.model_factory import ModelFactory
 from algotrader.provider.datastore import PersistenceMode
-from algotrader.trading.data_series import DataSeries
+# from algotrader.trading.data_series import DataSeries
 from algotrader.trading.event import MarketDataEventHandler
 from algotrader.trading.series import Series
+from algotrader.trading.data_frame import DataFrame
 from algotrader.utils.logging import logger
 from algotrader.utils.market_data import get_series_id
 from algotrader.utils.model import get_full_cls_name, get_cls
@@ -20,6 +21,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__quote_dict = {}
         self.__trade_dict = {}
         self.__series_dict = {}
+        self.__frame_dict = {}
         self.subscription = None
         self.store = None
 
@@ -42,14 +44,11 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             for ps in proto_series_list:
                 series = Series.from_proto_series(ps)
                 self.__series_dict[series.series_id] = series
-            # series_states = self.store.load_all('time_series')
-            # for series_state in series_states:
-            #     if hasattr(series_state, 'series_cls') and series_state.series_cls:
-            #         cls = get_cls(series_state.series_cls)
-            #         series = cls(time_series=series_state)
-            #     else:
-            #         series = DataSeries(time_series=series_state)
-            #     self.__series_dict[series.id()] = series
+
+            proto_frame_list = self.store.load_all("frame")
+            for bd in proto_frame_list:
+                df = DataFrame.from_proto_frame(bd, app_context=self.app_context)
+                self.__frame_dict[df.df_id] = df
 
             bars = self.store.load_all("bars")
             for bar in bars:
@@ -75,7 +74,10 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
             elif self.persist_mode != PersistenceMode.Disable:
                 for series in self.__series_dict.values():
-                    self.store.save_time_series(series.time_series)
+                    self.store.save_series(series.to_proto_series())
+
+                for df in self.__frame_dict.values():
+                    self.store.save_frame(df.to_proto_frame(self.app_context))
 
     def _is_realtime_persist(self):
         return self.store and self.persist_mode == PersistenceMode.RealTime
@@ -117,7 +119,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
         self.get_series(get_series_id(quote)).add(
             timestamp=quote.timestamp,
-            data={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
+            value={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
              "ask_size": quote.ask_size})
 
         if self._is_realtime_persist():
@@ -128,7 +130,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__trade_dict[trade.inst_id] = trade
         self.get_series(get_series_id(trade)).add(
             timestamp=trade.timestamp,
-            data= {"price": trade.price, "size": trade.size})
+            value={"price": trade.price, "size": trade.size})
 
         if self._is_realtime_persist():
             self.store.save_trade(trade)
@@ -172,9 +174,26 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         if series.series_id not in self.__series_dict:
             self.__series_dict[series.series_id] = series
             if self._is_realtime_persist():
-                self.store.save_time_series(series.time_series)
+                self.store.save_series(series.to_proto_series())
+                # self.store.save_time_series(series.time_series)
         elif raise_if_duplicate and self.__series_dict[series.series_id] != series:
             raise AssertionError("Series [%s] already exist" % series.series_id)
+
+    def get_frame(self, key):
+        if isinstance(key, str):
+            if key not in self.__frame_dict:
+                raise AssertionError("No frame with series_id = %s" % key)
+            else:
+                return self.__frame_dict[key]
+
+    def add_frame(self, df : DataFrame, raise_if_duplicate=True):
+        if df.df_id not in self.__frame_dict:
+            self.__frame_dict[df.df_id] = df
+            if self._is_realtime_persist():
+                self.store.save_frame(df.to_proto_frame(self.app_context))
+        # elif raise_if_duplicate and self.__frame_dict[df.df_id] != df:
+        else:
+            raise AssertionError("Dataframe [%s] already exist" % df.df_id)
 
     def has_series(self, name):
         return name in self.__series_dict
@@ -184,6 +203,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__quote_dict = {}
         self.__trade_dict = {}
         self.__series_dict = {}
+        self.__frame_dict = {}
 
     def id(self):
         return "InstrumentDataManager"

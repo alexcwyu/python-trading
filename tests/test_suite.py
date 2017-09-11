@@ -27,6 +27,7 @@ from tests.test_talib_wrapper import TALibSMATest
 from tests.test_feed import FeedTest
 from tests.test_plot import PlotTest
 from tests.test_series import SeriesTest
+from tests.test_data_frame import DataFrameTest
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -39,7 +40,7 @@ def suite():
     test_suite.addTest(unittest.makeSuite(FeedTest))
     test_suite.addTest(unittest.makeSuite(IndicatorTest))
     test_suite.addTest(unittest.makeSuite(InstrumentDataTest))
-    test_suite.addTest(unittest.makeSuite(MovingAverageTest))
+    # test_suite.addTest(unittest.makeSuite(MovingAverageTest))
     test_suite.addTest(unittest.makeSuite(MarketDataProcessorTest))
     test_suite.addTest(unittest.makeSuite(ModelFactoryTest))
     test_suite.addTest(unittest.makeSuite(OrderTest))
@@ -51,12 +52,13 @@ def suite():
     test_suite.addTest(unittest.makeSuite(PortfolioTest))
     test_suite.addTest(unittest.makeSuite(PositionTest))
     test_suite.addTest(unittest.makeSuite(RefDataTest))
-    test_suite.addTest(unittest.makeSuite(RollingApplyTest))
+    # test_suite.addTest(unittest.makeSuite(RollingApplyTest))
     test_suite.addTest(unittest.makeSuite(SerializationTest))
     test_suite.addTest(unittest.makeSuite(IndicatorPersistenceTest))
     test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
-    test_suite.addTest(unittest.makeSuite(TALibSMATest))
+    # test_suite.addTest(unittest.makeSuite(TALibSMATest))
     test_suite.addTest(unittest.makeSuite(SeriesTest))
+    test_suite.addTest(unittest.makeSuite(DataFrameTest))
     return test_suite
 
 

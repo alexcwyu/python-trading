@@ -1,5 +1,10 @@
 from unittest import TestCase
 import numpy as np
+from algotrader.trading.config import Config, load_from_yaml
+from algotrader.trading.context import ApplicationContext
+from tests import test_override
+from algotrader.trading.data_frame import DataFrame
+
 import raccoon as rc
 import pandas as pd
 
@@ -9,86 +14,97 @@ from algotrader.model.time_series_pb2 import *
 from algotrader.trading.data_frame import Series, DataFrame
 
 import algotrader.model.time_series2_pb2 as proto
-from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.utils.proto_series_helper import get_proto_series_data, set_proto_series_data, to_np_type, from_np_type
 
 
 class DataFrameTest(TestCase):
-    value10 = 20000 + np.cumsum(np.random.normal(0,100,10))
-    value5 = 20000 + np.cumsum(np.random.normal(0,100,5))
 
-    factory = ModelFactory()
+    stg_override = {
+        "Strategy": {
+            "down2%": {
+                "qty": 1000
+            }
+        }
+    }
 
-    def __create_proto_series1(self):
-        df_id = "Bar.Daily"
-        inst_id ="HSI@SEHK"
+    def create_app_context(self, conf):
+        return ApplicationContext(config=Config(
+            load_from_yaml("../config/backtest.yaml"),
+            load_from_yaml("../config/down2%.yaml"),
+            test_override,
+            {
+                "Application": {
+                    "ceateAtStart": True,
+                    "deleteDBAtStop": False,
+                    "persistenceMode": "RealTime"
+            }
+        },
+        conf
+    ))
 
-        proto_series1 = proto.Series()
-        proto_series1.series_id = "Bar.Daily.close-HSI@SEHK"
-        proto_series1.df_id = df_id
-        proto_series1.col_id = "close"
-        proto_series1.inst_id = inst_id
-        proto_series1.dtype = proto.DTDouble
-        proto_series1.index.extend(list(range(1499787464853, 1499887464853, 20000000)))
-        proto_series1.double_data.extend(DataFrameTest.value5)
-        return proto_series1
+    def __create_rc_dataframe(self):
+        rc_df = rc.DataFrame({"a": [1.2, 2.3, 3.4],
+                           "b": [1.6, 3.3, 6.6],
+                           "c": [2.4, 6.3, -2.7]})
 
-    def __create_proto_series2(self):
-        df_id = "Bar.Daily"
-        inst_id ="HSI@SEHK"
-        proto_series2 = proto.Series()
-        proto_series2.series_id = "Bar.Daily.open-HSI@SEHK"
-        proto_series2.df_id = df_id
-        proto_series2.col_id = "open"
-        proto_series2.inst_id = inst_id
-        proto_series2.dtype = proto.DTDouble
-        proto_series2.index.extend(list(range(1499787464853, 1499887464853, 10000000)))
-        proto_series2.double_data.extend(DataFrameTest.value10)
-        return proto_series2
+        return rc_df
 
 
-    def __create_empty_series(self):
-        df_id = "Bar.Daily"
-        inst_id ="HSI@SEHK"
-        series = Series()
+    def test_rc_df_to_df(self):
+        rc_df = self.__create_rc_dataframe()
+        df = DataFrame.from_rc_dataframe(rc_df, "test_df", "test_source")
+        series_dict = df.to_series_dict()
 
-    def test_empty_series_ctor(self):
-        try:
-            series = Series()
-            self.assertIsNone(series.inst_id)
-            self.assertIsNone(series.df_id)
-            self.assertIsNone(series.col_id)
-        except Exception:
-            self.fail("series ctor raised ExceptionType unexpectedly!")
+        self.assertTrue('a' in series_dict.keys())
+        self.assertTrue('b' in series_dict.keys())
+        self.assertTrue('c' in series_dict.keys())
 
-    def test_ctor_from_to_proto(self):
-        proto_series = self.__create_proto_series1()
-        series = Series.from_proto_series(proto_series)
+        self.assertEqual("a", series_dict['a'].col_id)
+        self.assertEqual("b", series_dict['b'].col_id)
+        self.assertEqual("c", series_dict['c'].col_id)
+        series_a = series_dict['a']
+        self.assertEqual("test_df", series_a.df_id)
+        self.assertEqual("test_df.test_source.a", series_a.series_id)
+        self.assertEqual("test_source", series_a.provider_id)
 
-        self.assertEquals("Bar.Daily.close-HSI@SEHK", series.series_id)
-        self.assertEquals("Bar.Daily", series.df_id)
-        self.assertEquals("close", series.col_id)
-        self.assertEquals("HSI@SEHK", series.inst_id)
+        series_b = series_dict['b']
+        series_c = series_dict['c']
+        self.assertListEqual(list(series_a.data), [1.2, 2.3, 3.4])
+        self.assertListEqual(list(series_b.data), [1.6, 3.3, 6.6])
+        self.assertListEqual(list(series_c.data), [2.4, 6.3, -2.7])
 
-        res_data = np.array(series.data)
-        self.__np_assert_almost_equal(DataFrameTest.value5, res_data)
 
-        proto_series_out = series.to_proto_series()
-        self.assertListEqual(list(proto_series_out.index), list(proto_series.index))
-        self.assertListEqual(get_proto_series_data(proto_series_out), get_proto_series_data(proto_series))
 
-    def test_ctor_from_to_pandas(self):
-        orig_data = np.random.uniform(0,1,20)
-        pd_series = pd.Series(index=np.linspace(0,19,20), data=orig_data)
-        series = Series.from_pd_series(pd_series=pd_series)
 
-        self.assertIsNone(series.series_id)
-        self.assertIsNone(series.df_id)
-        self.assertIsNone(series.col_id)
-        self.assertIsNone(series.inst_id)
+    # def test_sync_series(self):
+    #     app_context = self.create_app_context(conf={
+    #         "Application": {
+    #             "createDBAtStart": True,
+    #             "deleteDBAtStop": False,
+    #             "persistenceMode": "RealTime"
+    #         }
+    #     })
+    #     app_context.start()
+    #
+    #     series0 = app_context.inst_data_mgr.get_series("series0")
+    #     series1 = app_context.inst_data_mgr.get_series("series1")
+    #     series2 = app_context.inst_data_mgr.get_series("series2")
+    #
+    #     series0.start(app_context)
+    #     series1.start(app_context)
+    #     series2.start(app_context)
+    #
+    #     df = DataFrame([series0, series1, series2])
+    #     df.start(app_context)
+    #
+    #     series0.add(0, 100)
+    #     series1.add(0, 50)
+    #     series2.add(0, 80)
 
-        res_data = np.array(series.data)
-        self.__np_assert_almost_equal(orig_data, res_data)
+
+
+
+
 
 
 

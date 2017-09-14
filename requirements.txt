@@ -23,3 +23,6 @@ pyfolio
 nose
 nose_parameterized
 PyMonad
+
+# bitcoin
+krakenex

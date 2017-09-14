@@ -254,7 +254,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         """
         data = self._data
         index = self._index
-        pd_series = pd.Series(data=data, index=pd.to_datetime(np.array(index), unit='ms'), name=self.data_name, dtype=self.dtype)
+        pd_series = pd.Series(data=data, index=pd.to_datetime(np.fromiter(index, dtype=np.int64), unit='ms'), name=self.data_name, dtype=self.dtype)
         pd_series.series_id = self.series_id
         pd_series.df_id = self.df_id
         pd_series.col_id = self.col_id

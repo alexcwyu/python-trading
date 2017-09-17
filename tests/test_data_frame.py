@@ -1,20 +1,24 @@
 from unittest import TestCase
+import datetime
+from datetime import timedelta
 import numpy as np
+import raccoon as rc
+import pandas as pd
 from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
 from tests import test_override
-from algotrader.trading.data_frame import DataFrame
+from algotrader.trading.data_frame import Series, DataFrame
 
-import raccoon as rc
-import pandas as pd
 
 from algotrader import Startable, Context
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.time_series_pb2 import *
-from algotrader.trading.data_frame import Series, DataFrame
-
+from algotrader.utils.date import *
 import algotrader.model.time_series2_pb2 as proto
 from algotrader.utils.proto_series_helper import get_proto_series_data, set_proto_series_data, to_np_type, from_np_type
+
+from tests.test_series import SeriesTest
+
 
 
 class DataFrameTest(TestCase):
@@ -48,6 +52,59 @@ class DataFrameTest(TestCase):
                            "c": [2.4, 6.3, -2.7]})
 
         return rc_df
+
+
+    @staticmethod
+    def create_df_backed_by_series_dict():
+        open_data = [100., 101., 102.]
+        close_data = [101., 103., 101.]
+        d1 = datetime.datetime(2010, 6, 6, 9, 30, 0)
+        proto_open = SeriesTest.create_proto_series(d1, open_data, 3, "open")
+        proto_close = SeriesTest.create_proto_series(d1, close_data, 3, "close")
+
+        op_sz = Series.from_proto_series(proto_open)
+        cl_sz= Series.from_proto_series(proto_close)
+        series_dict = {"open": op_sz, "close": cl_sz}
+
+        return DataFrame.from_series_dict(series_dict=series_dict)
+
+
+    def test_ctor_from_series_dict(self):
+        open_data = [100., 101., 102.]
+        close_data = [101., 103., 101.]
+        d1 = datetime.datetime(2010, 6, 6, 9, 30, 0)
+        proto_open = SeriesTest.create_proto_series(d1, open_data, 3, "open")
+        proto_close = SeriesTest.create_proto_series(d1, close_data, 3, "close")
+
+        op_sz = Series.from_proto_series(proto_open)
+        cl_sz= Series.from_proto_series(proto_close)
+        series_dict = {"open": op_sz, "close": cl_sz}
+
+        df = DataFrame.from_series_dict(series_dict=series_dict)
+
+        self.assertListEqual(['close', 'open'], df.columns)
+        self.assertListEqual(open_data, df['open'].data[0])
+        self.assertListEqual(close_data, df['close'].data[0])
+        # rc_df = df.rc_df
+        # rc_df.show()
+
+    def test_append(self):
+        # this dataframe does not have series_dict yet
+        df = DataFrame(df_id="id", provider_id="p", inst_id="i", parent_df_id="pid", columns=['close', 'high'])
+
+        d1 = datetime.datetime(2010, 6, 6, 9, 30, 0)
+        d2 = d1 + timedelta(seconds=1)
+
+        ts1 = datetime_to_unixtimemillis(d1)
+        ts2 = datetime_to_unixtimemillis(d2)
+        df.append_row(ts1, {"close" : 100.0})
+        df.append_row(ts2, {"high" : 110.0})
+
+        #df2 has series_dict
+        df2 = DataFrameTest.create_df_backed_by_series_dict()
+        t3 = df2.index[-1].to_pydatetime() + timedelta(seconds=1)
+        df2.append_row(t3, {"open" : 107, "close": 109})
+
 
 
     def test_rc_df_to_df(self):

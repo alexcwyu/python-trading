@@ -1,38 +1,29 @@
-from typing import Dict
-
 import bisect
-import warnings
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
+
 import numpy as np
 import pandas as pd
 import raccoon as rc
-from enum import Enum
 from pymonad import Monad, Monoid
-from algotrader.trading.subscribable import Subscribable
-from rx.subjects import Subject
-from algotrader import Startable, Context
+
+from algotrader import Startable
 # from algotrader.trading.context import ApplicationContext
-import algotrader.model.time_series2_pb2 as proto
-from algotrader.model.model_factory import ModelFactory
-from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
 from algotrader.model.frame_pb2 import Frame
-from algotrader.utils.proto_series_helper import get_proto_series_data, set_proto_series_data, to_np_type, from_np_type
+from algotrader.technical.function_wrapper import FunctionWithPeriodsName
 from algotrader.trading.series import Series
-from algotrader.utils.function_wrapper import FunctionWithPeriodsName
-import rx
-from algotrader.utils.logging import logger
-
-# TODO: think how we could save the df into the repository? And when?
-
-class CombineMode(Enum):
-    ALL_SYNC_ZIP = 1
-    ANY_MOST_LATEST = 2
+from algotrader.trading.subscribable import Subscribable
 
 
 class DataFrame(Subscribable, Startable, Monad, Monoid):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, df_id=None, provider_id=None, inst_id=None, parent_df_id=None,
+                 columns=None, func=None, *args, **kwargs):
         """
-        We discourage user call the contor, please use from_ method to construct
+
+        :param df_id:
+        :param provider_id:
+        :param inst_id:
+        :param parent_df_id:
+        :param func: function
         :param args:
         :param kwargs:
         """
@@ -40,17 +31,20 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         # if series_dict and rc_df is not None:
         #     warnings.warn("Cannot enter both series_dict and rc_df, rc_df is ignored!", UserWarning)
 
-        self.df_id = None
-        self.provider_id = None
-        self.inst_id = None
-        self.rc_df = None
+        self.df_id = df_id
+        self.provider_id = provider_id
+        self.inst_id = inst_id
+        self.rc_df = rc.DataFrame(columns=columns)
         self.series_dict = None
+        self.parent_df_id = parent_df_id
+        self.func = func
 
     def append_row(self, index, values, new_cols=True):
         self.rc_df.append_row(index, values, new_cols)
-        for col, val in values.items():
-            series = self.series_dict[col]
-            series.add(index, val)
+        if self.series_dict:
+            for col, val in values.items():
+                series = self.series_dict[col]
+                series.add(index, val)
 
 
 
@@ -70,26 +64,76 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         :param func:
         :return:
         """
-        func_name = func.__name__
-        drv_series_id = "%s(self.series_id)" % func_name
-        series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id, func=func,
-                        parent_series_id=self.series_id, dtype=self.dtype, update_mode=self.update_mode)
-        return series
+        return self.fmap(func)
 
 
-        func_name = func.__name__
-        drv_df_id = "%s(%s,%s)" % (func_name, self.df_id, func.periods)
+    def fmap(self, func: FunctionWithPeriodsName):
+        """
+        Applies 'function' to the contents of the functor and returns a new functor value.
+        :param func:
+        :return: Series as Monad
 
-        # if self.app_context.inst_data_mgr.has_series(drv_series_id):
-        #     series = self.app_context.inst_data_mgr.get_series(drv_series_id)
-        #     series.func = func
-        #     return series
-        # else:
-        #     series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id, func=func,
-        #                     parent_series_id=self.series_id, dtype=self.dtype, update_mode=self.update_mode)
-        #
-        #     self.app_context.inst_data_mgr.add_series(series, raise_if_duplicate=True)
-        #     return series
+        Examle usage
+        ema20 = emafunc * close
+        where the ema20 is the new Monad that came the binding of emafunc and close Monad.
+
+        Since function itself is not serialized in algotrading environment, eventhough we can directly
+        retrieve the ema20 series from DB, it is not recommended to do so as the "function" part is missing.
+
+        It is recommended to declare the
+                atr = atrfun * bar
+        again in the _start of the stategy so that here we load it from DB for you and the user assign back the
+        relationship between two Monads by function.
+        """
+        func_name = func.name
+        columns = func.output_columns
+        drv_df_id = "%s(self.series_id)" % func_name
+
+        if not isinstance(list, columns):
+            columns = list(columns)
+
+        if self.app_context.inst_data_mgr.has_frame(drv_df_id):
+            frame = self.app_context.inst_data_mgr.get_frame(drv_df_id)
+            frame.func = func
+            return frame
+        else:
+            frame = DataFrame(df_id=drv_df_id, provider_id=self.provider_id, inst_id=self.inst_id, parent_df_id=self.df_id,
+                   func=func, columns=columns)
+
+            return frame
+
+
+    def evaluate(self):
+        if not self.parent_df_id:
+            return
+
+
+        periods = self.func.periods
+        parent_frame = self.app_context.inst_data_mgr.get_frame(self.parent_df_id)
+
+        if len(parent_frame) == 0:
+            return
+
+
+        curr_idx = self.index[-1] if len(self) > 0 else -1
+        if parent_frame.index[-1] > curr_idx:
+            # TODO: Review if we should use linear search for performace?
+            idx = bisect.bisect_right(parent_frame.index, curr_idx)
+
+            parent_len = len(parent_frame)
+
+            if parent_len < periods:
+                self.append_rows(parent_frame.index[idx:], {col : [np.nan for i in range(parent_len - idx)]
+                                                            for col in self.columns})
+            else:
+                start = idx - periods if idx >= periods else 0
+                val = self.func(
+                    self.func.array_utils(parent_frame.tail(parent_len - start).data))
+
+                # self.append_rows(parent_series.index[idx:], val[-parent_len + idx:].tolist())
+                self.append_rows(parent_frame.index[idx:], val)
+
+
 
 
 
@@ -113,7 +157,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
             collection.update(data_dict)
             return collection
         else:
-            return super(DataFrame, self).to_dict()
+            return self.rc_df.to_dict(index=False, ordered=True)
 
     def to_pd_dataframe(self):
         """
@@ -122,7 +166,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         :return: pandas DataFrame
         """
         data_dict = self.to_dict(index=False, value_as_series=False)
-        return pd.DataFrame(data_dict, columns=self.columns, index=self.index)
+        return pd.DataFrame(data_dict, columns=self.rc_df.columns, index=self.rc_df.index)
 
 
 
@@ -158,7 +202,8 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         df.series_dict = series_dict
         pd_df = pd.DataFrame(data={series.col_id: series.to_pd_series() for series in series_dict.values()})
 
-        series = series_dict.values()[0]
+        series = next(iter(series_dict.values()))
+
         df.df_id = series.df_id
         df.provider_id = series.provider_id
         df.inst_id = series.inst_id
@@ -167,7 +212,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         return df
 
     @classmethod
-    def from_rc_dataframe(cls, rc_df: rc.DataFrame, df_id: str, provider_id: str):
+    def from_rc_dataframe(cls, rc_df: rc.DataFrame, df_id: str, provider_id: str, parent_df_id:str = None):
         """
 
         :param rc_df:
@@ -177,10 +222,11 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         df.rc_df = rc_df
         df.df_id = df_id
         df.provider_id = provider_id
+        df.parent_df_id = parent_df_id
         return df
 
     @classmethod
-    def from_pd_dataframe(cls, pd_df: pd.DataFrame, df_id:str, provider_id: str, inst_id:str = None):
+    def from_pd_dataframe(cls, pd_df: pd.DataFrame, df_id:str, provider_id: str, inst_id:str = None, parent_df_id:str = None):
         """
         Convert a pandas dataframe to dataframe
 
@@ -191,6 +237,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         df.rc_df = DataFrame.pd_df_to_rc_df(pd_df)
         df.df_id = df_id
         df.provider_id = provider_id
+        df.parent_df_id = parent_df_id
         df.inst_id = '' if inst_id is None else inst_id
 
         return df
@@ -248,6 +295,39 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         series_list = [app_context.inst_data_mgr.get_series(series_id) for series_id in bundle.series_id_list]
         series_dict = {series.col_id: series for series in series_list}
         return DataFrame.from_series_dict(series_dict)
+
+
+    def show(self, index=True, **kwargs):
+        return self.rc_df.show(index=index)
+
+    @property
+    def data(self):
+        return self.rc_df.data
+
+    @property
+    def columns(self):
+        return self.rc_df.columns
+
+
+    @property
+    def index(self):
+        return self.rc_df.index
+
+    @property
+    def index_name(self):
+        return self.rc_df.index_name
+
+    def __getitem__(self, index):
+        return self.rc_df.__getitem__(index)
+
+    def __len__(self):
+        return len(self.rc_df)
+
+    def tail(self, rows):
+        return self.rc_df.tail(rows)
+
+    def head(self, rows):
+        return self.rc_df.head(rows)
 
 #
 #

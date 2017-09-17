@@ -24,6 +24,8 @@
 
             when compute / evaluate, check lastcomputed timestamp
 
+        Question:
+        - when we load the child series by get_series, do we check if parent series has benn loaded to memory? if not, create it?
 
 
     - subscribe (realtime update, push from parent)
@@ -31,6 +33,15 @@
         - publish
         - when subscriber receive update, update the parent timestamp
 
+
+- DataFrame
+    - It will serve as a derived object during the algo app lifetime, it will never serialized back as Dataframe in database.
+    - Only Series is stored in DB
+    - So every dataframe will breakdown into series and save into the database
+    - Reload of the dataframe from dataframe will be done by first retrieve back the series, and construct it to dataframe
+    - We are bounded by Google Protobuf that it can't store 2D array. Or course we can always enumerate 2D array by properly indexed 1D array
+    - Raccoon Dataframe will still be used since if we want to use the Rx's combine latest, it will modify come column series,
+        so it is better to use the Raccoon Dataframe as mirror or view while the original series
 
 
 - multi-index
@@ -81,3 +92,52 @@ Expression
     - slice for each parebnt
 
 def update(input, ):
+
+
+#########
+
+
+# take care the conversion between datetime and unixtime.
+#https://stackoverflow.com/questions/15203623/convert-pandas-datetimeindex-to-unix-time
+
+the following does not match!
+
+import pandas as pd
+Backend TkAgg is interactive backend. Turning interactive mode on.
+df = pd.DataFrame({"ts" : [now], "a" : [20]})
+pd.to_datetime(df['ts'])
+Out[10]:
+0   2017-08-31 00:36:22.876549
+Name: ts, dtype: datetime64[ns]
+df['ts'] = pd.to_datetime(df['ts'])
+df
+Out[12]:
+    a                         ts
+0  20 2017-08-31 00:36:22.876549
+df['ts'].values
+Out[13]: array(['2017-08-31T00:36:22.876549000'], dtype='datetime64[ns]')
+df['ts']
+Out[14]:
+0   2017-08-31 00:36:22.876549
+Name: ts, dtype: datetime64[ns]
+df = df.set_index('ts')
+df
+Out[16]:
+                             a
+ts
+2017-08-31 00:36:22.876549  20
+df.index[0]
+Out[17]: Timestamp('2017-08-31 00:36:22.876549')
+df.index[0].value
+Out[18]: 1504139782876549000
+df.index[0].value // 10**9
+Out[19]: 1504139782
+df.index[0].value // 10**9 - date_to_unixtimemillis(now)
+Out[20]: -1502604660218
+df.index[0].value // 10**9 - date_to_unixtimemillis(now)
+Out[21]: -1502604660218
+df.index[0].value // 10**9
+Out[22]: 1504139782
+date_to_unixtimemillis(now)
+Out[23]: 1504108800000
+

@@ -1,20 +1,17 @@
-from typing import Dict
-
 import bisect
-import datetime
+from enum import Enum
+
 import numpy as np
 import pandas as pd
 import raccoon as rc
-from enum import Enum
 from pymonad import Monad, Monoid
-from algotrader import Startable, Context
 
 import algotrader.model.time_series2_pb2 as proto
-from algotrader.model.model_factory import ModelFactory
+from algotrader import Startable
 from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
-from algotrader.utils.proto_series_helper import get_proto_series_data, set_proto_series_data, to_np_type, from_np_type
-from algotrader.utils.function_wrapper import FunctionWithPeriodsName
+from algotrader.technical.function_wrapper import FunctionWithPeriodsName
 from algotrader.trading.subscribable import Subscribable
+from algotrader.utils.proto_series_helper import get_proto_series_data, set_proto_series_data, to_np_type, from_np_type
 
 
 class UpdateMode(Enum):
@@ -91,22 +88,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         :param func:
         :return:
         """
-        # TODO: It seems to be bind that it bind the function to series itself and replace series content?
-        #  in this case we have no interest in that, try to use fmap
-        func_name = func.__name__
-        drv_series_id = "%s(%s,%s)" % (func_name, self.series_id, func.periods)
-
-        if self.app_context.inst_data_mgr.has_series(drv_series_id):
-            series = self.app_context.inst_data_mgr.get_series(drv_series_id)
-            series.func = func
-            return series
-        else:
-            series = Series(series_id=drv_series_id, df_id=self.df_id, col_id=func_name, inst_id=self.inst_id,
-                            func=func,
-                            parent_series_id=self.series_id, dtype=self.dtype, update_mode=self.update_mode)
-
-            self.app_context.inst_data_mgr.add_series(series, raise_if_duplicate=True)
-            return series
+        return self.fmap(func)
 
     def fmap(self, func: FunctionWithPeriodsName):
         """
@@ -171,8 +153,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         """
         :return:
         """
-        if self.parent_series_id is None:
-            # TODO: how to handle this? extra checking ?
+        if not self.parent_series_id:
             return
 
         periods = self.func.periods

@@ -198,6 +198,9 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def has_series(self, name):
         return name in self.__series_dict
 
+    def has_frame(self, name):
+        return name in self.__frame_dict
+
     def reset(self):
         self.__bar_dict = {}
         self.__quote_dict = {}

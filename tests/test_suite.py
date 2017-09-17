@@ -11,7 +11,7 @@ from tests.test_data_series import DataSeriesTest
 from tests.test_in_memory_db import InMemoryDBTest
 from tests.test_indicator import IndicatorTest
 from tests.test_instrument_data import InstrumentDataTest
-from tests.test_ma import MovingAverageTest
+# from tests.test_ma import MovingAverageTest
 from tests.test_market_data_processor import MarketDataProcessorTest
 from tests.test_model_factory import ModelFactoryTest
 from tests.test_order import OrderTest
@@ -19,11 +19,11 @@ from tests.test_order_handler import OrderHandlerTest
 from tests.test_portfolio import PortfolioTest
 from tests.test_position import PositionTest
 from tests.test_ref_data import RefDataTest
-from tests.test_rolling import RollingApplyTest
+# from tests.test_rolling import RollingApplyTest
 from tests.test_ser_deser import SerializationTest
 from tests.test_persistence_strategy import StrategyPersistenceTest
 from tests.test_persistence_indicator import IndicatorPersistenceTest
-from tests.test_talib_wrapper import TALibSMATest
+# from tests.test_talib_wrapper import TALibSMATest
 from tests.test_feed import FeedTest
 from tests.test_plot import PlotTest
 from tests.test_series import SeriesTest

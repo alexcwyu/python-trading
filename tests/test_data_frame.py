@@ -33,7 +33,7 @@ class DataFrameTest(TestCase):
 
     def create_app_context(self, conf):
         return ApplicationContext(config=Config(
-            load_from_yaml("../config/backtest.yaml"),
+            load_from_yaml("../config/unittest.yaml"),
             load_from_yaml("../config/down2%.yaml"),
             test_override,
             {
@@ -52,6 +52,13 @@ class DataFrameTest(TestCase):
                            "c": [2.4, 6.3, -2.7]})
 
         return rc_df
+
+    @staticmethod
+    def create_df_by_rc_df():
+        rc_df = rc.DataFrame({"a": [1.2, 2.3, 3.4],
+                              "b": [1.6, 3.3, 6.6],
+                              "c": [2.4, 6.3, -2.7]})
+        return DataFrame.from_rc_dataframe(rc_df=rc_df, df_id="test_from_rc_df", provider_id="test")
 
 
     @staticmethod
@@ -131,6 +138,9 @@ class DataFrameTest(TestCase):
         self.assertListEqual(list(series_c.data), [2.4, 6.3, -2.7])
 
 
+    def test_to_series_dict(self):
+        df = DataFrameTest.create_df_by_rc_df()
+        series_dict = df.to_series_dict()
 
 
     # def test_sync_series(self):

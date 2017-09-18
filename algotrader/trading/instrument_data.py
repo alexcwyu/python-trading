@@ -182,7 +182,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def get_frame(self, key):
         if isinstance(key, str):
             if key not in self.__frame_dict:
-                raise AssertionError("No frame with series_id = %s" % key)
+                raise AssertionError("No frame with df_id = %s" % key)
             else:
                 return self.__frame_dict[key]
 

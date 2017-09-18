@@ -336,11 +336,12 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         :param dlist: double list
         :return:
         """
-        if not index:
-            raise Exception("index cannot be None")
+        # if not index:
+        #     raise Exception("index cannot be None")
 
         series = cls()
-        series.append_rows(index, dlist)
+        if index and dlist:
+            series.append_rows(index, dlist)
         series.data_name = col_id
         series.dtype = dtype
         series.series_id = series_id

@@ -87,9 +87,9 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         """
         func_name = func.name
         columns = func.output_columns
-        drv_df_id = "%s(self.series_id)" % func_name
+        drv_df_id = "%s(%s)" % (func_name, self.df_id)
 
-        if not isinstance(list, columns):
+        if not isinstance(columns, list):
             columns = list(columns)
 
         if self.app_context.inst_data_mgr.has_frame(drv_df_id):
@@ -99,6 +99,8 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         else:
             frame = DataFrame(df_id=drv_df_id, provider_id=self.provider_id, inst_id=self.inst_id, parent_df_id=self.df_id,
                    func=func, columns=columns)
+
+            self.app_context.inst_data_mgr.add_frame(frame, raise_if_duplicate=True)
 
             return frame
 
@@ -127,8 +129,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
                                                             for col in self.columns})
             else:
                 start = idx - periods if idx >= periods else 0
-                val = self.func(
-                    self.func.array_utils(parent_frame.tail(parent_len - start).data))
+                val = self.func(parent_frame.tail(parent_len - start).to_dict())
 
                 # self.append_rows(parent_series.index[idx:], val[-parent_len + idx:].tolist())
                 self.append_rows(parent_frame.index[idx:], val)
@@ -177,7 +178,8 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         pandas_data = pd_df.values.T.tolist()
         for i in range(len(columns)):
             data[columns[i]] = pandas_data[i]
-        index = pd_df.index.tolist()
+        # index = pd_df.index.tolist()
+        index = [ts.value // 10**6 for ts in pd_df.index.tolist()]
         index_name = pd_df.index.name
         index_name = 'index' if not index_name else index_name
         return rc.DataFrame(data=data, columns=columns, index=index, index_name=index_name)
@@ -329,6 +331,8 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
     def head(self, rows):
         return self.rc_df.head(rows)
 
+    def append_rows(self, indexes, values, new_cols=True):
+        self.rc_df.append_rows(indexes=indexes, values=values, new_cols=new_cols)
 #
 #
 #

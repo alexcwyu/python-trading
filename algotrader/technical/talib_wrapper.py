@@ -9,11 +9,12 @@ class TALibHLCFunction(FunctionWithPeriodsName):
                                                array_utils=array_utils)
 
     def __call__(self, data, *args, **kwargs):
-        high = self.array_utils(data['high'])
-        low = self.array_utils(data['low'])
-        close = self.array_utils(data['close'])
+        high = self.array_utils(data['High'])
+        low = self.array_utils(data['Low'])
+        close = self.array_utils(data['Close'])
         out_arr = self.func(high=high, low=low, close=close, timeperiod=self.periods, *args, **kwargs)
-        return {next(iter(self.output_columns)) : out_arr}
+        out_dict = {next(iter(self.output_columns)): out_arr.tolist()}
+        return out_dict
 
 
 class TALibHLCVFunction(FunctionWithPeriodsName):
@@ -23,10 +24,10 @@ class TALibHLCVFunction(FunctionWithPeriodsName):
                                                array_utils=array_utils)
 
     def __call__(self, data, *args, **kwargs):
-        high = self.array_utils(data['high'])
-        low = self.array_utils(data['low'])
-        close = self.array_utils(data['close'])
-        volume = self.array_utils(data['volume'])
+        high = self.array_utils(data['High'])
+        low = self.array_utils(data['Low'])
+        close = self.array_utils(data['Close'])
+        volume = self.array_utils(data['Volume'])
         out_arr = self.func(high=high, low=low, close=close, volume=volume, timeperiod=self.periods, *args, **kwargs)
         return {next(iter(self.output_columns)) : out_arr}
 
@@ -38,10 +39,10 @@ class TALibOHLCFunction(FunctionWithPeriodsName):
                                                 array_utils=array_utils)
 
     def __call__(self, data, *args, **kwargs):
-        openarr = self.array_utils(data['open'])
-        high = self.array_utils(data['high'])
-        low = self.array_utils(data['low'])
-        close = self.array_utils(data['close'])
+        openarr = self.array_utils(data['Open'])
+        high = self.array_utils(data['High'])
+        low = self.array_utils(data['Low'])
+        close = self.array_utils(data['Close'])
         out_arr = self.func(open=openarr, high=high, low=low, close=close, timeperiod=self.periods, *args, **kwargs)
         return {next(iter(self.output_columns)) : out_arr}
 
@@ -53,8 +54,8 @@ class TALibHLFunction(FunctionWithPeriodsName):
                                                 array_utils=array_utils)
 
     def __call__(self, data, *args, **kwargs):
-        high = self.array_utils(data['high'])
-        low = self.array_utils(data['low'])
+        high = self.array_utils(data['High'])
+        low = self.array_utils(data['Low'])
         out_arr = self.func(high=high, low=low, timeperiod=self.periods, *args, **kwargs)
         return {next(iter(self.output_columns)) : out_arr}
 

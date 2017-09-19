@@ -17,14 +17,6 @@ class FunctionWithPeriodsName(object):
         return self.func(periods=self.periods, *args, **kwargs)
 
 
-class TALibFunction(FunctionWithPeriodsName):
-    def __init__(self, periods, func, name=None, array_utils=iterable_to_np_array):
-        super(TALibFunction, self).__init__(periods=periods, func=func, name=name, array_utils=array_utils)
-
-    def __call__(self, *args, **kwargs):
-        return self.func(timeperiod=self.periods, *args, **kwargs)
-
-
 class ModelAsFunction(FunctionWithPeriodsName):
     def __init__(self, model, periods, name, array_utils):
         super(ModelAsFunction, self).__init__(periods=periods, func=None, name=name, array_utils=array_utils)
@@ -73,13 +65,6 @@ class DigitalFeedbackFilter(FunctionWithPeriodsName):
 def periods_function(periods, name=None):
     def function_wrapper(f):
         return FunctionWithPeriodsName(func=f, periods=periods, name=name)
-
-    return function_wrapper
-
-
-def talib_function(periods, name):
-    def function_wrapper(f):
-        return TALibFunction(func=f, periods=periods, name=name)
 
     return function_wrapper
 

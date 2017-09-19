@@ -19,8 +19,6 @@ from algotrader.utils.proto_series_helper import get_proto_series_data, set_prot
 
 from tests.test_series import SeriesTest
 
-
-
 class DataFrameTest(TestCase):
 
     stg_override = {
@@ -109,7 +107,7 @@ class DataFrameTest(TestCase):
 
         #df2 has series_dict
         df2 = DataFrameTest.create_df_backed_by_series_dict()
-        t3 = df2.index[-1].to_pydatetime() + timedelta(seconds=1)
+        t3 = unixtimemillis_to_datetime(df2.index[-1]) + timedelta(seconds=1)
         df2.append_row(t3, {"open" : 107, "close": 109})
 
 

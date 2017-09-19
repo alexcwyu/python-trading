@@ -191,8 +191,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             self.__frame_dict[df.df_id] = df
             if self._is_realtime_persist():
                 self.store.save_frame(df.to_proto_frame(self.app_context))
-        # elif raise_if_duplicate and self.__frame_dict[df.df_id] != df:
-        else:
+        elif raise_if_duplicate and self.__frame_dict[df.df_id] != df:
             raise AssertionError("Dataframe [%s] already exist" % df.df_id)
 
     def has_series(self, name):

@@ -63,7 +63,6 @@ class TALibWrapperTest(TestCase):
         self.pd_df.rename(columns={'Last' : 'Close'}, inplace=True)
         df = DataFrame.from_pd_dataframe(self.pd_df, 'Bar.HSI', 'test', 'HSI')
         df.start(app_context)
-        app_context.inst_data_mgr.add_frame(df)
 
         atr20f = atr20 * df
 
@@ -76,6 +75,33 @@ class TALibWrapperTest(TestCase):
                            np.array(self.pd_df.Low.values, dtype='f8'),
                            np.array(self.pd_df.Close.values, dtype='f8'), 20)
         self.__np_assert_almost_equal(target, atr20_df['atr20'].values)
+
+    # def test_bbands(self):
+    #     app_context = self.create_app_context(conf={
+    #         "Application": {
+    #             "createDBAtStart": True,
+    #             "deleteDBAtStop": False,
+    #             "persistenceMode": "RealTime"
+    #         }
+    #     })
+    #     app_context.start()
+    #     # print(self.pd_df.head())
+    #
+    #     self.pd_df.rename(columns={'Last' : 'Close'}, inplace=True)
+    #     df = DataFrame.from_pd_dataframe(self.pd_df, 'Bar.HSI', 'test', 'HSI')
+    #     df.start(app_context)
+    #
+    #     bbands20f = bbands20 * df
+    #
+    #     bbands20f.start(app_context)
+    #     bbands20f.evaluate()
+    #
+    #     bbands20_df = bbands20f.to_pd_dataframe()
+    #
+    #     target_u, target_m, target_l = talib.BBANDS(np.array(self.pd_df.Close.values, dtype='f8'), 20)
+    #     self.__np_assert_almost_equal(target_u, bbands20_df['UBand'].values)
+    #     self.__np_assert_almost_equal(target_m, bbands20_df['MBand'].values)
+    #     self.__np_assert_almost_equal(target_l, bbands20_df['LBand'].values)
 
 
 

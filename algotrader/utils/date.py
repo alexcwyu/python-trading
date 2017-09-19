@@ -16,7 +16,7 @@ def datetime_to_unixtimemillis(dt: datetime.datetime) -> int:
 #     return datetime.datetime.fromtimestamp(timestamp / 1000.0)
 
 def unixtimemillis_to_datetime(timestamp: int) -> datetime.datetime:
-    pd.to_datetime(timestamp, unit='ms').to_pydatetime()
+    return pd.to_datetime(timestamp, unit='ms').to_pydatetime()
 
 
 def datetime_to_timestamp(dt: datetime.datetime) -> int:

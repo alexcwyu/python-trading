@@ -19,9 +19,8 @@ class UpdateMode(Enum):
     ACTIVE_SUBSCRIBE = 2
 
 
-class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
-    def __init__(self, proto_series: proto.Series = None,
-                 series_id: str = None, df_id: str = None,
+class Series(Subscribable, Startable, Monad, Monoid):
+    def __init__(self, series_id: str = None, df_id: str = None,
                  col_id: str = None, inst_id: str = None,
                  provider_id: str = None,
                  dtype: np.dtype = np.float64,
@@ -31,36 +30,14 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
                  *args,
                  **kwargs
                  ):
-        if not proto_series:
-            # TODO try get the protoseries by series_id from DB
-            proto_series = None
-
-        if proto_series:
-            super(Series, self).__init__(data=get_proto_series_data(proto_series),
-                                         index=pd.to_datetime(list(proto_series.index), unit='ms').tolist(),
-                                         data_name=proto_series.col_id,
-                                         index_name="timestamp", use_blist=True,
-                                         value=None,
-                                         *args,
-                                         **kwargs)
-            self.series_id = proto_series.series_id
-            self.df_id = proto_series.df_id
-            self.col_id = proto_series.col_id
-            self.inst_id = proto_series.inst_id
-            self.provider_id = proto_series.provider_id
-            self.dtype = to_np_type(proto_series.dtype)
-        else:
-            super(Series, self).__init__(data_name=col_id, index_name="timestamp", use_blist=True, value=None,
-                                         *args,
-                                         **kwargs)
-
-            self.series_id = series_id
-            self.df_id = df_id
-            self.col_id = col_id
-            self.inst_id = inst_id
-            self.provider_id = provider_id
-            self.dtype = dtype
-
+        super(Series, self).__init__(value=None, *args, **kwargs)
+        self.rc_series = rc.Series(data_name=col_id, index_name='timestamp', use_blist=True)
+        self.series_id = series_id
+        self.df_id = df_id
+        self.col_id = col_id
+        self.inst_id = inst_id
+        self.provider_id = provider_id
+        self.dtype = dtype
         self.func = func
         self.parent_series_id = parent_series_id
         self.update_mode = update_mode
@@ -77,7 +54,8 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
 
     def add(self, timestamp, value):
         self.append_row(timestamp, value)
-        self.notify_downstream(None)
+        # self.rc_series.append_row(timestamp, value)
+        # self.notify_downstream(None)
         # self.subject.on_next(
         #     ModelFactory.build_time_series_update_event(source=self.series_id, timestamp=timestamp,
         #                                                 data={self.col_id: value}))
@@ -188,6 +166,9 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
     def on_update(self, event: TimeSeriesUpdateEvent):
         self.evaluate()
 
+    def to_dict(self, index=True, ordered=False):
+        return self.rc_series.to_dict(index=index, ordered=ordered)
+
     def to_proto_series(self) -> proto.Series:
         """
         Convert to Protobuf Series following Pandas's to_ notation
@@ -214,7 +195,8 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         :return:
         """
         series = cls()
-        series.append_rows(
+
+        series.rc_series.append_rows(
             # pd.to_datetime(list(proto_series.index), unit='ms').tolist(),
             list(proto_series.index),
             get_proto_series_data(proto_series))
@@ -233,8 +215,8 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         Convert to Pandas Series following Pandas's to_ notation
         :return: pd.Series
         """
-        data = self._data
-        index = self._index
+        data = self.data
+        index = self.index
         pd_series = pd.Series(data=data, index=pd.to_datetime(np.fromiter(index, dtype=np.int64), unit='ms'), name=self.data_name, dtype=self.dtype)
         pd_series.series_id = self.series_id
         pd_series.df_id = self.df_id
@@ -325,7 +307,7 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         Convert to numpy array following Pandas's to_ notation
         :return: numpy array
         """
-        return np.fromiter(self._data, dtype=to_np_type(self.dtype))
+        return np.fromiter(self.data, dtype=to_np_type(self.dtype))
 
     @classmethod
     def from_list(cls, dlist: list, dtype, index=None, series_id=None, df_id=None, col_id=None, inst_id=None,
@@ -351,3 +333,60 @@ class Series(rc.Series, Subscribable, Startable, Monad, Monoid):
         series.provider_id = provider_id
 
         return series
+
+    @property
+    def data(self):
+        return self.rc_series.data
+
+    @property
+    def index(self):
+        return self.rc_series.index
+
+    def __getitem__(self, index):
+        return self.rc_series.__getitem__(index)
+
+    def append_row(self, index, value):
+        self.rc_series.append_row(index, value)
+        self.notify_downstream(None)
+
+    def append_rows(self, indexes, values):
+        return self.rc_series.append_rows(indexes, values)
+        self.notify_downstream(None)
+
+    def tail(self, rows=5):
+        return self.rc_series.tail(rows=rows)
+
+    def head(self, rows=5):
+        return self.rc_series.head(rows=rows)
+
+    def show(self, index=True, **kwargs):
+        self.rc_series.show(index=index, **kwargs)
+
+    def get(self, indexes, as_list=False):
+        return self.rc_series.get(indexes=indexes, as_list=as_list)
+
+    def get_cell(self, index):
+        return self.rc_series.get_cell(index=index)
+
+    def get_rows(self, indexes, as_list=False):
+        return self.rc_series.get_rows(indexes=indexes, as_list=as_list)
+
+    def get_location(self, location):
+        return self.rc_series.get_location(location=location)
+
+    def get_locations(self, locations, as_list=False):
+        return self.rc_series.get_locations(locations=locations, as_list=as_list)
+
+    # TODO: See if this help evaluate()'s logic?
+    def get_slice(self, start_index=None, stop_index=None, as_list=False):
+        return self.rc_series.get_slice(start_index=start_index, stop_index=stop_index, as_list=as_list)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            #TODO: Replace with more efficient check without pandas?
+            return self.to_pd_series().equals(other.to_pd_series())
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)

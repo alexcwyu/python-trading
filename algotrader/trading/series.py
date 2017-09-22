@@ -339,6 +339,14 @@ class Series(Subscribable, Startable, Monad, Monoid):
         return self.rc_series.data
 
     @property
+    def data_name(self):
+        return self.rc_series.data_name
+
+    @data_name.setter
+    def data_name(self, name):
+        self.rc_series.data_name = name
+
+    @property
     def index(self):
         return self.rc_series.index
 
@@ -390,3 +398,12 @@ class Series(Subscribable, Startable, Monad, Monoid):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def __len__(self):
+        return len(self.rc_series)
+
+    def __repr__(self):
+        return self.rc_series.__repr__()
+
+    def __str__(self):
+        return self.rc_series.__str__()

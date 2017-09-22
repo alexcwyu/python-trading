@@ -40,12 +40,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         self.func = func
         self.update_mode = update_mode
 
-    def append_row(self, index, values, new_cols=True):
-        self.rc_df.append_row(index, values, new_cols)
-        if self.series_dict:
-            for col, val in values.items():
-                series = self.series_dict[col]
-                series.add(index, val)
+
 
 
 
@@ -266,7 +261,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
                 df_id = self.df_id
                 provider_id = self.provider_id
                 inst_id = self.inst_id
-                series_id = "%s.%s.%s" % (df_id, provider_id, col)
+                series_id = "%s.%s" % (df_id, col)
 
                 series = Series.from_list(dlist, dtype=np.float64, index=self.rc_df.index,
                                                           series_id=series_id, df_id=df_id,
@@ -337,6 +332,13 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
 
     def head(self, rows):
         return self.rc_df.head(rows)
+
+    def append_row(self, index, value, new_cols=True):
+        self.rc_df.append_row(index, value, new_cols)
+        if self.series_dict:
+            for col, val in value.items():
+                series = self.series_dict[col]
+                series.add(index, val)
 
     def append_rows(self, indexes, values, new_cols=True):
         self.rc_df.append_rows(indexes=indexes, values=values, new_cols=new_cols)

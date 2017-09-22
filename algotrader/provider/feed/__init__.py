@@ -14,6 +14,7 @@ class Feed(Provider):
     PandasMemory = "PandasMemory"
     PandasH5 = "PandasH5"
     PandasWeb = "PandasWeb"
+    PandasDB = "PandasDB"
     Yahoo = "Yahoo"
     Google = "Google"
     Quandl = "Quandl"

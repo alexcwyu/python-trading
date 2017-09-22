@@ -2,17 +2,18 @@ import numpy as np
 
 from algotrader import Manager, Context
 from algotrader.model.model_factory import ModelFactory
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.time_series_pb2 import *
 from algotrader.provider.datastore import PersistenceMode
 # from algotrader.trading.data_series import DataSeries
 from algotrader.trading.event import MarketDataEventHandler
 from algotrader.trading.series import Series
 from algotrader.trading.data_frame import DataFrame
 from algotrader.utils.logging import logger
-from algotrader.utils.market_data import get_series_id
+from algotrader.utils.market_data import get_series_id, get_frame_id
 from algotrader.utils.model import get_full_cls_name, get_cls
+from algotrader.utils.protobuf_to_dict import protobuf_to_dict
 
-from algotrader.model.market_data_pb2 import *
-from algotrader.model.time_series_pb2 import *
 
 class InstrumentDataManager(MarketDataEventHandler, Manager):
     def __init__(self):
@@ -90,6 +91,16 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         #     timestamp=bar.timestamp,
         #     data={"open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
         #      "vol": bar.vol})
+
+        # a universal frame store all bars?
+        # self.frame().append_row(
+        #     index=(bar.timestamp, bar.inst_id),
+        #     value=protobuf_to_dict(bar))
+
+        self.get_frame(get_frame_id(bar), provider_id=bar.provider_id, inst_id=bar.inst_id).append_row(
+            index=(bar.timestamp, bar.inst_id),
+            value=protobuf_to_dict(bar)
+        )
         self.get_series(get_series_id(bar, tags='close')).add(
             timestamp=bar.timestamp,
             value=bar.close)
@@ -179,12 +190,12 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         elif raise_if_duplicate and self.__series_dict[series.series_id] != series:
             raise AssertionError("Series [%s] already exist" % series.series_id)
 
-    def get_frame(self, key):
+    def get_frame(self, key, provider_id=None, inst_id=None, columns=None):
         if isinstance(key, str):
             if key not in self.__frame_dict:
-                raise AssertionError("No frame with df_id = %s" % key)
-            else:
-                return self.__frame_dict[key]
+                # raise AssertionError("No frame with df_id = %s" % key)
+                self.__frame_dict[key] = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns)
+            return self.__frame_dict[key]
 
     def add_frame(self, df : DataFrame, raise_if_duplicate=True):
         if df.df_id not in self.__frame_dict:

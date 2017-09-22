@@ -23,11 +23,11 @@ def talib_function(periods, name):
 """
 The following Function Decorator is used to composite with Dataframe
 """
-class TALib1Input3OutputFunction(FunctionWithPeriodsName):
+class TALibMonoInputTriOutputsFunction(FunctionWithPeriodsName):
     def __init__(self, periods, func, output_cols, input_col='Close', name=None, array_utils=iterable_to_np_array):
-        super(TALib1Input3OutputFunction, self).__init__(periods=periods, func=func, name=name,
-                                                 output_columns=output_cols,
-                                                 array_utils=array_utils)
+        super(TALibMonoInputTriOutputsFunction, self).__init__(periods=periods, func=func, name=name,
+                                                               output_columns=output_cols,
+                                                               array_utils=array_utils)
         self.input_col = input_col
 
     def __call__(self, data, *args, **kwargs):
@@ -125,12 +125,12 @@ def talib_hl_function(periods, name, output_cols):
 
 def talib_1I3O_function(periods, name, input_col, output_cols):
     def function_wrapper(f):
-        return TALib1Input3OutputFunction(func=f, periods=periods, name=name, input_col=input_col, output_cols=output_cols)
+        return TALibMonoInputTriOutputsFunction(func=f, periods=periods, name=name, input_col=input_col, output_cols=output_cols)
 
     return function_wrapper
 
 
 # some predefined decorated function as example
 atr20 = talib_hlc_function(20, 'ATR20', ['atr20'])(talib.ATR)
-bbands20 = talib_1I3O_function(5, 'BBBand5', 'Close', ['UBand', 'MBand', 'LBand'])(talib.BBANDS)
+bbands20 = talib_1I3O_function(20, 'BBBand5', 'Close', ['UBand', 'MBand', 'LBand'])(talib.BBANDS)
 

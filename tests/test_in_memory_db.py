@@ -26,7 +26,7 @@ class InMemoryDBTest(TestCase):
             data = sorted([random.randint(0, 100) for i in range(0, 4)])
             bar = ModelFactory.build_bar(timestamp=x, inst_id="3", open=data[1], high=data[3], low=data[0],
                                          close=data[2],
-                                         vol=random.randint(100, 1000))
+                                         volume=random.randint(100, 1000))
             inputs.append(bar)
             self.db.save_bar(bar)
 

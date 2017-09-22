@@ -14,8 +14,8 @@ class OrderHandlerTest(TestCase):
     def test_limit_order_handler(self):
         handler = LimitOrderHandler(self.config)
 
-        bar1 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=20, high=21, low=19, close=20.5, vol=1000)
-        bar2 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=16, high=18, low=15, close=17, vol=1000)
+        bar1 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=20, high=21, low=19, close=20.5, volume=1000)
+        bar2 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=16, high=18, low=15, close=17, volume=1000)
 
         # BUY
         order = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id="1", inst_id="1", action=Buy,
@@ -73,8 +73,8 @@ class OrderHandlerTest(TestCase):
     def test_stop_order_handler(self):
         handler = StopOrderHandler(self.config)
 
-        bar1 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=20, high=21, low=19, close=20.5, vol=1000)
-        bar2 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=16, high=18, low=15, close=17, vol=1000)
+        bar1 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=20, high=21, low=19, close=20.5, volume=1000)
+        bar2 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=16, high=18, low=15, close=17, volume=1000)
 
         # BUY
         order1 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id="1", inst_id="1", action=Buy,
@@ -131,8 +131,8 @@ class OrderHandlerTest(TestCase):
     def test_StopLimit_order_handler(self):
         handler = StopLimitOrderHandler(self.config)
 
-        bar1 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=20, high=21, low=19, close=20.5, vol=1000)
-        bar2 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=16, high=18, low=15, close=17, vol=1000)
+        bar1 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=20, high=21, low=19, close=20.5, volume=1000)
+        bar2 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=16, high=18, low=15, close=17, volume=1000)
 
         # BUY
         order1 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id="1", inst_id="1", action=Buy,
@@ -213,11 +213,11 @@ class OrderHandlerTest(TestCase):
     def test_trailing_stop_order_handler(self):
         handler = TrailingStopOrderHandler(self.config)
 
-        bar1 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=16, high=18, low=15, close=17, vol=1000)
-        bar2 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=17, high=19, low=16, close=18, vol=1000)
-        bar3 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=18, high=20, low=17, close=19, vol=1000)
-        bar4 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=19, high=21, low=18, close=20, vol=1000)
-        bar5 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=20, high=22, low=19, close=21, vol=1000)
+        bar1 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=16, high=18, low=15, close=17, volume=1000)
+        bar2 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=17, high=19, low=16, close=18, volume=1000)
+        bar3 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=18, high=20, low=17, close=19, volume=1000)
+        bar4 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=19, high=21, low=18, close=20, volume=1000)
+        bar5 = ModelFactory.build_bar(timestamp=0, inst_id="1", open=20, high=22, low=19, close=21, volume=1000)
 
         # BUY with bar
         order1 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id="1", inst_id="1", action=Buy,

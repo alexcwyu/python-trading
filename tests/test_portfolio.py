@@ -122,7 +122,7 @@ class PortfolioTest(TestCase):
         self.assertEqual(expected_stock_value, self.portfolio.performance.series.get_by_idx(1, 'stock_value'))
         self.assertEqual(expected_total_equity, self.portfolio.performance.series.get_by_idx(1, 'total_equity'))
 
-        self.portfolio.on_bar(ModelFactory.build_bar(inst_id='HSI@SEHK', close=16, adj_close=16, vol=1000, timestamp=3))
+        self.portfolio.on_bar(ModelFactory.build_bar(inst_id='HSI@SEHK', close=16, adj_close=16, volume=1000, timestamp=3))
         expected_cash = 100000 - 500 * 18.4
         expected_stock_value = 500 * 16
         expected_total_equity = expected_cash + expected_stock_value

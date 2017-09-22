@@ -80,7 +80,7 @@ class PandasDataFeed(Feed):
             high=row['High'],
             low=row['Low'],
             close=row['Close'],
-            vol=row['Volume'],
+            volume=row['Volume'],
             adj_close=row['Adj Close'] if 'Adj Close' in row else None,
             size=row['BarSize'])
 

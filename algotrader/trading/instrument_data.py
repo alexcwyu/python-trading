@@ -119,7 +119,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
         self.get_series(get_series_id(bar, tags='volume')).add(
             timestamp=bar.timestamp,
-            value=bar.vol)
+            value=bar.volume)
 
         if self._is_realtime_persist():
             self.store.save_bar(bar)

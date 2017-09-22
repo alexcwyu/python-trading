@@ -103,7 +103,7 @@ class SampleFactory(object):
 
     def sample_bar(self):
         bar = ModelFactory.build_bar("HSI@SEHK", Bar.Time, 86400, provider_id='IB', timestamp=12312,
-                                     utc_time=12312, begin_time=12300, open=123, high=300, low=30, close=156, vol=500,
+                                     utc_time=12312, begin_time=12300, open=123, high=300, low=30, close=156, volume=500,
                                      adj_close=324, open_interest=123)
 
         return bar

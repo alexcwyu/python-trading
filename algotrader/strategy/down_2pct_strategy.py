@@ -1,8 +1,9 @@
+import talib
+
 from algotrader import Context
 from algotrader.model.trade_data_pb2 import *
 from algotrader.strategy import Strategy
-import talib
-from algotrader.utils.function_wrapper import talib_function
+from algotrader.technical.talib_wrapper import talib_function
 
 
 class Down2PctStrategy(Strategy):

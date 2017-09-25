@@ -41,15 +41,15 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def load_all(self):
         if self.store:
             self.store.start(self.app_context)
-            proto_series_list = self.store.load_all('series')
-            for ps in proto_series_list:
-                series = Series.from_proto_series(ps)
-                self.__series_dict[series.series_id] = series
-
-            proto_frame_list = self.store.load_all("frame")
-            for bd in proto_frame_list:
-                df = DataFrame.from_proto_frame(bd, app_context=self.app_context)
-                self.__frame_dict[df.df_id] = df
+            # proto_series_list = self.store.load_all('series')
+            # for ps in proto_series_list:
+            #     series = Series.from_proto_series(ps)
+            #     self.__series_dict[series.series_id] = series
+            #
+            # proto_frame_list = self.store.load_all("frame")
+            # for bd in proto_frame_list:
+            #     df = DataFrame.from_proto_frame(bd, app_context=self.app_context)
+            #     self.__frame_dict[df.df_id] = df
 
             bars = self.store.load_all("bars")
             for bar in bars:
@@ -174,10 +174,11 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def get_series(self, key, df_id=None, col_id=None, inst_id=None):
         if type(key) == str:
             if key not in self.__series_dict:
-                # self.__series_dict[key] = cls(
-                #     time_series=ModelFactory.build_time_series(series_id=key, series_cls=get_full_cls_name(cls), desc=desc,
-                #                                                missing_value_replace=missing_value))
-                self.__series_dict[key] = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64)
+                if self.store.obj_exist('series', key):
+                    proto_series = self.store.load_one('series', key)
+                    self.__series_dict[key] = Series.from_proto_series(proto_series)
+                else:
+                    self.__series_dict[key] = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64)
             return self.__series_dict[key]
         raise AssertionError()
 
@@ -186,15 +187,17 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             self.__series_dict[series.series_id] = series
             if self._is_realtime_persist():
                 self.store.save_series(series.to_proto_series())
-                # self.store.save_time_series(series.time_series)
         elif raise_if_duplicate and self.__series_dict[series.series_id] != series:
             raise AssertionError("Series [%s] already exist" % series.series_id)
 
     def get_frame(self, key, provider_id=None, inst_id=None, columns=None):
         if isinstance(key, str):
             if key not in self.__frame_dict:
-                # raise AssertionError("No frame with df_id = %s" % key)
-                self.__frame_dict[key] = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns)
+                if self.store.obj_exist('frame', key):
+                    proto_frame = self.store.load_one('frame', key)
+                    self.__frame_dict[key] = DataFrame.from_proto_frame(proto_frame, app_context=self.app_context)
+                else:
+                    self.__frame_dict[key] = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns)
             return self.__frame_dict[key]
 
     def add_frame(self, df : DataFrame, raise_if_duplicate=True):

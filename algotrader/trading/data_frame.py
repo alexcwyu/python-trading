@@ -337,8 +337,10 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         self.rc_df.append_row(index, value, new_cols)
         if self.series_dict:
             for col, val in value.items():
-                series = self.series_dict[col]
-                series.add(index, val)
+                # TODO: CREATE A NEW ROW!:W
+                if col in self.series_dict.keys():
+                    series = self.series_dict[col]
+                    series.add(index, val)
 
     def append_rows(self, indexes, values, new_cols=True):
         self.rc_df.append_rows(indexes=indexes, values=values, new_cols=new_cols)

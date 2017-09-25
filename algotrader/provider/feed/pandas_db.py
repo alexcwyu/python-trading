@@ -11,7 +11,7 @@ class PandaDBDataFeed(PandasDataFeed):
     """
 
     def __init__(self):
-        super(PandaDBDataFeed, self).__init__()
+        super(PandaDBDataFeed, self).__init__(datetime_as_index=False)
 
     def _start(self, app_context: Context) -> None:
         self.provider_id = self._get_feed_config("provider_id")

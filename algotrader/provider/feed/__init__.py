@@ -39,6 +39,9 @@ class Feed(Provider):
 class PandasDataFeed(Feed):
     __metaclass__ = abc.ABCMeta
 
+    def __init__(self, datetime_as_index=False):
+        self.datetime_as_index = datetime_as_index
+
     def subscribe_mktdata(self, *sub_reqs):
         self._verify_subscription(*sub_reqs);
         sub_req_ranges = {}
@@ -65,7 +68,7 @@ class PandasDataFeed(Feed):
 
         for index, row in df.iterrows():
             inst = insts[row['InstId']]
-            timestamp = datetime_to_unixtimemillis(index)
+            timestamp = datetime_to_unixtimemillis(index) if self.datetime_as_index else index
             if self._within_range(row['InstId'], timestamp, sub_req_ranges):
                 bar = self._build_bar(row, timestamp)
                 self.app_context.event_bus.data_subject.on_next(bar)
@@ -76,12 +79,13 @@ class PandasDataFeed(Feed):
             type=Bar.Time,
             provider_id=row['ProviderId'],
             timestamp=timestamp,
-            open=row['Open'],
-            high=row['High'],
-            low=row['Low'],
-            close=row['Close'],
-            volume=row['Volume'],
-            adj_close=row['Adj Close'] if 'Adj Close' in row else None,
+            open=row['open'],
+            high=row['high'],
+            low=row['low'],
+            close=row['close'],
+            volume=row['volume'],
+            # adj_close=row['Adj Close'] if 'Adj Close' in row else None,
+            adj_close=row['adj_close'],
             size=row['BarSize'])
 
     @abc.abstractmethod

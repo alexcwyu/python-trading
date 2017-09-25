@@ -27,6 +27,14 @@ class DataStore(Provider):
     def load_all(self, clazz):
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def obj_exist(self, clazz, key):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def load_one(self, clazz, key):
+        raise NotImplementedError()
+
     def create_database(self):
         pass
 

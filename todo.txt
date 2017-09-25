@@ -2,6 +2,11 @@
 - to and from pandas
 - to and from Protobuf
 
+there is a bug in dataframe. When bar has a attribute that no inside the dataframe load, and when we append,
+in the rc's dataframe we supposed to add a new column. But the "series_dict" part is now missing.
+So we have to refactor the add column in "to_series_dict" and let append_row to call add column when the "col" is not in the
+series_dict's key
+
 - persist to and from DB
 - serialize and deserialize via network
 
@@ -140,4 +145,6 @@ df.index[0].value // 10**9
 Out[22]: 1504139782
 date_to_unixtimemillis(now)
 Out[23]: 1504108800000
+
+
 

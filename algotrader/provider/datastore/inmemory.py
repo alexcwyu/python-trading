@@ -90,6 +90,19 @@ class InMemoryDataStore(SimpleDataStore):
             result.append(obj)
         return result
 
+    def obj_exist(self, db, key):
+        if db == 'sequences':
+            return False
+        return key in self.db.keys()
+
+    def load_one(self, db, key):
+        if db == 'sequences':
+            return self.sequences
+        clazz = get_model_from_db_name(db)
+        data = self.db.get(key)
+        obj = dict_to_model(clazz, data)
+        return obj
+
     def load_from_csv(self, inst_csv, ccy_csv, exch_csv):
         load_inst_from_csv(self, inst_csv)
         load_ccy_from_csv(self, ccy_csv)

@@ -54,8 +54,7 @@ class StrategyPlotter:
         series = self.strategy.app_context.inst_data_mgr.get_series(key)
         # key = series_dict.keys()[0]
 
-        # TODO: axisbg is deprecated
-        ax_stock = fig.add_axes(rect_stock, axisbg=axescolor)  # left, bottom, width, height
+        ax_stock = fig.add_axes(rect_stock, facecolor=axescolor)  # left, bottom, width, height
 
         # pmax = series.max()
         ax_stock.text(0.025, 0.95, 'Chart', va='top', transform=ax_stock.transAxes, fontsize=textsize)
@@ -80,14 +79,14 @@ class StrategyPlotter:
         return ax_stock, ax_stock_t
 
     def _plot_indicator(self, fig, ax_stock):
-        ax_indicator = fig.add_axes(rect_indicator, axisbg=axescolor, sharex=ax_stock)
+        ax_indicator = fig.add_axes(rect_indicator, facecolor=axescolor, sharex=ax_stock)
         ax_indicator.text(0.025, 0.95, 'Indicator', va='top', transform=ax_indicator.transAxes, fontsize=textsize)
         # s2.plot(ax=ax_indicator)
 
         return ax_indicator
 
     def _plot_equity(self, fig, ax_stock):
-        ax_equity = fig.add_axes(rect_equity, axisbg=axescolor, sharex=ax_stock)
+        ax_equity = fig.add_axes(rect_equity, facecolor=axescolor, sharex=ax_stock)
         ax_equity.text(0.025, 0.95, 'Equity', va='top', transform=ax_equity.transAxes, fontsize=textsize)
 
         if self.strategy.get_portfolio().performance.series.size() > 0:
@@ -98,7 +97,7 @@ class StrategyPlotter:
 
     def _plot_pnl(self, fig, ax_stock):
 
-        ax_pnl = fig.add_axes(rect_pnl, axisbg=axescolor, sharex=ax_stock)
+        ax_pnl = fig.add_axes(rect_pnl, facecolor=axescolor, sharex=ax_stock)
         ax_pnl.text(0.025, 0.95, 'Pnl', va='top', transform=ax_pnl.transAxes, fontsize=textsize)
 
         result = self.strategy.get_portfolio().get_series()
@@ -110,7 +109,7 @@ class StrategyPlotter:
 
     def _plot_draw_down(self, fig, ax_stock):
 
-        ax_drawdown = fig.add_axes(rect_drawdown, axisbg=axescolor, sharex=ax_stock)
+        ax_drawdown = fig.add_axes(rect_drawdown, facecolor=axescolor, sharex=ax_stock)
         ax_drawdown.text(0.025, 0.95, 'Drawdown', va='top', transform=ax_drawdown.transAxes, fontsize=textsize)
 
         result = self.strategy.get_portfolio().get_series()

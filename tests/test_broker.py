@@ -56,8 +56,8 @@ class SimulatorTest(TestCase):
         exec_report = self.exec_handler.exec_reports[0]
         self.assert_exec_report(exec_report, nos.cl_id, nos.cl_ord_id, 0, 0, Submitted)
 
-        bar1 = ModelFactory.build_bar(timestamp=0, inst_id="HSI@SEHK", open=20, high=21, low=19, close=20.5, vol=1000)
-        bar2 = ModelFactory.build_bar(timestamp=1, inst_id="HSI@SEHK", open=16, high=18, low=15, close=17, vol=1000)
+        bar1 = ModelFactory.build_bar(timestamp=0, inst_id="HSI@SEHK", open=20, high=21, low=19, close=20.5, volume=1000)
+        bar2 = ModelFactory.build_bar(timestamp=1, inst_id="HSI@SEHK", open=16, high=18, low=15, close=17, volume=1000)
 
         self.exec_handler.reset()
         self.simulator.on_bar(bar1)
@@ -71,7 +71,7 @@ class SimulatorTest(TestCase):
 
     def test_on_limit_order_immediate_fill(self):
         # bar1 = Bar(inst_id=1, open=20, high=21, low=19, close=20.5, vol=1000)
-        bar2 = ModelFactory.build_bar(timestamp=1, inst_id="HSI@SEHK", open=16, high=18, low=15, close=17, vol=1000)
+        bar2 = ModelFactory.build_bar(timestamp=1, inst_id="HSI@SEHK", open=16, high=18, low=15, close=17, volume=1000)
 
         self.app_context.inst_data_mgr.on_bar(bar2)
 

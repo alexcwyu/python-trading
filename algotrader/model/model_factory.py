@@ -260,7 +260,7 @@ class ModelFactory(object):
 
     @staticmethod
     def build_bar(inst_id: str, type: Bar.Type = None, size: int = None, provider_id: str = None, timestamp: int = None,
-                  open: float = None, high: float = None, low: float = None, close: float = None, vol: float = None,
+                  open: float = None, high: float = None, low: float = None, close: float = None, volume: float = None,
                   adj_close: float = None,
                   open_interest: float = None,
                   utc_time: int = None, begin_time: int = None) -> Bar:
@@ -282,8 +282,8 @@ class ModelFactory(object):
             bar.low = low
         if close:
             bar.close = close
-        if vol:
-            bar.vol = vol
+        if volume:
+            bar.volume = volume
         if adj_close:
             bar.adj_close = adj_close
         if open_interest:

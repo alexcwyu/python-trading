@@ -23,9 +23,12 @@ message Bar {
     double high = 10;
     double low = 11;
     double close = 12;
-    double vol = 13;
+    double volume = 13;
     double adj_close = 14;
     double open_interest = 15;
+    double prev_open_interest = 16;
+    double num_trades = 17;
+    double settled = 18;
 }
 
 message Quote {

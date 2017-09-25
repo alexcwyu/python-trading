@@ -29,7 +29,7 @@ class BarProcessor(MarketDataProcessor):
     def get_qty(self, new_ord_req, market_data, config):
         if config.partial_fill:
             bar_vol = math.trunc(
-                market_data.vol if not config.bar_vol_ratio else market_data.vol * config.bar_vol_ratio)
+                market_data.volume if not config.bar_vol_ratio else market_data.volume * config.bar_vol_ratio)
             return min(new_ord_req.qty, bar_vol)
         return new_ord_req.qty
 

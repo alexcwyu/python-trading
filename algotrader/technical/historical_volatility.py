@@ -1,7 +1,8 @@
 
 import numpy as np
 
-from algotrader.utils.function_wrapper import *
+from algotrader.technical.function_wrapper import *
+
 
 def rolling_window(arr, periods):
     shape = arr.shape[:-1] + (arr.shape[-1] - periods + 1, periods)

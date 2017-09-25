@@ -7,7 +7,7 @@ class Slippage(object):
     __metaclass__ = abc.ABCMeta
 
     def calc_price_w_bar(self, new_ord_req, price, qty, bar):
-        return self.calc_price(new_ord_req, price, qty, bar.vol)
+        return self.calc_price(new_ord_req, price, qty, bar.volume)
 
     def calc_price_w_quote(self, new_ord_req, price, qty, quote):
         if is_buy(new_ord_req):

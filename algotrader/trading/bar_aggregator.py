@@ -169,7 +169,7 @@ class BarAggregator(MarketDataEventHandler, Startable):
                       high=self.__high,
                       low=self.__low,
                       close=self.__close,
-                      vol=self.__volume,
+                      volume=self.__volume,
                       adj_close=0,
                       size=self.__output_size,
                       type=self.__output_bar_type)

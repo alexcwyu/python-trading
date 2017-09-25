@@ -14,7 +14,7 @@ class MarketDataProcessorTest(TestCase):
         order = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id="1", inst_id="1", action=Buy,
                                                      type=Limit,
                                                      qty=1000, limit_price=18.5)
-        bar = ModelFactory.build_bar(timestamp=0, inst_id="1", open=18, high=19, low=17, close=17.5, vol=1000)
+        bar = ModelFactory.build_bar(timestamp=0, inst_id="1", open=18, high=19, low=17, close=17.5, volume=1000)
 
         self.assertEqual(17.5, processor.get_price(order, bar, config))
         self.assertEqual(1000, processor.get_qty(order, bar, config))

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='algotrader/model/market_data.proto',
   package='algotrader.model',
   syntax='proto3',
-  serialized_pb=_b('\n\"algotrader/model/market_data.proto\x12\x10\x61lgotrader.model\"\xc0\x02\n\x03\x42\x61r\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bprovider_id\x18\x02 \x01(\t\x12(\n\x04type\x18\x03 \x01(\x0e\x32\x1a.algotrader.model.Bar.Type\x12\x0c\n\x04size\x18\x04 \x01(\x05\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\x12\x10\n\x08utc_time\x18\x06 \x01(\x03\x12\x12\n\nbegin_time\x18\x07 \x01(\x03\x12\x0c\n\x04open\x18\t \x01(\x01\x12\x0c\n\x04high\x18\n \x01(\x01\x12\x0b\n\x03low\x18\x0b \x01(\x01\x12\r\n\x05\x63lose\x18\x0c \x01(\x01\x12\x0b\n\x03vol\x18\r \x01(\x01\x12\x11\n\tadj_close\x18\x0e \x01(\x01\x12\x15\n\ropen_interest\x18\x0f \x01(\x01\"3\n\x04Type\x12\x08\n\x04Time\x10\x00\x12\x08\n\x04Tick\x10\x01\x12\n\n\x06Volume\x10\x02\x12\x0b\n\x07\x44ynamic\x10\x03\"\x90\x01\n\x05Quote\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bprovider_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08utc_time\x18\x04 \x01(\x03\x12\x0b\n\x03\x62id\x18\x05 \x01(\x01\x12\x10\n\x08\x62id_size\x18\x06 \x01(\x01\x12\x0b\n\x03\x61sk\x18\x07 \x01(\x01\x12\x10\n\x08\x61sk_size\x18\x08 \x01(\x01\"o\n\x05Trade\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bprovider_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08utc_time\x18\x04 \x01(\x03\x12\r\n\x05price\x18\x05 \x01(\x01\x12\x0c\n\x04size\x18\x06 \x01(\x01\"\xd5\x02\n\x0bMarketDepth\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bprovider_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08utc_time\x18\x04 \x01(\x03\x12\x13\n\x0bmd_provider\x18\x05 \x01(\t\x12\x10\n\x08position\x18\x06 \x01(\x03\x12:\n\toperation\x18\x07 \x01(\x0e\x32\'.algotrader.model.MarketDepth.Operation\x12\x30\n\x04side\x18\x08 \x01(\x0e\x32\".algotrader.model.MarketDepth.Side\x12\r\n\x05price\x18\t \x01(\x01\x12\x0c\n\x04size\x18\n \x01(\x01\"\x18\n\x04Side\x12\x07\n\x03\x41sk\x10\x00\x12\x07\n\x03\x42id\x10\x01\"/\n\tOperation\x12\n\n\x06Insert\x10\x00\x12\n\n\x06Update\x10\x01\x12\n\n\x06\x44\x65lete\x10\x02\"\xbd\x02\n\x1dMarketDataSubscriptionRequest\x12\x44\n\x04type\x18\x01 \x01(\x0e\x32\x36.algotrader.model.MarketDataSubscriptionRequest.MDType\x12\x0f\n\x07inst_id\x18\x02 \x01(\t\x12\x0f\n\x07\x66\x65\x65\x64_id\x18\x03 \x01(\t\x12\x16\n\x0emd_provider_id\x18\x04 \x01(\t\x12,\n\x08\x62\x61r_type\x18\x05 \x01(\x0e\x32\x1a.algotrader.model.Bar.Type\x12\x10\n\x08\x62\x61r_size\x18\x06 \x01(\x05\x12\x11\n\tfrom_date\x18\x07 \x01(\x03\x12\x0f\n\x07to_date\x18\x08 \x01(\x03\"8\n\x06MDType\x12\x07\n\x03\x42\x61r\x10\x00\x12\t\n\x05Trade\x10\x01\x12\t\n\x05Quote\x10\x02\x12\x0f\n\x0bMarketDepth\x10\x03\"\xb9\x02\n\x15\x42\x61rAggregationRequest\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bprovider_id\x18\x02 \x01(\t\x12\x45\n\ninput_type\x18\x03 \x01(\x0e\x32\x31.algotrader.model.BarAggregationRequest.InputType\x12\x16\n\x0einput_bar_size\x18\x04 \x01(\x05\x12/\n\x0boutput_type\x18\x05 \x01(\x0e\x32\x1a.algotrader.model.Bar.Type\x12\x13\n\x0boutput_size\x18\x06 \x01(\x05\"U\n\tInputType\x12\x07\n\x03\x42\x61r\x10\x00\x12\t\n\x05Trade\x10\x01\x12\x07\n\x03\x42id\x10\x02\x12\x07\n\x03\x41sk\x10\x03\x12\n\n\x06\x42idAsk\x10\x04\x12\n\n\x06Middle\x10\x05\x12\n\n\x06Spread\x10\x06\x62\x06proto3')
+  serialized_pb=_b('\n\"algotrader/model/market_data.proto\x12\x10\x61lgotrader.model\"\x84\x03\n\x03\x42\x61r\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bprovider_id\x18\x02 \x01(\t\x12(\n\x04type\x18\x03 \x01(\x0e\x32\x1a.algotrader.model.Bar.Type\x12\x0c\n\x04size\x18\x04 \x01(\x05\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\x12\x10\n\x08utc_time\x18\x06 \x01(\x03\x12\x12\n\nbegin_time\x18\x07 \x01(\x03\x12\x0c\n\x04open\x18\t \x01(\x01\x12\x0c\n\x04high\x18\n \x01(\x01\x12\x0b\n\x03low\x18\x0b \x01(\x01\x12\r\n\x05\x63lose\x18\x0c \x01(\x01\x12\x0e\n\x06volume\x18\r \x01(\x01\x12\x11\n\tadj_close\x18\x0e \x01(\x01\x12\x15\n\ropen_interest\x18\x0f \x01(\x01\x12\x1a\n\x12prev_open_interest\x18\x10 \x01(\x01\x12\x12\n\nnum_trades\x18\x11 \x01(\x01\x12\x0f\n\x07settled\x18\x12 \x01(\x01\"3\n\x04Type\x12\x08\n\x04Time\x10\x00\x12\x08\n\x04Tick\x10\x01\x12\n\n\x06Volume\x10\x02\x12\x0b\n\x07\x44ynamic\x10\x03\"\x90\x01\n\x05Quote\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bprovider_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08utc_time\x18\x04 \x01(\x03\x12\x0b\n\x03\x62id\x18\x05 \x01(\x01\x12\x10\n\x08\x62id_size\x18\x06 \x01(\x01\x12\x0b\n\x03\x61sk\x18\x07 \x01(\x01\x12\x10\n\x08\x61sk_size\x18\x08 \x01(\x01\"o\n\x05Trade\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bprovider_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08utc_time\x18\x04 \x01(\x03\x12\r\n\x05price\x18\x05 \x01(\x01\x12\x0c\n\x04size\x18\x06 \x01(\x01\"\xd5\x02\n\x0bMarketDepth\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bprovider_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x10\n\x08utc_time\x18\x04 \x01(\x03\x12\x13\n\x0bmd_provider\x18\x05 \x01(\t\x12\x10\n\x08position\x18\x06 \x01(\x03\x12:\n\toperation\x18\x07 \x01(\x0e\x32\'.algotrader.model.MarketDepth.Operation\x12\x30\n\x04side\x18\x08 \x01(\x0e\x32\".algotrader.model.MarketDepth.Side\x12\r\n\x05price\x18\t \x01(\x01\x12\x0c\n\x04size\x18\n \x01(\x01\"\x18\n\x04Side\x12\x07\n\x03\x41sk\x10\x00\x12\x07\n\x03\x42id\x10\x01\"/\n\tOperation\x12\n\n\x06Insert\x10\x00\x12\n\n\x06Update\x10\x01\x12\n\n\x06\x44\x65lete\x10\x02\"\xbd\x02\n\x1dMarketDataSubscriptionRequest\x12\x44\n\x04type\x18\x01 \x01(\x0e\x32\x36.algotrader.model.MarketDataSubscriptionRequest.MDType\x12\x0f\n\x07inst_id\x18\x02 \x01(\t\x12\x0f\n\x07\x66\x65\x65\x64_id\x18\x03 \x01(\t\x12\x16\n\x0emd_provider_id\x18\x04 \x01(\t\x12,\n\x08\x62\x61r_type\x18\x05 \x01(\x0e\x32\x1a.algotrader.model.Bar.Type\x12\x10\n\x08\x62\x61r_size\x18\x06 \x01(\x05\x12\x11\n\tfrom_date\x18\x07 \x01(\x03\x12\x0f\n\x07to_date\x18\x08 \x01(\x03\"8\n\x06MDType\x12\x07\n\x03\x42\x61r\x10\x00\x12\t\n\x05Trade\x10\x01\x12\t\n\x05Quote\x10\x02\x12\x0f\n\x0bMarketDepth\x10\x03\"\xb9\x02\n\x15\x42\x61rAggregationRequest\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x13\n\x0bprovider_id\x18\x02 \x01(\t\x12\x45\n\ninput_type\x18\x03 \x01(\x0e\x32\x31.algotrader.model.BarAggregationRequest.InputType\x12\x16\n\x0einput_bar_size\x18\x04 \x01(\x05\x12/\n\x0boutput_type\x18\x05 \x01(\x0e\x32\x1a.algotrader.model.Bar.Type\x12\x13\n\x0boutput_size\x18\x06 \x01(\x05\"U\n\tInputType\x12\x07\n\x03\x42\x61r\x10\x00\x12\t\n\x05Trade\x10\x01\x12\x07\n\x03\x42id\x10\x02\x12\x07\n\x03\x41sk\x10\x03\x12\n\n\x06\x42idAsk\x10\x04\x12\n\n\x06Middle\x10\x05\x12\n\n\x06Spread\x10\x06\x62\x06proto3')
 )
 
 
@@ -49,8 +49,8 @@ _BAR_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=326,
-  serialized_end=377,
+  serialized_start=394,
+  serialized_end=445,
 )
 _sym_db.RegisterEnumDescriptor(_BAR_TYPE)
 
@@ -71,8 +71,8 @@ _MARKETDEPTH_SIDE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=908,
-  serialized_end=932,
+  serialized_start=976,
+  serialized_end=1000,
 )
 _sym_db.RegisterEnumDescriptor(_MARKETDEPTH_SIDE)
 
@@ -97,8 +97,8 @@ _MARKETDEPTH_OPERATION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=934,
-  serialized_end=981,
+  serialized_start=1002,
+  serialized_end=1049,
 )
 _sym_db.RegisterEnumDescriptor(_MARKETDEPTH_OPERATION)
 
@@ -127,8 +127,8 @@ _MARKETDATASUBSCRIPTIONREQUEST_MDTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1245,
-  serialized_end=1301,
+  serialized_start=1313,
+  serialized_end=1369,
 )
 _sym_db.RegisterEnumDescriptor(_MARKETDATASUBSCRIPTIONREQUEST_MDTYPE)
 
@@ -169,8 +169,8 @@ _BARAGGREGATIONREQUEST_INPUTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1532,
-  serialized_end=1617,
+  serialized_start=1600,
+  serialized_end=1685,
 )
 _sym_db.RegisterEnumDescriptor(_BARAGGREGATIONREQUEST_INPUTTYPE)
 
@@ -260,7 +260,7 @@ _BAR = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='vol', full_name='algotrader.model.Bar.vol', index=11,
+      name='volume', full_name='algotrader.model.Bar.volume', index=11,
       number=13, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -280,6 +280,27 @@ _BAR = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='prev_open_interest', full_name='algotrader.model.Bar.prev_open_interest', index=14,
+      number=16, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='num_trades', full_name='algotrader.model.Bar.num_trades', index=15,
+      number=17, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='settled', full_name='algotrader.model.Bar.settled', index=16,
+      number=18, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -294,7 +315,7 @@ _BAR = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=57,
-  serialized_end=377,
+  serialized_end=445,
 )
 
 
@@ -373,8 +394,8 @@ _QUOTE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=380,
-  serialized_end=524,
+  serialized_start=448,
+  serialized_end=592,
 )
 
 
@@ -439,8 +460,8 @@ _TRADE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=526,
-  serialized_end=637,
+  serialized_start=594,
+  serialized_end=705,
 )
 
 
@@ -535,8 +556,8 @@ _MARKETDEPTH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=640,
-  serialized_end=981,
+  serialized_start=708,
+  serialized_end=1049,
 )
 
 
@@ -616,8 +637,8 @@ _MARKETDATASUBSCRIPTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=984,
-  serialized_end=1301,
+  serialized_start=1052,
+  serialized_end=1369,
 )
 
 
@@ -683,8 +704,8 @@ _BARAGGREGATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1304,
-  serialized_end=1617,
+  serialized_start=1372,
+  serialized_end=1685,
 )
 
 _BAR.fields_by_name['type'].enum_type = _BAR_TYPE

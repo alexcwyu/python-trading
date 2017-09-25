@@ -15,6 +15,7 @@ from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
 from tests import test_override
 import datetime
+from datetime import timedelta
 from algotrader.utils.date import *
 
 
@@ -36,6 +37,25 @@ class SeriesTest(TestCase):
         proto_series.provider_id= "Dummy Provider"
         proto_series.dtype = proto.DTDouble
         return proto_series
+
+    @staticmethod
+    def create_proto_series(start_date, values, n, col_id):
+        df_id = "Bar.Daily"
+        inst_id ="HSI@SEHK"
+
+        dates = [start_date + timedelta(seconds=i) for i in range(n)]
+        ts = [datetime_to_unixtimemillis(d) for d in dates]
+
+        proto_series1 = proto.Series()
+        proto_series1.series_id = "Bar.Daily.close-HSI@SEHK"
+        proto_series1.df_id = df_id
+        proto_series1.col_id = col_id
+        proto_series1.inst_id = inst_id
+        proto_series1.provider_id= "Dummy Provider"
+        proto_series1.dtype = proto.DTDouble
+        proto_series1.index.extend(ts)
+        proto_series1.double_data.extend(values)
+        return proto_series1
 
 
     def __create_proto_series1(self):

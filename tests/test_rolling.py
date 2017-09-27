@@ -1,61 +1,61 @@
-import numpy as np
-from unittest import TestCase
-
-from algotrader.technical.rolling_apply import StdDev
-from algotrader.trading.context import ApplicationContext
-
-
-# from algotrader.trading.instrument_data import inst_data_mgr
-
-
-class RollingApplyTest(TestCase):
-    def setUp(self):
-        self.app_context = ApplicationContext()
-
-    def test_name(self):
-        bar = self.app_context.inst_data_mgr.get_series("bar")
-        stddev = StdDev(inputs=bar, input_keys='close', length=3)
-        self.assertEquals("StdDev(bar[close],length=3)", stddev.name)
-
-    def test_empty_at_initialize(self):
-        close = self.app_context.inst_data_mgr.get_series("bar")
-        stddev = StdDev(inputs=close, input_keys='close', length=3)
-        self.assertEquals(0, len(stddev.get_data()))
-
-    def test_nan_before_size(self):
-        bar = self.app_context.inst_data_mgr.get_series("bar")
-        bar.start(self.app_context)
-
-        stddev = StdDev(inputs=bar, input_keys='close', length=3)
-        stddev.start(self.app_context)
-
-        t1 = 1
-
-        nextTime = lambda t: t + 3
-
-        x = np.random.normal(0, 2.0, 3)
-        ts = np.cumsum(x) + 100
-
-        i = 0
-
-        bar.add(timestamp=t1, data={"close": ts[i], "open": 0})
-        self.assertEquals([{'value': np.nan}],
-                          stddev.get_data())
-
-        t2 = nextTime(t1)
-        i = i + 1
-        bar.add(timestamp=t2, data={"close": ts[i], "open": 1.4})
-        self.assertEquals([{'value': np.nan},
-                           {'value': np.nan}],
-                          stddev.get_data())
-
-        t3 = nextTime(t2)
-        i = i + 1
-        bar.add(timestamp=t3, data={"close": ts[i], "open": 1.8})
-        self.assertEquals([{'value': np.nan},
-                           {'value': np.nan},
-                           {'value': np.std(ts)}],
-                          stddev.get_data())
+# import numpy as np
+# from unittest import TestCase
+#
+# from algotrader.technical.rolling_apply import StdDev
+# from algotrader.trading.context import ApplicationContext
+#
+#
+# # from algotrader.trading.instrument_data import inst_data_mgr
+#
+#
+# class RollingApplyTest(TestCase):
+#     def setUp(self):
+#         self.app_context = ApplicationContext()
+#
+#     def test_name(self):
+#         bar = self.app_context.inst_data_mgr.get_series("bar")
+#         stddev = StdDev(inputs=bar, input_keys='close', length=3)
+#         self.assertEquals("StdDev(bar[close],length=3)", stddev.name)
+#
+#     def test_empty_at_initialize(self):
+#         close = self.app_context.inst_data_mgr.get_series("bar")
+#         stddev = StdDev(inputs=close, input_keys='close', length=3)
+#         self.assertEquals(0, len(stddev.get_data()))
+#
+#     def test_nan_before_size(self):
+#         bar = self.app_context.inst_data_mgr.get_series("bar")
+#         bar.start(self.app_context)
+#
+#         stddev = StdDev(inputs=bar, input_keys='close', length=3)
+#         stddev.start(self.app_context)
+#
+#         t1 = 1
+#
+#         nextTime = lambda t: t + 3
+#
+#         x = np.random.normal(0, 2.0, 3)
+#         ts = np.cumsum(x) + 100
+#
+#         i = 0
+#
+#         bar.add(timestamp=t1, data={"close": ts[i], "open": 0})
+#         self.assertEquals([{'value': np.nan}],
+#                           stddev.get_data())
+#
+#         t2 = nextTime(t1)
+#         i = i + 1
+#         bar.add(timestamp=t2, data={"close": ts[i], "open": 1.4})
+#         self.assertEquals([{'value': np.nan},
+#                            {'value': np.nan}],
+#                           stddev.get_data())
+#
+#         t3 = nextTime(t2)
+#         i = i + 1
+#         bar.add(timestamp=t3, data={"close": ts[i], "open": 1.8})
+#         self.assertEquals([{'value': np.nan},
+#                            {'value': np.nan},
+#                            {'value': np.std(ts)}],
+#                           stddev.get_data())
 
         # def test_moving_average_calculation(self):
         #     inst_data_mgr.clear()

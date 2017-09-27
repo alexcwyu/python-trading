@@ -1,4 +1,5 @@
 import abc
+import re
 
 import pandas as pd
 
@@ -39,7 +40,7 @@ class Feed(Provider):
 class PandasDataFeed(Feed):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, datetime_as_index=False):
+    def __init__(self, datetime_as_index=True):
         self.datetime_as_index = datetime_as_index
 
     def subscribe_mktdata(self, *sub_reqs):
@@ -74,10 +75,14 @@ class PandasDataFeed(Feed):
                 self.app_context.event_bus.data_subject.on_next(bar)
 
     def _build_bar(self, row, timestamp) -> Bar:
+        # CSV feed may read a Yahoo file with column name like Close/ Adj Close while
+        # in dataframe serialization for the ease of interop between protobuf's bar and dataframe we chose small letter as column
+        # so we here transform all to lower letter here to support both cases
+        row = row.rename(lambda x : re.sub(' ', '_', x).lower())
         return ModelFactory.build_bar(
-            inst_id=row['InstId'],
+            inst_id=row['instid'],
             type=Bar.Time,
-            provider_id=row['ProviderId'],
+            provider_id=row['providerid'],
             timestamp=timestamp,
             open=row['open'],
             high=row['high'],
@@ -86,7 +91,7 @@ class PandasDataFeed(Feed):
             volume=row['volume'],
             # adj_close=row['Adj Close'] if 'Adj Close' in row else None,
             adj_close=row['adj_close'],
-            size=row['BarSize'])
+            size=row['barsize'])
 
     @abc.abstractmethod
     def _load_dataframes(self, insts, *sub_reqs):

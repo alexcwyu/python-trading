@@ -11,6 +11,7 @@ Application:
   deleteDBAtStop : false
 
   feedId: "CSV"
+#  feedId: "PandasDB"
   brokerId: "Simulator"
   portfolioId: "test"
 
@@ -47,6 +48,10 @@ DataStore:
 Feed:
   CSV:
     path: "../../data/tradedata"
+
+  PandasDB:
+    provider_id: "Yahoo"
+
 
 Broker:
   Simulator:

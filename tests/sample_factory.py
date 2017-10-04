@@ -14,20 +14,15 @@ class SampleFactory(object):
         pass
 
     def sample_instrument(self):
-        inst = ModelFactory.build_instrument(symbol='2800.HK', type=Instrument.STK, primary_exch_id='SEHK',
-                                             ccy_id='HKD',
-                                             name='2800', exch_ids=['NYSE', 'TSE'], sector="Finance",
-                                             industry="Banking",
-                                             margin=100, tick_size=0.05,
+        inst = ModelFactory.build_instrument(symbol='2800.HK', inst_type=Instrument.STK, primary_exch_id='SEHK',
+                                             ccy_id='HKD', name='2800', exch_ids=['NYSE', 'TSE'], sector="Finance",
+                                             industry="Banking", margin=100, tick_size=0.05,
                                              alt_symbols={'IB': '2800', 'RIC': '2800.HK'},
                                              alt_ids={'VALOREN': '123123', 'ISIN': '123123'},
                                              underlying_type=Underlying.FixedWeightBasket,
                                              underlying_ids=['0005.HK@SEHK', '0001.HK@SEHK'],
-                                             underlying_weights=[0.1, 0.9],
-                                             option_type=Instrument.Call,
-                                             option_style=Instrument.European,
-                                             strike=100.5,
-                                             exp_date=20160101)
+                                             underlying_weights=[0.1, 0.9], option_type=Instrument.Call,
+                                             option_style=Instrument.European, strike=100.5, exp_date=20160101)
         return inst
 
     def sample_exchange(self):

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='algotrader/model/ref_data.proto',
   package='algotrader.model',
   syntax='proto3',
-  serialized_pb=_b('\n\x1f\x61lgotrader/model/ref_data.proto\x12\x10\x61lgotrader.model\"\xff\x01\n\nUnderlying\x12\x39\n\x04type\x18\x01 \x01(\x0e\x32+.algotrader.model.Underlying.UnderlyingType\x12\x32\n\x06\x61ssets\x18\x02 \x03(\x0b\x32\".algotrader.model.Underlying.Asset\x1a(\n\x05\x41sset\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x01\"X\n\x0eUnderlyingType\x12\n\n\x06Single\x10\x00\x12\x15\n\x11\x46ixedWeightBasket\x10\x01\x12\x11\n\rWorstOfBasket\x10\x02\x12\x10\n\x0c\x42\x65stOfBasket\x10\x03\"\xcc\x08\n\nInstrument\x12\x0f\n\x07inst_id\x18\x02 \x01(\t\x12\x0e\n\x06symbol\x18\x03 \x01(\t\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x33\n\x04type\x18\x05 \x01(\x0e\x32%.algotrader.model.Instrument.InstType\x12\x17\n\x0fprimary_exch_id\x18\x06 \x01(\t\x12\x10\n\x08\x65xch_ids\x18\x07 \x03(\t\x12\x0e\n\x06\x63\x63y_id\x18\x08 \x01(\t\x12\x0e\n\x06sector\x18\t \x01(\t\x12\x10\n\x08industry\x18\n \x01(\t\x12\x0e\n\x06margin\x18\x0b \x01(\x01\x12\x11\n\ttick_size\x18\x0c \x01(\x01\x12\x41\n\x0b\x61lt_symbols\x18\x1f \x03(\x0b\x32,.algotrader.model.Instrument.AltSymbolsEntry\x12\x39\n\x07\x61lt_ids\x18  \x03(\x0b\x32(.algotrader.model.Instrument.AltIdsEntry\x12\x41\n\x0b\x61lt_sectors\x18! \x03(\x0b\x32,.algotrader.model.Instrument.AltSectorsEntry\x12G\n\x0e\x61lt_industries\x18\" \x03(\x0b\x32/.algotrader.model.Instrument.AltIndustriesEntry\x12\x30\n\nunderlying\x18\x65 \x01(\x0b\x32\x1c.algotrader.model.Underlying\x12<\n\x0boption_type\x18\x66 \x01(\x0e\x32\'.algotrader.model.Instrument.OptionType\x12>\n\x0coption_style\x18g \x01(\x0e\x32(.algotrader.model.Instrument.OptionStyle\x12\x0e\n\x06strike\x18h \x01(\x01\x12\x10\n\x08\x65xp_date\x18i \x01(\x03\x12\x12\n\nmultiplier\x18j \x01(\x01\x1a\x31\n\x0f\x41ltSymbolsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a-\n\x0b\x41ltIdsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x31\n\x0f\x41ltSectorsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x34\n\x12\x41ltIndustriesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"S\n\x08InstType\x12\x07\n\x03STK\x10\x00\x12\x07\n\x03\x46UT\x10\x01\x12\x07\n\x03OPT\x10\x02\x12\x07\n\x03\x46OT\x10\x03\x12\x07\n\x03IDX\x10\x04\x12\x08\n\x04\x43\x41SH\x10\x05\x12\x07\n\x03\x45TF\x10\x06\x12\x07\n\x03\x43\x42O\x10\x07\"\x1f\n\nOptionType\x12\x08\n\x04\x43\x61ll\x10\x00\x12\x07\n\x03Put\x10\x01\")\n\x0bOptionStyle\x12\x0c\n\x08\x45uropean\x10\x00\x12\x0c\n\x08\x41merican\x10\x01\"\xd4\x01\n\x08\x45xchange\x12\x0f\n\x07\x65xch_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\ncountry_id\x18\x03 \x01(\t\x12\x18\n\x10trading_hours_id\x18\x04 \x01(\t\x12\x13\n\x0bholidays_id\x18\x05 \x01(\t\x12\x37\n\x07\x61lt_ids\x18\x06 \x03(\x0b\x32&.algotrader.model.Exchange.AltIdsEntry\x1a-\n\x0b\x41ltIdsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x07\x43ountry\x12\x12\n\ncountry_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0bholidays_id\x18\x03 \x01(\t\"(\n\x08\x43urrency\x12\x0e\n\x06\x63\x63y_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"\xe3\x02\n\rHolidaySeries\x12\x13\n\x0bholidays_id\x18\x01 \x01(\t\x12\x39\n\x08holidays\x18\x02 \x03(\x0b\x32\'.algotrader.model.HolidaySeries.Holiday\x1a\x81\x02\n\x07Holiday\x12\x14\n\x0ctrading_date\x18\x01 \x01(\x03\x12\x12\n\nstart_date\x18\x02 \x01(\x03\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x10\n\x08\x65nd_date\x18\x04 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\x05 \x01(\x03\x12:\n\x04type\x18\x06 \x01(\x0e\x32,.algotrader.model.HolidaySeries.Holiday.Type\x12\x0c\n\x04\x64\x65sc\x18\x07 \x01(\t\"J\n\x04Type\x12\x0b\n\x07\x46ullDay\x10\x00\x12\x0c\n\x08LateOpen\x10\x01\x12\x0e\n\nEarlyClose\x10\x02\x12\x0b\n\x07Replace\x10\x03\x12\n\n\x06Modify\x10\x04\"\xab\x03\n\x0cTradingHours\x12\x18\n\x10trading_hours_id\x18\x01 \x01(\t\x12\x13\n\x0btimezone_id\x18\x02 \x01(\t\x12\x38\n\x08sessions\x18\x03 \x03(\x0b\x32&.algotrader.model.TradingHours.Session\x1a\xb1\x02\n\x07Session\x12\x46\n\x0estart_weekdate\x18\x01 \x01(\x0e\x32..algotrader.model.TradingHours.Session.WeekDay\x12\x12\n\nstart_time\x18\x02 \x01(\x03\x12\x44\n\x0c\x65nd_weekdate\x18\x03 \x01(\x0e\x32..algotrader.model.TradingHours.Session.WeekDay\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\x03\x12\x0b\n\x03\x65od\x18\x05 \x01(\x08\"e\n\x07WeekDay\x12\n\n\x06Sunday\x10\x00\x12\n\n\x06Monday\x10\x01\x12\x0b\n\x07Tuesday\x10\x02\x12\r\n\tWednesday\x10\x03\x12\x0c\n\x08Thursday\x10\x04\x12\n\n\x06\x46riday\x10\x05\x12\x0c\n\x08Saturday\x10\x06\"\x1f\n\x08TimeZone\x12\x13\n\x0btimezone_id\x18\x01 \x01(\tb\x06proto3')
+  serialized_pb=_b('\n\x1f\x61lgotrader/model/ref_data.proto\x12\x10\x61lgotrader.model\"\xff\x01\n\nUnderlying\x12\x39\n\x04type\x18\x01 \x01(\x0e\x32+.algotrader.model.Underlying.UnderlyingType\x12\x32\n\x06\x61ssets\x18\x02 \x03(\x0b\x32\".algotrader.model.Underlying.Asset\x1a(\n\x05\x41sset\x12\x0f\n\x07inst_id\x18\x01 \x01(\t\x12\x0e\n\x06weight\x18\x02 \x01(\x01\"X\n\x0eUnderlyingType\x12\n\n\x06Single\x10\x00\x12\x15\n\x11\x46ixedWeightBasket\x10\x01\x12\x11\n\rWorstOfBasket\x10\x02\x12\x10\n\x0c\x42\x65stOfBasket\x10\x03\"\xff\x08\n\nInstrument\x12\x0f\n\x07inst_id\x18\x02 \x01(\t\x12\x0e\n\x06symbol\x18\x03 \x01(\t\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x33\n\x04type\x18\x05 \x01(\x0e\x32%.algotrader.model.Instrument.InstType\x12\x17\n\x0fprimary_exch_id\x18\x06 \x01(\t\x12\x10\n\x08\x65xch_ids\x18\x07 \x03(\t\x12\x0e\n\x06\x63\x63y_id\x18\x08 \x01(\t\x12\x0e\n\x06sector\x18\t \x01(\t\x12\x10\n\x08industry\x18\n \x01(\t\x12\x0e\n\x06margin\x18\x0b \x01(\x01\x12\x11\n\ttick_size\x18\x0c \x01(\x01\x12\x41\n\x0b\x61lt_symbols\x18\x1f \x03(\x0b\x32,.algotrader.model.Instrument.AltSymbolsEntry\x12\x39\n\x07\x61lt_ids\x18  \x03(\x0b\x32(.algotrader.model.Instrument.AltIdsEntry\x12\x41\n\x0b\x61lt_sectors\x18! \x03(\x0b\x32,.algotrader.model.Instrument.AltSectorsEntry\x12G\n\x0e\x61lt_industries\x18\" \x03(\x0b\x32/.algotrader.model.Instrument.AltIndustriesEntry\x12\x30\n\nunderlying\x18\x65 \x01(\x0b\x32\x1c.algotrader.model.Underlying\x12<\n\x0boption_type\x18\x66 \x01(\x0e\x32\'.algotrader.model.Instrument.OptionType\x12>\n\x0coption_style\x18g \x01(\x0e\x32(.algotrader.model.Instrument.OptionStyle\x12\x0e\n\x06strike\x18h \x01(\x01\x12\x10\n\x08\x65xp_date\x18i \x01(\x03\x12\x12\n\nmultiplier\x18j \x01(\x01\x1a\x31\n\x0f\x41ltSymbolsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a-\n\x0b\x41ltIdsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x31\n\x0f\x41ltSectorsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x34\n\x12\x41ltIndustriesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"d\n\x08InstType\x12\x0f\n\x0b\x44\x45\x46\x41ULTINST\x10\x00\x12\x07\n\x03STK\x10\x01\x12\x07\n\x03\x46UT\x10\x02\x12\x07\n\x03OPT\x10\x03\x12\x07\n\x03\x46OT\x10\x04\x12\x07\n\x03IDX\x10\x05\x12\x08\n\x04\x43\x41SH\x10\x06\x12\x07\n\x03\x45TF\x10\x07\x12\x07\n\x03\x43\x42O\x10\x08\"/\n\nOptionType\x12\x0e\n\nDEFAULTOPT\x10\x00\x12\x08\n\x04\x43\x61ll\x10\x01\x12\x07\n\x03Put\x10\x02\";\n\x0bOptionStyle\x12\x10\n\x0c\x44\x45\x46\x41ULTSTYLE\x10\x00\x12\x0c\n\x08\x45uropean\x10\x01\x12\x0c\n\x08\x41merican\x10\x02\"\xd4\x01\n\x08\x45xchange\x12\x0f\n\x07\x65xch_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\ncountry_id\x18\x03 \x01(\t\x12\x18\n\x10trading_hours_id\x18\x04 \x01(\t\x12\x13\n\x0bholidays_id\x18\x05 \x01(\t\x12\x37\n\x07\x61lt_ids\x18\x06 \x03(\x0b\x32&.algotrader.model.Exchange.AltIdsEntry\x1a-\n\x0b\x41ltIdsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x07\x43ountry\x12\x12\n\ncountry_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0bholidays_id\x18\x03 \x01(\t\"(\n\x08\x43urrency\x12\x0e\n\x06\x63\x63y_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"\xe3\x02\n\rHolidaySeries\x12\x13\n\x0bholidays_id\x18\x01 \x01(\t\x12\x39\n\x08holidays\x18\x02 \x03(\x0b\x32\'.algotrader.model.HolidaySeries.Holiday\x1a\x81\x02\n\x07Holiday\x12\x14\n\x0ctrading_date\x18\x01 \x01(\x03\x12\x12\n\nstart_date\x18\x02 \x01(\x03\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x10\n\x08\x65nd_date\x18\x04 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\x05 \x01(\x03\x12:\n\x04type\x18\x06 \x01(\x0e\x32,.algotrader.model.HolidaySeries.Holiday.Type\x12\x0c\n\x04\x64\x65sc\x18\x07 \x01(\t\"J\n\x04Type\x12\x0b\n\x07\x46ullDay\x10\x00\x12\x0c\n\x08LateOpen\x10\x01\x12\x0e\n\nEarlyClose\x10\x02\x12\x0b\n\x07Replace\x10\x03\x12\n\n\x06Modify\x10\x04\"\xab\x03\n\x0cTradingHours\x12\x18\n\x10trading_hours_id\x18\x01 \x01(\t\x12\x13\n\x0btimezone_id\x18\x02 \x01(\t\x12\x38\n\x08sessions\x18\x03 \x03(\x0b\x32&.algotrader.model.TradingHours.Session\x1a\xb1\x02\n\x07Session\x12\x46\n\x0estart_weekdate\x18\x01 \x01(\x0e\x32..algotrader.model.TradingHours.Session.WeekDay\x12\x12\n\nstart_time\x18\x02 \x01(\x03\x12\x44\n\x0c\x65nd_weekdate\x18\x03 \x01(\x0e\x32..algotrader.model.TradingHours.Session.WeekDay\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\x03\x12\x0b\n\x03\x65od\x18\x05 \x01(\x08\"e\n\x07WeekDay\x12\n\n\x06Sunday\x10\x00\x12\n\n\x06Monday\x10\x01\x12\x0b\n\x07Tuesday\x10\x02\x12\r\n\tWednesday\x10\x03\x12\x0c\n\x08Thursday\x10\x04\x12\n\n\x06\x46riday\x10\x05\x12\x0c\n\x08Saturday\x10\x06\"\x1f\n\x08TimeZone\x12\x13\n\x0btimezone_id\x18\x01 \x01(\tb\x06proto3')
 )
 
 
@@ -61,42 +61,46 @@ _INSTRUMENT_INSTTYPE = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='STK', index=0, number=0,
+      name='DEFAULTINST', index=0, number=0,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FUT', index=1, number=1,
+      name='STK', index=1, number=1,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='OPT', index=2, number=2,
+      name='FUT', index=2, number=2,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FOT', index=3, number=3,
+      name='OPT', index=3, number=3,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='IDX', index=4, number=4,
+      name='FOT', index=4, number=4,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CASH', index=5, number=5,
+      name='IDX', index=5, number=5,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='ETF', index=6, number=6,
+      name='CASH', index=6, number=6,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CBO', index=7, number=7,
+      name='ETF', index=7, number=7,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CBO', index=8, number=8,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
   serialized_start=1253,
-  serialized_end=1336,
+  serialized_end=1353,
 )
 _sym_db.RegisterEnumDescriptor(_INSTRUMENT_INSTTYPE)
 
@@ -107,18 +111,22 @@ _INSTRUMENT_OPTIONTYPE = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='Call', index=0, number=0,
+      name='DEFAULTOPT', index=0, number=0,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='Put', index=1, number=1,
+      name='Call', index=1, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='Put', index=2, number=2,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=1338,
-  serialized_end=1369,
+  serialized_start=1355,
+  serialized_end=1402,
 )
 _sym_db.RegisterEnumDescriptor(_INSTRUMENT_OPTIONTYPE)
 
@@ -129,18 +137,22 @@ _INSTRUMENT_OPTIONSTYLE = _descriptor.EnumDescriptor(
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='European', index=0, number=0,
+      name='DEFAULTSTYLE', index=0, number=0,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='American', index=1, number=1,
+      name='European', index=1, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='American', index=2, number=2,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=1371,
-  serialized_end=1412,
+  serialized_start=1404,
+  serialized_end=1463,
 )
 _sym_db.RegisterEnumDescriptor(_INSTRUMENT_OPTIONSTYLE)
 
@@ -173,8 +185,8 @@ _HOLIDAYSERIES_HOLIDAY_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=2019,
-  serialized_end=2093,
+  serialized_start=2070,
+  serialized_end=2144,
 )
 _sym_db.RegisterEnumDescriptor(_HOLIDAYSERIES_HOLIDAY_TYPE)
 
@@ -215,8 +227,8 @@ _TRADINGHOURS_SESSION_WEEKDAY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=2422,
-  serialized_end=2523,
+  serialized_start=2473,
+  serialized_end=2574,
 )
 _sym_db.RegisterEnumDescriptor(_TRADINGHOURS_SESSION_WEEKDAY)
 
@@ -615,7 +627,7 @@ _INSTRUMENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=312,
-  serialized_end=1412,
+  serialized_end=1463,
 )
 
 
@@ -717,8 +729,8 @@ _EXCHANGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1415,
-  serialized_end=1627,
+  serialized_start=1466,
+  serialized_end=1678,
 )
 
 
@@ -762,8 +774,8 @@ _COUNTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1629,
-  serialized_end=1693,
+  serialized_start=1680,
+  serialized_end=1744,
 )
 
 
@@ -800,8 +812,8 @@ _CURRENCY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1695,
-  serialized_end=1735,
+  serialized_start=1746,
+  serialized_end=1786,
 )
 
 
@@ -874,8 +886,8 @@ _HOLIDAYSERIES_HOLIDAY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1836,
-  serialized_end=2093,
+  serialized_start=1887,
+  serialized_end=2144,
 )
 
 _HOLIDAYSERIES = _descriptor.Descriptor(
@@ -911,8 +923,8 @@ _HOLIDAYSERIES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1738,
-  serialized_end=2093,
+  serialized_start=1789,
+  serialized_end=2144,
 )
 
 
@@ -971,8 +983,8 @@ _TRADINGHOURS_SESSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2218,
-  serialized_end=2523,
+  serialized_start=2269,
+  serialized_end=2574,
 )
 
 _TRADINGHOURS = _descriptor.Descriptor(
@@ -1015,8 +1027,8 @@ _TRADINGHOURS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2096,
-  serialized_end=2523,
+  serialized_start=2147,
+  serialized_end=2574,
 )
 
 
@@ -1046,8 +1058,8 @@ _TIMEZONE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2525,
-  serialized_end=2556,
+  serialized_start=2576,
+  serialized_end=2607,
 )
 
 _UNDERLYING_ASSET.containing_type = _UNDERLYING

@@ -7,11 +7,13 @@ from collections import defaultdict
 from algotrader.model.market_data_pb2 import *
 from algotrader.model.model_factory import ModelFactory
 from algotrader.model.trade_data_pb2 import *
+from algotrader.model.ref_data_pb2 import Instrument, Underlying
 from algotrader.provider.broker import Broker
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.feed import Feed
 from algotrader.utils.logging import logger
+from algotrader.utils.ref_data import representableAsInt
 from algotrader import Context
 
 
@@ -647,9 +649,10 @@ class IBBroker(IBSocket, Broker, Feed):
         logger.info("scannerDataEnd, reqId=%s", reqId)
         self._complete_req(reqId)
 
-    def reqContractDetails(self, symbol=None, exchange=None, sec_type=None, currency=None, callback=None):
+    def reqContractDetails(self, symbol=None, exchange=None, sec_type=None, currency=None, callback=None, include_expired=False):
         contract = self.model_factory.create_ib_contract(symbol=symbol, exchange=exchange, sec_type=sec_type,
-                                                         currency=currency)
+                                                         currency=currency,
+                                                         include_expired=include_expired)
         req_id = self.get_next_request_id()
         self._reg_callback(req_id, callback)
 
@@ -663,6 +666,7 @@ class IBBroker(IBSocket, Broker, Feed):
         """
         cd = contractDetails
         sd = contractDetails.summary
+
         logger.debug("contractDetails, reqId=%s, conId=%s, symbol=%s, secType=%s, exchange=%s, " +
                      "primaryExchange=%s, expiry=%s, strike=%s, right=%s, " +
                      "multiplier=%s, currency=%s, localSymbol=%s, secIdType=%s, " +
@@ -691,15 +695,98 @@ class IBBroker(IBSocket, Broker, Feed):
                      cd.putable, cd.coupon, cd.convertible, cd.issueDate,
                      cd.nextOptionDate, cd.nextOptionType, cd.nextOptionPartial, cd.notes)
 
-        inst = ModelFactory.build_instrument(symbol=sd.symbol,
-                                             type=sd.secType,
-                                             name=cd.longName,
-                                             sector=cd.industry, industry=cd.category,
-                                             primary_exch_id=sd.primaryExchange,
-                                             ccy_id=sd.currency)
-        self.ref_data_mgr.add_inst(inst)
+        if sd.secType == 'STK':
+            self._build_stk(contractDetails)
+        elif sd.secType == 'IDX':
+            self._build_idx(contractDetails)
+        elif sd.secType == 'FUT':
+            self._build_fut(contractDetails)
 
+
+        # exch_ids = []
+        # if not (sd.exchange is None):
+        #     exch_ids.append(sd.exchange)
+        #
+        # inst = ModelFactory.build_instrument(symbol=sd.symbol, inst_type=sd.secType, primary_exch_id=sd.primaryExchange,
+        #                                      exch_ids=exch_ids,
+        #                                      ccy_id=sd.currency, name=cd.longName, sector=cd.industry,
+        #                                      industry=cd.category,
+        #                                      tick_size=cd.minTick,
+        #                                      exp_date=int(sd.expiry),
+        #                                      strike=sd.strike,
+        #                                      underlying_ids=[sd.symbol])
+        # self.ref_data_mgr.add_inst(inst)
+
+        # logger.info("saved")
+
+
+    def _build_stk(self, contractDetails):
+        cd = contractDetails
+        sd = contractDetails.summary
+        exch_ids = []
+        if not (sd.exchange is None):
+            exch_ids.append(sd.exchange)
+
+
+        inst = ModelFactory.build_instrument(symbol=sd.symbol,
+                                             inst_type=Instrument.STK,
+                                             primary_exch_id=sd.primaryExchange,
+                                             exch_ids=exch_ids,
+                                             ccy_id=sd.currency, name=cd.longName, sector=cd.industry,
+                                             industry=cd.category,
+                                             tick_size=cd.minTick,
+                                             )
+        self.ref_data_mgr.add_inst(inst)
         logger.info("saved")
+        return inst.inst_id
+
+    def _build_fut(self, contractDetails):
+        cd = contractDetails
+        sd = contractDetails.summary
+
+        if not representableAsInt(sd.expiry):
+            raise AssertionError("Expiry cannot be represented by Int! Build Future instrument failed!")
+
+        exch_ids = []
+        if not (sd.exchange is None):
+            exch_ids.append(sd.exchange)
+
+        index_inst_id = ModelFactory.build_inst_id(symbol=sd.symbol,
+                                                   exch_id=sd.exchange,
+                                                   inst_type=Instrument.IDX)
+
+        idx_inst = self.ref_data_mgr.get_inst(index_inst_id)
+        if idx_inst is None:
+            index_inst_id = self._build_idx(contractDetails)
+
+        inst = ModelFactory.build_instrument(symbol=sd.symbol, inst_type=Instrument.FUT, primary_exch_id=sd.primaryExchange,
+                                             exch_ids=exch_ids,
+                                             ccy_id=sd.currency, name=cd.longName,
+                                             tick_size=cd.minTick,
+                                             exp_date=int(sd.expiry),
+                                             underlying_type=Underlying.Single,
+                                             underlying_ids=[index_inst_id])
+
+        self.ref_data_mgr.add_inst(inst)
+        logger.info("saved")
+        return inst.inst_id
+
+
+    def _build_idx(self, contractDetails):
+        cd = contractDetails
+        sd = contractDetails.summary
+        exch_ids = []
+        if not (sd.exchange is None):
+            exch_ids.append(sd.exchange)
+
+        inst = ModelFactory.build_instrument(symbol=sd.symbol, inst_type=Instrument.IDX, primary_exch_id=sd.primaryExchange,
+                                             exch_ids=exch_ids,
+                                             ccy_id=sd.currency, name=cd.longName,)
+
+        self.ref_data_mgr.add_inst(inst)
+        return inst.inst_id
+
+
 
     def contractDetailsEnd(self, reqId):
         logger.info("contractDetailsEnd, reqId=%s" % reqId)

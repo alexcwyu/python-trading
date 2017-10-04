@@ -8,32 +8,38 @@ from algotrader.model.trade_data_pb2 import *
 from algotrader.utils.data_series import get_input_name, convert_input_keys, convert_input
 from algotrader.utils.model import add_to_dict, add_to_list
 from algotrader.utils.proto_series_helper import get_proto_series_data, set_proto_series_data, to_np_type, from_np_type
+import datetime
+import pandas as pd
 
-
+future_code = ['F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z']
+month_code_dict = dict(zip(range(1,13), future_code))
 
 class ModelFactory(object):
     # ref data
     @staticmethod
-    def build_instrument(symbol: str, type: Instrument.InstType, primary_exch_id: str, ccy_id: str,
+    def build_instrument(symbol: str, inst_type: Instrument.InstType, primary_exch_id: str, ccy_id: str,
                          name: str = None, exch_ids: List[str] = None, sector: str = None, industry: str = None,
-                         margin: float = None, tick_size: float = None,
-                         alt_symbols: Dict[str, str] = None, alt_ids: Dict[str, str] = None,
-                         alt_sectors: Dict[str, str] = None, alt_industries: Dict[str, str] = None,
-                         underlying_type: Underlying.UnderlyingType = None,
-                         underlying_ids: List[str] = None,
-                         underlying_weights: List[float] = None,
-                         option_type: Instrument.OptionType = None,
-                         option_style: Instrument.OptionStyle = None, strike: float = None,
-                         exp_date: int = None,
-                         multiplier: float = None) -> Instrument:
+                         margin: float = None, tick_size: float = None, alt_symbols: Dict[str, str] = None,
+                         alt_ids: Dict[str, str] = None, alt_sectors: Dict[str, str] = None,
+                         alt_industries: Dict[str, str] = None, underlying_type: Underlying.UnderlyingType = None,
+                         underlying_ids: List[str] = None, underlying_weights: List[float] = None,
+                         option_type: Instrument.OptionType = None, option_style: Instrument.OptionStyle = None,
+                         strike: float = None, exp_date: int = None, multiplier: float = None) -> Instrument:
         inst = Instrument()
-        inst.inst_id = symbol + '@' + primary_exch_id
-        inst.symbol = symbol
-        if isinstance(type, int):
-            inst.type = type
+        if isinstance(inst_type, int):
+            inst.type = inst_type
         else:
-            inst.type = Instrument.InstType.DESCRIPTOR.values_by_name[type].number
+            inst.type = Instrument.InstType.DESCRIPTOR.values_by_name[inst_type].number
         inst.primary_exch_id = str(primary_exch_id)
+
+        exch_id = inst.primary_exch_id
+        if exch_id == '' and exch_ids:
+            exch_id = exch_ids[0]
+
+        inst.inst_id = ModelFactory.build_inst_id(symbol, exch_id, inst.type, strike=strike,
+                                                  expiry_date=exp_date)
+        inst.symbol = symbol
+
         inst.ccy_id = str(ccy_id)
 
         if name:
@@ -58,7 +64,10 @@ class ModelFactory(object):
         add_to_dict(inst.alt_sectors, alt_sectors)
         add_to_dict(inst.alt_industries, alt_industries)
 
-        if underlying_type and underlying_ids:
+        # if underlying_type and underlying_ids:
+        if underlying_ids:
+            if not underlying_type:
+                underlying_type = Underlying.Single
             ModelFactory.build_underlying(inst, underlying_type, underlying_ids, underlying_weights)
 
             if option_type:
@@ -720,8 +729,26 @@ class ModelFactory(object):
         return "%s@%s" % (cl_id, ord_id)
 
     @staticmethod
-    def build_inst_id(symbol: str, exch_id: str) -> str:
-        return "%s@%s" % (symbol, exch_id)
+    def build_inst_id(symbol: str, exch_id: str, inst_type: Instrument.InstType,
+                      expiry_date: int = None,
+                      strike: float = None,
+                      ) -> str:
+        if inst_type  == Instrument.STK or inst_type == Instrument.IDX or inst_type == Instrument.ETF:
+            return "%s@%s" % (symbol, exch_id)
+        elif inst_type == Instrument.FUT:
+            year = expiry_date // 10000
+            month = expiry_date % 10000 // 100
+            year_str = year % 2000 if year > 2000 else year % 1900
+            return '%s%s%s@%s' % (symbol, month_code_dict[month], year_str, exch_id)
+        elif inst_type == Instrument.OPT:
+            # expiry_date = pd.to_datetime(str(expiry_date)).to_pydatetime()
+            # year_str = expiry_date.year % 2000 if expiry_date.year > 2000 else expiry_date.year % 1900
+            # return '%s%s%s%s' % (symbol, strike, month_code_dict[expiry_date.month], year_str)
+            return ''
+        elif inst_type == Instrument.CASH:
+            return symbol
+        else:
+            return "%s@%s" % (symbol, exch_id)
 
     @staticmethod
     def build_sequence(id: str, seq: int) -> Sequence:

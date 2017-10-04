@@ -46,14 +46,15 @@ def init_ib(app_context):
 
 
 
-def import_inst_from_ib(broker, symbol, sec_type='STK', exchange=None, currency=None):
+def import_inst_from_ib(broker, symbol, sec_type='STK', exchange=None, currency=None, include_expired=True):
     try:
         result = AsyncResult()
         logger.info("importing symbol %s" % symbol)
-        broker.reqContractDetails(symbol=symbol, sec_type=sec_type, exchange=exchange, currency=currency, callback=result)
+        broker.reqContractDetails(symbol=symbol, sec_type=sec_type, exchange=exchange, currency=currency, callback=result,
+                                  include_expired=include_expired)
         # broker.reqScannerSubscription(inst_type='STK', location_code='STK.US', scan_code='TOP_PERC_GAIN', above_vol=1000000, callback=callback)
 
-        logger.info("done %s %s" % (symbol, result.get(timeout=3)))
+        logger.info("done %s %s" % (symbol, result.get(timeout=30)))
     except Exception as e:
         logger.error("faile to import %s", symbol, e)
 

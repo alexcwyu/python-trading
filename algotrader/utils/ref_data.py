@@ -62,20 +62,11 @@ def load_inst_from_row(data_store, row):
         for item in row['alt_symbols'].split(";"):
             kv = item.split("=")
             alt_symbols[kv[0]] = kv[1]
-    inst = ModelFactory.build_instrument(symbol=row['symbol'],
-                                         type=row['type'],
-                                         primary_exch_id=row['exch_id'],
-                                         ccy_id=row['ccy_id'],
-                                         name=row['name'],
-                                         sector=row['sector'],
-                                         industry=row['industry'],
-                                         margin=row['margin'],
-                                         alt_symbols=alt_symbols,
-                                         underlying_ids=row['und_inst_id'],
-                                         option_type=row['put_call'],
-                                         strike=row['strike'],
-                                         exp_date=row['expiry_date'],
-                                         multiplier=row['factor'])
+    inst = ModelFactory.build_instrument(symbol=row['symbol'], inst_type=row['type'], primary_exch_id=row['exch_id'],
+                                         ccy_id=row['ccy_id'], name=row['name'], sector=row['sector'],
+                                         industry=row['industry'], margin=row['margin'], alt_symbols=alt_symbols,
+                                         underlying_ids=row['und_inst_id'], option_type=row['put_call'],
+                                         strike=row['strike'], exp_date=row['expiry_date'], multiplier=row['factor'])
     data_store.save_instrument(inst)
 
 
@@ -85,7 +76,15 @@ def load_ccy_from_row(data_store, row):
 
 
 def load_exch_from_row(data_store, row):
-    exch = ModelFactory.build_exchange(exch_id=row['exch_id'], name=row['name'])
+    alt_ids = {}
+    if 'alt_ids' in row and row['alt_ids']:
+        for item in row['alt_ids'].split(";"):
+            kv = item.split("=")
+            alt_ids[kv[0]] = kv[1]
+    exch = ModelFactory.build_exchange(exch_id=row['exch_id'], name=row['name'], country_id=row['country_id'],
+                                       trading_hours_id=row['trading_hours_id'],
+                                       holidays_id=row['holidays_id'],
+                                       alt_ids=alt_ids)
     data_store.save_exchange(exch)
 
 
@@ -107,3 +106,12 @@ def build_inst_dataframe_from_list(symbols, type='ETF', exch_id='NYSE', ccy_id='
     inst_df['margin'] = ''
     inst_df['inst_id'] = inst_df.index
     return inst_df
+
+
+def representableAsInt(s: str):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+

@@ -42,7 +42,7 @@ def datestr_to_date(datestr: str) -> datetime.date:
 
 
 def date_to_unixtimemillis(d: datetime.date) -> int:
-    return int(datetime.combine(d, datetime.min.time()).timestamp())
+    return int(datetime.datetime.combine(d, datetime.datetime.min.time()).timestamp())
     # return int(
     #     (datetime.datetime.combine(d, datetime.datetime.min.time()) - epoch).total_seconds() * 1000)
 
@@ -57,6 +57,12 @@ def date_to_timestamp(d: datetime.date) -> int:
 
 def timestamp_to_date(timestamp: int) -> datetime.date:
     return datetime.datetime.fromtimestamp(timestamp).date()
+
+from pytz import timezone
+ib_tz_to_py_tz = {
+    "Asia/Hong_Kong" : timezone('Hongkong'),
+    "CST" : timezone('US/Central')
+}
 
 """
  if the input is pandas's Timestamp

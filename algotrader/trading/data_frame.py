@@ -169,7 +169,8 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         :return: pandas DataFrame
         """
         data_dict = self.to_dict(index=False, value_as_series=False)
-        return pd.DataFrame(data_dict, columns=self.rc_df.columns, index=self.rc_df.index)
+        return pd.DataFrame(data_dict, columns=self.rc_df.columns,
+                            index= pd.to_datetime(self.rc_df.index, unit='ms'))
 
 
 
@@ -333,17 +334,50 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
     def head(self, rows):
         return self.rc_df.head(rows)
 
+    def append(self, df):
+        if isinstance(df, pd.DataFrame):
+            rc_df = DataFrame.pd_df_to_rc_df(df)
+            self._append(rc_df)
+        elif isinstance(df, DataFrame):
+            self._append(df.rc_df)
+        elif isinstance(df, rc.DataFrame):
+            self.rc_df.append(df)
+        else:
+            raise RuntimeError("append only support pandas/raccoon and algotrader's DataFrame")
+
+    def _append(self, df: rc.DataFrame):
+        self.rc_df.append(df)
+        if self.series_dict:
+            values = df.to_dict(index=False)
+            indexes = df.index
+            for col, val in values.items():
+                if col in self.series_dict.keys():
+                    series = self.series_dict[col]
+                    series.add(indexes, val)
+
+        self.notify_downstream(None)
+
+
     def append_row(self, index, value, new_cols=True):
         self.rc_df.append_row(index, value, new_cols)
         if self.series_dict:
             for col, val in value.items():
-                # TODO: CREATE A NEW ROW!:W
+                # TODO: CREATE A NEW ROW!
                 if col in self.series_dict.keys():
                     series = self.series_dict[col]
                     series.add(index, val)
 
+        self.notify_downstream(None)
+
     def append_rows(self, indexes, values, new_cols=True):
         self.rc_df.append_rows(indexes=indexes, values=values, new_cols=new_cols)
+        # TODO: Missing the part in series_dict
+        if self.series_dict:
+            for col, val in values.items():
+                if col in self.series_dict.keys():
+                    series = self.series_dict[col]
+                    series.append_rows(indexes, val)
+
         self.notify_downstream(None)
 
     def __eq__(self, other):

@@ -53,11 +53,14 @@ class DataFrameTest(TestCase):
 
     @staticmethod
     def create_df_by_rc_df():
-        rc_df = rc.DataFrame({"a": [1.2, 2.3, 3.4],
+        d1 = datetime.datetime(2000, 1, 1)
+
+        dates = [d1 + timedelta(seconds=i) for i in range(3)]
+        ts = [datetime_to_unixtimemillis(d) for d in dates]
+        rc_df = rc.DataFrame(index=ts, data={"a": [1.2, 2.3, 3.4],
                               "b": [1.6, 3.3, 6.6],
                               "c": [2.4, 6.3, -2.7]})
         return DataFrame.from_rc_dataframe(rc_df=rc_df, df_id="test_from_rc_df", provider_id="test")
-
 
     @staticmethod
     def create_df_backed_by_series_dict():
@@ -110,6 +113,25 @@ class DataFrameTest(TestCase):
         t3 = unixtimemillis_to_datetime(df2.index[-1]) + timedelta(seconds=1)
         df2.append_row(t3, {"open" : 107, "close": 109})
 
+    def test_append_df(self):
+        df = self.create_df_by_rc_df()
+
+        d1 = datetime.datetime(2000,2,1)
+        dates = [d1 + timedelta(days=i) for i in range(2)]
+        ts = [datetime_to_unixtimemillis(d) for d in dates]
+        rc_df = rc.DataFrame(index=ts, data={"a": [6,7], "b":[7, 8], "c":[8,9]})
+        df.append(rc_df)
+
+        self.assertEqual({"a": [1.2, 2.3, 3.4, 6, 7],
+                          "b": [1.6, 3.3, 6.6, 7, 8],
+                          "c": [2.4, 6.3, -2.7, 8, 9]}, df.to_dict(value_as_series=False, index=False))
+
+        df = self.create_df_by_rc_df()
+        pd_df = pd.DataFrame(index=dates, data={"a": [6,7], "b":[7, 8], "c":[8,9]})
+        df.append(pd_df)
+        self.assertEqual({"a": [1.2, 2.3, 3.4, 6, 7],
+                          "b": [1.6, 3.3, 6.6, 7, 8],
+                          "c": [2.4, 6.3, -2.7, 8, 9]}, df.to_dict(value_as_series=False, index=False))
 
 
     def test_rc_df_to_df(self):
@@ -126,7 +148,7 @@ class DataFrameTest(TestCase):
         self.assertEqual("c", series_dict['c'].col_id)
         series_a = series_dict['a']
         self.assertEqual("test_df", series_a.df_id)
-        self.assertEqual("test_df.test_source.a", series_a.series_id)
+        self.assertEqual("test_df.a", series_a.series_id)
         self.assertEqual("test_source", series_a.provider_id)
 
         series_b = series_dict['b']

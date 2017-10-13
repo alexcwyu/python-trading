@@ -1,7 +1,8 @@
 from algotrader import Manager, Context
 from algotrader.provider.datastore import PersistenceMode
-
+from algotrader.utils.protobuf_to_dict import protobuf_to_dict
 from algotrader.model.ref_data_pb2 import *
+import pandas as pd
 
 class RefDataManager(Manager):
     def __init__(self):
@@ -71,6 +72,32 @@ class RefDataManager(Manager):
     def get_insts_by_symbols(self, symbols):
         symbols = set(symbols)
         return [inst for inst in self._inst_dict.values() if inst.symbol in symbols]
+
+    def get_insts_by_type(self, inst_type, as_df=False):
+        inst_list = [inst for inst in self._inst_dict.values() if inst.type == inst_type]
+        if as_df:
+            return RefDataManager.inst_list_to_df(inst_list)
+        else:
+            return inst_list
+
+    @staticmethod
+    def inst_list_to_df(inst_list: list):
+        # is_derivative = lambda inst: inst.type == Instrument.FUT or inst.type == Instrument.OPT
+        #
+        # deriv_list = [inst for inst in inst_list if is_derivative(inst)]
+        # non_deriv_list = [inst for inst in inst_list if is_derivative(inst)]
+        #
+        # deriv_df = pd.DataFrame([protobuf_to_dict(inst) for inst in deriv_list])
+        # if deriv_df.shape[0] > 0 :
+        #     deriv_df['exp_date'] = pd.to_datetime(deriv_df['exp_date'].astype(int).astype(str))
+        #
+        # non_deriv_df = pd.DataFrame([protobuf_to_dict(inst) for inst in non_deriv_list])
+        # return deriv_df.append(non_deriv_df)
+        df = pd.DataFrame([protobuf_to_dict(inst) for inst in inst_list])
+        if 'exp_date' in df.columns:
+            df['exp_date'] = pd.to_datetime(df['exp_date'].astype(int).astype(str), errors='ignore')
+        return df
+
 
     def add_inst(self, inst):
         self._inst_dict[inst.inst_id] = inst

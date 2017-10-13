@@ -13,7 +13,7 @@ from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.feed import Feed
 from algotrader.utils.logging import logger
-from algotrader.utils.ref_data import representableAsInt
+from algotrader.utils.numericals import representableAsInt
 from algotrader import Context
 
 
@@ -763,6 +763,7 @@ class IBBroker(IBSocket, Broker, Feed):
                                              exch_ids=exch_ids,
                                              ccy_id=sd.currency, name=cd.longName,
                                              tick_size=cd.minTick,
+                                             multiplier=int(sd.multiplier),
                                              exp_date=int(sd.expiry),
                                              underlying_type=Underlying.Single,
                                              underlying_ids=[index_inst_id])

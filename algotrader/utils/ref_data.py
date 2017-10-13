@@ -108,10 +108,3 @@ def build_inst_dataframe_from_list(symbols, type='ETF', exch_id='NYSE', ccy_id='
     return inst_df
 
 
-def representableAsInt(s: str):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
-

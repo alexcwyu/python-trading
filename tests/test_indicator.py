@@ -1,9 +1,10 @@
 from unittest import TestCase
 
-from algotrader.trading.context import ApplicationContext
-from algotrader.technical.historical_volatility import hvol30, hvol60
-from algotrader.utils.function_wrapper import *
 import numpy as np
+
+from algotrader.technical.function_wrapper import *
+from algotrader.technical.historical_volatility import hvol30
+from algotrader.trading.context import ApplicationContext
 
 
 def average(arr: np.ndarray):

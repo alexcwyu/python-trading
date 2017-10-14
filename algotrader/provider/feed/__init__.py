@@ -1,4 +1,5 @@
 import abc
+import re
 
 import pandas as pd
 
@@ -14,6 +15,7 @@ class Feed(Provider):
     PandasMemory = "PandasMemory"
     PandasH5 = "PandasH5"
     PandasWeb = "PandasWeb"
+    PandasDB = "PandasDB"
     Yahoo = "Yahoo"
     Google = "Google"
     Quandl = "Quandl"
@@ -37,6 +39,9 @@ class Feed(Provider):
 
 class PandasDataFeed(Feed):
     __metaclass__ = abc.ABCMeta
+
+    def __init__(self, datetime_as_index=True):
+        self.datetime_as_index = datetime_as_index
 
     def subscribe_mktdata(self, *sub_reqs):
         self._verify_subscription(*sub_reqs);
@@ -64,24 +69,29 @@ class PandasDataFeed(Feed):
 
         for index, row in df.iterrows():
             inst = insts[row['InstId']]
-            timestamp = datetime_to_unixtimemillis(index)
+            timestamp = datetime_to_unixtimemillis(index) if self.datetime_as_index else index
             if self._within_range(row['InstId'], timestamp, sub_req_ranges):
                 bar = self._build_bar(row, timestamp)
                 self.app_context.event_bus.data_subject.on_next(bar)
 
     def _build_bar(self, row, timestamp) -> Bar:
+        # CSV feed may read a Yahoo file with column name like Close/ Adj Close while
+        # in dataframe serialization for the ease of interop between protobuf's bar and dataframe we chose small letter as column
+        # so we here transform all to lower letter here to support both cases
+        row = row.rename(lambda x : re.sub(' ', '_', x).lower())
         return ModelFactory.build_bar(
-            inst_id=row['InstId'],
+            inst_id=row['instid'],
             type=Bar.Time,
-            provider_id=row['ProviderId'],
+            provider_id=row['providerid'],
             timestamp=timestamp,
-            open=row['Open'],
-            high=row['High'],
-            low=row['Low'],
-            close=row['Close'],
-            vol=row['Volume'],
-            adj_close=row['Adj Close'] if 'Adj Close' in row else None,
-            size=row['BarSize'])
+            open=row['open'],
+            high=row['high'],
+            low=row['low'],
+            close=row['close'],
+            volume=row['volume'],
+            # adj_close=row['Adj Close'] if 'Adj Close' in row else None,
+            adj_close=row['adj_close'],
+            size=row['barsize'])
 
     @abc.abstractmethod
     def _load_dataframes(self, insts, *sub_reqs):

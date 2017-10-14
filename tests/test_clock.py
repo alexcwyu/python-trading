@@ -98,12 +98,13 @@ class ClockTest(TestCase):
 
     @nottest
     def test_timestamp_conversion(self):
-        dt = datetime.datetime(year=2000, month=1, day=1, hour=7, minute=30, second=30)
+        # dt = datetime.datetime(year=2000, month=1, day=1, hour=7, minute=30, second=30)
+        dt = datetime.datetime(year=1999, month=12, day=31, hour=23, minute=30, second=30)
         ts = datetime_to_unixtimemillis(dt)
         self.assertEqual(946683030000, ts)
 
         dt2 = unixtimemillis_to_datetime(ts)
-        self.assertEquals(dt, dt2)
+        self.assertEqual(dt, dt2)
 
         dt3 = datetime.datetime.fromtimestamp(0)
 

@@ -1,17 +1,15 @@
 
+import math
+from datetime import timedelta
 from unittest import TestCase
 
-import math
 import numpy as np
-import pandas as pd
-import datetime
-from datetime import timedelta
+
+from algotrader.technical.function_wrapper import *
+from algotrader.technical.historical_volatility import historical_volatility, historical_volatility_function
 from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
 from algotrader.utils.date import *
-from algotrader.technical.historical_volatility import historical_volatility, historical_volatility_function
-from algotrader.utils.function_wrapper import *
-
 
 hv3 = periods_function(periods=3, name='hv3')(historical_volatility)
 

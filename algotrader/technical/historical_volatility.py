@@ -1,12 +1,8 @@
 
 import numpy as np
+from algotrader.technical.function_wrapper import *
+from algotrader.technical.rolling_apply import rolling_window
 
-from algotrader.utils.function_wrapper import *
-
-def rolling_window(arr, periods):
-    shape = arr.shape[:-1] + (arr.shape[-1] - periods + 1, periods)
-    strides = arr.strides + (arr.strides[-1],)
-    return np.lib.stride_tricks.as_strided(arr, shape=shape, strides=strides)
 
 def historical_volatility_function(arr, days_in_year=252):
     if arr.ndim == 1:

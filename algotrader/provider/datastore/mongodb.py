@@ -192,6 +192,21 @@ class MongoDBDataStore(SimpleDataStore):
                 result.append(self._deserialize(clazz, data))
             return result
 
+    def obj_exist(self, db, key):
+        if db == "sequences":
+            return False
+        else:
+            clazz = get_model_from_db_name(db)
+            #https://stackoverflow.com/questions/8389811/how-to-query-mongodb-to-test-if-an-item-exists
+            return self.db_map[clazz].find({"_id": key}).limit(1).count(with_limit_and_skip=True) > 0
+
+    def load_one(self, db, key):
+        if db == "sequences":
+            raise RuntimeError("sequence not supported in load_one")
+        clazz = get_model_from_db_name(db)
+        data = self.db_map[clazz].find_one({"_id": key})
+        return self._deserialize(clazz, data)
+
     def load_bars(self, sub_key):
         from_timestamp = date_to_unixtimemillis(sub_key.from_date)
         to_timestamp = date_to_unixtimemillis(sub_key.to_date)

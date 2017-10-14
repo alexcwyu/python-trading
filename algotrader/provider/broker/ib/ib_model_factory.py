@@ -133,7 +133,8 @@ class IBModelFactory:
     def convert_ord_action(self, ord_action):
         return self.ord_action_mapping[ord_action]
 
-    def create_ib_contract(self, inst_id=None, symbol=None, exchange=None, sec_type=None, currency=None):
+    def create_ib_contract(self, inst_id=None, symbol=None, exchange=None, sec_type=None, currency=None,
+                           include_expired=False):
         contract = swigibpy.Contract()
 
         if inst_id:
@@ -151,6 +152,9 @@ class IBModelFactory:
                 contract.secType = sec_type
             if currency:
                 contract.currency = currency
+
+        if include_expired:
+            contract.includeExpired = include_expired
 
         return contract
 

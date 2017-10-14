@@ -327,13 +327,13 @@ class DataSeriesTest(TestCase):
 
     def test_subscript(self):
         close = self.__create_series()
-        self.assertEquals([np.nan, np.nan], close[0:2, "v1"])
-        self.assertEquals({"v1": [np.nan, np.nan, 44.34, 44.09], "v2": [np.nan, np.nan, 44.34, 44.09]},
+        self.assertEqual([np.nan, np.nan], close[0:2, "v1"])
+        self.assertEqual({"v1": [np.nan, np.nan, 44.34, 44.09], "v2": [np.nan, np.nan, 44.34, 44.09]},
                           close[0:4, ["v1", "v2"]])
 
-        self.assertEquals([np.nan, np.nan, 44.34, 44.09], close[0:4, "v1"])
-        self.assertEquals([np.nan, np.nan, 44.34, 44.09, 44.15, 43.61, 44.33, 44.83], close[0:8, "v1"])
-        self.assertEquals([45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.0], close[-8:, "v1"])
+        self.assertEqual([np.nan, np.nan, 44.34, 44.09], close[0:4, "v1"])
+        self.assertEqual([np.nan, np.nan, 44.34, 44.09, 44.15, 43.61, 44.33, 44.83], close[0:8, "v1"])
+        self.assertEqual([45.84, 46.08, 45.89, 46.03, 45.61, 46.28, 46.28, 46.0], close[-8:, "v1"])
 
     def test_mean(self):
         close = self.__create_series()

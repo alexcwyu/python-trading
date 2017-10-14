@@ -16,7 +16,7 @@ def datetime_to_unixtimemillis(dt: datetime.datetime) -> int:
 #     return datetime.datetime.fromtimestamp(timestamp / 1000.0)
 
 def unixtimemillis_to_datetime(timestamp: int) -> datetime.datetime:
-    pd.to_datetime(timestamp, unit='ms').to_pydatetime()
+    return pd.to_datetime(timestamp, unit='ms').to_pydatetime()
 
 
 def datetime_to_timestamp(dt: datetime.datetime) -> int:
@@ -30,7 +30,8 @@ def timestamp_to_datetime(timestamp: int) -> datetime.datetime:
 def datestr_to_unixtimemillis(datestr: str) -> int:
     if not datestr:
         return None
-    return date_to_unixtimemillis(datestr_to_date(datestr))
+    # return date_to_unixtimemillis(datestr_to_date(datestr))
+    return pd.to_datetime(datestr).value // 10 ** 6
 
 
 def datestr_to_date(datestr: str) -> datetime.date:
@@ -41,8 +42,9 @@ def datestr_to_date(datestr: str) -> datetime.date:
 
 
 def date_to_unixtimemillis(d: datetime.date) -> int:
-    return int(
-        (datetime.datetime.combine(d, datetime.datetime.min.time()) - epoch).total_seconds() * 1000)
+    return int(datetime.datetime.combine(d, datetime.datetime.min.time()).timestamp())
+    # return int(
+    #     (datetime.datetime.combine(d, datetime.datetime.min.time()) - epoch).total_seconds() * 1000)
 
 
 def unixtimemillis_to_date(timestamp: int) -> datetime.date:
@@ -55,6 +57,12 @@ def date_to_timestamp(d: datetime.date) -> int:
 
 def timestamp_to_date(timestamp: int) -> datetime.date:
     return datetime.datetime.fromtimestamp(timestamp).date()
+
+from pytz import timezone
+ib_tz_to_py_tz = {
+    "Asia/Hong_Kong" : timezone('Hongkong'),
+    "CST" : timezone('US/Central')
+}
 
 """
  if the input is pandas's Timestamp

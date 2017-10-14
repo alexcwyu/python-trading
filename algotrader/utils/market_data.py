@@ -118,6 +118,21 @@ def get_series_id(item, tags: str = None) -> str:
     raise RuntimeError("unknown series type")
 
 
+def get_frame_id(item, tags: str = None) -> str:
+    if isinstance(item, Bar):
+        return build_bar_frame_id(item.inst_id, item.size, item.provider_id, get_bar_type_name(item.type))
+    if isinstance(item, Trade):
+        return "Trade.%s" % (item.inst_id)
+    if isinstance(item, Quote):
+        return "Quote.%s" % (item.inst_id)
+    if isinstance(item, MarketDepth):
+        return "MarketDepth.%s" % (item.inst_id)
+
+    raise RuntimeError("unknown series type")
+
+def build_bar_frame_id(inst_id, size, provider_id, bar_type = "Time"):
+    return "Bar.%s.%s.%s.%s" % (inst_id, bar_type, size, provider_id)
+
 def build_subscription_requests(feed_id, instruments, subscription_types, from_date=None, to_date=None):
     reqs = []
     for instrument in instruments:

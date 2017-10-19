@@ -1,17 +1,17 @@
 symbol,type,name,exch_id,ccy_id,alt_symbols,sector,industry,und_inst_id,expiry_date,factor,strike,put_call,margin
-EURUSD,CASH,EUR/USD,IDEALPRO,USD,IB=EUR
-USDJPY,CASH,USD/JPY,IDEALPRO,JPY,IB=USD
-GOOG,STK,Alphabet Inc.,NASDAQ,USD
-MSFT,STK,Microsoft Corporation,NASDAQ,USD
-AAPL,STK,Apple Inc.,NASDAQ,USD
-FB,STK,Facebook Inc.,NASDAQ,USD
-AMZN,STK,Amazon.com Inc.,NASDAQ,USD
-BABA,STK,ALIBABA GROUP HOLDING LTD,NYSE,USD
-VXX,STK,iPath S&P 500 VIX ST Futures ETN,NYSEARCA,USD
-SPY,ETF,SPDR S&P 500 ETF,ARCA,USD
-XIV,ETF,VelocityShares Daily Inverse VIX ST ETN,NYSEARCA,USD
-HSI,IDX,HANG SENG INDEX,CBOE,HKD,Yahoo=^HSI
-SPX,IDX,S&P 500 Index,CBOE,USD,Yahoo=^GSPC:Goolge=.INX
-DJI,IDX,Dow Jones Industrial Average,CBOE,USD,Yahoo=^DJI:Google=.DJI
-IXIC,IDX,NASDAQ Composite,NASDAQ,USD,Yahoo=^IXIC:Google=.IXIC
-VIX,IDX,VOLATILITY S&P 500,CBOE,USD,Yahoo=^VIX
+EURUSD,CASH,EUR/USD,IDEALPRO,USD,IB=EUR,,,,,,,,
+USDJPY,CASH,USD/JPY,IDEALPRO,JPY,IB=USD,,,,,,,,
+GOOG,STK,Alphabet Inc.,NASDAQ,USD,,,,,,,,
+MSFT,STK,Microsoft Corporation,NASDAQ,USD,,,,,,,,
+AAPL,STK,Apple Inc.,NASDAQ,USD,,,,,,,,
+FB,STK,Facebook Inc.,NASDAQ,USD,,,,,,,,
+AMZN,STK,Amazon.com Inc.,NASDAQ,USD,,,,,,,,
+BABA,STK,ALIBABA GROUP HOLDING LTD,NYSE,USD,,,,,,,,
+VXX,STK,iPath S&P 500 VIX ST Futures ETN,NYSEARCA,USD,,,,,,,,
+SPY,ETF,SPDR S&P 500 ETF,ARCA,USD,,,,,,,,
+XIV,ETF,VelocityShares Daily Inverse VIX ST ETN,NYSEARCA,USD,,,,,,,,
+HSI,IDX,HANG SENG INDEX,CBOE,HKD,Yahoo=^HSI,,,,,,,,
+SPX,IDX,S&P 500 Index,CBOE,USD,Yahoo=^GSPC:Goolge=.INX,,,,,,,,
+DJI,IDX,Dow Jones Industrial Average,CBOE,USD,Yahoo=^DJI:Google=.DJI,,,,,,,,
+IXIC,IDX,NASDAQ Composite,NASDAQ,USD,Yahoo=^IXIC:Google=.IXIC,,,,,,,,
+VIX,IDX,VOLATILITY S&P 500,CBOE,USD,Yahoo=^VIX,,,,,,,,

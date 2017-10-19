@@ -301,6 +301,21 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         series_dict = {series.col_id: series for series in series_list}
         return DataFrame.from_series_dict(series_dict)
 
+    def to_list_of_lists(self, cols_orders: list = None):
+        """
+        This method is useful for those charting like StockCharts in HighCharts ( Python wrapped)
+        The first column is index
+
+        :return:
+        """
+        pd_df = self.to_pd_dataframe()
+        if cols_orders is not None:
+            col_data = pd_df[cols_orders]
+        else:
+            col_data = pd_df.values
+        data = np.hstack((np.transpose(np.matrix(self.index)), col_data))
+        return data.tolist()
+
 
     def show(self, index=True, **kwargs):
         return self.rc_df.show(index=index)

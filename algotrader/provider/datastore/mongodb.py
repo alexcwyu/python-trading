@@ -155,16 +155,16 @@ class MongoDBDataStore(SimpleDataStore):
     def save_portfolio_update(self, portfolio_update: PortfolioUpdate):
         self.save(portfolio_update)
 
-    def save_account_state(self, account_state: AccountState):
+    def save_account(self, account_state: AccountState):
         self.save(account_state)
 
-    def save_portfolio_state(self, portfolio_state: PortfolioState):
+    def save_portfolio(self, portfolio_state: PortfolioState):
         self.save(portfolio_state)
 
-    def save_strategy_state(self, strategy_state: StrategyState):
+    def save_strategy(self, strategy_state: StrategyState):
         self.save(strategy_state)
 
-    def save_order_state(self, order_state: OrderState):
+    def save_order(self, order_state: OrderState):
         self.save(order_state)
     #
     # def save_config(self, config):

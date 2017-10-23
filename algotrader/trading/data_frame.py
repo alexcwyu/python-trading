@@ -8,6 +8,7 @@ from pymonad import Monad, Monoid
 
 from algotrader import Startable
 # from algotrader.trading.context import ApplicationContext
+from algotrader.app import Application
 from algotrader.model.frame_pb2 import Frame
 from algotrader.technical.function_wrapper import FunctionWithPeriodsName
 from algotrader.trading.series import Series, UpdateMode
@@ -374,6 +375,16 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
 
 
     def append_row(self, index, value, new_cols=True):
+        if index in self.rc_df.index and \
+            self.app_context is not None and \
+                self.app_context.config.config['Application']['type'] == Application.BackTesting:
+            return
+
+        self._append_row(index, value, new_cols)
+
+
+
+    def _append_row(self, index, value, new_cols=True):
         self.rc_df.append_row(index, value, new_cols)
         if self.series_dict:
             for col, val in value.items():
@@ -385,6 +396,12 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         self.notify_downstream(None)
 
     def append_rows(self, indexes, values, new_cols=True):
+        if self.app_context is not None:
+            if self.app_context.config.config['Application']['type']:
+                pass
+
+
+
         self.rc_df.append_rows(indexes=indexes, values=values, new_cols=new_cols)
         # TODO: Missing the part in series_dict
         if self.series_dict:

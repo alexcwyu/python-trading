@@ -7,7 +7,7 @@ import pandas as pd
 from algotrader.trading.config import Config, load_from_yaml
 from algotrader.trading.context import ApplicationContext
 from tests import test_override
-from algotrader.trading.data_frame import Series, DataFrame
+from algotrader.trading.data_frame import Series, DataFrame, UpdateMode
 
 
 from algotrader import Startable, Context
@@ -76,6 +76,10 @@ class DataFrameTest(TestCase):
 
         return DataFrame.from_series_dict(series_dict=series_dict)
 
+    def test_ctor_from_rc(self):
+        df = self.create_df_by_rc_df()
+        self.assertEqual(df.update_mode, UpdateMode.ACTIVE_SUBSCRIBE)
+
 
     def test_ctor_from_series_dict(self):
         open_data = [100., 101., 102.]
@@ -90,6 +94,7 @@ class DataFrameTest(TestCase):
 
         df = DataFrame.from_series_dict(series_dict=series_dict)
 
+        self.assertEqual(df.update_mode, UpdateMode.ACTIVE_SUBSCRIBE)
         self.assertListEqual(['close', 'open'], df.columns)
         self.assertListEqual(open_data, df['open'].data[0])
         self.assertListEqual(close_data, df['close'].data[0])

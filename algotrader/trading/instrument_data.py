@@ -98,7 +98,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         #     value=protobuf_to_dict(bar))
 
         self.get_frame(get_frame_id(bar), provider_id=bar.provider_id, inst_id=bar.inst_id).append_row(
-            index=(bar.timestamp, bar.inst_id),
+            index=bar.timestamp,
             value=protobuf_to_dict(bar)
         )
         self.get_series(get_series_id(bar, tags='close')).add(
@@ -176,9 +176,12 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             if key not in self.__series_dict:
                 if self.store.obj_exist('series', key):
                     proto_series = self.store.load_one('series', key)
-                    self.__series_dict[key] = Series.from_proto_series(proto_series)
+                    series = Series.from_proto_series(proto_series)
                 else:
-                    self.__series_dict[key] = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64)
+                    series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64)
+
+                series.start(self.app_context)
+                self.__series_dict[key] = series
             return self.__series_dict[key]
         raise AssertionError()
 
@@ -195,9 +198,13 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             if key not in self.__frame_dict:
                 if self.store.obj_exist('frame', key):
                     proto_frame = self.store.load_one('frame', key)
-                    self.__frame_dict[key] = DataFrame.from_proto_frame(proto_frame, app_context=self.app_context)
+                    frame = DataFrame.from_proto_frame(proto_frame, app_context=self.app_context)
                 else:
-                    self.__frame_dict[key] = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns)
+                    frame = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns)
+
+                frame.start(self.app_context)
+                self.__frame_dict[key] = frame
+
             return self.__frame_dict[key]
 
     def add_frame(self, df : DataFrame, raise_if_duplicate=True):

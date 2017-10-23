@@ -30,6 +30,7 @@ DataStore:
     username:
     password:
     dbname: "algotrader"
+#    dbname: "test"
 
   InMemory:
     file: "algotrader_db.p"

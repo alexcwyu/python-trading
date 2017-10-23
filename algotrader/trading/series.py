@@ -6,6 +6,7 @@ import pandas as pd
 import raccoon as rc
 from pymonad import Monad, Monoid
 
+from algotrader.app import Application
 import algotrader.model.time_series2_pb2 as proto
 from algotrader import Startable
 from algotrader.model.time_series_pb2 import TimeSeriesUpdateEvent
@@ -33,10 +34,10 @@ class Series(Subscribable, Startable, Monad, Monoid):
         super(Series, self).__init__(value=None, *args, **kwargs)
         self.rc_series = rc.Series(data_name=col_id, index_name='timestamp', use_blist=True)
         self.series_id = series_id
-        self.df_id = df_id
-        self.col_id = col_id
-        self.inst_id = inst_id
-        self.provider_id = provider_id
+        self.df_id = df_id if df_id is not None else ""
+        self.col_id = col_id if col_id is not None else ""
+        self.inst_id = inst_id if inst_id is not None else ""
+        self.provider_id = provider_id if provider_id is not None else ""
         self.dtype = dtype
         self.func = func
         self.parent_series_id = parent_series_id
@@ -98,6 +99,7 @@ class Series(Subscribable, Startable, Monad, Monoid):
                             func=func,
                             parent_series_id=self.series_id, dtype=self.dtype, update_mode=self.update_mode)
 
+            series.start(self.app_context)
             self.app_context.inst_data_mgr.add_series(series, raise_if_duplicate=True)
             return series
 
@@ -354,6 +356,14 @@ class Series(Subscribable, Startable, Monad, Monoid):
         return self.rc_series.__getitem__(index)
 
     def append_row(self, index, value):
+        if index in self.rc_series.index and \
+            self.app_context is not None and \
+                self.app_context.config.config['Application']['type'] == Application.BackTesting:
+            return
+
+        self._append_row(index, value)
+
+    def _append_row(self, index, value):
         self.rc_series.append_row(index, value)
         self.notify_downstream(None)
 

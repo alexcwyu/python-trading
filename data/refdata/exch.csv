@@ -1,32 +1,37 @@
-exch_id,name
-SEHK,Hong Kong Stock Exchange
-HKFE,Hong Kong Futures Exchange
-SEHKNTL,Shanghai-Hong Kong Stock Connect
-NSE,National Stock Exchange of India
-CHIXJ,CHI-X Japan
-OSE,Osaka Securities Exchange
-TSEJ,Tokyo Stock Exchange
-SGX,Singapore Exchange
-KSE,Korea Stock Exchange
-ASX,Australian Stock Exchange
-IDEAL,IDEAL FX
-IDEALPRO,IDEALPRO Metals
-LSE,London Stock Exchange
-SWX,Swiss Exchange
-FWB,Frankfurt Stock Exchange
-CFE,CBOE Futures Exchange
-ECBOT,CBOT
-CBOE,Chicago Board Options Exchange
+exch_id,name,country_id,trading_hours_id,holidays_id,alt_ids
+SEHK,Hong Kong Stock Exchange,Hong Kong,,,Quandl=HKEX:
+HKFE,Hong Kong Futures Exchange,Hong Kong,,,Quandl=HKEX:
+CFE,Chicago Board Options Exchange(CBOE) Futures Exchange,US,,,Quandl=CBOE:
+GLOBEX,CME GLOBEX,US,,,IB=GLOBEX:Quandl=CME
+ECBOT,Chicago Board of Trade,US,,,IB=ECBOT:Quandl=CME
+NYBOT,ICE Futures U.S.,US,,,
+NYMEX,New York Mercantile Exchange,US,,,Quandl=CME
+ICEUS,ICE Futures US,US,,,Quandl=ICE
+NASDAQ,NASDAQ,US,,,
+DTB,EUREX,Germany,,,Quandl=EUREX
+FWB,Frankfurt Stock Exchange,Germany,,,
+ICEEU,ICE Intercontinental Exchange,UK,,,
+ICE/IPE,ICE Intercontinental Exchange Energy,UK,,,
+ICEEUSOFT,ICE Intercontinental Exchange Commodity,UK,,,
+NSE,National Stock Exchange of India,India,,,
+CHIXJ,CHI-X Japan,Japan,,,
+OSE,Osaka Securities Exchange,Japan,,,Quandl=OSE
+TSEJ,Tokyo Stock Exchange,Japan,,,
+SGX,Singapore Exchange,Singapore,,,
+KSE,Korea Stock Exchange,South Korea,,,Quandl=KRX
+ASX,Australian Stock Exchange,Australia,,,
+LSE,London Stock Exchange,UK,,,
+SOFFEX,EUREX,Switzerland,,,
+SWX,Swiss Exchange,Switzerland,,,
 CHX,Chicago Stock Exchange
-GLOBEX,CME
-NYBOT,ICE Futures U.S.
-ICEUS,ICE Futures US
 ISE,ISE Options Exchange
-NASDAQ,NASDAQ
-AMEX,NYSE Amex
-ARCA,NYSE Arca
-PSE,NYSE Arca
-NYMEX,New York Mercantile Exchange
-NYSE,New York Stock Exchange
-TSE,Toronto Stock Exchange
-SMART,Smart Order Routing
+AMEX,NYSE Amex,US,,,
+ARCA,NYSE Arca,US,,,
+PSE,NYSE Arca,US,,,
+NYSE,New York Stock Exchange,US,,,
+TSE,Toronto Stock Exchange,CANADA,,,
+SNFE,ASX24,Australia,,,
+SEHKNTL,Shanghai-Hong Kong Stock Connect,China,,,
+IDEAL,IDEAL FX,,,,
+IDEALPRO,IDEALPRO Metals,,,,
+SMART,Smart Order Routing,,,,

@@ -8,6 +8,7 @@ from pymonad import Monad, Monoid
 
 from algotrader import Startable
 # from algotrader.trading.context import ApplicationContext
+from algotrader.app import Application
 from algotrader.model.frame_pb2 import Frame
 from algotrader.technical.function_wrapper import FunctionWithPeriodsName
 from algotrader.trading.series import Series, UpdateMode
@@ -301,6 +302,21 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         series_dict = {series.col_id: series for series in series_list}
         return DataFrame.from_series_dict(series_dict)
 
+    def to_list_of_lists(self, cols_orders: list = None):
+        """
+        This method is useful for those charting like StockCharts in HighCharts ( Python wrapped)
+        The first column is index
+
+        :return:
+        """
+        pd_df = self.to_pd_dataframe()
+        if cols_orders is not None:
+            col_data = pd_df[cols_orders]
+        else:
+            col_data = pd_df.values
+        data = np.hstack((np.transpose(np.matrix(self.index)), col_data))
+        return data.tolist()
+
 
     def show(self, index=True, **kwargs):
         return self.rc_df.show(index=index)
@@ -359,6 +375,16 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
 
 
     def append_row(self, index, value, new_cols=True):
+        if index in self.rc_df.index and \
+            self.app_context is not None and \
+                self.app_context.config.config['Application']['type'] == Application.BackTesting:
+            return
+
+        self._append_row(index, value, new_cols)
+
+
+
+    def _append_row(self, index, value, new_cols=True):
         self.rc_df.append_row(index, value, new_cols)
         if self.series_dict:
             for col, val in value.items():
@@ -370,6 +396,12 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         self.notify_downstream(None)
 
     def append_rows(self, indexes, values, new_cols=True):
+        if self.app_context is not None:
+            if self.app_context.config.config['Application']['type']:
+                pass
+
+
+
         self.rc_df.append_rows(indexes=indexes, values=values, new_cols=new_cols)
         # TODO: Missing the part in series_dict
         if self.series_dict:

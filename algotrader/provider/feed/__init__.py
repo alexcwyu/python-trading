@@ -57,7 +57,7 @@ class PandasDataFeed(Feed):
 
     def _verify_subscription(self, *sub_reqs):
         for sub_req in sub_reqs:
-            if not sub_req.from_date or sub_req.type != MarketDataSubscriptionRequest.Bar or sub_req.bar_type != Bar.Time or sub_req.bar_size != D1:
+            if not sub_req.from_date or sub_req.type != MarketDataSubscriptionRequest.Bar or sub_req.bar_type != Bar.Time: # or sub_req.bar_size != D1:
                 raise RuntimeError("only HistDataSubscriptionKey is supported!")
 
     def _within_range(self, inst_id, timestamp, sub_req_ranges):
@@ -84,13 +84,12 @@ class PandasDataFeed(Feed):
             type=Bar.Time,
             provider_id=row['providerid'],
             timestamp=timestamp,
-            open=row['open'],
-            high=row['high'],
-            low=row['low'],
-            close=row['close'],
-            volume=row['volume'],
-            # adj_close=row['Adj Close'] if 'Adj Close' in row else None,
-            adj_close=row['adj_close'],
+            open=row['open'] if 'open' in row else None,
+            high=row['high'] if 'high' in row else None,
+            low=row['low'] if 'low' in row else None,
+            close=row['close'] if 'close' in row else None,
+            volume=row['volume'] if 'volume' in row else None,
+            adj_close=row['adj_close'] if 'adj_close' in row else None,
             size=row['barsize'])
 
     @abc.abstractmethod

@@ -28,7 +28,7 @@ class ModelAsFunction(FunctionWithPeriodsName):
 
 class SKLearnTransformer(ModelAsFunction):
     def __init__(self, model, periods, name, array_utils):
-        super(SKLearnTransformer, self).__init__(periods=periods, func=model, name=name, array_utils=array_utils)
+        super(SKLearnTransformer, self).__init__(periods=periods, model=model, name=name, array_utils=array_utils)
 
     def __call__(self, *args, **kwargs):
         return self.model.fit_transform(*args, **kwargs)
@@ -71,7 +71,7 @@ def periods_function(periods, name=None):
 
 def sklearn_trasformer_function(periods, name):
     def function_wrapper(model):
-        return SKLearnTransformer(model=model, periods=periods, name=name)
+        return SKLearnTransformer(model=model, periods=periods, name=name, array_utils=iterable_to_np_array)
 
     return function_wrapper
 

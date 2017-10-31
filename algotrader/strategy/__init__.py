@@ -60,11 +60,11 @@ class Strategy(HasPositions, ExecutionEventHandler, Startable, HasId):
         if self.feed:
             self.feed.start(app_context)
 
-        for sub_req in build_subscription_requests(self.feed.id(), self.instruments,
+        sub_req = build_subscription_requests(self.feed.id(), self.instruments,
                                                    self.config.get_app_config("subscriptionTypes"),
                                                    self.config.get_app_config("fromDate"),
-                                                   self.config.get_app_config("toDate")):
-            self.feed.subscribe_mktdata(sub_req)
+                                                   self.config.get_app_config("toDate"))
+        self.feed.subscribe_mktdata(*sub_req)
 
     def _stop(self):
         if self.event_subscription:

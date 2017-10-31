@@ -170,6 +170,13 @@ class SeriesTest(TestCase):
         pd_series_out = series.to_pd_series()
         self.assertTrue(pd_series.equals(pd_series_out))
 
+        try:
+            series = Series.from_pd_series(pd_series, "test_series2")
+        except :
+            self.fail("Series.from_pd_series(pd_series))")
+
+
+
     def test_pd_rc_proto(self):
         pd_series = self.__create_pd_series()
 

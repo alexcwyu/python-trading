@@ -1,0 +1,2 @@
+31-Oct-2017:
+- Fix the subscription when multiple instruments

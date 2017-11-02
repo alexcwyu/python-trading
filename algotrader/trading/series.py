@@ -253,30 +253,22 @@ class Series(Subscribable, Startable, Monad, Monoid):
         if hasattr(pd_series, 'df_id'):
             series.df_id = pd_series.df_id
         else:
-            if not df_id:
-                raise RuntimeError("Please provide df_id")
-            series.df_id = df_id
+            series.df_id = df_id if df_id is not None else ""
 
         if hasattr(pd_series, 'col_id'):
             series.col_id = pd_series.col_id
         else:
-            if not col_id:
-                raise RuntimeError("Please provide col_id")
-            series.col_id = col_id
+            series.col_id = col_id if col_id is not None else ""
 
         if hasattr(pd_series, 'inst_id'):
             series.inst_id = pd_series.inst_id
         else:
-            if not inst_id:
-                raise RuntimeError("Please provide inst_id")
-            series.inst_id = inst_id
+            series.inst_id = inst_id if inst_id is not None else ""
 
         if hasattr(pd_series, 'provider_id'):
             series.provider_id = pd_series.provider_id
         else:
-            if not provider_id:
-                raise RuntimeError("Please provide sourcd_id")
-            series.provider_id = provider_id
+            series.provider_id = provider_id if provider_id is not None else ""
 
         return series
 

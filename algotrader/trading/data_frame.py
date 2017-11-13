@@ -421,3 +421,6 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def get(self, indexes=None, columns=None, as_list=False, as_dict=False):
+        return self.rc_df.get(indexes, columns, as_list, as_dict)

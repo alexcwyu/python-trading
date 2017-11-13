@@ -25,7 +25,7 @@ class PandaDBDataFeed(PandasDataFeed):
         for sub_req in sub_reqs:
             inst = insts[sub_req.inst_id]
             frame_id = build_bar_frame_id(inst_id=inst.inst_id, size=sub_req.bar_size, provider_id=provider_id)
-            algo_df = self.app_context.inst_data_mgr.get_frame(frame_id)
+            algo_df = self.app_context.inst_data_mgr.get_frame(frame_id, provider_id=provider_id, inst_id=inst.inst_id)
             df = algo_df.to_pd_dataframe()
             df['InstId'] = sub_req.inst_id
             df['ProviderId'] = sub_req.md_provider_id

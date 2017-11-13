@@ -86,38 +86,35 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
         self.__bar_dict[bar.inst_id] = bar
+        provider = self.app_context.config.config['Application']['type']
 
-        # self.get_series(get_series_id(bar)).add(
-        #     timestamp=bar.timestamp,
-        #     data={"open": bar.open, "high": bar.high, "low": bar.low, "close": bar.close,
-        #      "vol": bar.vol})
-
-        # a universal frame store all bars?
-        # self.frame().append_row(
-        #     index=(bar.timestamp, bar.inst_id),
-        #     value=protobuf_to_dict(bar))
-
-        self.get_frame(get_frame_id(bar), provider_id=bar.provider_id, inst_id=bar.inst_id).append_row(
+        self.get_frame(
+            get_frame_id(bar,
+                         provider_id=provider),
+            provider_id=provider,
+            inst_id=bar.inst_id
+        ).append_row(
             index=bar.timestamp,
             value=protobuf_to_dict(bar)
         )
-        self.get_series(get_series_id(bar, tags='close')).add(
+
+        self.get_series(get_series_id(bar, tags='close', provider_id=provider)).add(
             timestamp=bar.timestamp,
             value=bar.close)
 
-        self.get_series(get_series_id(bar, tags='open')).add(
+        self.get_series(get_series_id(bar, tags='open', provider_id=provider)).add(
             timestamp=bar.timestamp,
             value=bar.open)
 
-        self.get_series(get_series_id(bar, tags='high')).add(
+        self.get_series(get_series_id(bar, tags='high', provider_id=provider)).add(
             timestamp=bar.timestamp,
             value=bar.high)
 
-        self.get_series(get_series_id(bar, tags='low')).add(
+        self.get_series(get_series_id(bar, tags='low', provider_id=provider)).add(
             timestamp=bar.timestamp,
             value=bar.low)
 
-        self.get_series(get_series_id(bar, tags='volume')).add(
+        self.get_series(get_series_id(bar, tags='volume', provider_id=provider)).add(
             timestamp=bar.timestamp,
             value=bar.volume)
 
@@ -131,7 +128,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.get_series(get_series_id(quote)).add(
             timestamp=quote.timestamp,
             value={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
-             "ask_size": quote.ask_size})
+                   "ask_size": quote.ask_size})
 
         if self._is_realtime_persist():
             self.store.save_quote(quote)
@@ -207,7 +204,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
             return self.__frame_dict[key]
 
-    def add_frame(self, df : DataFrame, raise_if_duplicate=True):
+    def add_frame(self, df: DataFrame, raise_if_duplicate=True):
         if df.df_id not in self.__frame_dict:
             self.__frame_dict[df.df_id] = df
             if self._is_realtime_persist():

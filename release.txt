@@ -1,2 +1,6 @@
 31-Oct-2017:
 - Fix the subscription when multiple instruments
+13-Nov-2017:
+- In instrument data manager, on_bar, the provider id will depends on app context's application type (backtest / live trading),
+ instead of bar's source provider id. In the coming version, the BackTesting as provider_id series/frame will be deleted and
+ not serialized.

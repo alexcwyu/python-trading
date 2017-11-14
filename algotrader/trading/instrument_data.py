@@ -13,6 +13,7 @@ from algotrader.utils.logging import logger
 from algotrader.utils.market_data import get_series_id, get_frame_id
 from algotrader.utils.model import get_full_cls_name, get_cls
 from algotrader.utils.protobuf_to_dict import protobuf_to_dict
+from algotrader.app import Application
 
 
 class InstrumentDataManager(MarketDataEventHandler, Manager):
@@ -74,10 +75,12 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
                     self.store.save_trade(trade)
 
             elif self.persist_mode != PersistenceMode.Disable:
-                for series in self.__series_dict.values():
+                for series in (series for series in self.__series_dict.values()\
+                               if not series.provider_id == Application.BackTesting):
                     self.store.save_series(series.to_proto_series())
 
-                for df in self.__frame_dict.values():
+                for df in (df for df in self.__frame_dict.values()\
+                           if not df.provider_id == Application.BackTesting):
                     self.store.save_frame(df.to_proto_frame(self.app_context))
 
     def _is_realtime_persist(self):

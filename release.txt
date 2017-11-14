@@ -4,3 +4,5 @@
 - In instrument data manager, on_bar, the provider id will depends on app context's application type (backtest / live trading),
  instead of bar's source provider id. In the coming version, the BackTesting as provider_id series/frame will be deleted and
  not serialized.
+14-Nov-2017:
+- Those frame/series with BackTesting in provider_id will not be serialized.

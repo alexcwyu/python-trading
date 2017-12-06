@@ -16,8 +16,8 @@ class Down2PctStrategy(Strategy):
         self.qty = self._get_stg_config("qty", default=1)
 
         self.close = self.app_context.inst_data_mgr.get_series(
-            "Bar.%s.close.Time.86400" % app_context.config.get_app_config("instrumentIds")[0])
-        self.close.start(app_context)
+            "Bar.%s.Time.86400.Yahoo.close" % app_context.config.get_app_config("instrumentIds")[0], transient=True)
+        # self.close.start(app_context)
 
         # decorate the simple function with extra attribute so that the Series as functor can retrieve
         roc_function = talib_function(periods=1, name='roc')(talib.ROC) # construct a functor

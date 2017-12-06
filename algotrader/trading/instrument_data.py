@@ -13,6 +13,7 @@ from algotrader.utils.logging import logger
 from algotrader.utils.market_data import get_series_id, get_frame_id
 from algotrader.utils.model import get_full_cls_name, get_cls
 from algotrader.utils.protobuf_to_dict import protobuf_to_dict
+from algotrader.app import Application
 
 
 class InstrumentDataManager(MarketDataEventHandler, Manager):
@@ -22,7 +23,9 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__quote_dict = {}
         self.__trade_dict = {}
         self.__series_dict = {}
+        self.__transient_series_dict = {}
         self.__frame_dict = {}
+        self.__transient_frame_dict = {}
         self.subscription = None
         self.store = None
 
@@ -86,37 +89,48 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def on_bar(self, bar):
         logger.debug("[%s] %s" % (self.__class__.__name__, bar))
         self.__bar_dict[bar.inst_id] = bar
-        provider = self.app_context.config.config['Application']['type']
+        app_type = self.app_context.config.config['Application']['type']
+        transient = True if app_type == Application.BackTesting else False
+
+        cols_series_id = {'close': get_series_id(bar, tags='close', provider_id=bar.provider_id),
+                        'open': get_series_id(bar, tags='open', provider_id=bar.provider_id),
+                        'high': get_series_id(bar, tags='high', provider_id=bar.provider_id),
+                        'low': get_series_id(bar, tags='low', provider_id=bar.provider_id),
+                        'volume': get_series_id(bar, tags='volume', provider_id=bar.provider_id)
+                        }
+
+        self.get_series(get_series_id(bar, tags='close', provider_id=bar.provider_id), transient=transient).add(
+            timestamp=bar.timestamp,
+            value=bar.close)
+
+        self.get_series(get_series_id(bar, tags='open', provider_id=bar.provider_id), transient=transient).add(
+            timestamp=bar.timestamp,
+            value=bar.open)
+
+        self.get_series(get_series_id(bar, tags='high', provider_id=bar.provider_id), transient=transient).add(
+            timestamp=bar.timestamp,
+            value=bar.high)
+
+        self.get_series(get_series_id(bar, tags='low', provider_id=bar.provider_id), transient=transient).add(
+            timestamp=bar.timestamp,
+            value=bar.low)
+
+        self.get_series(get_series_id(bar, tags='volume', provider_id=bar.provider_id), transient=transient).add(
+            timestamp=bar.timestamp,
+            value=bar.volume)
 
         self.get_frame(
             get_frame_id(bar,
-                         provider_id=provider),
-            provider_id=provider,
-            inst_id=bar.inst_id
+                         provider_id=bar.provider_id),
+            provider_id=bar.provider_id,
+            inst_id=bar.inst_id,
+            columns=['close', 'open', 'high', 'low', 'volume'],
+            cols_series_id=cols_series_id,
+            transient=transient
         ).append_row(
             index=bar.timestamp,
             value=protobuf_to_dict(bar)
         )
-
-        self.get_series(get_series_id(bar, tags='close', provider_id=provider)).add(
-            timestamp=bar.timestamp,
-            value=bar.close)
-
-        self.get_series(get_series_id(bar, tags='open', provider_id=provider)).add(
-            timestamp=bar.timestamp,
-            value=bar.open)
-
-        self.get_series(get_series_id(bar, tags='high', provider_id=provider)).add(
-            timestamp=bar.timestamp,
-            value=bar.high)
-
-        self.get_series(get_series_id(bar, tags='low', provider_id=provider)).add(
-            timestamp=bar.timestamp,
-            value=bar.low)
-
-        self.get_series(get_series_id(bar, tags='volume', provider_id=provider)).add(
-            timestamp=bar.timestamp,
-            value=bar.volume)
 
         if self._is_realtime_persist():
             self.store.save_bar(bar)
@@ -167,20 +181,36 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             return self.__bar_dict[inst_id].close
         return None
 
-    # def get_series(self, key, create_if_missing=True, cls=DataSeries, desc=None, missing_value=np.nan):
-    def get_series(self, key, df_id=None, col_id=None, inst_id=None):
-        if type(key) == str:
-            if key not in self.__series_dict:
-                if self.store.obj_exist('series', key):
-                    proto_series = self.store.load_one('series', key)
-                    series = Series.from_proto_series(proto_series)
-                else:
-                    series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64)
+    def get_series(self, key, df_id=None, col_id=None, inst_id=None, transient=False):
+        if transient:
+            return self._get_transient_series(key, df_id, col_id, inst_id)
+        else:
+            return self._get_series(key, df_id, col_id, inst_id)
 
-                series.start(self.app_context)
-                self.__series_dict[key] = series
-            return self.__series_dict[key]
-        raise AssertionError()
+    def _get_transient_series(self, key, df_id=None, col_id=None, inst_id=None):
+        if type(key) != str:
+            raise AssertionError()
+
+        if key not in self.__transient_series_dict:
+            series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64)
+            self.__transient_series_dict[key] = series
+            series.start(self.app_context)
+        return self.__transient_series_dict[key]
+
+    def _get_series(self, key, df_id=None, col_id=None, inst_id=None):
+        if type(key) != str:
+            raise AssertionError()
+
+        if key not in self.__series_dict:
+            if self.store.obj_exist('series', key):
+                proto_series = self.store.load_one('series', key)
+                series = Series.from_proto_series(proto_series)
+            else:
+                series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64)
+
+            series.start(self.app_context)
+            self.__series_dict[key] = series
+        return self.__series_dict[key]
 
     def add_series(self, series, raise_if_duplicate=False):
         if series.series_id not in self.__series_dict:
@@ -190,14 +220,38 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         elif raise_if_duplicate and self.__series_dict[series.series_id] != series:
             raise AssertionError("Series [%s] already exist" % series.series_id)
 
-    def get_frame(self, key, provider_id=None, inst_id=None, columns=None):
+    def get_frame(self, key, provider_id=None, inst_id=None, columns=None, cols_series_id : dict = None, transient=False):
+        if transient:
+            return self._get_transient_frame(key, provider_id, inst_id, columns, cols_series_id)
+        else:
+            return self._get_frame(key, provider_id, inst_id, columns, cols_series_id)
+
+    def _get_transient_frame(self, key, provider_id=None, inst_id=None, columns=None, cols_series_id : dict = None):
+        if type(key) != str:
+            raise AssertionError()
+
+        if key not in self.__transient_frame_dict:
+            if cols_series_id:
+                series_dict = {k: self.get_series(v, transient=True) for k, v in cols_series_id.items()}
+                frame = DataFrame.from_series_dict(series_dict)
+            else:
+                frame = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns)
+            self.__transient_frame_dict[key] = frame
+            frame.start(self.app_context)
+        return self.__transient_frame_dict[key]
+
+    def _get_frame(self, key, provider_id=None, inst_id=None, columns=None, cols_series_id : dict = None):
         if isinstance(key, str):
             if key not in self.__frame_dict:
                 if self.store.obj_exist('frame', key):
                     proto_frame = self.store.load_one('frame', key)
                     frame = DataFrame.from_proto_frame(proto_frame, app_context=self.app_context)
                 else:
-                    frame = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns)
+                    if cols_series_id:
+                        series_dict = {k: self.get_series(v, transient=False) for k, v in cols_series_id.items()}
+                        frame = DataFrame.from_series_dict(series_dict)
+                    else:
+                        frame = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns)
 
                 frame.start(self.app_context)
                 self.__frame_dict[key] = frame

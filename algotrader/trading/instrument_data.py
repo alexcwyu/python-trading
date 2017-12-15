@@ -23,7 +23,6 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         self.__quote_dict = {}
         self.__trade_dict = {}
         self.__series_dict = {}
-        self.__transient_series_dict = {}
         self.__frame_dict = {}
         self.__transient_frame_dict = {}
         self.subscription = None
@@ -78,10 +77,12 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
             elif self.persist_mode != PersistenceMode.Disable:
                 for series in self.__series_dict.values():
-                    self.store.save_series(series.to_proto_series())
+                    if not series.transient:
+                        self.store.save_series(series.to_proto_series())
 
                 for df in self.__frame_dict.values():
-                    self.store.save_frame(df.to_proto_frame(self.app_context))
+                    if not df.transient:
+                        self.store.save_frame(df.to_proto_frame(self.app_context))
 
     def _is_realtime_persist(self):
         return self.store and self.persist_mode == PersistenceMode.RealTime
@@ -191,11 +192,11 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         if type(key) != str:
             raise AssertionError()
 
-        if key not in self.__transient_series_dict:
-            series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64)
-            self.__transient_series_dict[key] = series
+        if key not in self.__series_dict:
+            series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64, transient=True)
+            self.__series_dict[key] = series
             series.start(self.app_context)
-        return self.__transient_series_dict[key]
+        return self.__series_dict[key]
 
     def _get_series(self, key, df_id=None, col_id=None, inst_id=None):
         if type(key) != str:
@@ -206,7 +207,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
                 proto_series = self.store.load_one('series', key)
                 series = Series.from_proto_series(proto_series)
             else:
-                series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64)
+                series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64,
+                                transient=False)
 
             series.start(self.app_context)
             self.__series_dict[key] = series
@@ -230,15 +232,16 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         if type(key) != str:
             raise AssertionError()
 
-        if key not in self.__transient_frame_dict:
+        if key not in self.__frame_dict:
             if cols_series_id:
                 series_dict = {k: self.get_series(v, transient=True) for k, v in cols_series_id.items()}
                 frame = DataFrame.from_series_dict(series_dict)
+                frame.transient = True
             else:
-                frame = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns)
-            self.__transient_frame_dict[key] = frame
+                frame = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns, transient=True)
+            self.__frame_dict[key] = frame
             frame.start(self.app_context)
-        return self.__transient_frame_dict[key]
+        return self.__frame_dict[key]
 
     def _get_frame(self, key, provider_id=None, inst_id=None, columns=None, cols_series_id : dict = None):
         if isinstance(key, str):
@@ -251,7 +254,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
                         series_dict = {k: self.get_series(v, transient=False) for k, v in cols_series_id.items()}
                         frame = DataFrame.from_series_dict(series_dict)
                     else:
-                        frame = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns)
+                        frame = DataFrame(df_id=key, provider_id=provider_id, inst_id=inst_id, columns=columns, transient=False)
 
                 frame.start(self.app_context)
                 self.__frame_dict[key] = frame

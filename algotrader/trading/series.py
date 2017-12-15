@@ -28,6 +28,7 @@ class Series(Subscribable, Startable, Monad, Monoid):
                  func=None,
                  parent_series_id: str = None,
                  update_mode: UpdateMode = UpdateMode.ACTIVE_SUBSCRIBE,
+                 transient=False,
                  *args,
                  **kwargs
                  ):
@@ -42,6 +43,7 @@ class Series(Subscribable, Startable, Monad, Monoid):
         self.func = func
         self.parent_series_id = parent_series_id
         self.update_mode = update_mode
+        self.transient = transient
 
     def _start(self, app_context=None):
 

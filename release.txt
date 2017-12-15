@@ -8,3 +8,6 @@
 - Rollback all 13-Nov-2017's changes. Now a new flag is introduced for series and dataframe as transient. When it is transient,
 it will never be serialized and stored to the database. It is particular useful when we replay those historical market data
 in backtesting, so we will use a transient series to store it during backtest.
+12-Dec-2017:
+- The transient flag is not just used in instrument data manager when getting series and df. We also introduce this transient flag
+into the series and df.

@@ -18,7 +18,9 @@ from algotrader.trading.subscribable import Subscribable
 class DataFrame(Subscribable, Startable, Monad, Monoid):
     def __init__(self, df_id=None, provider_id=None, inst_id=None, parent_df_id=None,
                  columns=None, func=None,
-                 update_mode: UpdateMode = UpdateMode.ACTIVE_SUBSCRIBE, *args, **kwargs):
+                 update_mode: UpdateMode = UpdateMode.ACTIVE_SUBSCRIBE,
+                 transient=False,
+                 *args, **kwargs):
         """
         Default Ctor, with protobuf obj pls construct by from ctor
         :param df_id:
@@ -28,6 +30,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         :param columns:
         :param func:
         :param update_mode:
+        :param transient:
         :param args:
         :param kwargs:
         """
@@ -40,9 +43,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         self.parent_df_id = parent_df_id
         self.func = func
         self.update_mode = update_mode
-
-
-
+        self.transient = transient
 
 
     def _start(self, app_context = None):
@@ -215,6 +216,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         df.inst_id = series.inst_id
 
         df.rc_df = DataFrame.pd_df_to_rc_df(pd_df)
+        df.transient = False
         return df
 
     @classmethod

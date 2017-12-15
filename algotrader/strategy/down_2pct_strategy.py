@@ -4,6 +4,7 @@ from algotrader import Context
 from algotrader.model.trade_data_pb2 import *
 from algotrader.strategy import Strategy
 from algotrader.technical.talib_wrapper import talib_function
+from algotrader.utils.market_data import build_bar_frame_id, build_series_id, M1, D1
 
 
 class Down2PctStrategy(Strategy):
@@ -15,8 +16,12 @@ class Down2PctStrategy(Strategy):
     def _start(self, app_context: Context) -> None:
         self.qty = self._get_stg_config("qty", default=1)
 
-        self.close = self.app_context.inst_data_mgr.get_series(
-            "Bar.%s.Time.86400.Yahoo.close" % app_context.config.get_app_config("instrumentIds")[0], transient=True)
+        inst_id = app_context.config.get_app_config("instrumentIds")[0]
+        close_key = build_series_id(inst_id, D1, "Yahoo", 'close')
+        self.close = self.app_context.inst_data_mgr.get_series(close_key, transient=True)
+
+        # self.close = self.app_context.inst_data_mgr.get_series(
+        #     "Bar.%s.Time.86400.Yahoo.close" % app_context.config.get_app_config("instrumentIds")[0], transient=True)
         # self.close.start(app_context)
 
         # decorate the simple function with extra attribute so that the Series as functor can retrieve

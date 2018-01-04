@@ -371,7 +371,8 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
             for col, val in values.items():
                 if col in self.series_dict.keys():
                     series = self.series_dict[col]
-                    series.add(indexes, val)
+                    series.append_rows(indexes, val)
+                    # series.add(indexes, val)
 
         self.notify_downstream(None)
 

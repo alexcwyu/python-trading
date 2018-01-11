@@ -207,7 +207,16 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         """
         df = cls()
         df.series_dict = series_dict
-        pd_df = pd.DataFrame(data={series.col_id: series.to_pd_series() for series in series_dict.values()})
+
+        # check if all the series came from single inst id, if then we use col_id as column
+        # else, different inst's close (with same col_id ) may join together into single df
+        # se in this case we will use the unique series_id instead
+
+        num_distinct_inst_id = len({series.inst_id for series in series_dict.values()})
+        if num_distinct_inst_id > 1:
+            pd_df = pd.DataFrame(data={series.series_id: series.to_pd_series() for series in series_dict.values()})
+        else:
+            pd_df = pd.DataFrame(data={series.col_id: series.to_pd_series() for series in series_dict.values()})
 
         series = next(iter(series_dict.values()))
 

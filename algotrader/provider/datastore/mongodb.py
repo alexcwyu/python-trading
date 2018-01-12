@@ -83,7 +83,7 @@ class MongoDBDataStore(SimpleDataStore):
         return DataStore.Mongo
 
     def save(self, obj):
-        logger.info("[%s] saving %s" % (self.__class__.__name__, obj))
+        logger.debug("[%s] saving %s" % (self.__class__.__name__, obj))
         id = get_model_id(obj)
         packed_data = protobuf_to_dict(obj)
         t = type(obj)

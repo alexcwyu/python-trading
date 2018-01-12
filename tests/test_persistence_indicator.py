@@ -26,11 +26,12 @@ class IndicatorPersistenceTest(TestCase):
 
     def create_app_context(self, conf):
         return ApplicationContext(config=Config(
-            load_from_yaml("../config/backtest.yaml"),
+            load_from_yaml("../config/unittest.yaml"),
             load_from_yaml("../config/down2%.yaml"),
             test_override,
             {
                 "Application": {
+                    "dataStoreId": "Mongo",
                     "ceateAtStart": True,
                     "deleteDBAtStop": False,
                     "persistenceMode": "RealTime"

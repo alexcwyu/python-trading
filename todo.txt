@@ -1,3 +1,5 @@
+For some reason, the close series of HSI before the pandas_db feed load it, so when we load there we have a NAN series
+
 ### Dataframe / Series
 - to and from pandas
 - to and from Protobuf

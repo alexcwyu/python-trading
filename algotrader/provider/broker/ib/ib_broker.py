@@ -312,7 +312,7 @@ class IBBroker(IBSocket, Broker, Feed):
         self.tws.requestFA(3)  # account_aliases
 
     def __req_acct_update(self):
-        self.tws.reqAccountUpdates(True, self.account)
+        self.tws.reqAccountUpdates(True, str(self.account))
 
     def on_new_ord_req(self, new_ord_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))

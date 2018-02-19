@@ -50,7 +50,8 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         # TODO: Probably this is useless
         super(DataFrame, self)._start(self.app_context)
 
-        self.app_context.inst_data_mgr.add_frame(self)
+        if not self.app_context.inst_data_mgr.has_frame(self.df_id):
+            self.app_context.inst_data_mgr.add_frame(self)
 
         if self.parent_df_id is not None and self.update_mode == UpdateMode.ACTIVE_SUBSCRIBE:
             parent_frame = self.app_context.inst_data_mgr.get_frame(self.parent_df_id)

@@ -209,16 +209,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         df = cls()
         df.series_dict = series_dict
 
-        # check if all the series came from single inst id, if then we use col_id as column
-        # else, different inst's close (with same col_id ) may join together into single df
-        # se in this case we will use the unique series_id instead
-
-        num_distinct_inst_id = len({series.inst_id for series in series_dict.values()})
-        if num_distinct_inst_id > 1:
-            pd_df = pd.DataFrame(data={series.series_id: series.to_pd_series() for series in series_dict.values()})
-        else:
-            pd_df = pd.DataFrame(data={series.col_id: series.to_pd_series() for series in series_dict.values()})
-
+        pd_df = pd.DataFrame(data={key: series.to_pd_series() for key, series in series_dict.items()})
         series = next(iter(series_dict.values()))
 
         df.df_id = series.df_id
@@ -311,7 +302,17 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
     @classmethod
     def from_proto_frame(cls, bundle: Frame, app_context):
         series_list = [app_context.inst_data_mgr.get_series(series_id) for series_id in bundle.series_id_list]
-        series_dict = {series.col_id: series for series in series_list}
+
+        # check if all the series came from single inst id, if then we use col_id as column
+        # else, different inst's close (with same col_id ) may join together into single df
+        # se in this case we will use the unique series_id instead
+        num_distinct_inst_id = len({series.inst_id for series in series_list})
+        if num_distinct_inst_id > 1:
+            series_dict = {series.series_id: series for series in series_list}
+        else:
+            series_dict = {series.col_id: series for series in series_list}
+
+        # series_dict = {series.col_id: series for series in series_list}
         return DataFrame.from_series_dict(series_dict)
 
     def to_list_of_lists(self, cols_orders: list = None):

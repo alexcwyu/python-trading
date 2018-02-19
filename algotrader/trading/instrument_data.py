@@ -120,18 +120,18 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             timestamp=bar.timestamp,
             value=bar.volume)
 
-        self.get_frame(
-            get_frame_id(bar,
-                         provider_id=bar.provider_id),
-            provider_id=bar.provider_id,
-            inst_id=bar.inst_id,
-            columns=['close', 'open', 'high', 'low', 'volume'],
-            cols_series_id=cols_series_id,
-            transient=transient
-        ).append_row(
-            index=bar.timestamp,
-            value=protobuf_to_dict(bar)
-        )
+        # self.get_frame(
+        #     get_frame_id(bar,
+        #                  provider_id=bar.provider_id),
+        #     provider_id=bar.provider_id,
+        #     inst_id=bar.inst_id,
+        #     columns=['close', 'open', 'high', 'low', 'volume'],
+        #     cols_series_id=cols_series_id,
+        #     transient=transient
+        # ).append_row(
+        #     index=bar.timestamp,
+        #     value=protobuf_to_dict(bar)
+        # )
 
         if self._is_realtime_persist():
             self.store.save_bar(bar)
@@ -182,23 +182,24 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             return self.__bar_dict[inst_id].close
         return None
 
-    def get_series(self, key, df_id=None, col_id=None, inst_id=None, transient=False):
+    def get_series(self, key, df_id=None, col_id=None, inst_id=None, provider_id=None, transient=False):
         if transient:
             return self._get_transient_series(key, df_id, col_id, inst_id)
         else:
             return self._get_series(key, df_id, col_id, inst_id)
 
-    def _get_transient_series(self, key, df_id=None, col_id=None, inst_id=None):
+    def _get_transient_series(self, key, df_id=None, col_id=None, inst_id=None, provider_id=None):
         if type(key) != str:
             raise AssertionError()
 
         if key not in self.__series_dict:
-            series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64, transient=True)
+            series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, provider_id=provider_id,
+                            dtype=np.float64, transient=True)
             self.__series_dict[key] = series
             series.start(self.app_context)
         return self.__series_dict[key]
 
-    def _get_series(self, key, df_id=None, col_id=None, inst_id=None):
+    def _get_series(self, key, df_id=None, col_id=None, inst_id=None, provider_id=None):
         if type(key) != str:
             raise AssertionError()
 
@@ -207,7 +208,9 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
                 proto_series = self.store.load_one('series', key)
                 series = Series.from_proto_series(proto_series)
             else:
-                series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id, dtype=np.float64,
+                series = Series(series_id=key, df_id=df_id, col_id=col_id, inst_id=inst_id,
+                                provider_id=provider_id,
+                                dtype=np.float64,
                                 transient=False)
 
             series.start(self.app_context)
@@ -222,7 +225,13 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         elif raise_if_duplicate and self.__series_dict[series.series_id] != series:
             raise AssertionError("Series [%s] already exist" % series.series_id)
 
-    def get_frame(self, key, provider_id=None, inst_id=None, columns=None, cols_series_id : dict = None, transient=False):
+    def get_frame(self, key, provider_id, inst_id, columns=None, cols_series_id : dict = None, transient=False):
+        if provider_id is None:
+            raise RuntimeError("Please provide provider_id")
+
+        if inst_id is None:
+            raise RuntimeError("Please provide inst_id")
+
         if transient:
             return self._get_transient_frame(key, provider_id, inst_id, columns, cols_series_id)
         else:
@@ -261,7 +270,7 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
 
             return self.__frame_dict[key]
 
-    def add_frame(self, df: DataFrame, raise_if_duplicate=True):
+    def add_frame(self, df: DataFrame, raise_if_duplicate=True, transient=False):
         if df.df_id not in self.__frame_dict:
             self.__frame_dict[df.df_id] = df
             if self._is_realtime_persist():

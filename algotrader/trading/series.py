@@ -156,8 +156,15 @@ class Series(Subscribable, Startable, Monad, Monoid):
                 self.append_rows(parent_series.index[idx:], [np.nan for i in range(parent_len - idx)])
             else:
                 start = idx - periods if idx >= periods else 0
-                val = self.func(
-                    self.func.array_utils(parent_series.tail(parent_len - start).data))
+
+                if (self.func.feedback_periods > 0) and (len(self) > self.func.feedback_periods):
+                    val = self.func(
+                        self.func.array_utils(parent_series.tail(parent_len-start).data),
+                        lag_self=self.func.array_utils(self.tail(self.func.feedback_periods).data),
+                    )
+                else:
+                    val = self.func(
+                        self.func.array_utils(parent_series.tail(parent_len - start).data))
 
                 self.append_rows(parent_series.index[idx:], val[-parent_len + idx:].tolist())
 
@@ -350,12 +357,8 @@ class Series(Subscribable, Startable, Monad, Monoid):
         return self.rc_series.__getitem__(index)
 
     def append_row(self, index, value):
-        if index in self.rc_series.index and \
-            self.app_context is not None and \
-                self.app_context.config.config['Application']['type'] == Application.BackTesting:
-            return
-
-        self._append_row(index, value)
+        self.rc_series.append_row(index, value)
+        self.notify_downstream(None)
 
     def _append_row(self, index, value):
         self.rc_series.append_row(index, value)

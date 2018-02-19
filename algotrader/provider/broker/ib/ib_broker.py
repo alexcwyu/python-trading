@@ -233,7 +233,8 @@ class IBBroker(IBSocket, Broker, Feed):
 
     def subscribe_mktdata(self, *sub_reqs):
         for sub_req in sub_reqs:
-            if sub_req.type.from_date:
+            # if sub_req.type.from_date:
+            if sub_req.from_date != 0:
                 req_func = self.__req_hist_data
             elif sub_req.type == MarketDataSubscriptionRequest.MarketDepth:
                 req_func = self.__req_market_depth
@@ -275,10 +276,15 @@ class IBBroker(IBSocket, Broker, Feed):
         self.tws.cancelMktData(req_id)
 
     def __req_real_time_bar(self, req_id, sub_req, contract):
-        self.tws.reqRealTimeBars(req_id, contract,
-                                 sub_req.subscription_type.bar_size,  # barSizeSetting,
-                                 self.model_factory.convert_hist_data_type(sub_req.subscription_type.data_type),
-                                 0  # RTH Regular trading hour
+        self.tws.reqRealTimeBars(req_id,
+                                 contract,
+                                 # sub_req.subscription_type.bar_size,  # barSizeSetting,
+                                 sub_req.bar_size,  # barSizeSetting,
+                                 # self.model_factory.convert_hist_data_type(sub_req.subscription_type.data_type),
+                                 self.model_factory.convert_hist_data_type(sub_req.type),
+                                 # 0,  # RTH Regular trading hour
+                                 True,
+                                 swigibpy.TagValueList()
                                  )
 
     def __cancel_real_time_bar(self, req_id):

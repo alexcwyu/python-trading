@@ -5,15 +5,23 @@ import pandas as pd
 from algotrader.model.model_factory import ModelFactory
 
 
-def get_inst_symbol(self, inst, provider_id):
+def get_inst_symbol(inst, provider_id):
     if inst:
         return inst.alt_symbols[provider_id] if provider_id in inst.alt_symbols else inst.symbol
     return None
 
 
-def get_exch_id(self, exch, provider_id):
-    if exch:
-        return exch.alt_ids[provider_id] if provider_id in exch.alt_ids else exch.exch_id
+def get_exch_id(inst, provider_id):
+    if inst is None:
+        return None
+
+    if inst.alt_ids is not None:
+        return inst.alt_ids[provider_id] if provider_id in inst.alt_ids else inst.exch_ids[0]
+    else:
+        return inst.exch_ids[0]
+
+    # if inst:
+    #     return inst.alt_ids[provider_id] if provider_id in inst.alt_ids else inst.exch_id
     return None
 
 

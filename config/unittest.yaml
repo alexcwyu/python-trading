@@ -4,10 +4,10 @@ Application:
 
   clockId: "Simulation"
 
-  dataStoreId: "InMemory"
-#  dataStoreId: "Mongo"
-  persistenceMode: "Disable"
-  createDBAtStart : false
+#  dataStoreId: "InMemory"
+  dataStoreId: "Mongo"
+  persistenceMode: "RealTime"
+  createDBAtStart : True
   deleteDBAtStop : false
 
   feedId: "CSV"
@@ -36,7 +36,7 @@ DataStore:
     port: 27017
     username:
     password:
-    dbname: "algotrader"
+    dbname: "test"
 
   InMemory:
     file: "../../data/algotrader_db.p"

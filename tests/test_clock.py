@@ -110,7 +110,7 @@ class ClockTest(TestCase):
 
         ts2 = datetime_to_unixtimemillis(dt3)
         dt4 = unixtimemillis_to_datetime(ts2)
-        self.assertEquals(0, ts2)
+        self.assertEquals(28800000, ts2)
         self.assertEquals(dt3, dt4)
 
     def test_real_time_clock_now(self):

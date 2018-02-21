@@ -197,11 +197,15 @@ class IBBroker(IBSocket, Broker, Feed):
         #    time.sleep(1)
 
     def poll(self):
+        logger.info("poll is called")
         ok = True
         while ok:
+            logger.info("checkMessages")
             ok = self.tws.checkMessages()
+            logger.info("ok = %s after tws checkMessage" % ok )
 
             if ok and (not self.tws or not self.tws.isConnected()):
+                logger.info("ok is now False")
                 ok = False
             gevent.sleep(self.gevent_sleep)
 
@@ -233,7 +237,8 @@ class IBBroker(IBSocket, Broker, Feed):
 
     def subscribe_mktdata(self, *sub_reqs):
         for sub_req in sub_reqs:
-            if sub_req.type.from_date:
+            # if sub_req.type.from_date:
+            if sub_req.from_date != 0:
                 req_func = self.__req_hist_data
             elif sub_req.type == MarketDataSubscriptionRequest.MarketDepth:
                 req_func = self.__req_market_depth
@@ -275,10 +280,13 @@ class IBBroker(IBSocket, Broker, Feed):
         self.tws.cancelMktData(req_id)
 
     def __req_real_time_bar(self, req_id, sub_req, contract):
-        self.tws.reqRealTimeBars(req_id, contract,
-                                 sub_req.subscription_type.bar_size,  # barSizeSetting,
-                                 self.model_factory.convert_hist_data_type(sub_req.subscription_type.data_type),
-                                 0  # RTH Regular trading hour
+        self.tws.reqRealTimeBars(req_id,
+                                 contract,
+                                 sub_req.bar_size,  # barSizeSetting,
+                                 self.model_factory.convert_hist_data_type(sub_req.type),
+                                 # 0,  # RTH Regular trading hour
+                                 True,
+                                 swigibpy.TagValueList()
                                  )
 
     def __cancel_real_time_bar(self, req_id):
@@ -312,7 +320,7 @@ class IBBroker(IBSocket, Broker, Feed):
         self.tws.requestFA(3)  # account_aliases
 
     def __req_acct_update(self):
-        self.tws.reqAccountUpdates(True, self.account)
+        self.tws.reqAccountUpdates(True, str(self.account))
 
     def on_new_ord_req(self, new_ord_req):
         logger.debug("[%s] %s" % (self.__class__.__name__, new_ord_req))
@@ -489,8 +497,11 @@ class IBBroker(IBSocket, Broker, Feed):
         TickerId reqId, long time, double open, double high, double low, double close, long volume,
         double wap, int count
         """
+        logger.info("reqId=%s, time=%s, open=%s, high=%s, low=%s, close=%s, volume=%s, wap=%s, count=%s" %
+                    (reqId, time, open, high, low, close, volume, wap, count))
 
-        sub_req = self.data_sub_reg.get_subscription_key(reqId)
+        # sub_req = self.data_sub_reg.get_subscription_key(reqId)
+        sub_req = self.data_sub_reg.get_subscription_req(reqId)
         record = self.data_sub_reg.get_data_record(reqId)
 
         if record:
@@ -503,7 +514,7 @@ class IBBroker(IBSocket, Broker, Feed):
             timestamp = self.model_factory.convert_ib_time(time)
             self.data_event_bus.on_next(
                 Bar(inst_id=record.inst_id, timestamp=timestamp, open=open, high=high, low=low, close=close,
-                    vol=volume, size=sub_req.subscription_type.bar_size))
+                    volume=volume, size=sub_req.bar_size))
 
     def orderStatus(self, id, status, filled, remaining, avgFillPrice, permId,
                     parentId, lastFilledPrice, clientId, whyHeld):

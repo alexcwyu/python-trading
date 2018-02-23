@@ -49,7 +49,8 @@ class BacktestRunner(Application):
 def main():
     config = Config(
         load_from_yaml("../../config/backtest.yaml"),
-        load_from_yaml("../../config/down2%.yaml"))
+        load_from_yaml("../../config/mvg_avg_force.yaml"))
+        # load_from_yaml("../../config/down2%.yaml"))
 
     app_context = ApplicationContext(config=config)
 

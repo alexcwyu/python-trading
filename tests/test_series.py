@@ -119,9 +119,9 @@ class SeriesTest(TestCase):
     def test_empty_series_ctor(self):
         try:
             series = Series()
-            self.assertIsNone(series.inst_id)
-            self.assertIsNone(series.df_id)
-            self.assertIsNone(series.col_id)
+            self.assertEqual(series.inst_id, '')
+            self.assertEqual(series.df_id, '')
+            self.assertEqual(series.col_id, '')
             self.assertEqual(np.float64, series.dtype)
         except Exception:
             self.fail("series ctor raised ExceptionType unexpectedly!")

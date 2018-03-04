@@ -1,0 +1,22 @@
+Application:
+  stgId: "simplemm"
+  stgCls: "algotrader.strategy.simple_market_making.SimpleMarketMaking"
+  instrumentIds:
+#    - "HSIZ12@HKFE"
+#    - "HSIF10@HKFE"
+#    - "HSIG10@HKFE"
+#    - "HSIH18@HKFE"
+#    - "NQH18@GLOBEX"
+    - "AAPL@NASDAQ"
+#    - "700@SEHK"
+  subscriptionTypes:
+#    - "Bar.IB.Time.M1"
+    - "Quote.IB"
+    - "Trade.IB"
+#    - "Quote.HF"
+  subscriptions:
+
+Strategy:
+  simplemm:
+    qty: 1
+    tick: 2

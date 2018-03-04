@@ -137,9 +137,10 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             self.store.save_bar(bar)
 
     def on_quote(self, quote):
-        logger.debug("[%s] %s" % (self.__class__.__name__, quote))
+        logger.info("[%s] %s" % (self.__class__.__name__, quote))
         self.__quote_dict[quote.inst_id] = quote
 
+        # TODO: Replace this by frame, series is wrong
         self.get_series(get_series_id(quote)).add(
             timestamp=quote.timestamp,
             value={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
@@ -151,6 +152,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__trade_dict[trade.inst_id] = trade
+
+        # TODO: Replace this by frame, series is wrong
         self.get_series(get_series_id(trade)).add(
             timestamp=trade.timestamp,
             value={"price": trade.price, "size": trade.size})

@@ -140,11 +140,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         logger.info("[%s] %s" % (self.__class__.__name__, quote))
         self.__quote_dict[quote.inst_id] = quote
 
-        # TODO: Replace this by frame, series is wrong
-        self.get_series(get_series_id(quote)).add(
-            timestamp=quote.timestamp,
-            value={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
-                   "ask_size": quote.ask_size})
+        self.get_frame(get_frame_id(quote)).append_row(index=quote.timestamp,
+                value={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size, "ask_size": quote.ask_size})
 
         if self._is_realtime_persist():
             self.store.save_quote(quote)
@@ -153,10 +150,8 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__trade_dict[trade.inst_id] = trade
 
-        # TODO: Replace this by frame, series is wrong
-        self.get_series(get_series_id(trade)).add(
-            timestamp=trade.timestamp,
-            value={"price": trade.price, "size": trade.size})
+        self.get_frame(get_frame_id(trade)).append_row(index=trade.timestamp,
+                                                       value={"price": trade.price, "size": trade.size})
 
         if self._is_realtime_persist():
             self.store.save_trade(trade)

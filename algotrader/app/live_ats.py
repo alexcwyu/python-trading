@@ -31,7 +31,8 @@ class ATSRunner(Application):
         logger.info("ATS started, presss Ctrl-C to stop")
 
         # TODO: how to handle the Ctrl-C gratefully and make sure all startables has called stop?
-        gevent.sleep(1000000)
+        while True:
+            gevent.sleep(1)
 
 
 def main():

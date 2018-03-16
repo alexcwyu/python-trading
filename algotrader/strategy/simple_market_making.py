@@ -36,13 +36,14 @@ class SimpleMarketMaking(Strategy):
         super(SimpleMarketMaking, self)._stop()
 
     def on_quote(self, quote: Quote):
+        pass
         # logger.info("on_quote is called with %s" % quote)
-        multi = 2
-        if self.buy_order is None:
-            self.buy_order = self.limit_order(quote.inst_id, Buy, self.qty, quote.bid - multi * self.tick)
+        # multi = 2
+        #if self.buy_order is None:
+        #    self.buy_order = self.limit_order(quote.inst_id, Buy, self.qty, quote.bid - multi * self.tick)
 
-        if self.sell_order is None:
-            self.sell_order = self.limit_order(quote.inst_id, Sell, self.qty, quote.ask + multi * self.tick)
+        # if self.sell_order is None:
+        #    self.sell_order = self.limit_order(quote.inst_id, Sell, self.qty, quote.ask + multi * self.tick)
 
     def on_trade(self, trade: Trade):
         logger.info("on_quote is called with %s" % trade)

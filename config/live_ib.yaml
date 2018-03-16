@@ -11,6 +11,7 @@ Application:
 
   feedId: "IB"
   brokerId: "IB"
+  portfolioId: "test1"
 
 
 DataStore:
@@ -44,7 +45,8 @@ Broker:
     port: 4001
     clientId: 0
     account: 1
-    daemon: true
+    daemon: false
     useGevent: true
     nextRequestId: 1
     nextOrderId: 1
+    geventSleep: 0

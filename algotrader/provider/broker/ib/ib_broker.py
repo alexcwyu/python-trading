@@ -197,12 +197,11 @@ class IBBroker(IBSocket, Broker, Feed):
         #    time.sleep(1)
 
     def poll(self):
-        logger.info("poll is called")
         ok = True
-        while ok:
-            logger.info("checkMessages")
+        while True:
+            logger.debug("checkMessages")
             ok = self.tws.checkMessages()
-            logger.info("ok = %s after tws checkMessage" % ok )
+            logger.debug("ok = %s after tws checkMessage" % ok )
 
             if ok and (not self.tws or not self.tws.isConnected()):
                 logger.info("ok is now False")
@@ -273,8 +272,8 @@ class IBBroker(IBSocket, Broker, Feed):
     def __req_mktdata(self, req_id, sub_req, contract):
         self.tws.reqMktData(req_id, contract,
                             '',  # genericTicks
-                            False  # snapshot
-                            )
+                            False,  # snapshot
+                            swigibpy.TagValueList())
 
     def __cancel_mktdata(self, req_id):
         self.tws.cancelMktData(req_id)
@@ -380,6 +379,7 @@ class IBBroker(IBSocket, Broker, Feed):
         """
         TickerId tickerId, TickType field, double price, int canAutoExecute
         """
+        logger.debug("%s,%s,%s,%s" % (tickerId, field, price, canAutoExecute))
         record = self.data_sub_reg.get_data_record(tickerId)
         if record:
             prev = price
@@ -430,7 +430,9 @@ class IBBroker(IBSocket, Broker, Feed):
     def __emit_market_data(self, field, record):
         if record.quote_req and (
                                 field == swigibpy.BID or field == swigibpy.BID_SIZE or field == swigibpy.ASK or field == swigibpy.ASK_SIZE) and record.bid > 0 and record.ask > 0:
-            self.data_event_bus.on_next(Quote(inst_id=record.inst_id, timestamp=self.app_context.clock.now(),
+            self.data_event_bus.on_next(Quote(inst_id=record.inst_id,
+                                              timestamp=self.app_context.clock.now(),
+                                              provider_id=Broker.IB,
                                               bid=record.bid,
                                               bid_size=record.bid_size,
                                               ask=record.ask,

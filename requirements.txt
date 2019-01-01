@@ -1,4 +1,4 @@
-rx>=1.2.6
+rx>=1.5.0
 gevent
 msgpack-python
 

@@ -53,7 +53,18 @@ def suite():
     test_suite.addTest(unittest.makeSuite(PlotTest))
     test_suite.addTest(unittest.makeSuite(PortfolioTest))
     test_suite.addTest(unittest.makeSuite(PositionTest))
+<<<<<<< HEAD
+    test_suite.addTest(unittest.makeSuite(SerializerTest))
+    test_suite.addTest(unittest.makeSuite(TALibSMATest))
+    #test_suite.addTest(unittest.makeSuite(TestCompareWithFunctionalBacktest))
+    test_suite.addTest(unittest.makeSuite(InMemoryDBTest))
+    #test_suite.addTest(unittest.makeSuite(PersistenceTest))
+    #test_suite.addTest(unittest.makeSuite(StrategyPersistenceTest))
+    test_suite.addTest(unittest.makeSuite(PipelineTest))
+    test_suite.addTest(unittest.makeSuite(PairwiseTest))
+=======
     test_suite.addTest(unittest.makeSuite(RefDataTest))
+>>>>>>> cc21e5ebd346d2b2956bbf45f11daba52e4086b1
     test_suite.addTest(unittest.makeSuite(RollingApplyTest))
     test_suite.addTest(unittest.makeSuite(SerializationTest))
     test_suite.addTest(unittest.makeSuite(IndicatorPersistenceTest))

@@ -20,7 +20,7 @@ class UpdateMode(Enum):
     ACTIVE_SUBSCRIBE = 2
 
 
-class Series(Subscribable, Startable, Monad, Monoid):
+class Series(Subscribable, Startable, Monad, Monoid, rc.Series):
     def __init__(self, series_id: str = None, df_id: str = None,
                  col_id: str = None, inst_id: str = None,
                  provider_id: str = None,
@@ -31,8 +31,15 @@ class Series(Subscribable, Startable, Monad, Monoid):
                  *args,
                  **kwargs
                  ):
-        super(Series, self).__init__(value=None, *args, **kwargs)
-        self.rc_series = rc.Series(data_name=col_id, index_name='timestamp', use_blist=True)
+
+        for cls in self.__class__.__bases__:
+            if cls is not rc.Series:
+                cls.__init__(self, value=None, *args, **kwargs)
+            else:
+                rc.Series.__init__(self, data_name=col_id, index_name='timestamp', use_blist=True)
+
+        #super(Series, self).__init__(value=None, *args, **kwargs)
+        #self.rc_series = rc.Series(data_name=col_id, index_name='timestamp', use_blist=True)
         self.series_id = series_id
         self.df_id = df_id if df_id is not None else ""
         self.col_id = col_id if col_id is not None else ""
@@ -168,8 +175,6 @@ class Series(Subscribable, Startable, Monad, Monoid):
     def on_update(self, event: TimeSeriesUpdateEvent):
         self.evaluate()
 
-    def to_dict(self, index=True, ordered=False):
-        return self.rc_series.to_dict(index=index, ordered=ordered)
 
     def to_proto_series(self) -> proto.Series:
         """
@@ -198,7 +203,7 @@ class Series(Subscribable, Startable, Monad, Monoid):
         """
         series = cls()
 
-        series.rc_series.append_rows(
+        series.append_rows(
             # pd.to_datetime(list(proto_series.index), unit='ms').tolist(),
             list(proto_series.index),
             get_proto_series_data(proto_series))
@@ -336,27 +341,9 @@ class Series(Subscribable, Startable, Monad, Monoid):
 
         return series
 
-    @property
-    def data(self):
-        return self.rc_series.data
-
-    @property
-    def data_name(self):
-        return self.rc_series.data_name
-
-    @data_name.setter
-    def data_name(self, name):
-        self.rc_series.data_name = name
-
-    @property
-    def index(self):
-        return self.rc_series.index
-
-    def __getitem__(self, index):
-        return self.rc_series.__getitem__(index)
 
     def append_row(self, index, value):
-        if index in self.rc_series.index and \
+        if index in self.index and \
             self.app_context is not None and \
                 self.app_context.config.config['Application']['type'] == Application.BackTesting:
             return
@@ -364,40 +351,12 @@ class Series(Subscribable, Startable, Monad, Monoid):
         self._append_row(index, value)
 
     def _append_row(self, index, value):
-        self.rc_series.append_row(index, value)
+        rc.Series.append_row(self,index, value)
         self.notify_downstream(None)
 
     def append_rows(self, indexes, values):
-        return self.rc_series.append_rows(indexes, values)
+        rc.Series.append_rows(self, indexes, values)
         self.notify_downstream(None)
-
-    def tail(self, rows=5):
-        return self.rc_series.tail(rows=rows)
-
-    def head(self, rows=5):
-        return self.rc_series.head(rows=rows)
-
-    def show(self, index=True, **kwargs):
-        self.rc_series.show(index=index, **kwargs)
-
-    def get(self, indexes, as_list=False):
-        return self.rc_series.get(indexes=indexes, as_list=as_list)
-
-    def get_cell(self, index):
-        return self.rc_series.get_cell(index=index)
-
-    def get_rows(self, indexes, as_list=False):
-        return self.rc_series.get_rows(indexes=indexes, as_list=as_list)
-
-    def get_location(self, location):
-        return self.rc_series.get_location(location=location)
-
-    def get_locations(self, locations, as_list=False):
-        return self.rc_series.get_locations(locations=locations, as_list=as_list)
-
-    # TODO: See if this help evaluate()'s logic?
-    def get_slice(self, start_index=None, stop_index=None, as_list=False):
-        return self.rc_series.get_slice(start_index=start_index, stop_index=stop_index, as_list=as_list)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -409,11 +368,6 @@ class Series(Subscribable, Startable, Monad, Monoid):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def __len__(self):
-        return len(self.rc_series)
 
-    def __repr__(self):
-        return self.rc_series.__repr__()
 
-    def __str__(self):
-        return self.rc_series.__str__()
+

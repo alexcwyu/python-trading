@@ -1,62 +1,41 @@
 from gevent import monkey
 
 monkey.patch_all()
-
+from algotrader.trading.subscription import MarketDataSubscriber
 from algotrader.app import Application
-from algotrader.config.app import RealtimeMarketDataImporterConfig, HistoricalMarketDataImporterConfig
-from algotrader.config.broker import IBConfig
-from algotrader.config.persistence import MongoDBConfig
-from algotrader.config.persistence import PersistenceConfig
-from algotrader.event.market_data import BarSize, BarType
-from algotrader.provider.broker import Broker
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.provider.persistence.data_store import DataStore
-from algotrader.provider.subscription import BarSubscriptionType
-from algotrader.provider.subscription import MarketDataSubscriber
-from algotrader.trading.context import ApplicationContext
-from algotrader.trading.ref_data import RefDataManager
-from algotrader.utils import logger
-from algotrader.utils.clock import Clock
+from algotrader.utils.logging import logger
 import time
+from algotrader.trading.config import Config, load_from_yaml
+from algotrader.trading.context import ApplicationContext
+from algotrader.utils.market_data import build_subscription_requests
 
 
 class MktDataImporter(Application, MarketDataSubscriber):
-
-    def init(self):
-        logger.info("importing data")
-
-        self.app_context.start()
-
-        self.app_config = self.app_context.app_config
-        self.feed = self.app_context.provider_mgr.get(self.app_config.feed_id)
-        self.feed.start(self.app_context)
-
     def run(self):
-        self.instruments = self.app_context.ref_data_mgr.get_insts(self.app_config.instrument_ids)
-        if isinstance(self.app_config, HistoricalMarketDataImporterConfig):
-            self.subscript_market_data(self.feed, self.instruments, self.app_config.subscription_types,
-                                       self.app_config.from_date, self.app_config.to_date)
-        else:
-            self.subscript_market_data(self.feed, self.instruments, self.app_config.subscription_types)
+        logger.info("importing data")
+        self.app_context.start()
+        config = self.app_context.config
+
+        feed = self.app_context.provider_mgr.get(config.get_app_config("feedId"))
+        feed.start(self.app_context)
+        instruments = self.app_context.ref_data_mgr.get_insts_by_ids(config.get_app_config("instrumentIds"))
+
+        for sub_req in build_subscription_requests(feed.id(), instruments,
+                                                   config.get_app_config("subscriptionTypes"),
+                                                   config.get_app_config("fromDate"),
+                                                   config.get_app_config("toDate")):
+            feed.subscribe_mktdata(sub_req)
 
         logger.info("ATS started, presss Ctrl-C to stop")
-        for i in xrange(1, 1000):
+        for i in range(1, 1000):
             time.sleep(1)
             logger.info(".")
 
-def main():
-    persistence_config = PersistenceConfig(None,
-                                           DataStore.Mongo, PersistenceMode.RealTime,
-                                           DataStore.Mongo, PersistenceMode.RealTime,
-                                           DataStore.Mongo, PersistenceMode.RealTime,
-                                           DataStore.Mongo, PersistenceMode.RealTime)
-    app_config = RealtimeMarketDataImporterConfig(None, feed_id=Broker.IB, instrument_ids = [3],
-                                                  subscription_types=[BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
-                                                  ref_data_mgr_type=RefDataManager.InMemory, clock_type=Clock.RealTime,
-                                                  persistence_config=persistence_config,
-                                                  provider_configs=[MongoDBConfig(), IBConfig(client_id=2)])
-    app_context = ApplicationContext(app_config=app_config)
 
+def main():
+    config = Config(load_from_yaml("../../config/data_import.yaml"),
+                        {"Application": {"feedId": "Yahoo"}})
+    app_context = ApplicationContext(config=config)
     MktDataImporter().start(app_context)
 
 

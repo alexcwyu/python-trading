@@ -1,104 +1,134 @@
 from unittest import TestCase
 
-from algotrader.event.order import NewOrderRequest, OrdAction, OrdType, ExecutionReport, OrdStatus
-from algotrader.trading.order import Order
-from algotrader.trading.position import Position
+from algotrader.model.model_factory import *
+from algotrader.trading.context import ApplicationContext
 
 
 class PositionTest(TestCase):
+    def setUp(self):
+        self.app_context = ApplicationContext()
+        self.app_context.start()
+        self.portfolio = self.app_context.portf_mgr.new_portfolio(portf_id="test", initial_cash=100000)
+        self.portfolio.start(self.app_context)
+
     def test_add_order(self):
-        position = Position(1)
-        self.assertEquals(0, position.filled_qty())
-        self.assertEquals(0, len(position.all_orders()))
+        self.assertEquals(0, self.portfolio.position_filled_qty("HSI@SEHK"))
+        self.assertEquals(0, len(self.portfolio.position_order_ids("HSI@SEHK")))
 
-        order1 = Order(
-            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
-                            limit_price=18.5))
-        position.add_order(order1)
+        ord_req1 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Buy, type=Limit, qty=1000, limit_price=18.5)
+        self.portfolio.send_order(ord_req1)
 
-        self.assertEquals(1000, position.ordered_qty())
-        self.assertEquals(1, len(position.all_orders()))
+        self.assertEquals(1000, self.portfolio.position_ordered_qty("HSI@SEHK"))
+        self.assertEquals(1, len(self.portfolio.position_order_ids("HSI@SEHK")))
 
-        order2 = Order(
-            NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
-                            limit_price=18.5))
-        position.add_order(order2)
+        ord_req2 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='2', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Buy, type=Limit, qty=1000, limit_price=18.5)
 
-        self.assertEquals(2000, position.ordered_qty())
-        self.assertEquals(2, len(position.all_orders()))
+        self.portfolio.send_order(ord_req2)
 
-        order3 = Order(
-            NewOrderRequest(cl_id='test', cl_ord_id=3, inst_id=1, action=OrdAction.SELL, type=OrdType.LIMIT, qty=1200,
-                            limit_price=18.5))
-        position.add_order(order3)
+        self.assertEquals(2000, self.portfolio.position_ordered_qty("HSI@SEHK"))
+        self.assertEquals(2, len(self.portfolio.position_order_ids("HSI@SEHK")))
 
-        self.assertEquals(800, position.ordered_qty())
-        self.assertEquals(3, len(position.all_orders()))
+        ord_req3 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='3', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Sell, type=Limit, qty=1200, limit_price=18.5)
+
+        self.portfolio.send_order(ord_req3)
+
+        self.assertEquals(800, self.portfolio.position_ordered_qty("HSI@SEHK"))
+        self.assertEquals(3, len(self.portfolio.position_order_ids("HSI@SEHK")))
 
     def test_add_order_with_same_ord_id(self):
-        position = Position(1)
-        order1 = Order(
-            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
-                            limit_price=18.5))
-        order2 = Order(
-            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
-                            limit_price=18.5))
+        ord_req1 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Buy, type=Limit, qty=1000, limit_price=18.5)
+        self.portfolio.send_order(ord_req1)
 
-        position.add_order(order1)
-
-        with self.assertRaises(RuntimeError) as ex:
-            position.add_order(order2)
-
-    def test_add_order_with_diff_inst(self):
-        position = Position(1)
-        order1 = Order(
-            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
-                            limit_price=18.5))
-        order2 = Order(
-            NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=2, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
-                            limit_price=18.5))
-
-        position.add_order(order1)
-
-        with self.assertRaises(RuntimeError) as ex:
-            position.add_order(order2)
+        with self.assertRaises(Exception) as ex:
+            self.portfolio.send_order(ord_req1)
 
     def test_fill_qty(self):
-        position = Position(1)
-        self.assertEquals(0, position.filled_qty())
+        self.assertEquals(0, self.portfolio.position_filled_qty("HSI@SEHK"))
 
-        order1 = Order(
-            NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
-                            limit_price=18.5))
-        position.add_order(order1)
-        self.assertEquals(0, position.filled_qty())
+        ord_req1 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Buy, type=Limit, qty=1000, limit_price=18.5)
+        self.portfolio.send_order(ord_req1)
+        self.assertEquals(0, self.portfolio.position_filled_qty("HSI@SEHK"))
 
-        er1 = ExecutionReport(cl_id='test', cl_ord_id=1, ord_id=1, er_id=1, inst_id=1, last_qty=500, last_price=18.4,
-                              status=OrdStatus.PARTIALLY_FILLED)
-        order1.on_exec_report(er1)
-        position.add_position(er1.cl_id, er1.cl_ord_id, er1.last_qty)
-        self.assertEquals(500, position.filled_qty())
+        er1 = ModelFactory.build_execution_report(timestamp=0, cl_id='test', cl_ord_id="1", broker_id="Dummy",
+                                                  broker_event_id="1", broker_ord_id="1", inst_id='HSI@SEHK',
+                                                  last_qty=500, last_price=18.4,
+                                                  status=PartiallyFilled)
+        self.portfolio.on_exec_report(er1)
+        self.assertEquals(500, self.portfolio.position_filled_qty("HSI@SEHK"))
 
-        er2 = ExecutionReport(cl_id='test', cl_ord_id=1, ord_id=1, er_id=2, inst_id=1, last_qty=500, last_price=18.4,
-                              status=OrdStatus.FILLED)
-        order1.on_exec_report(er2)
-        position.add_position(er2.cl_id, er2.cl_ord_id, er2.last_qty)
-        self.assertEquals(1000, position.filled_qty())
+        er2 = ModelFactory.build_execution_report(timestamp=0, cl_id='test', cl_ord_id="1", broker_id="Dummy",
+                                                  broker_event_id="2", broker_ord_id="1", inst_id='HSI@SEHK',
+                                                  last_qty=500, last_price=18.4,
+                                                  status=Filled)
+        self.portfolio.on_exec_report(er2)
+        self.assertEquals(1000, self.portfolio.position_filled_qty("HSI@SEHK"))
 
-        order2 = Order(
-            NewOrderRequest(cl_id='test', cl_ord_id=2, inst_id=1, action=OrdAction.SELL, type=OrdType.LIMIT, qty=1200,
-                            limit_price=18.5))
-        position.add_order(order2)
-        self.assertEquals(1000, position.filled_qty())
+        ord_req2 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='2', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Sell, type=Limit, qty=1200, limit_price=18.5)
+        self.portfolio.send_order(ord_req2)
+        self.assertEquals(1000, self.portfolio.position_filled_qty("HSI@SEHK"))
 
-        er3 = ExecutionReport(cl_id='test', cl_ord_id=2, ord_id=2, er_id=3, inst_id=1, last_qty=800, last_price=18.4,
-                              status=OrdStatus.PARTIALLY_FILLED)
-        order2.on_exec_report(er3)
-        position.add_position(er3.cl_id, er3.cl_ord_id, er3.last_qty * -1)
-        self.assertEquals(200, position.filled_qty())
+        er3 = ModelFactory.build_execution_report(timestamp=0, cl_id='test', cl_ord_id="2", broker_id="Dummy",
+                                                  broker_event_id="3", broker_ord_id="2", inst_id='HSI@SEHK',
+                                                  last_qty=800, last_price=18.4,
+                                                  status=PartiallyFilled)
 
-        er4 = ExecutionReport(cl_id='test', cl_ord_id=2, ord_id=2, er_id=4, inst_id=1, last_qty=400, last_price=18.4,
-                              status=OrdStatus.FILLED)
-        order2.on_exec_report(er4)
-        position.add_position(er4.cl_id, er4.cl_ord_id, er4.last_qty * -1)
-        self.assertEquals(-200, position.filled_qty())
+        self.portfolio.on_exec_report(er3)
+        self.assertEquals(200, self.portfolio.position_filled_qty("HSI@SEHK"))
+
+        er4 = ModelFactory.build_execution_report(timestamp=0, cl_id='test', cl_ord_id="2", broker_id="Dummy",
+                                                  broker_event_id="3", broker_ord_id="2", inst_id='HSI@SEHK',
+                                                  last_qty=400, last_price=18.4,
+                                                  status=Filled)
+
+        self.portfolio.on_exec_report(er4)
+        self.assertEquals(-200, self.portfolio.position_filled_qty("HSI@SEHK"))
+
+    def test_fill_qty_with_diff_inst(self):
+        ord_req1 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='1', portf_id="test",
+                                                        broker_id="Dummy", inst_id='HSI@SEHK',
+                                                        action=Buy, type=Limit, qty=1000, limit_price=18.5)
+        self.portfolio.send_order(ord_req1)
+
+        ord_req2 = ModelFactory.build_new_order_request(timestamp=0, cl_id='test', cl_ord_id='2', portf_id="test",
+                                                        broker_id="Dummy", inst_id='0005.HK@SEHK',
+                                                        action=Sell, type=Limit, qty=800, limit_price=80)
+        self.portfolio.send_order(ord_req2)
+
+        self.assertEquals(0, self.portfolio.position_filled_qty("HSI@SEHK"))
+        self.assertEquals(1000, self.portfolio.position_ordered_qty("HSI@SEHK"))
+        self.assertEquals(0, self.portfolio.position_filled_qty("0005.HK@SEHK"))
+        self.assertEquals(-800, self.portfolio.position_ordered_qty("0005.HK@SEHK"))
+
+        er1 = ModelFactory.build_execution_report(timestamp=0, cl_id='test', cl_ord_id="1", broker_id="Dummy",
+                                                  broker_event_id="1", broker_ord_id="1", inst_id='HSI@SEHK',
+                                                  last_qty=500, last_price=18.4,
+                                                  status=PartiallyFilled)
+        self.portfolio.on_exec_report(er1)
+
+        self.assertEquals(500, self.portfolio.position_filled_qty("HSI@SEHK"))
+        self.assertEquals(1000, self.portfolio.position_ordered_qty("HSI@SEHK"))
+        self.assertEquals(0, self.portfolio.position_filled_qty("0005.HK@SEHK"))
+        self.assertEquals(-800, self.portfolio.position_ordered_qty("0005.HK@SEHK"))
+
+        er2 = ModelFactory.build_execution_report(timestamp=0, cl_id='test', cl_ord_id="2", broker_id="Dummy",
+                                                  broker_event_id="2", broker_ord_id="2", inst_id='0005.HK@SEHK',
+                                                  last_qty=600, last_price=80,
+                                                  status=PartiallyFilled)
+        self.portfolio.on_exec_report(er2)
+
+        self.assertEquals(500, self.portfolio.position_filled_qty("HSI@SEHK"))
+        self.assertEquals(1000, self.portfolio.position_ordered_qty("HSI@SEHK"))
+        self.assertEquals(-600, self.portfolio.position_filled_qty("0005.HK@SEHK"))
+        self.assertEquals(-800, self.portfolio.position_ordered_qty("0005.HK@SEHK"))

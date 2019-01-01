@@ -1,8 +1,4 @@
 from datetime import date, timedelta, datetime
-from unittest import TestCase
-
-from cassandra.cluster import Cluster
-from nose_parameterized import parameterized, param
 
 from algotrader.config.app import ApplicationConfig, BacktestingConfig
 from algotrader.config.persistence import MongoDBConfig, CassandraConfig, PersistenceConfig, InMemoryStoreConfig
@@ -12,24 +8,29 @@ from algotrader.event.market_data import BarSize, BarType
 from algotrader.event.order import NewOrderRequest, OrderCancelRequest, OrderReplaceRequest, OrderStatusUpdate, \
     ExecutionReport, TIF, \
     OrdStatus, OrdAction, OrdType
+from cassandra.cluster import Cluster
+from nose_parameterized import parameterized, param
+from unittest import TestCase
+
 from algotrader.provider.broker import Broker
+from algotrader.provider.datastore import DataStore
+from algotrader.provider.datastore import PersistenceMode
 from algotrader.provider.feed import Feed
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.provider.persistence.data_store import DataStore
-from algotrader.provider.subscription import BarSubscriptionType
-from algotrader.provider.subscription import HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType, MarketDepthSubscriptionType
-from algotrader.strategy.strategy import Strategy
+from algotrader.strategy import Strategy
 from algotrader.technical.ma import SMA
 from algotrader.trading.account import Account
+from algotrader.trading.clock import Clock
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.order import Order
 from algotrader.trading.ref_data import Instrument, Exchange, Currency
-from algotrader.utils.clock import Clock
-from algotrader.utils.date_utils import DateUtils
-from algotrader.utils.ser_deser import MapSerializer
+from algotrader.trading.subscription import BarSubscriptionType
+from algotrader.trading.subscription import HistDataSubscriptionKey, QuoteSubscriptionType, TradeSubscriptionType, \
+    MarketDepthSubscriptionType
+from algotrader.utils.date import date_to_unixtimemillis
+from poc.ser_deser import MapSerializer
 
-
-print Cluster.port
+print
+Cluster.port
 
 persistence_config = PersistenceConfig(None,
                                        DataStore.Mongo, PersistenceMode.Batch,
@@ -46,22 +47,25 @@ im_memory_delete_at_stop = True
 
 app_config = ApplicationConfig(None, None, Clock.RealTime, persistence_config,
                                provider_configs=[MongoDBConfig(dbname=name, create_at_start=create_at_start,
-                                             delete_at_stop=mongo_delete_at_stop),
-                               CassandraConfig(contact_points=['127.0.0.1'], keyspace=name,
-                                               create_at_start=create_at_start, delete_at_stop=cass_delete_at_stop),
-                               InMemoryStoreConfig(file="%s_db.p"%name,
-                                                   create_at_start=create_at_start, delete_at_stop=im_memory_delete_at_stop)])
+                                                               delete_at_stop=mongo_delete_at_stop),
+                                                 CassandraConfig(contact_points=['127.0.0.1'], keyspace=name,
+                                                                 create_at_start=create_at_start,
+                                                                 delete_at_stop=cass_delete_at_stop),
+                                                 InMemoryStoreConfig(file="%s_db.p" % name,
+                                                                     create_at_start=create_at_start,
+                                                                     delete_at_stop=im_memory_delete_at_stop)])
 context = ApplicationContext(app_config=app_config)
 clock = context.clock
 mongo = context.provider_mgr.get(DataStore.Mongo)
 cassandra = context.provider_mgr.get(DataStore.Cassandra)
-inmemory = context.provider_mgr.get(DataStore.InMemoryDB)
+inmemory = context.provider_mgr.get(DataStore.InMemory)
 
 params = [
     param('Mongo', mongo),
-    param('Cassandra', cassandra),
+    #param('Cassandra', cassandra),
     param('InMemory', inmemory)
 ]
+
 
 class DataStoreTest(TestCase):
     @classmethod
@@ -78,31 +82,30 @@ class DataStoreTest(TestCase):
 
     @parameterized.expand(params)
     def test_subscribe_bars(self, name, datastore):
-        start_date = date(2011,1,1)
-        end_date = date(2011,1,5)
+        start_date = date(2011, 1, 1)
+        end_date = date(2011, 1, 5)
         sub_key = HistDataSubscriptionKey(inst_id=10, provider_id=Broker.IB,
-                                          subscription_type=BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1),
+                                          subscription_type=BarSubscriptionType(bar_type=BarType.Time,
+                                                                                bar_size=BarSize.D1),
                                           from_date=start_date, to_date=end_date)
 
         date_val = start_date
 
         expect_val = []
-        for i in range(1,5):
-            persistable = Bar(timestamp=DateUtils.date_to_unixtimemillis(date_val), type=BarType.Time, size=BarSize.D1, inst_id=10, open=18 + i, high=19 + i, low=17 + i , close=17.5 + i, vol=100)
+        for i in range(1, 5):
+            persistable = Bar(timestamp=date_to_unixtimemillis(date_val), type=BarType.Time, size=BarSize.D1,
+                              inst_id=10, open=18 + i, high=19 + i, low=17 + i, close=17.5 + i, vol=100)
             datastore.save_bar(persistable)
             expect_val.append(persistable)
             date_val = date_val + timedelta(days=1)
 
-
         actual_val = datastore.load_mktdata(sub_key)
         self.assertEqual(expect_val, actual_val)
 
-
-
     @parameterized.expand(params)
     def test_subscribe_quotes(self, name, datastore):
-        start_date = date(2011,1,1)
-        end_date = date(2011,1,5)
+        start_date = date(2011, 1, 1)
+        end_date = date(2011, 1, 5)
         sub_key = HistDataSubscriptionKey(inst_id=10, provider_id=Broker.IB,
                                           subscription_type=QuoteSubscriptionType(),
                                           from_date=start_date, to_date=end_date)
@@ -110,22 +113,20 @@ class DataStoreTest(TestCase):
         date_val = start_date
 
         expect_val = []
-        for i in range(1,5):
-            persistable = Quote(timestamp=DateUtils.date_to_unixtimemillis(date_val), bid=18+i, ask=19+i, bid_size=200, ask_size=500, inst_id=10)
+        for i in range(1, 5):
+            persistable = Quote(timestamp=date_to_unixtimemillis(date_val), bid=18 + i, ask=19 + i,
+                                bid_size=200, ask_size=500, inst_id=10)
             datastore.save_quote(persistable)
             expect_val.append(persistable)
             date_val = date_val + timedelta(days=1)
 
-
         actual_val = datastore.load_mktdata(sub_key)
         self.assertEqual(expect_val, actual_val)
 
-
-
     @parameterized.expand(params)
     def test_subscribe_trades(self, name, datastore):
-        start_date = date(2011,1,1)
-        end_date = date(2011,1,5)
+        start_date = date(2011, 1, 1)
+        end_date = date(2011, 1, 5)
         sub_key = HistDataSubscriptionKey(inst_id=10, provider_id=Broker.IB,
                                           subscription_type=TradeSubscriptionType(),
                                           from_date=start_date, to_date=end_date)
@@ -133,22 +134,20 @@ class DataStoreTest(TestCase):
         date_val = start_date
 
         expect_val = []
-        for i in range(1,5):
-            persistable = Trade(timestamp=DateUtils.date_to_unixtimemillis(date_val), price=20+i, size=200+i, inst_id=10)
+        for i in range(1, 5):
+            persistable = Trade(timestamp=date_to_unixtimemillis(date_val), price=20 + i, size=200 + i,
+                                inst_id=10)
             datastore.save_trade(persistable)
             expect_val.append(persistable)
             date_val = date_val + timedelta(days=1)
 
-
         actual_val = datastore.load_mktdata(sub_key)
         self.assertEqual(expect_val, actual_val)
 
-
-
     @parameterized.expand(params)
     def test_subscribe_market_depths(self, name, datastore):
-        start_date = date(2011,1,1)
-        end_date = date(2011,1,5)
+        start_date = date(2011, 1, 1)
+        end_date = date(2011, 1, 5)
         sub_key = HistDataSubscriptionKey(inst_id=10, provider_id=Broker.IB,
                                           subscription_type=MarketDepthSubscriptionType(provider_id='20'),
                                           from_date=start_date, to_date=end_date)
@@ -156,28 +155,26 @@ class DataStoreTest(TestCase):
         date_val = start_date
 
         expect_val = []
-        for i in range(1,5):
-            persistable = MarketDepth(timestamp=DateUtils.date_to_unixtimemillis(date_val), inst_id=10, provider_id='20', position=10+i,
+        for i in range(1, 5):
+            persistable = MarketDepth(timestamp=date_to_unixtimemillis(date_val), inst_id=10,
+                                      provider_id='20', position=10 + i,
                                       operation=MDOperation.Insert, side=MDSide.Ask,
-                                      price=10.1+i, size=20)
+                                      price=10.1 + i, size=20)
             datastore.save_market_depth(persistable)
             expect_val.append(persistable)
             date_val = date_val + timedelta(days=1)
 
-
         actual_val = datastore.load_mktdata(sub_key)
         self.assertEqual(expect_val, actual_val)
 
-
-
     @parameterized.expand(params)
     def test_multi_subscriptions(self, name, datastore):
-        start_date = date(2011,1,1)
-        end_date = date(2011,1,5)
-
+        start_date = date(2011, 1, 1)
+        end_date = date(2011, 1, 5)
 
         sub_key1 = HistDataSubscriptionKey(inst_id=99, provider_id=Broker.IB,
-                                           subscription_type=BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1),
+                                           subscription_type=BarSubscriptionType(bar_type=BarType.Time,
+                                                                                 bar_size=BarSize.D1),
                                            from_date=start_date, to_date=end_date)
 
         sub_key2 = HistDataSubscriptionKey(inst_id=99, provider_id=Broker.IB,
@@ -190,41 +187,43 @@ class DataStoreTest(TestCase):
 
         expect_val = []
 
-        #out of range
-        persistable = Bar(timestamp=DateUtils.date_to_unixtimemillis(date(2010,12,31)), type=BarType.Time, size=BarSize.D1, inst_id=99, open=18, high=19, low=17, close=17.5, vol=100)
+        # out of range
+        persistable = Bar(timestamp=date_to_unixtimemillis(date(2010, 12, 31)), type=BarType.Time,
+                          size=BarSize.D1, inst_id=99, open=18, high=19, low=17, close=17.5, vol=100)
         datastore.save_bar(persistable)
 
-        persistable = Bar(timestamp=DateUtils.date_to_unixtimemillis(date(2011,1,1)), type=BarType.Time, size=BarSize.D1, inst_id=99, open=28, high=29, low=27, close=27.5, vol=100)
+        persistable = Bar(timestamp=date_to_unixtimemillis(date(2011, 1, 1)), type=BarType.Time,
+                          size=BarSize.D1, inst_id=99, open=28, high=29, low=27, close=27.5, vol=100)
         datastore.save_bar(persistable)
         expect_val.append(persistable)
 
-
-        persistable = Trade(timestamp=DateUtils.date_to_unixtimemillis(date(2011,1,2)), price=20, size=200, inst_id=99)
+        persistable = Trade(timestamp=date_to_unixtimemillis(date(2011, 1, 2)), price=20, size=200,
+                            inst_id=99)
         datastore.save_trade(persistable)
         expect_val.append(persistable)
 
-        persistable = Trade(timestamp=DateUtils.date_to_unixtimemillis(date(2011,1,3)), price=30, size=200, inst_id=99)
+        persistable = Trade(timestamp=date_to_unixtimemillis(date(2011, 1, 3)), price=30, size=200,
+                            inst_id=99)
         datastore.save_trade(persistable)
         expect_val.append(persistable)
 
         # not same instrument
-        persistable = Quote(timestamp=DateUtils.date_to_unixtimemillis(date(2011,1,3)), bid=18, ask=19, bid_size=200, ask_size=500, inst_id=11)
+        persistable = Quote(timestamp=date_to_unixtimemillis(date(2011, 1, 3)), bid=18, ask=19, bid_size=200,
+                            ask_size=500, inst_id=11)
         datastore.save_quote(persistable)
 
-
-        persistable = Quote(timestamp=DateUtils.date_to_unixtimemillis(date(2011,1,4)), bid=18, ask=19, bid_size=200, ask_size=500, inst_id=99)
+        persistable = Quote(timestamp=date_to_unixtimemillis(date(2011, 1, 4)), bid=18, ask=19, bid_size=200,
+                            ask_size=500, inst_id=99)
         datastore.save_quote(persistable)
         expect_val.append(persistable)
 
         # out of range
-        persistable = Quote(timestamp=DateUtils.date_to_unixtimemillis(date(2011,1,5)), bid=28, ask=29, bid_size=200, ask_size=500, inst_id=99)
+        persistable = Quote(timestamp=date_to_unixtimemillis(date(2011, 1, 5)), bid=28, ask=29, bid_size=200,
+                            ask_size=500, inst_id=99)
         datastore.save_quote(persistable)
 
         actual_val = datastore.load_mktdata(sub_key1, sub_key2, sub_key3)
         self.assertEqual(expect_val, actual_val)
-
-
-
 
     # Market Data Event
 
@@ -332,7 +331,8 @@ class DataStoreTest(TestCase):
 
     @parameterized.expand(params)
     def test_portfolio_update(self, name, datastore):
-        persistable = PortfolioUpdate(upd_id=1, portf_id = "test",inst_id = 4, position=100, mkt_price = 26.1, mkt_value = 2610, avg_cost = 24, unrealized_pnl = 210.0, realized_pnl=0.0,
+        persistable = PortfolioUpdate(upd_id=1, portf_id="test", inst_id=4, position=100, mkt_price=26.1,
+                                      mkt_value=2610, avg_cost=24, unrealized_pnl=210.0, realized_pnl=0.0,
                                       account_name="TEST", timestamp=clock.now())
         DataStoreTest.save_load(name, persistable, datastore, datastore.save_portfolio_update, 'portfolio_updates')
 
@@ -340,7 +340,7 @@ class DataStoreTest(TestCase):
 
     @parameterized.expand(params)
     def test_instrument(self, name, datastore):
-        persistable = Instrument(3, "Google", "STK", "GOOG", "SMART", "USD", alt_symbol={"IB": "GOOG"},
+        persistable = Instrument(3, "Google", "STK", "GOOG", "SMART", "USD", alt_symbols={"IB": "GOOG"},
                                  alt_exch_id=None,
                                  sector=None, industry=None,
                                  put_call=None, expiry_date=None, und_inst_id=None, factor=1, strike=0.0, margin=0.0)
@@ -400,12 +400,12 @@ class DataStoreTest(TestCase):
         dates = [datetime(2000, 1, 1), datetime(2015, 1, 1)]
 
         conf = BacktestingConfig(stg_id="sma", portfolio_id='test',
-                                        instrument_ids=[instrument],
-                                        subscription_types=[
-                                            BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
-                                        from_date=dates[0], to_date=dates[-1],
-                                        broker_id=Broker.Simulator,
-                                        feed_id=Feed.PandasMemory)
+                                 instrument_ids=[instrument],
+                                 subscription_types=[
+                                     BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+                                 from_date=dates[0], to_date=dates[-1],
+                                 broker_id=Broker.Simulator,
+                                 feed_id=Feed.PandasMemory)
 
         stg = Strategy(stg_id='st1')
         # nos = NewOrderRequest(cl_id='test', cl_ord_id=1, inst_id=1, action=OrdAction.BUY, type=OrdType.LIMIT, qty=1000,
@@ -425,9 +425,12 @@ class DataStoreTest(TestCase):
         result = [item for item in datastore.load_all(load_clazz) if item.id() == persistable.id()]
         assert len(result) == 1
         item = result[0]
-        print "===== %s" % name
-        print persistable
-        print item
+        print
+        "===== %s" % name
+        print
+        persistable
+        print
+        item
         assert MapSerializer.extract_slot(persistable) == MapSerializer.extract_slot(item)
 
     @classmethod
@@ -443,8 +446,9 @@ class DataStoreTest(TestCase):
         inmemory.stop()
 
 
-if __name__== "__main__":
+if __name__ == "__main__":
     import unittest
+
     runner = unittest.TextTestRunner()
     test_suite = unittest.TestSuite()
     test_suite.addTest(unittest.makeSuite(DataStoreTest))

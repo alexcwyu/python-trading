@@ -1,0 +1,13 @@
+# Conflicts:
+#	algotrader/provider/feed/csv_feed.py
+#	algotrader/provider/feed/pandas_web.py
+#	algotrader/provider/persistence/mongodb.py
+#	algotrader/provider/subscription.py
+#	algotrader/strategy/alpha_formula.py
+#	algotrader/technical/pipeline/__init__.py
+#	algotrader/technical/pipeline/pairwise.py
+#	algotrader/technical/pipeline/rank.py
+#	algotrader/trading/portfolio.py
+#	requirements.txt
+#	tests/test_pipeline.py
+#	tests/test_pipeline_pairwise.py

@@ -1,0 +1,269 @@
+syntax = "proto3";
+
+import "algotrader/model/time_series.proto";
+
+package algotrader.model;
+
+
+enum OrderAction {
+    Buy = 0;
+    Sell = 1;
+    //SellShort = 2;
+}
+
+enum OrderType {
+    Market = 0;
+    Limit = 1;
+    Stop = 2;
+    StopLimit = 3;
+    TrailingStop = 4;
+    MarketOnClose = 5;
+    LimitOnClose = 6;
+    MarketToLimit = 7;
+    MarketIfPriceTouched = 8;
+    MarketOnOpen = 9;
+}
+
+enum TIF {
+    DAY = 0;
+    GTC = 1;
+    FOK = 2;
+    GTD = 3;
+}
+
+enum OrderStatus {
+    UnknownStatus = 0;
+    New = 1;
+    PendingSubmit = 2;
+    Submitted = 3;
+    PendingCancel = 4;
+    Cancelled = 5;
+    PendingReplace = 6;
+    Replaced = 7;
+    PartiallyFilled = 8;
+    Filled = 9;
+    Rejected = 10;
+}
+
+message NewOrderRequest {
+    string cl_id = 1;
+    string cl_ord_id = 2;
+    int64 timestamp = 3;
+
+    string portf_id = 5;
+    string broker_id = 6;
+    string inst_id = 7;
+
+    OrderAction action = 10;
+    OrderType type = 11;
+    double qty = 12;
+    double limit_price = 13;
+    double stop_price = 14;
+    TIF tif = 15;
+
+    string oca_tag = 20;
+    map<string, string> params = 21;
+}
+
+
+message OrderReplaceRequest {
+    string cl_id = 1;
+    string cl_ord_id = 2;
+    int64 timestamp = 3;
+
+    string cl_orig_req_id = 4;
+
+    OrderType type = 10;
+    double qty = 11;
+    double limit_price = 12;
+    double stop_price = 13;
+    TIF tif = 14;
+
+    string oca_tag = 20;
+    map<string, string> params = 21;
+
+}
+
+message OrderCancelRequest {
+    string cl_id = 1;
+    string cl_ord_id = 2;
+    int64 timestamp = 3;
+
+    string cl_orig_req_id = 4;
+
+    map<string, string> params = 10;
+
+}
+
+message OrderStatusUpdate {
+    string broker_id = 1;
+    string broker_event_id = 2;
+    int64 timestamp = 3;
+
+    string broker_ord_id = 4;
+
+    string cl_id = 11;
+    string cl_ord_id = 12;
+    string inst_id = 13;
+
+    double filled_qty = 21;
+    double avg_price = 22;
+    OrderStatus status = 23;
+}
+
+
+message ExecutionReport {
+    string broker_id = 1;
+    string broker_event_id = 2;
+    int64 timestamp = 3;
+
+    string broker_ord_id = 4;
+
+
+    string cl_id = 11;
+    string cl_ord_id = 12;
+    string inst_id = 13;
+
+    double last_qty = 21;
+    double last_price = 22;
+    double commission = 23;
+    double filled_qty = 24;
+    double avg_price = 25;
+    OrderStatus status = 26;
+}
+
+
+message AccountValue {
+    string key = 1;
+    map<string, double> ccy_values = 2;
+}
+
+message AccountUpdate {
+    string broker_id = 1;
+    string broker_event_id = 2;
+    int64 timestamp = 3;
+
+    string account_name = 11;
+    map<string, AccountValue> values = 12;
+
+}
+
+message PortfolioUpdate {
+    string broker_id = 1;
+    string broker_event_id = 2;
+    int64 timestamp = 3;
+
+    string portf_id = 4;
+    string inst_id = 5;
+
+    double position = 20;
+    double mkt_price = 21;
+    double mkt_value = 22;
+    double avg_cost = 23;
+    double unrealized_pnl = 24;
+    double realized_pnl = 25;
+}
+
+message AccountState {
+    string acct_id = 1;
+    map<string, AccountValue> values = 2;
+    map<string, Position> positions = 3;
+}
+
+message PortfolioState {
+    string portf_id = 1;
+    double cash = 2;
+    double stock_value = 3;
+
+    map<string, Position> positions = 11;
+    repeated string cl_ord_ids = 12;
+
+    Performance performance = 21;
+    Pnl pnl = 22;
+    DrawDown drawdown = 23;
+}
+
+message Performance {
+    double total_equity = 1;
+    algotrader.model.TimeSeries series = 2;
+}
+
+message Pnl {
+    double last_pnl = 1;
+    algotrader.model.TimeSeries series = 2;
+}
+
+message DrawDown {
+    double last_drawdown = 1;
+    double last_drawdown_pct = 2;
+    double high_equity = 3;
+    double low_equity = 4;
+    double current_run_up = 5;
+    double current_drawdown = 6;
+    algotrader.model.TimeSeries series = 7;
+}
+
+
+message StrategyState {
+    string stg_id = 1;
+    string stg_cls = 2;
+    repeated string cl_ord_ids = 4;
+    map<string, Position> positions = 5;
+    string portf_id = 6;
+    int64 next_ord_id = 7;
+}
+
+
+message OrderState {
+    string cl_id = 1;
+    string cl_ord_id = 2;
+    string portf_id = 3;
+    string broker_id = 4;
+    string broker_ord_id = 5;
+
+    string inst_id = 6;
+
+    int64 creation_timestamp = 7;
+    int64 update_timestamp = 8;
+
+    OrderAction action = 10;
+    OrderType type = 11;
+    double qty = 12;
+    double limit_price = 13;
+    double stop_price = 14;
+    TIF tif = 15;
+
+    string oca_tag = 20;
+    map<string, string> params = 21;
+
+    OrderStatus status = 30;
+    double filled_qty = 31;
+    double avg_price = 32;
+    double last_qty = 33;
+    double last_price = 34;
+    bool stop_limit_ready = 35;
+    double trailing_stop_exec_price = 36;
+
+}
+
+message OrderPosition{
+    string cl_id = 1;
+    string cl_ord_id = 2;
+    double ordered_qty = 3;
+    double filled_qty = 4;
+}
+
+
+message Position {
+    string inst_id = 1;
+    double ordered_qty = 2;
+    double filled_qty = 3;
+    double last_price = 4;
+
+    map<string, OrderPosition> orders = 5;
+}
+
+message Sequence {
+    string id = 1;
+    int64 seq = 2;
+}

@@ -1,0 +1,50 @@
+Application:
+
+  type: "LiveTrading"
+
+  clockId: "RealTime"
+
+  dataStoreId: "Mongo"
+  persistenceMode: "RealTime"
+  createDBAtStart : false
+  deleteDBAtStop : false
+
+  feedId: "IB"
+  brokerId: "IB"
+
+
+DataStore:
+
+  Cassandra:
+    contactPoints:
+      - "127.0.0.1"
+    port:
+    username:
+    password:
+    keyspace: "algotrader"
+    scriptPath: "../../../scripts/cassandra/algotrader.cql"
+
+  Mongo:
+    host: "localhost"
+    port: 27107
+    username:
+    password:
+    dbname: "algotrader"
+
+  InMemory:
+    file: "algotrader_db.p"
+
+Feed:
+  CSV:
+    path: "../data/tradedata"
+
+Broker:
+  IB:
+    host: "localhost"
+    port: 4001
+    clientId: 0
+    account: 1
+    daemon: true
+    useGevent: false
+    nextRequestId: 1
+    nextOrderId: 1

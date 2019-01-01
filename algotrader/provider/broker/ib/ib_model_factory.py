@@ -3,12 +3,11 @@ from datetime import datetime
 import swigibpy
 from dateutil.relativedelta import relativedelta
 
-from algotrader.event.market_data import Bar, Quote, Trade, BarSize, MDOperation, MDSide
-from algotrader.event.order import OrdAction, OrdType, TIF, OrdStatus
-from algotrader.utils.date_utils import DateUtils
+from algotrader.model.trade_data_pb2 import *
+from algotrader.model.market_data_pb2 import MarketDepth
 from algotrader.provider.broker import Broker
-from algotrader.event.market_data import BarType, BarSize, MarketDataType
-
+from algotrader.utils.market_data import MarketDataSubscriptionRequest, S1, S5, S15, S30, M1, M5, M15, M30, H1, D1
+from algotrader.utils.date import datetime_to_unixtimemillis
 
 
 class IBModelFactory:
@@ -23,67 +22,67 @@ class IBModelFactory:
     }
 
     ord_action_mapping = {
-        OrdAction.BUY: "BUY",
-        OrdAction.SELL: "SELL",
-        OrdAction.SSHORT: "SSHORT"
+        Buy: "BUY",
+        Sell: "SELL",
+        # OrderAction.SSHORT: "SSHORT"
     }
 
     ord_type_mapping = {
-        OrdType.MARKET: "MKT",
-        OrdType.LIMIT: "LMT",
-        OrdType.STOP: "STP",
-        OrdType.STOP_LIMIT: "STPLMT",
-        OrdType.MARKET_ON_CLOSE: "MOC",
-        OrdType.LIMIT_ON_CLOSE: "LOC",
-        OrdType.TRAILING_STOP: "TRAIL",
-        OrdType.MARKET_TO_LIMIT: "MTL",
-        OrdType.MARKET_IF_PRICE_TOUCHED: "MIT",
-        OrdType.MARKET_ON_OPEN: "MOO"
+        Market: "MKT",
+        Limit: "LMT",
+        Stop: "STP",
+        StopLimit: "STPLMT",
+        MarketOnClose: "MOC",
+        LimitOnClose: "LOC",
+        TrailingStop: "TRAIL",
+        MarketToLimit: "MTL",
+        MarketIfPriceTouched: "MIT",
+        MarketOnOpen: "MOO"
     }
 
     tif_mapping = {
-        TIF.DAY: "DAY",
-        TIF.GTC: "GTC",
-        TIF.FOK: "FOK",
-        TIF.GTD: "GTD"
+        DAY: "DAY",
+        GTC: "GTC",
+        FOK: "FOK",
+        GTD: "GTD"
     }
 
     hist_data_type_mapping = {
-        MarketDataType.Bar: "TRADES",
-        MarketDataType.Quote: "BID_ASK",
-        MarketDataType.Trade: "TRADES"
+        MarketDataSubscriptionRequest.Bar: "TRADES",
+        MarketDataSubscriptionRequest.Quote: "BID_ASK",
+        MarketDataSubscriptionRequest.Trade: "TRADES"
     }
 
     bar_size_mapping = {
-        BarSize.S1: "1 secs",
-        BarSize.S5: "5 secs",
-        BarSize.S15: "15 secs",
-        BarSize.S30: "30 secs",
-        BarSize.M1: "1 min",
-        BarSize.M5: "5 mins",
-        BarSize.M15: "15 mins",
-        BarSize.M30: "30 mins",
-        BarSize.H1: "1 hour",
-        BarSize.D1: "1 day",
+        S1: "1 secs",
+        S5: "5 secs",
+        S15: "15 secs",
+        S30: "30 secs",
+        M1: "1 min",
+        M5: "5 mins",
+        M15: "15 mins",
+        M30: "30 mins",
+        H1: "1 hour",
+        D1: "1 day",
 
     }
 
     ib_md_operation_map = {
-        0: MDOperation.Insert,
-        1: MDOperation.Update,
-        2: MDOperation.Delete
+        0: MarketDepth.Insert,
+        1: MarketDepth.Update,
+        2: MarketDepth.Delete
     }
 
     ib_md_side_map = {
-        0: MDSide.Ask,
-        1: MDSide.Bid
+        0: MarketDepth.Ask,
+        1: MarketDepth.Bid
     }
 
     ib_ord_status_map = {
-        "Submitted": OrdStatus.NEW,
-        "PendingCancel": OrdStatus.PENDING_CANCEL,
-        "Cancelled": OrdStatus.CANCELLED,
-        "Inactive": OrdStatus.REJECTED
+        "Submitted": New,
+        "PendingCancel": PendingCancel,
+        "Cancelled": Cancelled,
+        "Inactive": Rejected
 
     }
 
@@ -134,7 +133,7 @@ class IBModelFactory:
     def convert_ord_action(self, ord_action):
         return self.ord_action_mapping[ord_action]
 
-    def create_ib_contract(self, inst_id = None, symbol = None, exchange = None, sec_type = None, currency = None):
+    def create_ib_contract(self, inst_id=None, symbol=None, exchange=None, sec_type=None, currency=None):
         contract = swigibpy.Contract()
 
         if inst_id:
@@ -155,13 +154,15 @@ class IBModelFactory:
 
         return contract
 
-
-    def create_ib_scanner_subsciption(self, num_row = None, inst_type = None, location_code = None, scan_code = None,
-                                      above_price = None, below_price = None, above_vol = None, avg_opt_vol_above = None,
-                                      mkt_cap_above = None, mkt_cap_below = None, moody_rating_above = None, moody_rating_below = None,
-                                      sp_rating_above = None, sp_rating_below = None,  mat_date_above = None, mat_date_below = None,
-                                      coupon_rate_above = None, coupon_rate_below = None,  exc_convertible = None, scanner_setting_pairs = None,
-                                      stk_type_filter = None):
+    def create_ib_scanner_subsciption(self, num_row=None, inst_type=None, location_code=None, scan_code=None,
+                                      above_price=None, below_price=None, above_vol=None, avg_opt_vol_above=None,
+                                      mkt_cap_above=None, mkt_cap_below=None, moody_rating_above=None,
+                                      moody_rating_below=None,
+                                      sp_rating_above=None, sp_rating_below=None, mat_date_above=None,
+                                      mat_date_below=None,
+                                      coupon_rate_above=None, coupon_rate_below=None, exc_convertible=None,
+                                      scanner_setting_pairs=None,
+                                      stk_type_filter=None):
 
         sub = swigibpy.ScannerSubscription()
 
@@ -210,7 +211,6 @@ class IBModelFactory:
 
         return sub
 
-
     def convert_hist_data_type(self, type):
         return self.hist_data_type_mapping.get(type, "MIDPOINT")
 
@@ -218,13 +218,13 @@ class IBModelFactory:
         return dt.strftime(self.IB_DATETIME_FORMAT)
 
     def convert_ib_date(self, ib_date_str):
-        return DateUtils.datetime_to_unixtimemillis(datetime.strptime(ib_date_str, self.IB_DATE_FORMAT))
+        return datetime_to_unixtimemillis(datetime.strptime(ib_date_str, self.IB_DATE_FORMAT))
 
     def convert_ib_datetime(self, ib_datetime_str):
-        return DateUtils.datetime_to_unixtimemillis(datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT2))
+        return datetime_to_unixtimemillis(datetime.strptime(ib_datetime_str, self.IB_DATETIME_FORMAT2))
 
     def convert_ib_time(self, ib_time):
-        return DateUtils.datetime_to_unixtimemillis(datetime.fromtimestamp(ib_time))
+        return datetime_to_unixtimemillis(datetime.fromtimestamp(ib_time))
 
     def convert_time_period(self, start_time, end_time):
         diff = relativedelta(end_time, start_time)
@@ -251,4 +251,4 @@ class IBModelFactory:
         return self.ib_md_side_map[ib_md_side]
 
     def convert_ib_ord_status(self, ib_ord_status):
-        return self.ib_ord_status_map.get(ib_ord_status, OrdStatus.UNKNOWN)
+        return self.ib_ord_status_map.get(ib_ord_status, OrderStatus.UNKNOWN)

@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Dict
 
 from algotrader.technical import Indicator
 from algotrader.technical.ma import SMA
@@ -16,17 +17,16 @@ class BB(Indicator):
         '__std_dev',
     )
 
-    def __init__(self, input=None, input_key=None, length=14, num_std=3, desc="Bollinger Bands"):
-        self.length = int(length)
-        self.num_std = int(num_std)
-        self.__sma = SMA(input, self.length)
-        self.__std_dev = STD(input, self.length)
-        super(BB, self).__init__(Indicator.get_name(BB.__name__, input, input_key, length, num_std), input, input_key,
-                                 desc)
+    def __init__(self, time_series=None, inputs=None, input_keys=None, desc="Bollinger Bands", length=14, num_std=3):
+        super(SMA, self).__init__(time_series=time_series, inputs=inputs, input_keys=input_keys, desc=desc,
+                                  length=length, num_std=num_std)
+        self.length = self.get_int_config("length", 14)
+        self.num_std = self.get_int_config("num_std", 3)
+        self.__sma = SMA(inputs=inputs, length=self.length)
+        self.__std_dev = STD(inputs=inputs, length=self.length)
 
-    def on_update(self, data):
+    def _process_update(self, source: str, timestamp: int, data: Dict[str, float]):
         result = {}
-        result['timestamp'] = data['timestamp']
         sma = self.__sma.now(self.input_keys[0])
         std = self.__std_dev.now(self.input_keys[0])
         if not np.isnan(sma):
@@ -41,4 +41,4 @@ class BB(Indicator):
             result[BB.LOWER] = np.nan
             result[Indicator.VALUE] = np.nan
 
-        self.add(result)
+        self.add(timestamp=timestamp, data=result)

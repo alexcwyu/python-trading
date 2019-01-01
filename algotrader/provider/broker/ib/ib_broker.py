@@ -1,20 +1,18 @@
 import threading
-from collections import defaultdict
 
 import gevent
 import swigibpy
+from collections import defaultdict
 
-from algotrader.config.broker import IBConfig
-from algotrader.event.market_data import Bar, Quote, Trade, MarketDepth
-from algotrader.event.market_data import MarketDataType
-from algotrader.event.order import OrderStatusUpdate, ExecutionReport, OrdStatus
+from algotrader.model.market_data_pb2 import *
+from algotrader.model.model_factory import ModelFactory
+from algotrader.model.trade_data_pb2 import *
 from algotrader.provider.broker import Broker
 from algotrader.provider.broker.ib.ib_model_factory import IBModelFactory
 from algotrader.provider.broker.ib.ib_socket import IBSocket
 from algotrader.provider.feed import Feed
-from algotrader.provider.subscription import HistDataSubscriptionKey, BarSubscriptionType, QuoteSubscriptionType, \
-    TradeSubscriptionType, MarketDepthSubscriptionType
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
+from algotrader import Context
 
 
 class DataRecord(object):
@@ -61,41 +59,42 @@ class SubscriptionRegistry(object):
         self.subscriptions = {}
         self.data_records = {}
 
-    def add_subscription(self, req_id, sub_key):
+    def add_subscription(self, req_id, sub_req):
         if req_id in self.subscriptions:
             raise "Duplicated req_id %s" % req_id
 
-        self.subscriptions[req_id] = sub_key
-        self.data_records[req_id] = DataRecord(sub_key.inst_id,
-                                               quote_req=sub_key.subscription_type.get_type() == MarketDataType.Quote,
-                                               trade_req=sub_key.subscription_type.get_type() == MarketDataType.Trade)
+        self.subscriptions[req_id] = sub_req
+        self.data_records[req_id] = DataRecord(sub_req.inst_id,
+                                               quote_req=sub_req.type == MarketDataSubscriptionRequest.Quote,
+                                               trade_req=sub_req.type == MarketDataSubscriptionRequest.Trade)
 
-    def get_subscription_key(self, req_id):
+    def get_subscription_req(self, req_id):
         return self.subscriptions.get(req_id, None)
 
-    def get_subsciption_id(self, sub_key):
-        for req_id, key in self.subscriptions.items():
-            if sub_key == key:
+    def get_subsciption_id(self, sub_req):
+        for req_id, req in self.subscriptions.items():
+            # TODO check equals comparison
+            if sub_req == req:
                 return req_id
         return None
 
-    def remove_subscription(self, req_id=None, sub_key=None):
+    def remove_subscription(self, req_id=None, sub_req=None):
         if req_id:
             if req_id in self.subscriptions:
                 del self.subscriptions[req_id]
             if req_id in self.data_records:
                 del self.data_records[req_id]
             return True
-        elif sub_key:
-            sub_id = self.get_subsciption_id(sub_key)
+        elif sub_req:
+            sub_id = self.get_subsciption_id(sub_req)
             return self.remove_subscription(req_id=req_id)
         else:
             return False
 
-    def has_subscription(self, req_id=None, sub_key=None):
+    def has_subscription(self, req_id=None, sub_req=None):
         if req_id:
             return req_id in self.subscriptions
-        if sub_key and self.get_subsciption_id(sub_key):
+        if sub_req and self.get_subsciption_id(sub_req):
             return True
         return False
 
@@ -152,15 +151,17 @@ class IBBroker(IBSocket, Broker, Feed):
         self.completed_reqs = []
         self.req_callback = {}
 
-    def _start(self, app_context, **kwargs):
-        self.ib_config = app_context.app_config.get_config(IBConfig)
+    def _start(self, app_context: Context) -> None:
 
-        self.next_request_id = self.ib_config.next_request_id
-        self.next_order_id = self.ib_config.next_order_id
+        self.next_request_id = self._get_broker_config("nextRequestId")
+        self.next_order_id = self._get_broker_config("nextOrderId")
+        self.port = self._get_broker_config("port")
+        self.client_id = self._get_broker_config("clientId")
+        self.account = self._get_broker_config("account")
+        self.daemon = self._get_broker_config("daemon")
+        self.use_gevent = self._get_broker_config("useGevent")
+
         self.tws = swigibpy.EPosixClientSocket(self)
-        self.port = self.ib_config.port
-        self.client_id = self.ib_config.client_id
-        self.account = self.ib_config.account
 
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.data_event_bus = self.app_context.event_bus.data_subject
@@ -170,11 +171,11 @@ class IBBroker(IBSocket, Broker, Feed):
         if not self.tws.eConnect("", self.port, self.client_id, poll_auto=False):
             raise RuntimeError('Failed to connect TWS')
 
-        if self.ib_config.use_gevent:
+        if self.use_gevent:
             gevent.spawn(self.poll)
         else:
             thread = threading.Thread(target=self.poll)
-            thread.daemon = self.ib_config.daemon
+            thread.daemon = self.daemon
             thread.start()
 
         if self.account:
@@ -224,41 +225,41 @@ class IBBroker(IBSocket, Broker, Feed):
     def next_ord_status_id(self):
         self.app_context.seq_mgr.get_next_sequence("%s.ordstatus" % self.id())
 
-    def subscribe_mktdata(self, *sub_keys):
-        for sub_key in sub_keys:
-            if isinstance(sub_key, HistDataSubscriptionKey):
+    def subscribe_mktdata(self, *sub_reqs):
+        for sub_req in sub_reqs:
+            if sub_req.type.from_date:
                 req_func = self.__req_hist_data
-            elif isinstance(sub_key.subscription_type, MarketDepthSubscriptionType):
+            elif sub_req.type == MarketDataSubscriptionRequest.MarketDepth:
                 req_func = self.__req_market_depth
-            elif isinstance(sub_key.subscription_type, BarSubscriptionType):
+            elif sub_req.type == MarketDataSubscriptionRequest.Bar:
                 req_func = self.__req_real_time_bar
-            elif isinstance(sub_key.subscription_type, (QuoteSubscriptionType, TradeSubscriptionType)):
+            elif sub_req.type == MarketDataSubscriptionRequest.Trade or sub_req.type == MarketDataSubscriptionRequest.Quote:
                 req_func = self.__req_mktdata
 
-            if req_func and not self.data_sub_reg.has_subscription(sub_key=sub_key):
+            if req_func and not self.data_sub_reg.has_subscription(sub_req=sub_req):
                 req_id = self.get_next_request_id()
-                self.data_sub_reg.add_subscription(req_id, sub_key)
-                contract = self.model_factory.create_ib_contract(sub_key.inst_id)
+                self.data_sub_reg.add_subscription(req_id, sub_req)
+                contract = self.model_factory.create_ib_contract(sub_req.inst_id)
 
-                req_func(req_id, sub_key, contract)
+                req_func(req_id, sub_req, contract)
 
-    def unsubscribe_mktdata(self, *sub_keys):
-        for sub_key in sub_keys:
-            if isinstance(sub_key, HistDataSubscriptionKey):
+    def unsubscribe_mktdata(self, *sub_reqs):
+        for sub_req in sub_reqs:
+            if sub_req.type.from_date:
                 cancel_func = self.__cancel_hist_data
-            elif isinstance(sub_key.subscription_type, MarketDepthSubscriptionType):
-                req_func = self.__cancel_market_depth
-            elif isinstance(sub_key.subscription_type, BarSubscriptionType):
+            elif sub_req.type == MarketDataSubscriptionRequest.MarketDepth:
+                cancel_func = self.__cancel_market_depth
+            elif sub_req.type == MarketDataSubscriptionRequest.Bar:
                 cancel_func = self.__cancel_real_time_bar
-            elif isinstance(sub_key.subscription_type, (QuoteSubscriptionType, TradeSubscriptionType)):
+            elif sub_req.type == MarketDataSubscriptionRequest.Trade or sub_req.type == MarketDataSubscriptionRequest.Quote:
                 cancel_func = self.__cancel_mktdata
 
             if cancel_func:
-                req_id = self.data_sub_reg.get_subsciption_id(sub_key)
+                req_id = self.data_sub_reg.get_subsciption_id(sub_req)
                 if req_id and self.data_sub_reg.remove_subscription(req_id):
                     cancel_func(req_id)
 
-    def __req_mktdata(self, req_id, sub_key, contract):
+    def __req_mktdata(self, req_id, sub_req, contract):
         self.tws.reqMktData(req_id, contract,
                             '',  # genericTicks
                             False  # snapshot
@@ -267,30 +268,30 @@ class IBBroker(IBSocket, Broker, Feed):
     def __cancel_mktdata(self, req_id):
         self.tws.cancelMktData(req_id)
 
-    def __req_real_time_bar(self, req_id, sub_key, contract):
+    def __req_real_time_bar(self, req_id, sub_req, contract):
         self.tws.reqRealTimeBars(req_id, contract,
-                                 sub_key.subscription_type.bar_size,  # barSizeSetting,
-                                 self.model_factory.convert_hist_data_type(sub_key.subscription_type.get_type()),
+                                 sub_req.subscription_type.bar_size,  # barSizeSetting,
+                                 self.model_factory.convert_hist_data_type(sub_req.subscription_type.data_type),
                                  0  # RTH Regular trading hour
                                  )
 
     def __cancel_real_time_bar(self, req_id):
         self.tws.cancelRealTimeBars(req_id)
 
-    def __req_market_depth(self, req_id, sub_key, contract):
-        self.tws.reqMktDepth(req_id, contract, sub_key.num_rows)
+    def __req_market_depth(self, req_id, sub_req, contract):
+        self.tws.reqMktDepth(req_id, contract, sub_req.num_rows)
 
     def __cancel_market_depth(self, req_id):
         self.tws.cancelMktDepth(req_id)
 
-    def __req_hist_data(self, req_id, sub_key, contract):
+    def __req_hist_data(self, req_id, sub_req, contract):
         self.tws.reqHistoricalData(req_id, contract,
-                                   self.model_factory.convert_datetime(sub_key.to_date),  # endDateTime,
-                                   self.model_factory.convert_time_period(sub_key.from_date, sub_key.to_date),
+                                   self.model_factory.convert_datetime(sub_req.to_date),  # endDateTime,
+                                   self.model_factory.convert_time_period(sub_req.from_date, sub_req.to_date),
                                    # durationStr,
-                                   self.model_factory.convert_bar_size(sub_key.subscription_type.bar_size),
+                                   self.model_factory.convert_bar_size(sub_req.subscription_type.bar_size),
                                    # barSizeSetting,
-                                   self.model_factory.convert_hist_data_type(sub_key.subscription_type.data_type),
+                                   self.model_factory.convert_hist_data_type(sub_req.subscription_type.data_type),
                                    # whatToShow,
                                    0,  # useRTH,
                                    1  # formatDate
@@ -431,9 +432,9 @@ class IBBroker(IBSocket, Broker, Feed):
         TickerId id, int position, int operation, int side, double price, int size
         """
         # TODO fix provider_id
-        sub_key = self.data_sub_reg.get_subscription_key(id)
+        sub_req = self.data_sub_reg.get_subscription_key(id)
         self.data_event_bus.on_next(
-            MarketDepth(inst_id=sub_key.inst_id, timestamp=self.app_context.clock.now(), provider_id=self.ID,
+            MarketDepth(inst_id=sub_req.inst_id, timestamp=self.app_context.clock.now(), provider_id=self.ID,
                         position=position,
                         operation=self.model_factory.convert_ib_md_operation(operation),
                         side=self.model_factory.convert_ib_md_side(side),
@@ -445,9 +446,9 @@ class IBBroker(IBSocket, Broker, Feed):
         int size
         """
         # TODO fix provider_id
-        sub_key = self.data_sub_reg.get_subscription_key(id)
+        sub_req = self.data_sub_reg.get_subscription_key(id)
         self.data_event_bus.on_next(
-            MarketDepth(inst_id=sub_key.inst_id, timestamp=self.app_context.clock.now(), provider_id=self.ID,
+            MarketDepth(inst_id=sub_req.inst_id, timestamp=self.app_context.clock.now(), provider_id=self.ID,
                         position=position,
                         operation=self.model_factory.convert_ib_md_operation(operation),
                         side=self.model_factory.convert_ib_md_side(side),
@@ -463,7 +464,7 @@ class IBBroker(IBSocket, Broker, Feed):
         if barCount < 0:
             return
 
-        sub_key = self.data_sub_reg.get_subscription_key(reqId)
+        sub_req = self.data_sub_reg.get_subscription_key(reqId)
         record = self.data_sub_reg.get_data_record(reqId)
 
         if record:
@@ -475,7 +476,7 @@ class IBBroker(IBSocket, Broker, Feed):
             timestamp = self.model_factory.convert_ib_date(date)
             self.data_event_bus.on_next(
                 Bar(inst_id=record.inst_id, timestamp=timestamp, open=open, high=high, low=low,
-                    close=close, vol=volume, size=sub_key.bar_size))
+                    close=close, vol=volume, size=sub_req.bar_size))
 
     def realtimeBar(self, reqId, time, open, high, low, close, volume, wap, count):
         """
@@ -483,7 +484,7 @@ class IBBroker(IBSocket, Broker, Feed):
         double wap, int count
         """
 
-        sub_key = self.data_sub_reg.get_subscription_key(reqId)
+        sub_req = self.data_sub_reg.get_subscription_key(reqId)
         record = self.data_sub_reg.get_data_record(reqId)
 
         if record:
@@ -496,7 +497,7 @@ class IBBroker(IBSocket, Broker, Feed):
             timestamp = self.model_factory.convert_ib_time(time)
             self.data_event_bus.on_next(
                 Bar(inst_id=record.inst_id, timestamp=timestamp, open=open, high=high, low=low, close=close,
-                    vol=volume, size=sub_key.subscription_type.bar_size))
+                    vol=volume, size=sub_req.subscription_type.bar_size))
 
     def orderStatus(self, id, status, filled, remaining, avgFillPrice, permId,
                     parentId, lastFilledPrice, clientId, whyHeld):
@@ -509,7 +510,7 @@ class IBBroker(IBSocket, Broker, Feed):
             ord_status = self.model_factory.convert_ib_ord_status(status)
             create_er = False
 
-            if ord_status == OrdStatus.NEW or ord_status == OrdStatus.PENDING_CANCEL or ord_status == OrdStatus.CANCELLED or ord_status == OrdStatus.REJECTED:
+            if ord_status == New or ord_status == PendingCancel or ord_status == Cancelled or ord_status == Rejected:
                 create_er = True
 
             if create_er:
@@ -686,11 +687,11 @@ class IBBroker(IBSocket, Broker, Feed):
                      cd.putable, cd.coupon, cd.convertible, cd.issueDate,
                      cd.nextOptionDate, cd.nextOptionType, cd.nextOptionPartial, cd.notes)
 
-        self.ref_data_mgr.create_inst(name=cd.longName, type=sd.secType, symbol=sd.symbol, exch_id=sd.exchange,
-                                      ccy_id=sd.currency,
-                                      # alt_symbol = {Broker.IB: sd.symbol},
-                                      # alt_exch_id = {Broker.IB: sd.exchange},
-                                      sector=cd.industry, industry=cd.category)
+        inst = ModelFactory.build_instrument(symbol=sd.symbol,
+                                             type=sd.secType,
+                                             name=cd.longName,
+                                             sector=cd.industry, industry=cd.category)
+        self.ref_data_mgr.add_inst(inst)
 
         logger.info("saved")
 
@@ -701,7 +702,6 @@ class IBBroker(IBSocket, Broker, Feed):
     def error(self, id, errorCode, errorString):
         logger.error("error, id=%s, errorCode=%s, errorString=%s", id, errorCode, errorString)
         self._complete_req(id)
-
 
     def is_completed(self, req_id):
         return req_id in self.completed_reqs

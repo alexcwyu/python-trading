@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package algotrader.model;
+
+
+
+message TimeSeriesItem{
+    int64 timestamp = 1;
+     map<string, double> data = 2;
+}
+
+message TimeSeriesUpdateEvent{
+    string source = 1;
+    TimeSeriesItem item= 2;
+}
+
+message TimeSeries{
+    message Input{
+        string source = 1;
+        repeated string keys = 2;
+    }
+
+    string series_id = 1;
+    string series_cls = 2;
+    repeated string keys = 3;
+    string desc = 4;
+    repeated Input inputs = 5;
+    string default_output_key = 6;
+    double missing_value_replace = 7;
+    int64 start_time = 8;
+    int64 end_time = 9;
+    repeated TimeSeriesItem items = 10;
+     map<string, string> configs = 11;
+}
+

@@ -1,21 +1,19 @@
 from gevent import monkey
-from gevent.event import Event, AsyncResult
-import gevent
+from gevent.event import AsyncResult
+
 monkey.patch_all()
-import time
 
 from algotrader.config.app import ApplicationConfig
 from algotrader.config.broker import IBConfig
 from algotrader.config.persistence import MongoDBConfig
 from algotrader.config.persistence import PersistenceConfig
 from algotrader.provider.broker import Broker
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.provider.persistence.data_store import DataStore
+from algotrader.provider.datastore import PersistenceMode
+from algotrader.provider.datastore import DataStore
 from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
-from algotrader.utils.clock import Clock
+from algotrader.trading.clock import Clock
 from algotrader.utils import logger
-import threading
 
 
 def app_context():

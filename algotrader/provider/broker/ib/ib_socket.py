@@ -1,6 +1,6 @@
 import swigibpy
 
-from algotrader.utils import logger
+from algotrader.utils.logging import logger
 
 
 class IBSocket(swigibpy.EWrapper):

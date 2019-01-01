@@ -1,5 +1,6 @@
-from algotrader.event.order import OrdAction
-from algotrader.strategy.strategy import Strategy
+from algotrader import Context
+from algotrader.model.trade_data_pb2 import *
+from algotrader.strategy import Strategy
 
 
 class MertonOptimalBaby(Strategy):
@@ -13,20 +14,22 @@ class MertonOptimalBaby(Strategy):
     So now this class is used as testing purpose
     """
 
-    def __init__(self, stg_id=None, stg_configs=None):
-        super(MertonOptimalBaby, self).__init__(stg_id=stg_id, stg_configs=stg_configs)
+    def __init__(self, stg_id: str, stg_cls: str, state: StrategyState = None):
+        super(MertonOptimalBaby, self).__init__(stg_id=stg_id, stg_cls=stg_cls, state=state)
         self.buy_order = None
 
-    def _start(self, app_context, **kwargs):
-        self.arate = self.get_stg_config_value("arate", 1)
-        self.vol = self.get_stg_config_value("vol", 1)
+    def _start(self, app_context: Context) -> None:
+        self.arate = self._get_stg_config("arate", default=1)
+        self.vol = self._get_stg_config("vol", default=1)
 
-        self.bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.app_context.app_config.instrument_ids[0])
+        self.bar = self.app_context.inst_data_mgr.get_series(
+            "Bar.%s.Time.86400" % app_context.config.get_app_config("instrumentIds")[0])
+
         self.bar.start(app_context)
 
         self.optimal_weight = self.arate / self.vol ** 2  # assume risk free rate is zero
 
-        super(MertonOptimalBaby, self)._start(app_context, **kwargs)
+        super(MertonOptimalBaby, self)._start(app_context)
 
     def _stop(self):
         super(MertonOptimalBaby, self)._stop()
@@ -39,7 +42,7 @@ class MertonOptimalBaby(Strategy):
         delta = allocation - portfolio.stock_value
         if delta > 0:
             qty = delta / bar.close  # assume no lot size here
-            self.market_order(inst_id=bar.inst_id, action=OrdAction.BUY, qty=qty)
+            self.market_order(inst_id=bar.inst_id, action=Buy, qty=qty)
         else:
             qty = -delta / bar.close  # assume no lot size here
-            self.market_order(inst_id=bar.inst_id, action=OrdAction.SELL, qty=qty)
+            self.market_order(inst_id=bar.inst_id, action=Sell, qty=qty)

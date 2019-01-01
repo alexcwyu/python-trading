@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
 
+from algotrader.utils.data_series import convert_series_idx_to_datetime
+
 
 class TimeSeriesPlot:
     def __init__(self, time_series, marker=" ", color=None):
-        self.time_series = time_series
+        self.time_series = convert_series_idx_to_datetime(time_series)
         self.marker = marker
         self.color = color
 
@@ -85,8 +87,8 @@ class StrategyPlotter:
         ax_equity = fig.add_axes(rect_equity, axisbg=axescolor, sharex=ax_stock)
         ax_equity.text(0.025, 0.95, 'Equity', va='top', transform=ax_equity.transAxes, fontsize=textsize)
 
-        if self.strategy.get_portfolio().performance_series.size() > 0:
-            series = TimeSeriesPlot(self.strategy.get_portfolio().performance_series.get_series("total_equity"))
+        if self.strategy.get_portfolio().performance.series.size() > 0:
+            series = TimeSeriesPlot(self.strategy.get_portfolio().performance.series.get_series("total_equity"))
             series.plot(ax=ax_equity)
 
         return ax_equity

@@ -4,19 +4,17 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
-
-from algotrader.chart.plotter import StrategyPlotter
 from algotrader.config.app import BacktestingConfig
 from algotrader.event.market_data import BarSize, BarType
+
+from algotrader.chart.plotter import StrategyPlotter
 from algotrader.provider.broker.sim.simulator import Simulator
 from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
-from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.strategy.sma_strategy import SMAStrategy
-from algotrader.trading.instrument_data import InstrumentDataManager
-from algotrader.trading.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
-from algotrader.trading.order_mgr import OrderManager
+from algotrader.trading import clock
 from algotrader.trading.portfolio import Portfolio
-from algotrader.utils import clock
+from algotrader.trading.subscription import BarSubscriptionType
+from tests.mock_ref_data import MockRefDataManager, build_inst_dataframe_from_list
 
 
 class BacktestRunner(object):

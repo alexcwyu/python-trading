@@ -1,0 +1,1 @@
+mongod --dbpath /mnt/data/dev/data/mongo

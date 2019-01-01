@@ -26,7 +26,7 @@ DataStore:
 
   Mongo:
     host: "localhost"
-    port: 27107
+    port: 27017
     username:
     password:
     dbname: "algotrader"
@@ -45,6 +45,6 @@ Broker:
     clientId: 0
     account: 1
     daemon: true
-    useGevent: false
+    useGevent: true
     nextRequestId: 1
     nextOrderId: 1

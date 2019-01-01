@@ -105,9 +105,19 @@ def get_quote_mid(quote: Quote) -> float:
     return quote.ask
 
 
-def get_series_id(item, tags: str = None) -> str:
+def get_series_id(item, tags: str = None, provider_id=None) -> str:
     if isinstance(item, Bar):
-        return "Bar.%s.%s.%s.%s" % (item.inst_id, tags, get_bar_type_name(item.type), item.size)
+        if not provider_id:
+            provider_id = item.provider_id
+
+        frame_id = build_bar_frame_id(item.inst_id,
+                                      size=item.size,
+                                      provider_id=provider_id,
+                                      bar_type=get_bar_type_name(item.type))
+
+        # if it is bar tag is the column name
+        return "%s.%s" % (frame_id, tags)
+        # return "Bar.%s.%s.%s.%s" % (item.inst_id, tags, get_bar_type_name(item.type), item.size)
     if isinstance(item, Trade):
         return "Trade.%s" % (item.inst_id)
     if isinstance(item, Quote):
@@ -118,9 +128,11 @@ def get_series_id(item, tags: str = None) -> str:
     raise RuntimeError("unknown series type")
 
 
-def get_frame_id(item, tags: str = None) -> str:
+def get_frame_id(item, provider_id=None, tags: str = None) -> str:
+    if not provider_id:
+        provider_id = item.provider_id
     if isinstance(item, Bar):
-        return build_bar_frame_id(item.inst_id, item.size, item.provider_id, get_bar_type_name(item.type))
+        return build_bar_frame_id(item.inst_id, item.size, provider_id, get_bar_type_name(item.type))
     if isinstance(item, Trade):
         return "Trade.%s" % (item.inst_id)
     if isinstance(item, Quote):
@@ -130,8 +142,14 @@ def get_frame_id(item, tags: str = None) -> str:
 
     raise RuntimeError("unknown series type")
 
-def build_bar_frame_id(inst_id, size, provider_id, bar_type = "Time"):
+
+def build_bar_frame_id(inst_id, size, provider_id, bar_type="Time"):
     return "Bar.%s.%s.%s.%s" % (inst_id, bar_type, size, provider_id)
+
+
+def build_series_id(inst_id, size, provider_id, column="close", bar_type="Time"):
+    return "%s.%s" % (build_bar_frame_id(inst_id, size, provider_id, bar_type), column)
+
 
 def build_subscription_requests(feed_id, instruments, subscription_types, from_date=None, to_date=None):
     reqs = []

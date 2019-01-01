@@ -2,11 +2,11 @@ from algotrader.utils.data_series import iterable_to_np_array
 
 
 class FunctionWithPeriodsName(object):
-    def __init__(self, func, periods, name=None, feedback=False, output_columns=None, array_utils=iterable_to_np_array):
+    def __init__(self, func, periods: int, name: str =None, feedback_periods: int =0, output_columns=None, array_utils=iterable_to_np_array):
         self.periods = periods
         self.func = func
         self.array_utils = array_utils
-        self.feedback = feedback
+        self.feedback_periods = feedback_periods
         self.output_columns = output_columns
         if not name:
             self.name = func.__name__

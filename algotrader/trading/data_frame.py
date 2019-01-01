@@ -18,7 +18,9 @@ from algotrader.trading.subscribable import Subscribable
 class DataFrame(Subscribable, Startable, Monad, Monoid):
     def __init__(self, df_id=None, provider_id=None, inst_id=None, parent_df_id=None,
                  columns=None, func=None,
-                 update_mode: UpdateMode = UpdateMode.ACTIVE_SUBSCRIBE, *args, **kwargs):
+                 update_mode: UpdateMode = UpdateMode.ACTIVE_SUBSCRIBE,
+                 transient=False,
+                 *args, **kwargs):
         """
         Default Ctor, with protobuf obj pls construct by from ctor
         :param df_id:
@@ -28,6 +30,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         :param columns:
         :param func:
         :param update_mode:
+        :param transient:
         :param args:
         :param kwargs:
         """
@@ -40,16 +43,15 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         self.parent_df_id = parent_df_id
         self.func = func
         self.update_mode = update_mode
-
-
-
+        self.transient = transient
 
 
     def _start(self, app_context = None):
         # TODO: Probably this is useless
         super(DataFrame, self)._start(self.app_context)
 
-        self.app_context.inst_data_mgr.add_frame(self)
+        if not self.app_context.inst_data_mgr.has_frame(self.df_id):
+            self.app_context.inst_data_mgr.add_frame(self)
 
         if self.parent_df_id is not None and self.update_mode == UpdateMode.ACTIVE_SUBSCRIBE:
             parent_frame = self.app_context.inst_data_mgr.get_frame(self.parent_df_id)
@@ -206,8 +208,8 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         """
         df = cls()
         df.series_dict = series_dict
-        pd_df = pd.DataFrame(data={series.col_id: series.to_pd_series() for series in series_dict.values()})
 
+        pd_df = pd.DataFrame(data={key: series.to_pd_series() for key, series in series_dict.items()})
         series = next(iter(series_dict.values()))
 
         df.df_id = series.df_id
@@ -215,6 +217,7 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
         df.inst_id = series.inst_id
 
         df.rc_df = DataFrame.pd_df_to_rc_df(pd_df)
+        df.transient = False
         return df
 
     @classmethod
@@ -299,7 +302,17 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
     @classmethod
     def from_proto_frame(cls, bundle: Frame, app_context):
         series_list = [app_context.inst_data_mgr.get_series(series_id) for series_id in bundle.series_id_list]
-        series_dict = {series.col_id: series for series in series_list}
+
+        # check if all the series came from single inst id, if then we use col_id as column
+        # else, different inst's close (with same col_id ) may join together into single df
+        # se in this case we will use the unique series_id instead
+        num_distinct_inst_id = len({series.inst_id for series in series_list})
+        if num_distinct_inst_id > 1:
+            series_dict = {series.series_id: series for series in series_list}
+        else:
+            series_dict = {series.col_id: series for series in series_list}
+
+        # series_dict = {series.col_id: series for series in series_list}
         return DataFrame.from_series_dict(series_dict)
 
     def to_list_of_lists(self, cols_orders: list = None):
@@ -369,15 +382,18 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
             for col, val in values.items():
                 if col in self.series_dict.keys():
                     series = self.series_dict[col]
-                    series.add(indexes, val)
+                    series.append_rows(indexes, val)
+                    # series.add(indexes, val)
 
         self.notify_downstream(None)
 
 
     def append_row(self, index, value, new_cols=True):
-        if index in self.rc_df.index and \
-            self.app_context is not None and \
-                self.app_context.config.config['Application']['type'] == Application.BackTesting:
+        # if index in self.rc_df.index and \
+        #     self.app_context is not None and \
+        #         self.app_context.config.config['Application']['type'] == Application.BackTesting:
+        #     return
+        if index in self.rc_df.index:
             return
 
         self._append_row(index, value, new_cols)
@@ -421,3 +437,6 @@ class DataFrame(Subscribable, Startable, Monad, Monoid):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def get(self, indexes=None, columns=None, as_list=False, as_dict=False):
+        return self.rc_df.get(indexes, columns, as_list, as_dict)

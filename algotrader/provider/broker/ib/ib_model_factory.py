@@ -5,9 +5,12 @@ from dateutil.relativedelta import relativedelta
 
 from algotrader.model.trade_data_pb2 import *
 from algotrader.model.market_data_pb2 import MarketDepth
+from algotrader.model.ref_data_pb2 import Instrument
+from algotrader.model.ref_data_pb2 import *
 from algotrader.provider.broker import Broker
 from algotrader.utils.market_data import MarketDataSubscriptionRequest, S1, S5, S15, S30, M1, M5, M15, M30, H1, D1
 from algotrader.utils.date import datetime_to_unixtimemillis
+from algotrader.utils.ref_data import get_exch_id, get_inst_symbol
 
 
 class IBModelFactory:
@@ -16,6 +19,14 @@ class IBModelFactory:
     IB_DATE_FORMAT = "%Y%m%d"
 
     sec_type_mapping = {
+        Instrument.STK: "STK",
+        Instrument.FUT: "FUT",
+        Instrument.OPT: "OPT",
+        Instrument.FOT: "FOT",
+        Instrument.IDX: "IDX",
+        Instrument.CASH: "CASH",
+        Instrument.ETF: "ETF",
+        Instrument.CBO: "CBO",
     }
 
     ccy_mapping = {
@@ -139,10 +150,10 @@ class IBModelFactory:
 
         if inst_id:
             inst = self.__ref_data_mgr.get_inst(inst_id=inst_id)
-            contract.exchange = inst.get_exch_id(Broker.IB)
-            contract.symbol = inst.get_symbol(Broker.IB)
-            contract.secType = self.convert_sec_type(inst.type)
-            contract.currency = self.convert_ccy(inst.ccy_id)
+            contract.exchange = get_exch_id(inst, Broker.IB)
+            contract.symbol = get_inst_symbol(inst, Broker.IB)
+            contract.secType = str(self.convert_sec_type(inst.type))
+            contract.currency = str(self.convert_ccy(inst.ccy_id))
         else:
             if exchange:
                 contract.exchange = exchange

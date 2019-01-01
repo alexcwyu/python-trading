@@ -117,11 +117,14 @@ class SeriesTest(TestCase):
         ))
 
     def test_empty_series_ctor(self):
-        series = Series()
-        self.assertEqual('', series.inst_id)
-        self.assertEqual('', series.df_id)
-        self.assertEqual('', series.col_id)
-        self.assertEqual(np.float64, series.dtype)
+        try:
+            series = Series()
+            self.assertEqual(series.inst_id, '')
+            self.assertEqual(series.df_id, '')
+            self.assertEqual(series.col_id, '')
+            self.assertEqual(np.float64, series.dtype)
+        except Exception:
+            self.fail("series ctor raised ExceptionType unexpectedly!")
 
 
     # def test_ctor_series(self):
@@ -166,6 +169,13 @@ class SeriesTest(TestCase):
 
         pd_series_out = series.to_pd_series()
         self.assertTrue(pd_series.equals(pd_series_out))
+
+        try:
+            series = Series.from_pd_series(pd_series, "test_series2")
+        except :
+            self.fail("Series.from_pd_series(pd_series))")
+
+
 
     def test_pd_rc_proto(self):
         pd_series = self.__create_pd_series()

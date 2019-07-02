@@ -137,13 +137,12 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
             self.store.save_bar(bar)
 
     def on_quote(self, quote):
-        logger.debug("[%s] %s" % (self.__class__.__name__, quote))
+        logger.info("[%s] %s" % (self.__class__.__name__, quote))
         self.__quote_dict[quote.inst_id] = quote
 
-        self.get_series(get_series_id(quote)).add(
-            timestamp=quote.timestamp,
-            value={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size,
-                   "ask_size": quote.ask_size})
+        self.get_frame(get_frame_id(quote), inst_id=quote.inst_id, provider_id=quote.provider_id,
+                       columns=['bid', 'ask', 'bid_size', 'ask_size']).append_row(index=quote.timestamp,
+                value={"bid": quote.bid, "ask": quote.ask, "bid_size": quote.bid_size, "ask_size": quote.ask_size})
 
         if self._is_realtime_persist():
             self.store.save_quote(quote)
@@ -151,9 +150,10 @@ class InstrumentDataManager(MarketDataEventHandler, Manager):
     def on_trade(self, trade):
         logger.debug("[%s] %s" % (self.__class__.__name__, trade))
         self.__trade_dict[trade.inst_id] = trade
-        self.get_series(get_series_id(trade)).add(
-            timestamp=trade.timestamp,
-            value={"price": trade.price, "size": trade.size})
+
+        self.get_frame(get_frame_id(trade), inst_id=trade.inst_id, provider_id=trade.provider_id,
+                       columns=['price', 'size']).append_row(index=trade.timestamp,
+                                                       value={"price": trade.price, "size": trade.size})
 
         if self._is_realtime_persist():
             self.store.save_trade(trade)

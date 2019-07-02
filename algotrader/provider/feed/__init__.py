@@ -19,6 +19,7 @@ class Feed(Provider):
     Yahoo = "Yahoo"
     Google = "Google"
     Quandl = "Quandl"
+    HF = "HF"
 
     __metaclass__ = abc.ABCMeta
 

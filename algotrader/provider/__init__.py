@@ -18,6 +18,7 @@ from algotrader.provider.feed.csv import CSVDataFeed
 from algotrader.provider.feed.pandas_web import PandasWebDataFeed
 from algotrader.provider.feed.pandas_memory import PandasMemoryDataFeed
 from algotrader.provider.feed.pandas_db import PandaDBDataFeed
+from algotrader.provider.feed.high_freq import HighFrequencyFileFeed
 from algotrader.provider.datastore.inmemory import InMemoryDataStore
 from algotrader.provider.datastore.mongodb import MongoDBDataStore
 
@@ -36,6 +37,7 @@ class ProviderManager(SimpleManager):
         self.add(PandasWebDataFeed())
         self.add(PandasMemoryDataFeed())
         self.add(PandaDBDataFeed())
+        self.add(HighFrequencyFileFeed())
 
     def id(self):
         return "ProviderManager"

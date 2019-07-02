@@ -1,0 +1,45 @@
+Application:
+  stgId: "simplemm"
+  stgCls: "algotrader.strategy.simple_market_making.SimpleMarketMaking"
+  instrumentIds:
+#    - "HSIZ12@HKFE"
+#    - "HSIF10@HKFE"
+#    - "HSIG10@HKFE"
+#    - "HSIH18@HKFE"
+#    - "NQH18@GLOBEX"
+#    - "AAPL@NASDAQ"
+#    - "SPY@ARCA"
+#    - "EEM@ARCA"
+#    - "XLF@ARCA"
+#    - "VXX@ARCA"
+#    - "QQQ@ARCA"
+#    - "GCX@ARCA"
+#    - "IWM@ARCA"
+#    - "FXI@ARCA"
+#    - "XLU@ARCA"
+#    - "EWZ@ARCA"
+#    - "USO@ARCA"
+#    - "HYG@ARCA"
+    - "1@SEHK"
+    - "2@SEHK"
+    - "3@SEHK"
+    - "4@SEHK"
+    - "5@SEHK"
+    - "11@SEHK"
+    - "12@SEHK"
+    - "16@SEHK"
+    - "17@SEHK"
+    - "700@SEHK"
+    - "2318@SEHK"
+    - "2628@SEHK"
+  subscriptionTypes:
+#    - "Bar.IB.Time.M1"
+    - "Quote.IB"
+    - "Trade.IB"
+#    - "Quote.HF"
+  subscriptions:
+
+Strategy:
+  simplemm:
+    qty: 1
+    tick: 2

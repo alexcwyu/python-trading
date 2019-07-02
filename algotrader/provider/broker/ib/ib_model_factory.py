@@ -266,4 +266,4 @@ class IBModelFactory:
         return self.ib_md_side_map[ib_md_side]
 
     def convert_ib_ord_status(self, ib_ord_status):
-        return self.ib_ord_status_map.get(ib_ord_status, OrderStatus.UNKNOWN)
+        return self.ib_ord_status_map.get(ib_ord_status, UnknownStatus)
